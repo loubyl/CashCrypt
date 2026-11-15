@@ -1,0 +1,58 @@
+# =============================================================================
+# CashCrypt — .gitignore
+# Node / Next.js project
+# NOTE: .kiro/ is intentionally NOT ignored — it is part of the project definition.
+# =============================================================================
+
+# ----- Dependencies ----------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ----- Next.js ---------------------------------------------------------------
+.next/
+out/
+
+# ----- Build outputs ---------------------------------------------------------
+dist/
+build/
+
+# ----- Environment variables -------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Keep .env.example in source control (no secrets, just documentation)
+!.env.example
+
+# ----- Testing ---------------------------------------------------------------
+coverage/
+.vitest-cache/
+
+# ----- OS files --------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Editors ---------------------------------------------------------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- Logs ------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----- Misc ------------------------------------------------------------------
+*.tsbuildinfo
+next-env.d.ts
+.vercel
