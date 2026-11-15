@@ -111,13 +111,15 @@ Four families, all loaded in `src/app/layout.tsx` via `next/font/google`. Self-h
 ## Commands
 
 ```bash
-pnpm dev          # development server
-pnpm build        # production build
-pnpm test         # run Vitest
-pnpm test:ui      # Vitest UI
-pnpm lint         # ESLint
-pnpm typecheck    # tsc --noEmit
+npm run dev          # development server
+npm run build        # production build
+npm test             # run Vitest
+npm run test:ui      # Vitest UI
+npm run lint         # ESLint
+npm run typecheck    # tsc --noEmit
 ```
+
+Node.js version: **24**.
 
 ## Deployment
 

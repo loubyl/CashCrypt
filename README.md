@@ -24,19 +24,18 @@ Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
+- Node.js 24+
 
 ### Install
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### Develop
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -44,15 +43,15 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Test
 
 ```bash
-pnpm test          # run all tests
-pnpm test:ui       # Vitest UI in the browser
+npm test             # run all tests
+npm run test:ui      # Vitest UI in the browser
 ```
 
 ### Build
 
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 ---
