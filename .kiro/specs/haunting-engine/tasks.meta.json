@@ -48,6 +48,37 @@
         "chatSessionId": "sess_d1394f43-4ea2-4c75-92d8-6276b8610127",
         "timestamp": 1794887828882
       }
+    ],
+    "4.1 Create `src/lib/haunting/lightScore.ts`": [
+      {
+        "executionId": "46dd5c9b-10e2-4899-b74d-420b7a5f9aa4",
+        "chatSessionId": "sess_e261862e-a437-455c-a104-be52c025ef0e",
+        "timestamp": 1794890750996
+      },
+      {
+        "executionId": "46dd5c9b-10e2-4899-b74d-420b7a5f9aa4",
+        "chatSessionId": "sess_e261862e-a437-455c-a104-be52c025ef0e",
+        "timestamp": 1794890814896
+      }
+    ],
+    "4.2 Write unit tests in `tests/haunting/lightScore.test.ts`": [
+      {
+        "executionId": "3358e239-2c3e-46c8-844d-15a7ca10c136",
+        "chatSessionId": "sess_0e4491e1-707a-4eb5-91bf-6b8a7294d9a7",
+        "timestamp": 1794890881431
+      },
+      {
+        "executionId": "3358e239-2c3e-46c8-844d-15a7ca10c136",
+        "chatSessionId": "sess_0e4491e1-707a-4eb5-91bf-6b8a7294d9a7",
+        "timestamp": 1794890926039
+      }
+    ],
+    "4. Implement the light score base formula": [
+      {
+        "executionId": "3358e239-2c3e-46c8-844d-15a7ca10c136",
+        "chatSessionId": "sess_0e4491e1-707a-4eb5-91bf-6b8a7294d9a7",
+        "timestamp": 1794890926082
+      }
     ]
   }
 }

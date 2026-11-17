@@ -923,6 +923,14 @@ Momentum rewards recent effort so that realistic weekly actions are visible: bas
 
 ---
 
+### Property 13: Base score is positive and strictly decreasing in the weighted sum
+
+*For any* internal snapshot with `monthlyIncomeCents ≥ MIN_INCOME_CENTS`, `computeBaseScore` SHALL return a finite value in `(0, 100]`. Increasing any single burden by at least one cent (a debt balance, a debt minimum payment, or a valid active subscription's monthly cost) SHALL strictly increase the weighted sum S and strictly decrease `baseScore`. For any two such snapshots whose weighted sums differ by more than floating-point resolution, the one with the smaller S SHALL have the strictly higher `baseScore`. Tested at the function level with realistic amounts (≤ 1e7 cents).
+
+**Validates: Requirements 2.6**
+
+---
+
 ## Error Handling
 
 The engine never throws for structurally valid input. The following conditions are handled silently:
@@ -957,7 +965,7 @@ Each property test references its design property with a tag comment:
 
 | File | Tests |
 |---|---|
-| `tests/haunting/lightScore.test.ts` | Bounds invariant (P1), determinism (P4), debt increase monotonicity (P6), `computeBaseScore` and `computeWeightedSum` unit tests |
+| `tests/haunting/lightScore.test.ts` | Bounds invariant (P1), determinism (P4), debt increase monotonicity (P6), base score strictly decreasing and never 0 (P13), `computeBaseScore` and `computeWeightedSum` unit tests |
 | `tests/haunting/decay.test.ts` | Band consistency invariant (P2), output consistency (P3: `windowBrightness` and `levelProgress`), `computeDecayLevel` for all band boundaries, `computeLevelProgress` formula |
 | `tests/haunting/zombies.test.ts` | Validity filter, cadence normalisation, Factor_C computation |
 | `tests/haunting/ghosts.test.ts` | Ghost conservation (P8), poltergeist conservation (P8), 30-day window |
@@ -980,7 +988,7 @@ Unit tests cover:
 - Each cadence conversion factor
 - `validateConfig` with valid and invalid configs
 
-Property tests (fast-check, ≥ 100 iterations each) cover all twelve correctness properties above.
+Property tests (fast-check, ≥ 100 iterations each) cover all thirteen correctness properties above.
 
 ### Static checks
 

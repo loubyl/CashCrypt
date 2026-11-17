@@ -57,20 +57,26 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - `dateToJulian` known value (2000-01-01 → 2451545).
     - _Requirements: 3.1, 3.7, 7.1, 7.4_
 
-- [ ] 4. Implement the light score base formula
-  - [ ] 4.1 Create `src/lib/haunting/lightScore.ts`
+- [x] 4. Implement the light score base formula
+  - [x] 4.1 Create `src/lib/haunting/lightScore.ts`
     - Export `computeWeightedSum(monthlyIncomeCents, debts, validActiveSubs)` returning `S = Wa·A + Wb·B + Wc·C` with A = Σ min payments / income, B = Σ balances / (income × months per year), C = Σ valid active monthly costs / income; negative values treated as 0.
     - Export `computeBaseScore(internal: InternalSnapshot)`: handle `monthlyIncomeCents < MIN_INCOME_CENTS` first (0 if any debt balance > 0 or any valid active subscription exists, otherwise 100), then `100 / (1 + S)` clamped to [0, 100]. Do not inline the formula in `index.ts`.
     - Compute Factor_C from the subscriptions' `valid` and `active` flags (do not import from `zombies.ts`, per the DAG).
     - All numbers come from `config.ts`; no division by zero.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8, 2.9, 2.10, 10.3, 13.1, 13.2, 13.5, 13.7_
 
-  - [ ] 4.2 Write unit tests in `tests/haunting/lightScore.test.ts`
+  - [x] 4.2 Write unit tests in `tests/haunting/lightScore.test.ts`
     - `computeWeightedSum` for hand-built internal inputs with exact expected S (for example the L1 persona: S ≈ 0.1465).
     - `computeBaseScore` returns 0 on zero income with a debt balance, 0 with a valid active subscription, and 100 with neither.
     - Negative balances and minimum payments are treated as 0.
     - Fully paid debt (balance 0) has no downward influence.
     - _Requirements: 2.1, 2.2, 2.3, 2.8, 2.9, 9.2, 10.3_
+
+  - [x] 4.3 Write property tests for the base score formula in `tests/haunting/lightScore.test.ts`
+    - **Property 13: Base score is positive and strictly decreasing in the weighted sum**
+    - Tag: `// Feature: haunting-engine, Property 13: ...`; 200 runs each, using an inline realistic generator (income from `MIN_INCOME_CENTS` to $10,000, amounts ≤ 1e7 cents) until task 11.1 provides `testArbitraries.ts`.
+    - Three properties: `computeBaseScore` is finite and in (0, 100] when income ≥ `MIN_INCOME_CENTS`; growing any one burden by ≥ 1 cent strictly raises S and strictly lowers the score; any two snapshots are ordered by S in reverse (pairs closer than floating-point resolution are skipped).
+    - **Validates: Requirements 2.6**
 
 - [ ] 5. Implement momentum
   - [ ] 5.1 Create `src/lib/haunting/momentum.ts`
@@ -259,7 +265,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     { "id": 2, "tasks": ["2.2", "3.1"] },
     { "id": 3, "tasks": ["2.3", "3.2", "4.1", "5.1", "6.1", "8.1", "9.1"] },
     { "id": 4, "tasks": ["4.2", "5.2", "6.2", "8.2", "9.2", "10.1"] },
-    { "id": 5, "tasks": ["10.2", "10.3", "10.4", "11.1", "13.1"] },
+    { "id": 5, "tasks": ["4.3", "10.2", "10.3", "10.4", "11.1", "13.1"] },
     { "id": 6, "tasks": ["12.1", "12.2", "12.5", "12.8", "12.9", "12.10"] },
     { "id": 7, "tasks": ["12.3", "12.4", "12.7", "12.11", "12.12"] },
     { "id": 8, "tasks": ["12.6", "12.13"] }
