@@ -215,6 +215,18 @@
         "chatSessionId": "sess_9b306f7d-9d4c-424c-984f-fe158ea61c1d",
         "timestamp": 1794906184211
       }
+    ],
+    "10.2 Write unit tests for the calibration scenarios in `tests/haunting/integration.test.ts`": [
+      {
+        "executionId": "c9e0502a-b7eb-419f-bb60-548786eab9eb",
+        "chatSessionId": "sess_51256038-f685-49f0-9960-5c011274a17d",
+        "timestamp": 1794906285316
+      },
+      {
+        "executionId": "c9e0502a-b7eb-419f-bb60-548786eab9eb",
+        "chatSessionId": "sess_51256038-f685-49f0-9960-5c011274a17d",
+        "timestamp": 1794906340855
+      }
     ]
   }
 }

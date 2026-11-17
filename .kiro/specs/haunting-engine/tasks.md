@@ -169,7 +169,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - No React, Dexie, Next.js or browser imports; no `Date.now()`, `new Date()` or `Math.random()`.
     - _Requirements: 2.4, 2.6, 2.7, 3.8, 4.7, 5.1, 12.1, 12.2, 12.3, 12.4, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7_
 
-  - [ ] 10.2 Write unit tests for the calibration scenarios in `tests/haunting/integration.test.ts`
+  - [x] 10.2 Write unit tests for the calibration scenarios in `tests/haunting/integration.test.ts`
     - Build the five personas from the design.md calibration table (dollar inputs, empty events) and assert exact `lightScore` (to 2 decimals) and `decayLevel`: L1 → 87.22 / 1, L2 → 62.74 / 2, L3 → 42.74 / 3, L4 → 32.74 / 4, L5 → 17.07 / 5. For each, `momentum` is 0 and `baseScore === lightScore`.
     - Zero-income cases through `computeHouseState`: income 0 with a debt balance → `lightScore` 0 and level 5; income 0 with a valid active subscription → 0; income 0 with no debts and no valid active subscriptions → 100, level 1, `windowBrightness` 1, `levelProgress` 1; income of 50 cents behaves like zero income.
     - L4 exorcism before/after: canceling the $15.49 never-used subscription strictly raises the score and removes exactly that zombie.
