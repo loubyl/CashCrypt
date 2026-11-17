@@ -43,3 +43,9 @@ A dated log of how Kiro features shaped CashCrypt, kept for the Kiroween write-u
   - **ESM config:** Vitest warned that `vitest.config.ts` used ESM syntax in a CommonJS package. Adding `"type": "module"` to `package.json` fixed it.
   - **`next typegen` before `tsc`:** `npm run typecheck` failed on the `LayoutProps` type, which Next generates only during a build. The script is now `next typegen && tsc --noEmit`.
 - **What it changed:** `typecheck`, `test`, `lint` and `build` all pass on a clean tree with no app features added. The build also warned about a stray `package-lock.json` in the home folder. Setting `turbopack.root` to the project directory in `next.config.ts` removed the warning. Steering and README now name the same stack versions.
+
+## 2026-11-17 — Spec: task 1 rewritten after the scaffold
+
+- **Kiro feature:** Spec (tasks)
+- **What happened:** The `haunting-engine` task list was generated before the Next.js 16 app was scaffolded, so task 1 still said to create `package.json`, `tsconfig.json` and `vitest.config.ts`. Those files now existed and had to be left alone. Task 1 was rewritten from "create tooling" to "verify existing tooling" (strict mode, `tests/` included, `@/` alias, Vitest and fast-check installed, `npm test` and `npm run typecheck` passing). The checks used temporary tests, one importing a module through `@/` and one running a fast-check property, which were deleted afterwards. The task and its sub-task were marked done without touching any config file. The task list Overview was updated to say the project already provides the tooling.
+- **What it changed:** The plan matches the repo as it is, and the spec no longer asks the agent to overwrite working configuration. It also made the purity rule precise: "no Next.js, React or Dexie" applies only to imports inside `src/lib/haunting/`, not to the project's dependencies.

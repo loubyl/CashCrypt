@@ -2,9 +2,9 @@
 
 ## Overview
 
-Implement the pure, deterministic haunting engine in `src/lib/haunting/` with TypeScript strict mode, following the dependency DAG in design.md: scaffolding, then `types.ts`, `config.ts`, `dates.ts`, `lightScore.ts`, `momentum.ts`, `decay.ts`, `zombies.ts`, `ghosts.ts`, `index.ts` (Cents_Boundary + `computeHouseState`), `testArbitraries.ts`, and finally the property, integration, robustness and static-check tests in `tests/haunting/`.
+Implement the pure, deterministic haunting engine in `src/lib/haunting/` with TypeScript strict mode, following the dependency DAG in design.md: verification of the existing tooling, then `types.ts`, `config.ts`, `dates.ts`, `lightScore.ts`, `momentum.ts`, `decay.ts`, `zombies.ts`, `ghosts.ts`, `index.ts` (Cents_Boundary + `computeHouseState`), `testArbitraries.ts`, and finally the property, integration, robustness and static-check tests in `tests/haunting/`.
 
-Scope limits: no UI, no Dexie, no exorcism planner. Only files listed in design.md under `src/lib/haunting/` and `tests/haunting/` are created, plus the project-level config files needed to run the tests (`package.json`, `tsconfig.json`, `vitest.config.ts`) and one extra static-check test, `tests/haunting/staticChecks.test.ts`.
+Scope limits: no UI, no Dexie, no exorcism planner. Only files listed in design.md under `src/lib/haunting/` and `tests/haunting/` are created, plus one extra static-check test, `tests/haunting/staticChecks.test.ts`. The Next.js 16 project already provides `package.json`, `tsconfig.json` and `vitest.config.ts` (with Vitest, `@vitest/coverage-v8` and `fast-check` installed), so no tooling files are created or overwritten.
 
 Conventions (steering `conventions.md`): Node 24, npm, named exports only, no `any`, English comments, no numeric literals governing scoring, banding, cadence, windowing or spawning outside `config.ts`. Design.md's config lists the core constants; where the engine needs another number (window length of 30 days, score bounds, cents per dollar, minimum valid income of 100 cents, months per year), add a named constant to `config.ts` instead of using a literal.
 
@@ -12,12 +12,15 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
 
 ## Tasks
 
-- [ ] 1. Scaffold the engine project tooling
-  - [ ] 1.1 Create `package.json`, `tsconfig.json` and `vitest.config.ts`
-    - `package.json`: Node 24 engine, scripts `test` (`vitest --run`), `typecheck` (`tsc --noEmit`), plus dev dependencies `typescript`, `vitest`, `@vitest/coverage-v8`, `fast-check`. Install with npm.
-    - `tsconfig.json`: `"strict": true`, `moduleResolution` suitable for Vitest, `paths` mapping `@/*` to `src/*`, `include` covering `src` and `tests`.
-    - `vitest.config.ts`: node environment, `tests/**/*.test.ts` include, `@` alias resolved to `src`.
-    - Do not add Next.js, React, Dexie or any UI dependency.
+- [x] 1. Verify the existing project tooling
+  - [x] 1.1 Verify and adjust the existing `package.json`, `tsconfig.json` and `vitest.config.ts`
+    - The Next.js 16 app was already scaffolded into the repo, so `package.json`, `tsconfig.json` and `vitest.config.ts` already exist. Do NOT recreate or overwrite them; only verify them and make the smallest adjustment if a check fails.
+    - Verify `tsconfig.json` has `"strict": true`, includes the `tests/` directory (the existing `**/*.ts` glob covers it) and maps `@/*` to `src/*` in `paths`.
+    - Verify `vitest.config.ts` uses the node environment, includes `tests/**/*.test.{ts,tsx}` and resolves `@/` to `src/` (a temporary probe test importing `@/...` must pass, then be deleted).
+    - Verify `vitest`, `@vitest/coverage-v8` and `fast-check` are installed and that the `test` (`vitest --run`) and `typecheck` (`next typegen && tsc --noEmit`) scripts exist.
+    - Verify `npm test` and `npm run typecheck` both pass.
+    - Scope of the purity rule: "no Next.js, React or Dexie" applies only to imports inside `src/lib/haunting/` (enforced by `tests/haunting/staticChecks.test.ts`). It does not restrict the project's dependencies; Next.js and React are installed at the project level.
+    - Status: all checks above passed on 2026-11-17 (`strict: true`, `tests/` covered by `**/*.ts`, `@/` alias resolved by the probe test, `vitest` 5.1.0, `@vitest/coverage-v8` 5.1.0 and `fast-check` 4.10.2 installed, `npm test` and `npm run typecheck` exit 0), so no file changes were needed.
     - _Requirements: 12.3, 14.4_
 
 - [ ] 2. Define types and configuration
