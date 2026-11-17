@@ -32,7 +32,7 @@ The Haunting Engine is a pure, deterministic TypeScript module located at `src/l
 - **MOMENTUM_MAX**: Config constant; the maximum value Momentum can reach (default 15). Prevents Momentum from dominating the score.
 - **Extra_Principal**: For a `debt_payment` event, the amount paid above the debt's `minimumMonthlyPayment` in integer cents. Stored in `extraPrincipalCents`.
 - **Calendar_Date**: A date represented as a `YYYY-MM-DD` string with no time-zone component.
-- **30-Day_Window**: The set of Calendar_Dates `d` such that `now − 30 days ≤ d ≤ now`, computed entirely from `now` in the Financial_Snapshot. Dates strictly after `now` are excluded.
+- **30-Day_Window**: The 30 calendar days ending on `now`, inclusive: the Calendar_Dates `d` such that `now − 29 days ≤ d ≤ now`, computed entirely from `now` in the Financial_Snapshot. `now − 30 days` and earlier are outside the window, and dates strictly after `now` are outside the window. The length is `WINDOW_DAYS` (30) from Config.
 
 ## Requirements
 
@@ -140,7 +140,7 @@ The Haunting Engine is a pure, deterministic TypeScript module located at `src/l
 
 #### Acceptance Criteria
 
-1. WHEN `computeHouseState` is called, THE Haunting_Engine SHALL identify every transaction whose `amount` is strictly greater than 0 and strictly less than `SMALL_EXPENSE_THRESHOLD`, and whose `date` (a Calendar_Date string) falls within the 30-Day_Window `[now − 30 days, now]`. Transactions with `amount ≤ 0` or with a `date` strictly after `now` SHALL never qualify.
+1. WHEN `computeHouseState` is called, THE Haunting_Engine SHALL identify every transaction whose `amount` is strictly greater than 0 and strictly less than `SMALL_EXPENSE_THRESHOLD`, and whose `date` (a Calendar_Date string) falls within the 30-Day_Window `[now − 29 days, now]`. Transactions with `amount ≤ 0` or with a `date` strictly after `now` SHALL never qualify.
 2. IF no Poltergeist exists, THEN THE Haunting_Engine SHALL produce one Ghost per qualifying transaction, where each Ghost has shape `{ transactionId, amount, description, category, date }` populated from the source transaction.
 3. WHEN no qualifying transactions exist, THE Haunting_Engine SHALL return an empty `ghosts` array and `null` for `poltergeist`.
 4. THE Haunting_Engine SHALL determine the 30-Day_Window exclusively from `now` in the Financial_Snapshot and SHALL never call `Date.now()` or `new Date()`.
@@ -245,7 +245,7 @@ The Haunting Engine is a pure, deterministic TypeScript module located at `src/l
 6. FOR ALL Structurally_Valid_Snapshots, WHEN a new snapshot is derived by increasing exactly one debt's `balance` by a finite positive amount ≤ 1e12 with all other fields unchanged, THE Haunting_Engine SHALL return a Light_Score less than or equal to the original. *(Debt balance increase monotonicity)*
 7. FOR ALL Structurally_Valid_Snapshots, WHEN a new snapshot is derived by increasing exactly one debt's `minimumMonthlyPayment` by a finite positive amount ≤ 1e12 with all other fields unchanged, THE Haunting_Engine SHALL return a Light_Score less than or equal to the original. *(Minimum payment increase monotonicity)*
 8. FOR ALL Structurally_Valid_Snapshots, WHEN a new snapshot is derived by reducing exactly one debt's `balance` by a finite positive amount such that the result remains ≥ 0 with all other fields unchanged, THE Haunting_Engine SHALL return a Light_Score greater than or equal to the original. *(Debt payment monotonicity)*
-9. FOR ALL Structurally_Valid_Snapshots where `poltergeist` is `null`, THE Haunting_Engine SHALL return a `ghosts` array whose length equals the count of transactions with `amount` strictly greater than 0 and strictly less than `SMALL_EXPENSE_THRESHOLD` and `date` within the 30-Day_Window `[now − 30 days, now]`. *(Ghost conservation property)*
+9. FOR ALL Structurally_Valid_Snapshots where `poltergeist` is `null`, THE Haunting_Engine SHALL return a `ghosts` array whose length equals the count of transactions with `amount` strictly greater than 0 and strictly less than `SMALL_EXPENSE_THRESHOLD` and `date` within the 30-Day_Window `[now − 29 days, now]`. *(Ghost conservation property)*
 10. FOR ALL Structurally_Valid_Snapshots where `poltergeist` is not `null`, THE Haunting_Engine SHALL return an empty `ghosts` array and a Poltergeist whose `totalAmount` equals the sum of `amount` for all qualifying small-expense transactions, `transactionCount` equals their count, and `byCategory` values sum to `totalAmount`. *(Poltergeist conservation property)*
 11. FOR ALL Structurally_Valid_Snapshots including those with zero `monthlyIncome`, empty arrays, all-zero APRs, and amounts up to 1e12, THE Haunting_Engine SHALL complete without throwing any exception. *(Robustness property)*
 12. FOR ALL Structurally_Valid_Snapshots where `monthlyIncome` is 0, the `debts` array is empty, and no valid active subscriptions exist, THE Haunting_Engine SHALL return Light_Score equal to 100. *(Zero-income, zero-obligation edge case)*

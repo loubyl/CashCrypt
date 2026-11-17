@@ -12,6 +12,42 @@
         "chatSessionId": "sess_c8bde777-9b43-463b-9b12-b25361f97586",
         "timestamp": 1794886484755
       }
+    ],
+    "3.1 Create `src/lib/haunting/dates.ts`": [
+      {
+        "executionId": "d64bebed-0a3c-4063-bc06-ec700a633e7f",
+        "chatSessionId": "sess_536b4466-695c-4a5c-b7cb-9b7298eaeb74",
+        "timestamp": 1794887051699
+      },
+      {
+        "executionId": "d64bebed-0a3c-4063-bc06-ec700a633e7f",
+        "chatSessionId": "sess_536b4466-695c-4a5c-b7cb-9b7298eaeb74",
+        "timestamp": 1794887176621
+      }
+    ],
+    "3.2 Write unit tests in `tests/haunting/dates.test.ts`": [
+      {
+        "executionId": "d64bebed-0a3c-4063-bc06-ec700a633e7f",
+        "chatSessionId": "sess_536b4466-695c-4a5c-b7cb-9b7298eaeb74",
+        "timestamp": 1794887177096
+      },
+      {
+        "executionId": "0d666837-c2fa-469b-a325-54a2c35caffe",
+        "chatSessionId": "sess_d1394f43-4ea2-4c75-92d8-6276b8610127",
+        "timestamp": 1794887716240
+      },
+      {
+        "executionId": "0d666837-c2fa-469b-a325-54a2c35caffe",
+        "chatSessionId": "sess_d1394f43-4ea2-4c75-92d8-6276b8610127",
+        "timestamp": 1794887828789
+      }
+    ],
+    "3. Implement pure date arithmetic": [
+      {
+        "executionId": "0d666837-c2fa-469b-a325-54a2c35caffe",
+        "chatSessionId": "sess_d1394f43-4ea2-4c75-92d8-6276b8610127",
+        "timestamp": 1794887828882
+      }
     ]
   }
 }

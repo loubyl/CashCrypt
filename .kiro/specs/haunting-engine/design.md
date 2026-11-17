@@ -335,7 +335,8 @@ Computes the Momentum bonus from in-window `FinancialEvent`s. It reuses `isInWin
 
 ```typescript
 export function filterInWindowEvents(events: FinancialEvent[], now: string): FinancialEvent[];
-// Returns only events whose date is in [now − 30 days, now]. Future dates excluded.
+// Returns only events whose date is in the WINDOW_DAYS calendar days ending on now, inclusive
+// (now − 29 … now). now − 30 and earlier, and future dates, are excluded.
 
 export function computeMomentum(events: FinancialEvent[], monthlyIncomeCents: number, now: string): number;
 // 1. If monthlyIncomeCents < 100 return 0 (zero-income path; preserves exact 0/100 light scores).
@@ -412,7 +413,8 @@ Computes ghosts and poltergeist using pure date arithmetic — no `Date` object 
 ```typescript
 // import { isInWindow } from './dates';
 // isInWindow(date: string, now: string): boolean
-// True if date is in [now − 30 days, now] (calendar days, YYYY-MM-DD strings).
+// True if date is one of the WINDOW_DAYS calendar days ending on now, inclusive (now − 29 … now);
+// now − WINDOW_DAYS and earlier, and future dates, are outside. YYYY-MM-DD strings.
 
 export function isSmallExpense(amountCents: number): boolean;
 // Returns true if 0 < amountCents < SMALL_EXPENSE_THRESHOLD_CENTS.
@@ -508,7 +510,7 @@ raw      = COEFF_EXTRA_PRINCIPAL  × (Σ extraPrincipalCents / monthlyIncomeCent
 momentum = clamp(raw, 0, MOMENTUM_MAX)
 ```
 
-**Rolling 30-day window:** only events dated in `[now − 30 days, now]` are summed. Events accumulate inside the window, so repeated weekly plans stack until `MOMENTUM_MAX` saturates. As events age past 30 days they drop out and momentum decays.
+**Rolling 30-day window:** only events dated in `[now − 29 days, now]` are summed. Events accumulate inside the window, so repeated weekly plans stack until `MOMENTUM_MAX` saturates. As events age past 30 days they drop out and momentum decays.
 
 **Zero-income rule:** when `monthlyIncomeCents < 100`, `momentum = 0`.
 
@@ -571,7 +573,7 @@ Each $12.00 transaction qualifies as a small expense: `0 < 1200 cents < 1500 cen
 
 ## Date Arithmetic
 
-The 30-day window uses no `Date` objects, no `Date.now()`, and no browser APIs. It is computed entirely from the `now` string in the Financial_Snapshot using Julian Day Number arithmetic.
+The 30-day window is the 30 calendar days ending on `now`, inclusive: `now − 29` through `now` are inside, `now − 30` and earlier are outside, and future dates are outside. It uses no `Date` objects, no `Date.now()`, and no browser APIs. It is computed entirely from the `now` string in the Financial_Snapshot using Julian Day Number arithmetic.
 
 Both functions below live in `src/lib/haunting/dates.ts` and are imported by `ghosts.ts` and `momentum.ts`. `dates.ts` is exempt from the no-numeric-literals rule: the Julian Day formula is calendar arithmetic, not a tunable scoring constant.
 
@@ -590,7 +592,8 @@ function isInWindow(date: string, now: string): boolean {
   const [y1, m1, d1] = date.split('-').map(Number);
   const jNow  = dateToJulian(y2, m2, d2);
   const jDate = dateToJulian(y1, m1, d1);
-  return jDate >= jNow - 30 && jDate <= jNow;
+  // WINDOW_DAYS comes from config.ts; jNow - WINDOW_DAYS itself is outside the window
+  return jDate > jNow - WINDOW_DAYS && jDate <= jNow;
 }
 ```
 
@@ -729,7 +732,7 @@ function addOutOfWindowEvent(snap: FinancialSnapshot, event: FinancialEvent): Fi
   return { ...snap, events: [...snap.events, { ...event, date: shiftDays(snap.now, -31) }] };
 }
 
-// Drop every event outside [now − 30 days, now]
+// Drop every event outside [now − 29 days, now]
 function removeOutOfWindowEvents(snap: FinancialSnapshot): FinancialSnapshot {
   return { ...snap, events: snap.events.filter(e => isInWindow(e.date, snap.now)) };
 }
@@ -880,7 +883,7 @@ Momentum rewards recent effort so that realistic weekly actions are visible: bas
 
 ### Property 8: Ghost-poltergeist conservation
 
-*For any* structurally valid snapshot where `poltergeist` is `null`, the `ghosts` array length SHALL equal the count of transactions where `amount` is strictly in `(0, SMALL_EXPENSE_THRESHOLD_CENTS)` and `date` falls in `[now − 30 days, now]`.
+*For any* structurally valid snapshot where `poltergeist` is `null`, the `ghosts` array length SHALL equal the count of transactions where `amount` is strictly in `(0, SMALL_EXPENSE_THRESHOLD_CENTS)` and `date` falls in `[now − 29 days, now]`.
 
 *For any* structurally valid snapshot where `poltergeist` is not `null`, `ghosts` SHALL be empty, `poltergeist.totalAmount` SHALL equal the integer sum of qualifying transaction amounts, `poltergeist.transactionCount` SHALL equal their count, and the values of `poltergeist.byCategory` SHALL sum exactly to `poltergeist.totalAmount`.
 
@@ -959,7 +962,7 @@ Each property test references its design property with a tag comment:
 | `tests/haunting/zombies.test.ts` | Validity filter, cadence normalisation, Factor_C computation |
 | `tests/haunting/ghosts.test.ts` | Ghost conservation (P8), poltergeist conservation (P8), 30-day window |
 | `tests/haunting/momentum.test.ts` | Momentum bounds (P10), window/monotonic (P11), zero-income neutrality, the L4 weekly-plan trajectory table as exact-value unit tests |
-| `tests/haunting/dates.test.ts` | `isInWindow` boundaries: `now` in, `now − 30` in, `now − 31` out, `now + 1` out, leap-year and year-boundary cases |
+| `tests/haunting/dates.test.ts` | `isInWindow` boundaries: `now` in, `now − 29` in, `now − 30` out, `now − 31` out, `now + 1` out, exactly `WINDOW_DAYS` days inside, leap-year and year-boundary cases |
 | `tests/haunting/integration.test.ts` | Calibration scenarios, subscription cancellation strict monotonicity (P5), debt payment monotonicity (P7) |
 | `tests/haunting/robustness.test.ts` | Robustness (P9), zero-income zero-obligation (P12) |
 | `tests/haunting/config.test.ts` | `validateConfig` returns `[]` for shipped config (Req 1 AC5) |
@@ -973,7 +976,7 @@ Unit tests cover:
 - L4 weekly-plan trajectory (weeks 1–4) with exact expected scores and levels
 - L4 poltergeist verification
 - Zero-income special cases (lightScore = 0 and lightScore = 100)
-- `isInWindow` at exact boundaries: `now`, `now − 30`, `now − 31`
+- `isInWindow` at exact boundaries: `now`, `now − 29` (in), `now − 30`, `now − 31`, `now + 1` (out)
 - Each cadence conversion factor
 - `validateConfig` with valid and invalid configs
 

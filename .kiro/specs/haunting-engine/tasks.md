@@ -43,17 +43,17 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Importing the config module does not throw.
     - _Requirements: 1.4, 1.5, 1.6_
 
-- [ ] 3. Implement pure date arithmetic
-  - [ ] 3.1 Create `src/lib/haunting/dates.ts`
+- [x] 3. Implement pure date arithmetic
+  - [x] 3.1 Create `src/lib/haunting/dates.ts`
     - Export `dateToJulian(yyyy, mm, dd)` and `isInWindow(date, now)` using Julian Day Number arithmetic. No imports from other files except, if needed, the window-days constant from `config.ts`; no `Date` object, no `Date.now()`.
-    - The window is `[now − WINDOW_DAYS, now]` inclusive; dates after `now` are excluded.
+    - The window is the `WINDOW_DAYS` calendar days ending on `now`, inclusive: `now − (WINDOW_DAYS − 1)` through `now` are inside; `now − WINDOW_DAYS` and earlier are outside; dates after `now` are outside.
     - Malformed date strings return `false` instead of throwing.
     - _Requirements: 3.1, 3.7, 7.1, 7.4, 12.2_
 
-  - [ ] 3.2 Write unit tests in `tests/haunting/dates.test.ts`
-    - `now` is in the window; `now − 30` is in; `now − 31` is out; `now + 1` is out.
-    - Leap-year case (for example `now = 2024-03-01` with `2024-01-31` in and `2024-01-30` out; and a 2023 non-leap counterpart).
-    - Year-boundary case (for example `now = 2025-01-10` with `2024-12-11` in and `2024-12-10` out).
+  - [x] 3.2 Write unit tests in `tests/haunting/dates.test.ts`
+    - `now` is in the window; `now − 29` is in; `now − 30` is out; `now − 31` is out; `now + 1` is out; exactly `WINDOW_DAYS` days of a long range are inside.
+    - Leap-year case (for example `now = 2024-03-01` with `2024-02-01` in and `2024-01-31` out; and a 2023 non-leap counterpart: `2023-01-31` in, `2023-01-30` out).
+    - Year-boundary case (for example `now = 2025-01-10` with `2024-12-12` in and `2024-12-11` out).
     - `dateToJulian` known value (2000-01-01 → 2451545).
     - _Requirements: 3.1, 3.7, 7.1, 7.4_
 
@@ -124,7 +124,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
 
   - [ ] 9.2 Write unit tests in `tests/haunting/ghosts.test.ts`
     - `isSmallExpense`: 0 and negative are false; 1 and 1499 are true; 1500 is false.
-    - Window: transactions dated `now`, `now − 30` qualify; `now − 31` and `now + 1` do not.
+    - Window: transactions dated `now` and `now − 29` qualify; `now − 30`, `now − 31` and `now + 1` do not.
     - Below-threshold total produces one ghost per qualifying transaction and `poltergeist: null`; exactly equal to the threshold stays `null` (strict greater-than).
     - Above-threshold total produces the Poltergeist with correct `totalAmount`, `transactionCount`, `byCategory` (sum equals total) and empty `ghosts`.
     - Zero income with qualifying transactions: `poltergeist` is `null`, ghosts returned individually.
