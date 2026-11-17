@@ -176,7 +176,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Input immutability: a deep-frozen snapshot does not throw and is unchanged.
     - _Requirements: 2.6, 2.7, 2.8, 2.9, 4.1, 4.2, 4.3, 4.4, 4.5, 6.1, 11.1, 11.4, 12.4, 13.5_
 
-  - [ ] 10.3 Write unit tests for the L4 weekly-plan trajectory in `tests/haunting/momentum.test.ts`
+  - [x] 10.3 Write unit tests for the L4 weekly-plan trajectory in `tests/haunting/momentum.test.ts`
     - Persona: L4 snapshot ($3,000 income, default demo debts and subscriptions) with the weekly plan stacked in the 30-day window: $300 extra principal on the $18,000 debt, cancel the $15.49 subscription (removed from the subscription list), and 3 completed exorcism actions per week, all dated in the window.
     - Assert exact `lightScore` (2 decimals) and `decayLevel` for weeks 1–4: 39.50 / L4, 45.73 / L3, 48.45 / L3, 48.68 / L3. Week 1 breakdown: `momentum` ≈ 6.52, base ≈ 32.99, `levelProgress` ≈ 0.98; weeks 3–4 have `momentum` equal to `MOMENTUM_MAX`.
     - The week-1 delta over the start (32.74) is within +5 and +8.
