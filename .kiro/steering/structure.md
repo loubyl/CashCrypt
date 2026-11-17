@@ -77,13 +77,16 @@ CashCrypt/
 │   │   │   ├── schema.ts       # Table definitions and types
 │   │   │   └── db.ts           # Dexie instance (singleton)
 │   │   ├── haunting/           # Pure haunting engine
-│   │   │   ├── index.ts        # Public API: computeHouseState()
-│   │   │   ├── config.ts       # All weights, thresholds, and score bands (single source of truth)
-│   │   │   ├── lightScore.ts   # Financial snapshot → light score (0–100)
-│   │   │   ├── decay.ts        # Light score → decay level (1–5)
-│   │   │   ├── zombies.ts      # Subscriptions → zombie list
+│   │   │   ├── index.ts        # Public API: computeHouseState(), cents boundary, re-exports
+│   │   │   ├── config.ts       # All weights, momentum coefficients, thresholds, bands + validateConfig()
+│   │   │   ├── lightScore.ts   # Snapshot → baseScore = 100 / (1 + S) (factors A, B, C)
+│   │   │   ├── momentum.ts     # In-window events → momentum (0 to MOMENTUM_MAX)
+│   │   │   ├── decay.ts        # lightScore → decay level, levelProgress, windowBrightness
+│   │   │   ├── zombies.ts      # Subscriptions → cadence normalisation + zombie list
 │   │   │   ├── ghosts.ts       # Transactions → ghost list + poltergeist check
-│   │   │   └── types.ts        # HouseState, Zombie, Ghost, Poltergeist types
+│   │   │   ├── dates.ts        # Pure calendar-date math: dateToJulian, isInWindow (no imports)
+│   │   │   ├── testArbitraries.ts  # fast-check generators (test-only, never imported by app code)
+│   │   │   └── types.ts        # FinancialSnapshot, FinancialEvent, HouseState, Zombie, Ghost, Poltergeist
 │   │   ├── exorcism/           # Pure exorcism planner
 │   │   │   ├── index.ts        # Public API: generateExorcismPlan()
 │   │   │   └── types.ts        # ExorcismAction type
@@ -103,10 +106,16 @@ CashCrypt/
 │
 ├── tests/                      # Vitest test files mirror src/lib/ structure
 │   ├── haunting/
-│   │   ├── lightScore.test.ts
-│   │   ├── decay.test.ts
+│   │   ├── config.test.ts          # shipped config passes validateConfig
+│   │   ├── lightScore.test.ts      # baseScore, monotonicity, bounds, determinism
+│   │   ├── momentum.test.ts        # momentum bounds, window, in-window monotonicity, L4 weekly plan
+│   │   ├── decay.test.ts           # band mapping, levelProgress, windowBrightness
 │   │   ├── zombies.test.ts
-│   │   └── ghosts.test.ts
+│   │   ├── ghosts.test.ts
+│   │   ├── dates.test.ts           # isInWindow boundaries, leap years, year boundaries
+│   │   ├── integration.test.ts     # cancellation strict monotonicity, end-to-end properties
+│   │   ├── robustness.test.ts      # extreme inputs, zero income, empty arrays
+│   │   └── staticChecks.test.ts    # source scan: banned APIs/imports, no numeric literals outside config.ts and dates.ts
 │   └── exorcism/
 │       └── planner.test.ts
 │

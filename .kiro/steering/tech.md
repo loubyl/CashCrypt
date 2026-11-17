@@ -24,14 +24,18 @@
 
 ### Haunting Engine
 - A set of **pure, deterministic TypeScript functions** in `src/lib/haunting/`.
-- Input: snapshot of financial data (debts, subscriptions, transactions, income).
-- Output: `HouseState` (light score 0–100, decay level 1–5, list of zombies, list of ghosts, poltergeist flag).
-- The **light score** (0–100, higher = healthier) is computed from two factors:
-  - (a) monthly minimum debt payments / monthly income
-  - (b) total debt balance / annual income
-- The decay level is derived from light score bands: 80–100 → 1 Pristine, 60–79 → 2 Uneasy, 40–59 → 3 Haunted, 20–39 → 4 Crumbling, 0–19 → 5 Condemned.
-- All weights, ratios, and band boundaries live in a single config object in `src/lib/haunting/config.ts`. No magic numbers elsewhere in the engine.
-- Invariant: paying down any debt balance must always raise or keep the light score (covered by fast-check property tests).
+- Input: `FinancialSnapshot` = `monthlyIncome`, `debts`, `subscriptions` (amount + cadence + usage), `transactions`, `events`, and a reference `now` date (`YYYY-MM-DD`). The engine never reads the clock.
+- Money enters as decimal dollars and is converted once to **integer cents** (`Math.round(x * 100)`) at the engine boundary; all sums and output amounts are integer cents.
+- Output: `HouseState` = `lightScore`, `baseScore`, `momentum`, `decayLevel` (1–5), `windowBrightness`, `levelProgress`, `zombies`, `ghosts`, `poltergeist`.
+- **Light score** (real number 0–100, higher = healthier) = `min(100, baseScore + momentum)`:
+  - `baseScore = 100 / (1 + S)` with `S = WEIGHT_FACTOR_A·A + WEIGHT_FACTOR_B·B + WEIGHT_FACTOR_C·C`, where
+    - A = monthly minimum debt payments / monthly income
+    - B = total debt balance / annual income
+    - C = monthly cost of valid active subscriptions / monthly income (debt factors weigh more than C)
+  - `momentum` (0 to `MOMENTUM_MAX`) rewards recent effort: extra principal paid, monthly cost of subscriptions canceled, and exorcism actions completed, all from `events` dated in the 30-calendar-day window ending on `now`. It is 0 when monthly income is below 100 cents.
+- The decay level uses half-open bands on the real-valued score: [80, 100] → 1 Pristine, [60, 80) → 2 Uneasy, [40, 60) → 3 Haunted, [20, 40) → 4 Crumbling, [0, 20) → 5 Condemned. The UI displays `Math.floor(lightScore)` with the breakdown (for example "39 = 33 base + 6 momentum").
+- All weights, momentum coefficients, thresholds, cadence factors, and band boundaries live in `src/lib/haunting/config.ts`, with a pure `validateConfig(config): string[]` that never throws. No magic numbers elsewhere in the engine.
+- Invariants (fast-check): paying down any debt balance never lowers the score; increasing a balance or minimum payment never raises it; canceling a subscription strictly raises it (when income > 0 and 0 < score < 100); events outside the window have no effect; adding an in-window event never lowers the score; momentum stays within [0, `MOMENTUM_MAX`].
 - No side effects, no I/O, no React imports.
 - Every function is covered by Vitest unit tests.
 - Property-based tests with fast-check verify invariants (decay level always 1–5, zombie count equals subscription count, output always has a valid light score).
@@ -47,7 +51,7 @@
 
 ### Demo Crypt
 - Seed data defined in `src/lib/demo/seed.ts`, organized as five named scenarios (one per decay level).
-- The **default demo** starts at decay level 4 with an active Poltergeist and 5–6 zombies with mixed usage.
+- The **default demo** starts at decay level 4 (score 32.74) with an active Poltergeist and 5 zombies with mixed usage. A realistic weekly plan ($300 extra principal, cancel a $15.49 never-used subscription, 3 actions completed) lifts the score to about 39.5 in week 1 and, kept up for four weeks, moves the house up one level to L3.
 - A **scenario switcher** component in the UI allows jumping directly to any of the five levels.
 - Loaded into Dexie on demand; never overwrites existing user data.
 - A single "Try the Demo Crypt" button in the UI triggers the default (level 4) scenario.
