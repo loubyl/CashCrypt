@@ -141,14 +141,14 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
       - No mutation: deep-frozen inputs do not throw and are unchanged after every exported function.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 2.3_
 
-- [ ] 9. Implement ghosts and the Poltergeist
-  - [ ] 9.1 Create `src/lib/haunting/ghosts.ts`
+- [x] 9. Implement ghosts and the Poltergeist
+  - [x] 9.1 Create `src/lib/haunting/ghosts.ts`
     - Export `isSmallExpense(amountCents)` (strictly between 0 and `SMALL_EXPENSE_THRESHOLD_CENTS`) and `computeGhostsAndPoltergeist(transactions, monthlyIncomeCents, now)` following design.md.
     - Poltergeist forms only when `monthlyIncomeCents ≥ MIN_INCOME_CENTS` and total is strictly greater than `POLTERGEIST_RATIO × monthlyIncomeCents`; then `ghosts` is `[]` and `byCategory` sums exactly to `totalAmount` (integer addition). Otherwise one ghost per qualifying transaction and `poltergeist: null`.
     - Negative amounts never qualify; future-dated transactions never qualify; inputs are not mutated.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5, 13.3, 13.7_
 
-  - [ ] 9.2 Write unit tests in `tests/haunting/ghosts.test.ts`
+  - [x] 9.2 Write unit tests in `tests/haunting/ghosts.test.ts`
     - `isSmallExpense`: 0 and negative are false; 1 and 1499 are true; 1500 is false.
     - Window: transactions dated `now` and `now − 29` qualify; `now − 30`, `now − 31` and `now + 1` do not.
     - Below-threshold total produces one ghost per qualifying transaction and `poltergeist: null`; exactly equal to the threshold stays `null` (strict greater-than).

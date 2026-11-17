@@ -172,6 +172,37 @@
         "chatSessionId": "sess_96f5f0bc-75e6-46f9-b472-a2d6dd4cc018",
         "timestamp": 1794895625927
       }
+    ],
+    "9.1 Create `src/lib/haunting/ghosts.ts`": [
+      {
+        "executionId": "a088e6d8-1bd5-4e70-8b95-35bba768f846",
+        "chatSessionId": "sess_073f2171-2b04-4e5e-bc5b-82d533eef09d",
+        "timestamp": 1794905687584
+      },
+      {
+        "executionId": "a088e6d8-1bd5-4e70-8b95-35bba768f846",
+        "chatSessionId": "sess_073f2171-2b04-4e5e-bc5b-82d533eef09d",
+        "timestamp": 1794905774193
+      }
+    ],
+    "9.2 Write unit tests in `tests/haunting/ghosts.test.ts`": [
+      {
+        "executionId": "b064ed39-d0c1-4f4b-a084-03184f4f0745",
+        "chatSessionId": "sess_78e8b937-ebb7-4f49-af00-a4d6c5c2f532",
+        "timestamp": 1794905870019
+      },
+      {
+        "executionId": "b064ed39-d0c1-4f4b-a084-03184f4f0745",
+        "chatSessionId": "sess_78e8b937-ebb7-4f49-af00-a4d6c5c2f532",
+        "timestamp": 1794905978968
+      }
+    ],
+    "9. Implement ghosts and the Poltergeist": [
+      {
+        "executionId": "b064ed39-d0c1-4f4b-a084-03184f4f0745",
+        "chatSessionId": "sess_78e8b937-ebb7-4f49-af00-a4d6c5c2f532",
+        "timestamp": 1794905979015
+      }
     ]
   }
 }

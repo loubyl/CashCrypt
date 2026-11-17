@@ -972,6 +972,22 @@ Momentum rewards recent effort so that realistic weekly actions are visible: bas
 
 ---
 
+### Property 19: Small-expense bounds
+
+*For any* number, `isSmallExpense` SHALL return `true` only for finite amounts strictly between 0 and `SMALL_EXPENSE_THRESHOLD_CENTS`. *For any* transactions, those with `NaN`, `Infinity`, negative or zero amounts, or dated outside the window (including future dates), SHALL NOT become ghosts and SHALL NOT count toward the Poltergeist.
+
+**Validates: Requirements 14.9, 14.10**
+
+---
+
+### Property 20: Ghost functions do not mutate their inputs
+
+*For any* deep-frozen transaction array, `isSmallExpense` and `computeGhostsAndPoltergeist` SHALL complete without throwing and leave the input unchanged.
+
+**Validates: Requirements 14.9, 14.10**
+
+---
+
 ## Error Handling
 
 The engine never throws for structurally valid input. The following conditions are handled silently:
