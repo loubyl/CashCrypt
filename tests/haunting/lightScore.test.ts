@@ -1,14 +1,22 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { computeHouseState } from "@/lib/haunting";
 import { MIN_INCOME_CENTS, SCORE_MAX } from "@/lib/haunting/config";
 import { computeBaseScore, computeWeightedSum } from "@/lib/haunting/lightScore";
-import { centsDebtArb, usageArb } from "@/lib/haunting/testArbitraries";
+import {
+  centsDebtArb,
+  increaseDebtBalance,
+  increaseMinimumPayment,
+  realisticSnapshot,
+  usageArb,
+} from "@/lib/haunting/testArbitraries";
 import type {
   InternalDebt,
   InternalSnapshot,
   InternalSubscription,
 } from "@/lib/haunting/types";
 
+const SCORE_MIN_BOUND = 0;
 const L1_INCOME_CENTS = 500000;
 const EXPECTED_L1_SUM = 0.1465;
 const EXPECTED_L1_BASE_SCORE = 87.22;
@@ -286,6 +294,86 @@ describe("computeBaseScore properties", () => {
         else expect(scoreA).toBeLessThan(scoreB);
       }),
       { numRuns: NUM_RUNS },
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end properties through computeHouseState (task 12)
+// ---------------------------------------------------------------------------
+
+const PROPERTY_RUNS = 100;
+const MAX_DEBT_DELTA_CENTS = 100_000_000;
+const UNIT_MIN = 0;
+const UNIT_MAX = 1;
+
+describe("computeHouseState properties", () => {
+  it("keeps every output field within its documented bounds", () => {
+    // Feature: haunting-engine, Property 1: Bounds invariant
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const state = computeHouseState(snap);
+        expect(state.lightScore).toBeGreaterThanOrEqual(SCORE_MIN_BOUND);
+        expect(state.lightScore).toBeLessThanOrEqual(SCORE_MAX);
+        expect(state.baseScore).toBeGreaterThanOrEqual(SCORE_MIN_BOUND);
+        expect(state.baseScore).toBeLessThanOrEqual(SCORE_MAX);
+        expect([1, 2, 3, 4, 5]).toContain(state.decayLevel);
+        expect(state.windowBrightness).toBeGreaterThanOrEqual(UNIT_MIN);
+        expect(state.windowBrightness).toBeLessThanOrEqual(UNIT_MAX);
+        expect(state.levelProgress).toBeGreaterThanOrEqual(UNIT_MIN);
+        expect(state.levelProgress).toBeLessThanOrEqual(UNIT_MAX);
+      }),
+      { numRuns: PROPERTY_RUNS },
+    );
+  });
+
+  it("returns deeply equal states when called twice on a structured clone", () => {
+    // Feature: haunting-engine, Property 4: Determinism
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const first = computeHouseState(snap);
+        const second = computeHouseState(structuredClone(snap));
+        expect(second).toStrictEqual(first);
+      }),
+      { numRuns: PROPERTY_RUNS },
+    );
+  });
+
+  it("never raises the score when a debt balance increases", () => {
+    // Feature: haunting-engine, Property 6: Debt increase monotonicity
+    fc.assert(
+      fc.property(
+        realisticSnapshot,
+        fc.nat(),
+        fc.integer({ min: 1, max: MAX_DEBT_DELTA_CENTS }),
+        (snap, indexSeed, deltaCents) => {
+          fc.pre(snap.debts.length > 0);
+          const index = indexSeed % snap.debts.length;
+          const before = computeHouseState(snap).lightScore;
+          const after = computeHouseState(increaseDebtBalance(snap, index, deltaCents)).lightScore;
+          expect(after).toBeLessThanOrEqual(before);
+        },
+      ),
+      { numRuns: PROPERTY_RUNS },
+    );
+  });
+
+  it("never raises the score when a minimum payment increases", () => {
+    // Feature: haunting-engine, Property 6: Debt increase monotonicity
+    fc.assert(
+      fc.property(
+        realisticSnapshot,
+        fc.nat(),
+        fc.integer({ min: 1, max: MAX_DEBT_DELTA_CENTS }),
+        (snap, indexSeed, deltaCents) => {
+          fc.pre(snap.debts.length > 0);
+          const index = indexSeed % snap.debts.length;
+          const before = computeHouseState(snap).lightScore;
+          const after = computeHouseState(increaseMinimumPayment(snap, index, deltaCents)).lightScore;
+          expect(after).toBeLessThanOrEqual(before);
+        },
+      ),
+      { numRuns: PROPERTY_RUNS },
     );
   });
 });

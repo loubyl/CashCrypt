@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
+  CENTS_PER_DOLLAR,
   MIN_INCOME_CENTS,
   POLTERGEIST_RATIO,
   SMALL_EXPENSE_THRESHOLD_CENTS,
@@ -8,7 +9,8 @@ import {
 } from "@/lib/haunting/config";
 import { computeGhostsAndPoltergeist, isSmallExpense } from "@/lib/haunting/ghosts";
 import { computeHouseState } from "@/lib/haunting";
-import { shiftDays } from "@/lib/haunting/testArbitraries";
+import { isInWindow } from "@/lib/haunting/dates";
+import { realisticSnapshot, shiftDays } from "@/lib/haunting/testArbitraries";
 import type { FinancialSnapshot, InternalTransaction } from "@/lib/haunting/types";
 
 const NUM_RUNS = 100;
@@ -355,5 +357,38 @@ describe("computeHouseState Level 4 Poltergeist scenario", () => {
     const { poltergeist, ghosts } = computeHouseState(snapshotWith(GHOST_AMOUNT_DOLLARS));
     expect(poltergeist).toBeNull();
     expect(ghosts).toHaveLength(TRANSACTION_COUNT);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end conservation property through computeHouseState (task 12)
+// ---------------------------------------------------------------------------
+
+describe("computeHouseState ghost and Poltergeist conservation", () => {
+  it("keeps ghosts and the Poltergeist consistent with the qualifying transactions", () => {
+    // Feature: haunting-engine, Property 8: Ghost-poltergeist conservation
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const state = computeHouseState(snap);
+        const qualifying = snap.transactions
+          .map((t) => ({ ...t, cents: Math.round(t.amount * CENTS_PER_DOLLAR) }))
+          .filter((t) => isInWindow(t.date, snap.now) && t.cents > 0 && t.cents < SMALL_EXPENSE_THRESHOLD_CENTS);
+        const total = qualifying.reduce((sum, t) => sum + t.cents, 0);
+
+        if (state.poltergeist === null) {
+          expect(state.ghosts).toHaveLength(qualifying.length);
+          expect(state.ghosts.map((g) => g.transactionId).sort()).toEqual(
+            qualifying.map((t) => t.transactionId).sort(),
+          );
+        } else {
+          expect(state.ghosts).toEqual([]);
+          expect(state.poltergeist.totalAmount).toBe(total);
+          expect(state.poltergeist.transactionCount).toBe(qualifying.length);
+          const categorySum = Object.values(state.poltergeist.byCategory).reduce((a, b) => a + b, 0);
+          expect(categorySum).toBe(state.poltergeist.totalAmount);
+        }
+      }),
+      { numRuns: NUM_RUNS },
+    );
   });
 });

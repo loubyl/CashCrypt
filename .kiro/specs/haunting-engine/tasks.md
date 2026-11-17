@@ -201,69 +201,69 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Current users: `lightScore.test.ts` (`centsDebtArb`, `usageArb`), `momentum.test.ts` (`eventOnDayArb`), `zombies.test.ts` (`cadenceArb`, `usageArb`) and `ghosts.test.ts` (`shiftDays`). Module-specific hostile generators stay in those files. `realisticSnapshot`, `extremeSnapshot` and the derived-snapshot builders are reserved for task 12 and not imported yet.
     - _Requirements: 14.1, 14.5, 14.11_
 
-- [ ] 12. Property-based and robustness tests
-  - [ ]* 12.1 Write property test for the bounds invariant in `tests/haunting/lightScore.test.ts`
+- [x] 12. Property-based and robustness tests
+  - [x] 12.1 Write property test for the bounds invariant in `tests/haunting/lightScore.test.ts`
     - **Property 1: Bounds invariant**
     - Tag: `// Feature: haunting-engine, Property 1: Bounds invariant`; ≥ 100 runs using `realisticSnapshot`.
     - Also asserts `baseScore` in [0, 100].
     - **Validates: Requirements 14.1**
 
-  - [ ]* 12.2 Write property test for band consistency in `tests/haunting/decay.test.ts`
+  - [x] 12.2 Write property test for band consistency in `tests/haunting/decay.test.ts`
     - **Property 2: Band consistency invariant**
     - Tag: `// Feature: haunting-engine, Property 2: Band consistency invariant`; ≥ 100 runs. Includes the `Math.floor(lightScore)` same-band check.
     - **Validates: Requirements 14.2, 14.14**
 
-  - [ ]* 12.3 Write property test for output consistency in `tests/haunting/decay.test.ts`
+  - [x] 12.3 Write property test for output consistency in `tests/haunting/decay.test.ts`
     - **Property 3: Output consistency invariant**
     - Tag: `// Feature: haunting-engine, Property 3: Output consistency invariant`; ≥ 100 runs. Checks `windowBrightness` and `levelProgress` formulas and that `windowBrightness` is monotone in `lightScore`.
     - **Validates: Requirements 14.3, 14.13**
 
-  - [ ]* 12.4 Write property test for determinism in `tests/haunting/lightScore.test.ts`
+  - [x] 12.4 Write property test for determinism in `tests/haunting/lightScore.test.ts`
     - **Property 4: Determinism**
     - Tag: `// Feature: haunting-engine, Property 4: Determinism`; ≥ 100 runs. Calls `computeHouseState` twice on a structured clone and compares with deep equality.
     - **Validates: Requirements 14.4**
 
-  - [ ]* 12.5 Write property test for subscription cancellation in `tests/haunting/integration.test.ts`
+  - [x] 12.5 Write property test for subscription cancellation in `tests/haunting/integration.test.ts`
     - **Property 5: Subscription cancellation strict monotonicity**
     - Tag: `// Feature: haunting-engine, Property 5: Subscription cancellation strict monotonicity`; ≥ 100 runs. Uses `fc.pre` / filtering for income > 0, score strictly in (0, 100), and a valid active subscription with `monthlyCostCents ≤ 1_000_000`; asserts strictly higher `lightScore` and one fewer zombie (the matching `subscriptionId`).
     - **Validates: Requirements 14.5**
 
-  - [ ]* 12.6 Write property test for debt increase in `tests/haunting/lightScore.test.ts`
+  - [x] 12.6 Write property test for debt increase in `tests/haunting/lightScore.test.ts`
     - **Property 6: Debt increase monotonicity**
     - Tag: `// Feature: haunting-engine, Property 6: Debt increase monotonicity`; ≥ 100 runs. Covers both balance increase and minimum-payment increase.
     - **Validates: Requirements 14.6, 14.7**
 
-  - [ ]* 12.7 Write property test for debt payment in `tests/haunting/integration.test.ts`
+  - [x] 12.7 Write property test for debt payment in `tests/haunting/integration.test.ts`
     - **Property 7: Debt payment monotonicity**
     - Tag: `// Feature: haunting-engine, Property 7: Debt payment monotonicity`; ≥ 100 runs. Includes the case where `lightScore` is already 100 and stays 100.
     - **Validates: Requirements 14.8**
 
-  - [ ]* 12.8 Write property test for ghost and Poltergeist conservation in `tests/haunting/ghosts.test.ts`
+  - [x] 12.8 Write property test for ghost and Poltergeist conservation in `tests/haunting/ghosts.test.ts`
     - **Property 8: Ghost-poltergeist conservation**
     - Tag: `// Feature: haunting-engine, Property 8: Ghost-poltergeist conservation`; ≥ 100 runs. Both branches: null poltergeist (ghost count equals qualifying count) and non-null poltergeist (empty ghosts, `totalAmount`, `transactionCount`, `byCategory` sum).
     - **Validates: Requirements 14.9, 14.10**
 
-  - [ ]* 12.9 Write property test for robustness in `tests/haunting/robustness.test.ts`
+  - [x] 12.9 Write property test for robustness in `tests/haunting/robustness.test.ts`
     - **Property 9: Robustness**
     - Tag: `// Feature: haunting-engine, Property 9: Robustness`; ≥ 100 runs using `extremeSnapshot`. Asserts no throw and every numeric output field is finite.
     - **Validates: Requirements 14.11**
 
-  - [ ]* 12.10 Write property test for momentum bounds in `tests/haunting/momentum.test.ts`
+  - [x] 12.10 Write property test for momentum bounds in `tests/haunting/momentum.test.ts`
     - **Property 10: Momentum bounds**
     - Tag: `// Feature: haunting-engine, Property 10: Momentum bounds`; ≥ 100 runs. Momentum in [0, `MOMENTUM_MAX`], and 0 when income is 0.
     - **Validates: Requirements 14.15, 14.19**
 
-  - [ ]* 12.11 Write property test for event window and monotonicity in `tests/haunting/momentum.test.ts`
+  - [x] 12.11 Write property test for event window and monotonicity in `tests/haunting/momentum.test.ts`
     - **Property 11: Event window and monotonicity**
     - Tag: `// Feature: haunting-engine, Property 11: Event window and monotonicity`; ≥ 100 runs. Adding out-of-window or future events leaves `momentum` and `lightScore` unchanged; adding an in-window event with non-negative amounts never lowers `lightScore`.
     - **Validates: Requirements 14.16, 14.17, 14.18**
 
-  - [ ]* 12.12 Write property test for the zero-income zero-obligation case in `tests/haunting/robustness.test.ts`
+  - [x] 12.12 Write property test for the zero-income zero-obligation case in `tests/haunting/robustness.test.ts`
     - **Property 12: Zero-income zero-obligation edge case**
     - Tag: `// Feature: haunting-engine, Property 12: Zero-income zero-obligation edge case`; ≥ 100 runs. Income 0, empty debts and no valid active subscriptions give `lightScore === 100`.
     - **Validates: Requirements 14.12**
 
-  - [ ]* 12.13 Write example-based robustness tests in `tests/haunting/robustness.test.ts`
+  - [x] 12.13 Write example-based robustness tests in `tests/haunting/robustness.test.ts`
     - Empty `debts`, `subscriptions`, `transactions` and `events` arrays; all-zero APRs; amounts at 1e12; negative debt balances, minimum payments and transaction amounts treated as 0; events all outside the window. Each completes without throwing and has finite numeric fields.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 10.3_
 

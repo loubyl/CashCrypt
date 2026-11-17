@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { computeHouseState } from "@/lib/haunting";
 import { MIN_INCOME_CENTS, MOMENTUM_MAX } from "@/lib/haunting/config";
 import { computeMomentum, filterInWindowEvents } from "@/lib/haunting/momentum";
-import { eventOnDayArb } from "@/lib/haunting/testArbitraries";
+import { eventOnDayArb, realisticSnapshot } from "@/lib/haunting/testArbitraries";
 import type { FinancialEvent, FinancialSnapshot, InputSubscription } from "@/lib/haunting/types";
 
 const NOW = "2025-06-30";
@@ -324,6 +324,66 @@ describe("computeMomentum properties", () => {
         return JSON.stringify(events) === JSON.stringify(copy);
       }),
       { numRuns: NUM_RUNS },
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end properties through computeHouseState (task 12)
+// ---------------------------------------------------------------------------
+
+const E2E_RUNS = 100;
+const E2E_EVENT_MAX_CENTS = 1_000_000;
+const E2E_OUTSIDE_SPAN_DAYS = 200;
+
+const snapshotWithEventArb = (daysArb: fc.Arbitrary<number>) =>
+  realisticSnapshot.chain((snap) =>
+    fc.tuple(fc.constant(snap), eventOnDayArb(snap.now, daysArb, E2E_EVENT_MAX_CENTS)),
+  );
+
+describe("computeHouseState momentum properties", () => {
+  it("keeps momentum within [0, MOMENTUM_MAX] and at 0 when income is 0", () => {
+    // Feature: haunting-engine, Property 10: Momentum bounds
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const { momentum } = computeHouseState(snap);
+        expect(momentum).toBeGreaterThanOrEqual(0);
+        expect(momentum).toBeLessThanOrEqual(MOMENTUM_MAX);
+        const zeroIncome = computeHouseState({ ...snap, monthlyIncome: 0 });
+        expect(zeroIncome.momentum).toBe(0);
+      }),
+      { numRuns: E2E_RUNS },
+    );
+  });
+
+  it("ignores events dated outside the window or in the future", () => {
+    // Feature: haunting-engine, Property 11: Event window and monotonicity
+    const outsideDays = fc.oneof(
+      fc.integer({ min: -E2E_OUTSIDE_SPAN_DAYS, max: -WINDOW_SPAN_DAYS - 1 }),
+      fc.integer({ min: 1, max: E2E_OUTSIDE_SPAN_DAYS }),
+    );
+    fc.assert(
+      fc.property(snapshotWithEventArb(outsideDays), ([snap, event]) => {
+        const before = computeHouseState(snap);
+        const after = computeHouseState({ ...snap, events: [...snap.events, event] });
+        expect(after.momentum).toBe(before.momentum);
+        expect(after.lightScore).toBe(before.lightScore);
+      }),
+      { numRuns: E2E_RUNS },
+    );
+  });
+
+  it("never lowers the score when an in-window event is added", () => {
+    // Feature: haunting-engine, Property 11: Event window and monotonicity
+    const insideDays = fc.integer({ min: -WINDOW_SPAN_DAYS, max: 0 });
+    fc.assert(
+      fc.property(snapshotWithEventArb(insideDays), ([snap, event]) => {
+        const before = computeHouseState(snap);
+        const after = computeHouseState({ ...snap, events: [...snap.events, event] });
+        expect(after.lightScore).toBeGreaterThanOrEqual(before.lightScore);
+        expect(after.momentum).toBeGreaterThanOrEqual(before.momentum);
+      }),
+      { numRuns: E2E_RUNS },
     );
   });
 });

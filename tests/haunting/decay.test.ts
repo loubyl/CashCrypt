@@ -1,5 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { computeHouseState } from "@/lib/haunting";
 import {
   BAND_L1_MIN,
   BAND_L2_MIN,
@@ -14,6 +15,7 @@ import {
   computeLevelProgress,
   computeWindowBrightness,
 } from "@/lib/haunting/decay";
+import { realisticSnapshot } from "@/lib/haunting/testArbitraries";
 import type { DecayLevel } from "@/lib/haunting/types";
 
 const PRECISION_DIGITS = 6;
@@ -214,6 +216,73 @@ describe("decay properties", () => {
         expect(computeWindowBrightness(low)).toBeLessThanOrEqual(computeWindowBrightness(high));
       }),
       { numRuns: NUM_RUNS },
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end properties through computeHouseState (task 12)
+// ---------------------------------------------------------------------------
+
+const E2E_RUNS = 100;
+const E2E_BAND_LOWS: Record<DecayLevel, number> = {
+  1: BAND_L1_MIN,
+  2: BAND_L2_MIN,
+  3: BAND_L3_MIN,
+  4: BAND_L4_MIN,
+  5: BAND_L5_MIN,
+};
+const E2E_BAND_UPS: Record<DecayLevel, number> = {
+  1: SCORE_MAX,
+  2: BAND_L1_MIN,
+  3: BAND_L2_MIN,
+  4: BAND_L3_MIN,
+  5: BAND_L4_MIN,
+};
+
+describe("computeHouseState decay properties", () => {
+  it("places the score in its half-open band and keeps the floored score in the same band", () => {
+    // Feature: haunting-engine, Property 2: Band consistency invariant
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const { lightScore, decayLevel } = computeHouseState(snap);
+        expect(lightScore).toBeGreaterThanOrEqual(E2E_BAND_LOWS[decayLevel]);
+        if (decayLevel === 1) {
+          expect(lightScore).toBeLessThanOrEqual(E2E_BAND_UPS[decayLevel]);
+        } else {
+          expect(lightScore).toBeLessThan(E2E_BAND_UPS[decayLevel]);
+        }
+        expect(computeDecayLevel(Math.floor(lightScore))).toBe(decayLevel);
+      }),
+      { numRuns: E2E_RUNS },
+    );
+  });
+
+  it("derives brightness and level progress from the light score", () => {
+    // Feature: haunting-engine, Property 3: Output consistency invariant
+    fc.assert(
+      fc.property(realisticSnapshot, (snap) => {
+        const { lightScore, decayLevel, windowBrightness, levelProgress } = computeHouseState(snap);
+        expect(windowBrightness).toBeCloseTo(lightScore / SCORE_MAX, PRECISION_DIGITS);
+        const low = E2E_BAND_LOWS[decayLevel];
+        const expected = Math.min(1, Math.max(0, (lightScore - low) / (E2E_BAND_UPS[decayLevel] - low)));
+        expect(levelProgress).toBeCloseTo(expected, PRECISION_DIGITS);
+      }),
+      { numRuns: E2E_RUNS },
+    );
+  });
+
+  it("never lowers window brightness when the light score rises", () => {
+    // Feature: haunting-engine, Property 3: Output consistency invariant
+    fc.assert(
+      fc.property(realisticSnapshot, realisticSnapshot, (a, b) => {
+        const stateA = computeHouseState(a);
+        const stateB = computeHouseState(b);
+        const [low, high] =
+          stateA.lightScore <= stateB.lightScore ? [stateA, stateB] : [stateB, stateA];
+        expect(low.windowBrightness).toBeLessThanOrEqual(high.windowBrightness);
+      }),
+      { numRuns: E2E_RUNS },
     );
   });
 });

@@ -1,6 +1,9 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { computeHouseState } from "@/lib/haunting";
 import type { FinancialSnapshot } from "@/lib/haunting";
+import { SCORE_MAX, SCORE_MIN } from "@/lib/haunting/config";
+import { cancelSubscription, payDebt, realisticSnapshot } from "@/lib/haunting/testArbitraries";
 
 const NOW = "2025-06-15";
 const SCORE_PRECISION = 2;
@@ -154,5 +157,58 @@ describe("input immutability", () => {
     deepFreeze(input);
     expect(() => computeHouseState(input)).not.toThrow();
     expect(input).toEqual(copy);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// End-to-end properties (task 12)
+// ---------------------------------------------------------------------------
+
+const PROPERTY_RUNS = 100;
+const MAX_CANCELABLE_MONTHLY_COST_CENTS = 1_000_000;
+const MAX_PAYMENT_CENTS = 100_000_000;
+
+describe("computeHouseState monotonicity properties", () => {
+  it("strictly raises the score and removes one zombie when a subscription is canceled", () => {
+    // Feature: haunting-engine, Property 5: Subscription cancellation strict monotonicity
+    fc.assert(
+      fc.property(realisticSnapshot, fc.nat(), (snap, pick) => {
+        fc.pre(snap.monthlyIncome > 0);
+        const before = computeHouseState(snap);
+        fc.pre(before.lightScore > SCORE_MIN && before.lightScore < SCORE_MAX);
+        const candidates = before.zombies.filter(
+          (z) => z.monthlyCost <= MAX_CANCELABLE_MONTHLY_COST_CENTS,
+        );
+        fc.pre(candidates.length > 0);
+        const target = candidates[pick % candidates.length];
+        const index = snap.subscriptions.findIndex((s) => s.subscriptionId === target.subscriptionId);
+        const after = computeHouseState(cancelSubscription(snap, index));
+        expect(after.lightScore).toBeGreaterThan(before.lightScore);
+        expect(after.zombies).toHaveLength(before.zombies.length - 1);
+        expect(after.zombies.map((z) => z.subscriptionId)).not.toContain(target.subscriptionId);
+      }),
+      { numRuns: PROPERTY_RUNS },
+    );
+  });
+
+  it("never lowers the score when a debt is paid down, and keeps a perfect score", () => {
+    // Feature: haunting-engine, Property 7: Debt payment monotonicity
+    fc.assert(
+      fc.property(
+        realisticSnapshot,
+        fc.nat(),
+        fc.integer({ min: 1, max: MAX_PAYMENT_CENTS }),
+        (snap, pick, deltaCents) => {
+          const indexes = snap.debts.flatMap((d, i) => (d.balance > 0 ? [i] : []));
+          fc.pre(indexes.length > 0);
+          const index = indexes[pick % indexes.length];
+          const before = computeHouseState(snap).lightScore;
+          const after = computeHouseState(payDebt(snap, index, deltaCents)).lightScore;
+          expect(after).toBeGreaterThanOrEqual(before);
+          if (before === SCORE_MAX) expect(after).toBe(SCORE_MAX);
+        },
+      ),
+      { numRuns: PROPERTY_RUNS },
+    );
   });
 });
