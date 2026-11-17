@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { computeHouseState } from "@/lib/haunting";
 import { MIN_INCOME_CENTS, MOMENTUM_MAX } from "@/lib/haunting/config";
 import { computeMomentum, filterInWindowEvents } from "@/lib/haunting/momentum";
+import { eventOnDayArb } from "@/lib/haunting/testArbitraries";
 import type { FinancialEvent, FinancialSnapshot, InputSubscription } from "@/lib/haunting/types";
 
 const NOW = "2025-06-30";
@@ -231,27 +232,12 @@ describe("L4 weekly-plan trajectory", () => {
 const NUM_RUNS = 100;
 const MAX_CENTS = 10_000_000;
 const MAX_EVENTS = 15;
-const DAY_MS = 86_400_000;
 const WINDOW_SPAN_DAYS = 29;
 const OUTSIDE_SPAN_DAYS = 400;
 const PROPERTY_NOW = NOW;
-const PROPERTY_NOW_MS = Date.UTC(2025, 5, 30);
-
-const dayString = (offsetDays: number): string =>
-  new Date(PROPERTY_NOW_MS + offsetDays * DAY_MS).toISOString().slice(0, 10);
-
-const eventTypeArb = fc.constantFrom<FinancialEvent["type"]>(
-  "debt_payment",
-  "subscription_canceled",
-  "exorcism_action_completed",
-);
+// Well-formed events come from the shared generator; the hostile one below stays local.
 const eventOnDaysArb = (daysArb: fc.Arbitrary<number>): fc.Arbitrary<FinancialEvent> =>
-  fc.record({
-    type: eventTypeArb,
-    date: daysArb.map(dayString),
-    amountCents: fc.integer({ min: 0, max: MAX_CENTS }),
-    extraPrincipalCents: fc.integer({ min: 0, max: MAX_CENTS }),
-  });
+  eventOnDayArb(PROPERTY_NOW, daysArb, MAX_CENTS);
 
 const inWindowEventArb = eventOnDaysArb(fc.integer({ min: -WINDOW_SPAN_DAYS, max: 0 }));
 const outOfWindowEventArb = eventOnDaysArb(

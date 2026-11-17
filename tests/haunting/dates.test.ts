@@ -71,7 +71,8 @@ describe("isInWindow", () => {
 
 // ---------------------------------------------------------------------------
 // Module-level property tests (design.md Property 14).
-// Generators are inline until src/lib/haunting/testArbitraries.ts exists.
+// These generators stay inline on purpose: they cover 1900-2100 and malformed strings,
+// which testArbitraries.ts does not generate, and they use Date.UTC as an independent oracle.
 // Date.UTC is used here only as an independent oracle for calendar dates;
 // the module under test never touches Date.
 // ---------------------------------------------------------------------------
@@ -106,7 +107,34 @@ const nowOffsetArb = fc.integer({
 
 const pad = (value: number, width: number): string => String(value).padStart(width, "0");
 
-/** Strings that look like dates but are not real calendar days in strict YYYY-MM-DD form. */
+// Independent oracle for "is this a real calendar date in strict YYYY-MM-DD form".
+// Written here on purpose: it must not reuse dates.ts, which is the code under test.
+const MONTH_LENGTHS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const FEBRUARY = 2;
+const LEAP_FEBRUARY_DAYS = 29;
+
+function isGregorianLeapYear(year: number): boolean {
+  if (year % 400 === 0) return true;
+  if (year % 100 === 0) return false;
+  return year % 4 === 0;
+}
+
+function isRealCalendarDate(text: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (match === null) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > MONTH_LENGTHS.length) return false;
+  const length = month === FEBRUARY && isGregorianLeapYear(year) ? LEAP_FEBRUARY_DAYS : MONTH_LENGTHS[month - 1];
+  return day >= 1 && day <= length;
+}
+
+/**
+ * Strings that look like dates but are not real calendar days in strict YYYY-MM-DD form.
+ * Every candidate is filtered through the independent oracle above, so a template that
+ * accidentally rebuilds a valid date (for example "no padding" on 2100-12-21) is dropped.
+ */
 const malformedDateArb = fc.oneof(
   // Random text that does not match the strict pattern.
   fc.string().filter((text) => !STRICT_DATE.test(text)),
@@ -135,7 +163,29 @@ const malformedDateArb = fc.oneof(
       `${y}${m}${d}`,
     );
   }),
-);
+).filter((candidate) => !isRealCalendarDate(candidate));
+
+describe("independent calendar oracle used by the property tests", () => {
+  it("accepts real dates, including leap days in leap years", () => {
+    for (const valid of ["1900-01-01", "2000-02-29", "2024-02-29", "2100-12-21", "2100-12-31"]) {
+      expect(isRealCalendarDate(valid)).toBe(true);
+    }
+  });
+
+  it("rejects impossible days, bad months and non-strict formats", () => {
+    for (const invalid of ["1900-02-29", "2100-02-29", "2023-02-29", "2025-04-31", "2025-13-01", "2025-00-10", "2025-01-00", "2100-12-2", "2100/12/21", " 2100-12-21"]) {
+      expect(isRealCalendarDate(invalid)).toBe(false);
+    }
+  });
+
+  it("agrees with dates.ts on every day from 1900 to 2100", () => {
+    for (let offset = 0; offset <= RANGE_DAYS; offset += 1) {
+      const iso = isoFromOffset(offset);
+      expect(isRealCalendarDate(iso)).toBe(true);
+      expect(isInWindow(iso, iso)).toBe(true);
+    }
+  });
+});
 
 describe("dates properties", () => {
   // Feature: haunting-engine, Property 14: Calendar arithmetic and window size

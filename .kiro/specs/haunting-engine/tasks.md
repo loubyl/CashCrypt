@@ -117,7 +117,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Unit tests: NaN → level 5, +Infinity → level 1, −Infinity → level 5; `computeLevelProgress` (for every level) and `computeWindowBrightness` return finite values in [0, 1] for those inputs.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 5.1, 5.2, 5.3, 5.4, 14.2, 14.3, 14.13, 14.14_
 
-- [ ] 7. Checkpoint - pure-math modules
+- [x] 7. Checkpoint - pure-math modules
   - Run `npm test` and `npm run typecheck`; ensure both pass, ask the user if questions arise.
 
 - [x] 8. Implement subscriptions and zombies
@@ -192,11 +192,13 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - The same transactions at $9.00 each (27000 cents) give `poltergeist: null` and 30 ghosts.
     - _Requirements: 7.1, 7.5, 8.1, 8.3, 8.4_
 
-- [ ] 11. Create the fast-check generators
-  - [ ] 11.1 Create `src/lib/haunting/testArbitraries.ts`
+- [x] 11. Create the fast-check generators
+  - [x] 11.1 Create `src/lib/haunting/testArbitraries.ts`
     - Export `realisticSnapshot` and `extremeSnapshot` arbitraries, plus the derived-snapshot builders `payDebt`, `cancelSubscription`, `increaseDebtBalance`, `increaseMinimumPayment` and a `centsToSnapshot` helper that divides integer-cent values by 100 to build dollar-valued snapshots (exact Cents_Boundary round trip).
     - Bias `now` and event dates so in-window and out-of-window events are both frequent (offset in [−5, 45] days from `now`, computed with the Julian helper from `dates.ts`, no `Date.now()`).
     - Test-only: never imported by app code. Exempt from the static numeric-literal check.
+    - Shared component arbitraries, also used to build the snapshot generators: `cadenceArb`, `usageArb`, `eventTypeArb`, `centsDebtArb`, `centsSubscriptionArb`, `eventPayloadArb`, `eventWithDate`, `eventOnDayArb`, plus the date helpers `julianToDate` and `shiftDays` (see design.md, "Shared exports").
+    - Current users: `lightScore.test.ts` (`centsDebtArb`, `usageArb`), `momentum.test.ts` (`eventOnDayArb`), `zombies.test.ts` (`cadenceArb`, `usageArb`) and `ghosts.test.ts` (`shiftDays`). Module-specific hostile generators stay in those files. `realisticSnapshot`, `extremeSnapshot` and the derived-snapshot builders are reserved for task 12 and not imported yet.
     - _Requirements: 14.1, 14.5, 14.11_
 
 - [ ] 12. Property-based and robustness tests

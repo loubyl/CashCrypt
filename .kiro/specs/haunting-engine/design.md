@@ -604,7 +604,36 @@ This handles month/year boundaries and leap years correctly through the Julian D
 
 ## fast-check Arbitraries
 
-Property-based tests use **two** generators defined in `src/lib/haunting/testArbitraries.ts` (test-only, not shipped to production).
+Property-based tests share the generators in `src/lib/haunting/testArbitraries.ts` (test-only, not shipped to production). The file exports two whole-snapshot generators (realistic and extreme, below), the derived-snapshot builders, and the component arbitraries that the snapshot generators are built from. Module tests import the component arbitraries directly, so every test draws debts, events, cadences and usages the same way. Module-specific hostile generators (`NaN`, `Infinity`, negative amounts, empty ids, `"__proto__"` categories, malformed dates) stay in the test files that need them.
+
+### Shared exports
+
+| Export | Kind | What it generates or does |
+|---|---|---|
+| `cadenceArb` | Arbitrary | One of `"weekly"`, `"monthly"`, `"yearly"` |
+| `usageArb` | Arbitrary | One of `"often"`, `"rarely"`, `"never"` |
+| `eventTypeArb` | Arbitrary | One of the three `FinancialEvent` types |
+| `centsDebtArb({ balanceMaxCents, minimumPaymentMaxCents, aprMax? })` | Arbitrary factory | A well-formed debt in integer cents (`CentsDebt`, same shape as `InternalDebt`); `aprMax` defaults to the realistic 0.4 |
+| `centsSubscriptionArb(amountMaxCents)` | Arbitrary factory | A well-formed subscription in integer cents per cadence period (`CentsSubscription`) |
+| `eventPayloadArb(amountMaxCents)` | Arbitrary factory | Event type plus optional non-negative `amountCents` and `extraPrincipalCents`, without a date (`EventPayload`) |
+| `eventWithDate(payload, date)` | Helper | Builds a `FinancialEvent`, omitting undefined amounts |
+| `eventOnDayArb(now, daysFromNow, amountMaxCents)` | Arbitrary factory | Events dated `now + days` (negative = past, positive = future) |
+| `julianToDate(julian)` / `shiftDays(date, days)` | Helpers | Julian Day Number to `YYYY-MM-DD`, and day shifts, with no `Date` object |
+| `centsToSnapshot(input)` | Helper | Integer-cent values to a dollar-valued `FinancialSnapshot` (exact Cents_Boundary round trip) |
+| `realisticSnapshot` / `extremeSnapshot` | Arbitraries | Whole dollar-valued snapshots, built from `centsDebtArb`, `centsSubscriptionArb` and `eventPayloadArb` |
+| `payDebt`, `cancelSubscription`, `increaseDebtBalance`, `increaseMinimumPayment` | Builders | Derived snapshots for monotonicity properties (see below) |
+
+### Which test files use them
+
+| Test file | Imports | Kept local on purpose |
+|---|---|---|
+| `tests/haunting/lightScore.test.ts` | `centsDebtArb`, `usageArb` | `InternalSubscription` generator (the module receives already-normalised subscriptions, which the shared file does not produce) |
+| `tests/haunting/momentum.test.ts` | `eventOnDayArb` | Hostile events with `NaN`, `Infinity` and negative amounts |
+| `tests/haunting/zombies.test.ts` | `cadenceArb`, `usageArb` | Hostile subscriptions: empty ids and names, `NaN`, `Infinity` and negative amounts |
+| `tests/haunting/ghosts.test.ts` | `shiftDays` | Amounts around the threshold, negative and non-finite amounts, the `"__proto__"` category |
+| `tests/haunting/dates.test.ts` | none | Dates from 1900 to 2100 and malformed strings, checked against an independent `Date.UTC` and calendar oracle |
+
+`realisticSnapshot`, `extremeSnapshot` and the derived-snapshot builders are not imported by any test yet. They are reserved for the end-to-end properties on `computeHouseState` in task 12. `centsSubscriptionArb`, `eventPayloadArb`, `eventWithDate` and `julianToDate` are currently used only inside `testArbitraries.ts` by the snapshot generators.
 
 ### Realistic generator
 

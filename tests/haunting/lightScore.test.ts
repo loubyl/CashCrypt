@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { MIN_INCOME_CENTS, SCORE_MAX } from "@/lib/haunting/config";
 import { computeBaseScore, computeWeightedSum } from "@/lib/haunting/lightScore";
+import { centsDebtArb, usageArb } from "@/lib/haunting/testArbitraries";
 import type {
   InternalDebt,
   InternalSnapshot,
@@ -162,8 +163,9 @@ describe("computeBaseScore", () => {
 
 // ---------------------------------------------------------------------------
 // Property tests for the base score formula (design.md, Property 13).
-// The realistic generator is built inline here; task 11.1 moves the shared
-// version into src/lib/haunting/testArbitraries.ts.
+// Debts and usages come from the shared generators in testArbitraries.ts.
+// The subscription generator stays local because this module consumes
+// already-normalised InternalSubscription values, which the shared file does not produce.
 // ---------------------------------------------------------------------------
 
 const NUM_RUNS = 200;
@@ -175,19 +177,16 @@ const MIN_INCREASE_CENTS = 1;
 const MAX_INCREASE_CENTS = 1_000_000;
 const RELATIVE_GAP = 1e-9;
 
-const debtArb = fc.record({
-  debtId: fc.constant("d"),
-  name: fc.constant("Debt"),
-  balanceCents: fc.integer({ min: 0, max: MAX_REALISTIC_CENTS }),
-  minimumMonthlyPaymentCents: fc.integer({ min: 0, max: MAX_MIN_PAYMENT_CENTS }),
-  apr: fc.constant(0.1),
+const debtArb = centsDebtArb({
+  balanceMaxCents: MAX_REALISTIC_CENTS,
+  minimumPaymentMaxCents: MAX_MIN_PAYMENT_CENTS,
 });
 
 const validActiveSubArb = fc.record({
   subscriptionId: fc.constant("s"),
   name: fc.constant("Sub"),
   monthlyCostCents: fc.integer({ min: 1, max: MAX_MIN_PAYMENT_CENTS }),
-  usage: fc.constantFrom("often" as const, "rarely" as const, "never" as const),
+  usage: usageArb,
   active: fc.constant(true),
   valid: fc.constant(true),
 });

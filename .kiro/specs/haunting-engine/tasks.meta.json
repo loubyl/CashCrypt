@@ -258,6 +258,25 @@
         "chatSessionId": "sess_7d82f36a-7489-4416-812a-be91f25eda3c",
         "timestamp": 1794907002440
       }
+    ],
+    "11.1 Create `src/lib/haunting/testArbitraries.ts`": [
+      {
+        "executionId": "60125bde-7179-44d2-a7db-5ae8e0fd4551",
+        "chatSessionId": "sess_efc9f1ba-3816-4cba-a31a-e058d9dbdc51",
+        "timestamp": 1794907153183
+      },
+      {
+        "executionId": "60125bde-7179-44d2-a7db-5ae8e0fd4551",
+        "chatSessionId": "sess_efc9f1ba-3816-4cba-a31a-e058d9dbdc51",
+        "timestamp": 1794907444062
+      }
+    ],
+    "11. Create the fast-check generators": [
+      {
+        "executionId": "60125bde-7179-44d2-a7db-5ae8e0fd4551",
+        "chatSessionId": "sess_efc9f1ba-3816-4cba-a31a-e058d9dbdc51",
+        "timestamp": 1794907444132
+      }
     ]
   }
 }

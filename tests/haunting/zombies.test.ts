@@ -7,6 +7,7 @@ import {
   isValidSubscription,
   normalizeSubscription,
 } from "@/lib/haunting/zombies";
+import { cadenceArb, usageArb } from "@/lib/haunting/testArbitraries";
 import type {
   Cadence,
   InternalSubscription,
@@ -151,8 +152,7 @@ describe("computeFactorC", () => {
   });
 });
 
-const cadenceArb = fc.constantFrom<Cadence>("weekly", "monthly", "yearly");
-const usageArb = fc.constantFrom<Usage>("often", "rarely", "never");
+// Cadences and usages come from testArbitraries.ts; ids, names and amounts stay hostile here.
 const hostileAmountArb = fc.oneof(
   fc.integer({ min: 0, max: MAX_AMOUNT_CENTS }),
   fc.integer({ min: -MAX_AMOUNT_CENTS, max: -1 }),

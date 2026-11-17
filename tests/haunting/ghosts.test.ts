@@ -8,12 +8,11 @@ import {
 } from "@/lib/haunting/config";
 import { computeGhostsAndPoltergeist, isSmallExpense } from "@/lib/haunting/ghosts";
 import { computeHouseState } from "@/lib/haunting";
+import { shiftDays } from "@/lib/haunting/testArbitraries";
 import type { FinancialSnapshot, InternalTransaction } from "@/lib/haunting/types";
 
 const NUM_RUNS = 100;
 const NOW = "2025-06-15";
-const MS_PER_DAY = 86_400_000;
-const NOW_MS = Date.UTC(2025, 5, 15);
 const OLDEST_IN_WINDOW_OFFSET = -(WINDOW_DAYS - 1);
 const JUST_OUTSIDE_WINDOW_OFFSET = -WINDOW_DAYS;
 const INCOME_CENTS = 300_000;
@@ -27,8 +26,9 @@ const MAX_OFFSET = 5;
 const MAX_TRANSACTIONS = 30;
 const CATEGORIES = ["coffee", "snacks", "rides", "__proto__"];
 
+/** `NOW` shifted by a whole number of days (negative = earlier), via the shared helper. */
 function dateWithOffset(offsetDays: number): string {
-  return new Date(NOW_MS + offsetDays * MS_PER_DAY).toISOString().slice(0, 10);
+  return shiftDays(NOW, offsetDays);
 }
 
 const makeTx = (overrides: Partial<InternalTransaction> = {}): InternalTransaction => ({
