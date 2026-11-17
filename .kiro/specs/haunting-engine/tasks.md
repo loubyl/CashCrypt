@@ -162,7 +162,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - _Requirements: 7.1, 7.2, 7.3, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5_
 
 - [ ] 10. Implement the public API and wire modules together
-  - [ ] 10.1 Create `src/lib/haunting/index.ts`
+  - [x] 10.1 Create `src/lib/haunting/index.ts`
     - Internal (non-exported) `convertToCents(snapshot): CentsSnapshot`: the only place that calls `Math.round(x * CENTS_PER_DOLLAR)`; converts income, debt balances and minimum payments, subscription amounts and transaction amounts; sanitises negative or non-finite values to 0; passes event cents through after sanitising (non-finite or negative → 0); treats income between 1 and 99 cents as the zero-income path.
     - Export `computeHouseState(snapshot)`: convert, normalise subscriptions, `computeBaseScore`, `computeMomentum`, clamp `lightScore = min(SCORE_MAX, baseScore + momentum)` to [`SCORE_MIN`, `SCORE_MAX`], decay level, level progress, window brightness, zombies, ghosts and poltergeist, as in design.md. Do not mutate the input.
     - Re-export `validateConfig` and the types `FinancialSnapshot`, `HouseState`, `Zombie`, `Ghost`, `Poltergeist`, `FinancialEvent`.
