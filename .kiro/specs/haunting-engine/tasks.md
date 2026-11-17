@@ -161,7 +161,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
       - No mutation: deep-frozen transaction arrays do not throw and are unchanged.
     - _Requirements: 7.1, 7.2, 7.3, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 10. Implement the public API and wire modules together
+- [x] 10. Implement the public API and wire modules together
   - [x] 10.1 Create `src/lib/haunting/index.ts`
     - Internal (non-exported) `convertToCents(snapshot): CentsSnapshot`: the only place that calls `Math.round(x * CENTS_PER_DOLLAR)`; converts income, debt balances and minimum payments, subscription amounts and transaction amounts; sanitises negative or non-finite values to 0; passes event cents through after sanitising (non-finite or negative → 0); treats income between 1 and 99 cents as the zero-income path.
     - Export `computeHouseState(snapshot)`: convert, normalise subscriptions, `computeBaseScore`, `computeMomentum`, clamp `lightScore = min(SCORE_MAX, baseScore + momentum)` to [`SCORE_MIN`, `SCORE_MAX`], decay level, level progress, window brightness, zombies, ghosts and poltergeist, as in design.md. Do not mutate the input.
@@ -187,7 +187,7 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
       - No mutation: deep-frozen event arrays do not throw and are unchanged.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8_
 
-  - [ ] 10.4 Write the L4 Poltergeist unit test in `tests/haunting/ghosts.test.ts`
+  - [x] 10.4 Write the L4 Poltergeist unit test in `tests/haunting/ghosts.test.ts`
     - Through `computeHouseState`: 30 transactions of $12.00 within the window on $3,000 income gives total 36000 cents > 30000 cents, so `poltergeist` is non-null with `totalAmount` 36000, `transactionCount` 30, and `ghosts` is `[]`.
     - The same transactions at $9.00 each (27000 cents) give `poltergeist: null` and 30 ghosts.
     - _Requirements: 7.1, 7.5, 8.1, 8.3, 8.4_

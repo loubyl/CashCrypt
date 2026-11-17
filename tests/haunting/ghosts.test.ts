@@ -7,7 +7,8 @@ import {
   WINDOW_DAYS,
 } from "@/lib/haunting/config";
 import { computeGhostsAndPoltergeist, isSmallExpense } from "@/lib/haunting/ghosts";
-import type { InternalTransaction } from "@/lib/haunting/types";
+import { computeHouseState } from "@/lib/haunting";
+import type { FinancialSnapshot, InternalTransaction } from "@/lib/haunting/types";
 
 const NUM_RUNS = 100;
 const NOW = "2025-06-15";
@@ -313,5 +314,46 @@ describe("ghosts properties", () => {
       }),
       { numRuns: NUM_RUNS },
     );
+  });
+});
+
+describe("computeHouseState Level 4 Poltergeist scenario", () => {
+  const MONTHLY_INCOME_DOLLARS = 3_000;
+  const TRANSACTION_COUNT = 30;
+  const POLTERGEIST_AMOUNT_DOLLARS = 12;
+  const GHOST_AMOUNT_DOLLARS = 9;
+  const CENTS_PER_DOLLAR = 100;
+
+  function snapshotWith(amountDollars: number): FinancialSnapshot {
+    return {
+      monthlyIncome: MONTHLY_INCOME_DOLLARS,
+      debts: [],
+      subscriptions: [],
+      transactions: Array.from({ length: TRANSACTION_COUNT }, (_, i) => ({
+        transactionId: `t${i}`,
+        amount: amountDollars,
+        description: "Small expense",
+        category: "coffee",
+        date: dateWithOffset(-i),
+      })),
+      events: [],
+      now: NOW,
+    };
+  }
+
+  it("merges 30 transactions of $12.00 on $3,000 income into a Poltergeist with no ghosts", () => {
+    const { poltergeist, ghosts } = computeHouseState(snapshotWith(POLTERGEIST_AMOUNT_DOLLARS));
+    expect(poltergeist).not.toBeNull();
+    expect(poltergeist?.totalAmount).toBe(
+      TRANSACTION_COUNT * POLTERGEIST_AMOUNT_DOLLARS * CENTS_PER_DOLLAR,
+    );
+    expect(poltergeist?.transactionCount).toBe(TRANSACTION_COUNT);
+    expect(ghosts).toEqual([]);
+  });
+
+  it("keeps 30 transactions of $9.00 on $3,000 income as 30 individual ghosts", () => {
+    const { poltergeist, ghosts } = computeHouseState(snapshotWith(GHOST_AMOUNT_DOLLARS));
+    expect(poltergeist).toBeNull();
+    expect(ghosts).toHaveLength(TRANSACTION_COUNT);
   });
 });

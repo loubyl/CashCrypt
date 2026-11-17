@@ -239,6 +239,25 @@
         "chatSessionId": "sess_bfcc83b6-7313-45aa-9c71-6b92afacebdc",
         "timestamp": 1794906590470
       }
+    ],
+    "10.4 Write the L4 Poltergeist unit test in `tests/haunting/ghosts.test.ts`": [
+      {
+        "executionId": "c1a42daf-9501-4eae-aac7-1ed5c013336c",
+        "chatSessionId": "sess_7d82f36a-7489-4416-812a-be91f25eda3c",
+        "timestamp": 1794906964768
+      },
+      {
+        "executionId": "c1a42daf-9501-4eae-aac7-1ed5c013336c",
+        "chatSessionId": "sess_7d82f36a-7489-4416-812a-be91f25eda3c",
+        "timestamp": 1794907002395
+      }
+    ],
+    "10. Implement the public API and wire modules together": [
+      {
+        "executionId": "c1a42daf-9501-4eae-aac7-1ed5c013336c",
+        "chatSessionId": "sess_7d82f36a-7489-4416-812a-be91f25eda3c",
+        "timestamp": 1794907002440
+      }
     ]
   }
 }
