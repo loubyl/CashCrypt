@@ -931,6 +931,14 @@ Momentum rewards recent effort so that realistic weekly actions are visible: bas
 
 ---
 
+### Property 14: Calendar arithmetic and window size
+
+*For any* valid calendar date between 1900-01-01 and 2100-12-31, `dateToJulian` SHALL give the next calendar day a Julian Day Number exactly 1 higher. *For any* valid `now` in that range, exactly `WINDOW_DAYS` calendar dates SHALL satisfy `isInWindow(date, now)`, namely `now − (WINDOW_DAYS − 1)` through `now`; every date after `now` SHALL be outside the window. *For any* string, `isInWindow` SHALL not throw, and SHALL return `false` whenever either argument is not a real calendar date in strict `YYYY-MM-DD` form.
+
+**Validates: Requirements 3.1, 3.7, 7.1, 7.4**
+
+---
+
 ## Error Handling
 
 The engine never throws for structurally valid input. The following conditions are handled silently:
@@ -970,7 +978,7 @@ Each property test references its design property with a tag comment:
 | `tests/haunting/zombies.test.ts` | Validity filter, cadence normalisation, Factor_C computation |
 | `tests/haunting/ghosts.test.ts` | Ghost conservation (P8), poltergeist conservation (P8), 30-day window |
 | `tests/haunting/momentum.test.ts` | Momentum bounds (P10), window/monotonic (P11), zero-income neutrality, the L4 weekly-plan trajectory table as exact-value unit tests |
-| `tests/haunting/dates.test.ts` | `isInWindow` boundaries: `now` in, `now − 29` in, `now − 30` out, `now − 31` out, `now + 1` out, exactly `WINDOW_DAYS` days inside, leap-year and year-boundary cases |
+| `tests/haunting/dates.test.ts` | Calendar arithmetic and window size (P14), `isInWindow` boundaries: `now` in, `now − 29` in, `now − 30` out, `now − 31` out, `now + 1` out, exactly `WINDOW_DAYS` days inside, leap-year and year-boundary cases |
 | `tests/haunting/integration.test.ts` | Calibration scenarios, subscription cancellation strict monotonicity (P5), debt payment monotonicity (P7) |
 | `tests/haunting/robustness.test.ts` | Robustness (P9), zero-income zero-obligation (P12) |
 | `tests/haunting/config.test.ts` | `validateConfig` returns `[]` for shipped config (Req 1 AC5) |
@@ -988,7 +996,7 @@ Unit tests cover:
 - Each cadence conversion factor
 - `validateConfig` with valid and invalid configs
 
-Property tests (fast-check, ≥ 100 iterations each) cover all thirteen correctness properties above.
+Property tests (fast-check, ≥ 100 iterations each) cover all fourteen correctness properties above.
 
 ### Static checks
 

@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { WINDOW_DAYS } from "@/lib/haunting/config";
 import { dateToJulian, isInWindow } from "@/lib/haunting/dates";
@@ -65,5 +66,146 @@ describe("isInWindow", () => {
     expect(isInWindow("not-a-date", now)).toBe(false);
     expect(isInWindow("2025-02-30", now)).toBe(false);
     expect(isInWindow(now, "2025/06/15")).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Module-level property tests (design.md Property 14).
+// Generators are inline until src/lib/haunting/testArbitraries.ts exists.
+// Date.UTC is used here only as an independent oracle for calendar dates;
+// the module under test never touches Date.
+// ---------------------------------------------------------------------------
+
+const NUM_RUNS = 500;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const RANGE_START_MS = Date.UTC(1900, 0, 1);
+const RANGE_END_MS = Date.UTC(2100, 11, 31);
+const RANGE_DAYS = Math.round((RANGE_END_MS - RANGE_START_MS) / DAY_MS);
+const SWEEP_MARGIN_DAYS = 10;
+const MAX_FUTURE_DAYS = 400;
+const STRICT_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** YYYY-MM-DD for the calendar day `offset` days after 1900-01-01. */
+function isoFromOffset(offset: number): string {
+  return new Date(RANGE_START_MS + offset * DAY_MS).toISOString().slice(0, 10);
+}
+
+function julianOf(iso: string): number {
+  const [year, month, day] = iso.split("-").map(Number);
+  return dateToJulian(year, month, day);
+}
+
+/** Day offsets whose date stays in 1900-01-01 .. 2100-12-31. */
+const dayOffsetArb = fc.integer({ min: 0, max: RANGE_DAYS });
+
+/** A `now` whose full sweep (window plus margins) stays inside the range. */
+const nowOffsetArb = fc.integer({
+  min: WINDOW_DAYS + SWEEP_MARGIN_DAYS,
+  max: RANGE_DAYS - SWEEP_MARGIN_DAYS,
+});
+
+const pad = (value: number, width: number): string => String(value).padStart(width, "0");
+
+/** Strings that look like dates but are not real calendar days in strict YYYY-MM-DD form. */
+const malformedDateArb = fc.oneof(
+  // Random text that does not match the strict pattern.
+  fc.string().filter((text) => !STRICT_DATE.test(text)),
+  // Month 00 or 13..99.
+  fc
+    .tuple(fc.integer({ min: 1900, max: 2100 }), fc.oneof(fc.constant(0), fc.integer({ min: 13, max: 99 })), fc.integer({ min: 1, max: 28 }))
+    .map(([y, m, d]) => `${pad(y, 4)}-${pad(m, 2)}-${pad(d, 2)}`),
+  // Day 00 or 32..99.
+  fc
+    .tuple(fc.integer({ min: 1900, max: 2100 }), fc.integer({ min: 1, max: 12 }), fc.oneof(fc.constant(0), fc.integer({ min: 32, max: 99 })))
+    .map(([y, m, d]) => `${pad(y, 4)}-${pad(m, 2)}-${pad(d, 2)}`),
+  // Days that do not exist in that month (for example February 30, April 31, February 29 in a non-leap year).
+  fc.constantFrom("2023-02-29", "2100-02-29", "1900-02-29", "2024-02-30", "2025-04-31", "2025-06-31", "2025-09-31", "2025-11-31"),
+  // Wrong separators, missing padding, extra characters.
+  dayOffsetArb.chain((offset) => {
+    const iso = isoFromOffset(offset);
+    const [y, m, d] = iso.split("-");
+    return fc.constantFrom(
+      `${y}/${m}/${d}`,
+      `${y}.${m}.${d}`,
+      `${y}-${Number(m)}-${Number(d)}`,
+      ` ${iso}`,
+      `${iso} `,
+      `${iso}T00:00:00Z`,
+      `${d}-${m}-${y}`,
+      `${y}${m}${d}`,
+    );
+  }),
+);
+
+describe("dates properties", () => {
+  // Feature: haunting-engine, Property 14: Calendar arithmetic and window size
+  it("gives consecutive calendar days Julian numbers exactly 1 apart", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 0, max: RANGE_DAYS - 1 }), (offset) => {
+        const today = julianOf(isoFromOffset(offset));
+        const tomorrow = julianOf(isoFromOffset(offset + 1));
+        expect(tomorrow - today).toBe(1);
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  // Feature: haunting-engine, Property 14: Calendar arithmetic and window size
+  it("agrees with an independent calendar on the number of days between two dates", () => {
+    fc.assert(
+      fc.property(dayOffsetArb, dayOffsetArb, (a, b) => {
+        expect(julianOf(isoFromOffset(b)) - julianOf(isoFromOffset(a))).toBe(b - a);
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  // Feature: haunting-engine, Property 14: Calendar arithmetic and window size
+  it("puts exactly WINDOW_DAYS dates inside the window for any now, ending on now", () => {
+    fc.assert(
+      fc.property(nowOffsetArb, (nowOffset) => {
+        const now = isoFromOffset(nowOffset);
+        const insideOffsets: number[] = [];
+        for (let k = -(WINDOW_DAYS + SWEEP_MARGIN_DAYS); k <= SWEEP_MARGIN_DAYS; k += 1) {
+          if (isInWindow(isoFromOffset(nowOffset + k), now)) insideOffsets.push(k);
+        }
+        expect(insideOffsets).toHaveLength(WINDOW_DAYS);
+        expect(insideOffsets[0]).toBe(-(WINDOW_DAYS - 1));
+        expect(insideOffsets[insideOffsets.length - 1]).toBe(0);
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  // Feature: haunting-engine, Property 14: Calendar arithmetic and window size
+  it("never puts a future date inside the window", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: RANGE_DAYS - MAX_FUTURE_DAYS }),
+        fc.integer({ min: 1, max: MAX_FUTURE_DAYS }),
+        (nowOffset, daysAhead) => {
+          expect(isInWindow(isoFromOffset(nowOffset + daysAhead), isoFromOffset(nowOffset))).toBe(false);
+        },
+      ),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  // Feature: haunting-engine, Property 14: Calendar arithmetic and window size
+  it("never throws on malformed strings and returns false on either argument", () => {
+    fc.assert(
+      fc.property(malformedDateArb, dayOffsetArb, (malformed, offset) => {
+        const valid = isoFromOffset(offset);
+        let asDate: boolean | undefined;
+        let asNow: boolean | undefined;
+        expect(() => {
+          asDate = isInWindow(malformed, valid);
+          asNow = isInWindow(valid, malformed);
+        }).not.toThrow();
+        expect(asDate).toBe(false);
+        expect(asNow).toBe(false);
+      }),
+      { numRuns: NUM_RUNS },
+    );
   });
 });

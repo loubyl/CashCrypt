@@ -56,6 +56,14 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Year-boundary case (for example `now = 2025-01-10` with `2024-12-12` in and `2024-12-11` out).
     - `dateToJulian` known value (2000-01-01 → 2451545).
     - _Requirements: 3.1, 3.7, 7.1, 7.4_
+  - [x] 3.3 Write module-level property tests in `tests/haunting/dates.test.ts`
+    - **Property 14: Calendar arithmetic and window size**, required by the `conventions.md` Testing rule.
+    - Tag `// Feature: haunting-engine, Property 14: ...`; ≥ 100 runs each; inline generator of valid calendar dates from 1900-01-01 to 2100-12-31 (no `testArbitraries.ts` yet).
+    - Consecutive calendar days differ by exactly 1 in `dateToJulian`.
+    - For any valid `now`, exactly `WINDOW_DAYS` dates fall inside the window, and they are `now − (WINDOW_DAYS − 1)` through `now`.
+    - Dates after `now` are never inside the window.
+    - Malformed strings (random strings, impossible months and days, wrong separators) never throw and make `isInWindow` return `false` on either argument.
+    - _Requirements: 3.1, 3.7, 7.1, 7.4_
 
 - [x] 4. Implement the light score base formula
   - [x] 4.1 Create `src/lib/haunting/lightScore.ts`
@@ -90,18 +98,24 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Negative and non-finite amounts contribute 0; input events array is not mutated.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 13.8, 13.9_
 
-- [ ] 6. Implement decay level, level progress and window brightness
-  - [ ] 6.1 Create `src/lib/haunting/decay.ts`
+- [x] 6. Implement decay level, level progress and window brightness
+  - [x] 6.1 Create `src/lib/haunting/decay.ts`
     - Export `computeDecayLevel(lightScore)`, `computeLevelProgress(lightScore, level)` and `computeWindowBrightness(lightScore)`.
     - Half-open bands from config ([80,100] → 1, [60,80) → 2, [40,60) → 3, [20,40) → 4, [0,20) → 5); clamp the score to [0, 100] first; `levelProgress` clamped to [0, 1]; level 1 uses upper bound 100 inclusive; `windowBrightness = lightScore / 100` clamped.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
 
-  - [ ] 6.2 Write unit tests in `tests/haunting/decay.test.ts`
+  - [x] 6.2 Write unit tests in `tests/haunting/decay.test.ts`
     - Level for every band boundary: 100, 80, 79.999, 60, 59.999, 40, 39.999, 20, 19.999, 0.
     - Out-of-range inputs (−5, 105) are clamped.
     - `computeLevelProgress` is 0 at each band low (levels 2–5), 1.0 at score 100, and the exact fraction at a mid-band value (for example 39.50 in L4 → 0.975).
     - `computeWindowBrightness` returns 0, 0.5, 1 for scores 0, 50, 100.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 5.1, 5.3, 5.5, 5.6_
+  - [x] 6.3 Write function-level property and non-finite tests in `tests/haunting/decay.test.ts`
+    - **Property 2: Band consistency invariant** and **Property 3: Output consistency invariant**, stated on `computeDecayLevel`, `computeLevelProgress` and `computeWindowBrightness` directly. Tasks 12.2 and 12.3 still cover the same properties end to end through `computeHouseState`.
+    - Tags `// Feature: haunting-engine, Property 2: ...` and `// Feature: haunting-engine, Property 3: ...`; 500 runs each over `fc.double` in [0, 100], integers in [0, 100] and the exact band boundaries (plus just below each).
+    - Properties: the level matches the unique half-open band; `computeDecayLevel(Math.floor(s)) === computeDecayLevel(s)`; `levelProgress` is in [0, 1] and equals the position inside the band; `windowBrightness = s / 100` and is non-decreasing in `s`.
+    - Unit tests: NaN → level 5, +Infinity → level 1, −Infinity → level 5; `computeLevelProgress` (for every level) and `computeWindowBrightness` return finite values in [0, 1] for those inputs.
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7, 5.1, 5.2, 5.3, 5.4, 14.2, 14.3, 14.13, 14.14_
 
 - [ ] 7. Checkpoint - pure-math modules
   - Run `npm test` and `npm run typecheck`; ensure both pass, ask the user if questions arise.
@@ -119,6 +133,11 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Validity filter: empty id, empty name, amount ≤ 0, invalid cadence, invalid usage, and `active: false` are each excluded; excluded entries are also excluded from `computeFactorC`.
     - `computeZombies` returns one zombie per valid active subscription with shape `{ subscriptionId, name, monthlyCost, usage }` and `[]` for empty input.
     - `computeFactorC` returns 0 when income is 0 and the exact ratio otherwise.
+    - Module-level properties (required by the `conventions.md` Testing rule, in addition to the end-to-end properties in task 12): tag each `// Feature: haunting-engine, Property N: ...` with ≥ 100 runs, using the matching `design.md` property number or a new numbered property added to `design.md` first; build generators inline if `testArbitraries.ts` does not exist yet.
+      - `normalizeSubscription` always returns a non-negative integer `monthlyCostCents`, and subscriptions with `NaN`, `Infinity` or negative amounts come back with `valid: false` and never throw.
+      - Conservation: `computeZombies` returns exactly one zombie per valid active subscription, with the same `subscriptionId`s, and never one for an invalid or inactive entry.
+      - `computeFactorC` is finite and ≥ 0, is 0 when income is 0, `NaN` or below `MIN_INCOME_CENTS`, and does not change when invalid or inactive subscriptions are added.
+      - No mutation: deep-frozen inputs do not throw and are unchanged after every exported function.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 2.3_
 
 - [ ] 9. Implement ghosts and the Poltergeist
@@ -135,6 +154,10 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Above-threshold total produces the Poltergeist with correct `totalAmount`, `transactionCount`, `byCategory` (sum equals total) and empty `ghosts`.
     - Zero income with qualifying transactions: `poltergeist` is `null`, ghosts returned individually.
     - Empty transactions: `ghosts` is `[]` and `poltergeist` is `null`.
+    - Module-level properties (required by the `conventions.md` Testing rule, in addition to the end-to-end properties in task 12): tag each `// Feature: haunting-engine, Property N: ...` with ≥ 100 runs, using the matching `design.md` property number or a new numbered property added to `design.md` first; build generators inline if `testArbitraries.ts` does not exist yet.
+      - Property 8 at the function level on `computeGhostsAndPoltergeist`: with no Poltergeist, the ghost count equals the qualifying count and every ghost maps to a qualifying transaction; with a Poltergeist, `ghosts` is `[]`, `totalAmount` is the integer sum of qualifying amounts, `transactionCount` is their count and `byCategory` sums exactly to `totalAmount`.
+      - Bounds: `isSmallExpense` is true only for finite amounts strictly between 0 and `SMALL_EXPENSE_THRESHOLD_CENTS`; transactions with `NaN`, `Infinity`, negative or zero amounts, or dated outside the window or in the future, never become ghosts or count toward the Poltergeist.
+      - No mutation: deep-frozen transaction arrays do not throw and are unchanged.
     - _Requirements: 7.1, 7.2, 7.3, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5_
 
 - [ ] 10. Implement the public API and wire modules together
@@ -156,6 +179,11 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Persona: L4 snapshot ($3,000 income, default demo debts and subscriptions) with the weekly plan stacked in the 30-day window: $300 extra principal on the $18,000 debt, cancel the $15.49 subscription (removed from the subscription list), and 3 completed exorcism actions per week, all dated in the window.
     - Assert exact `lightScore` (2 decimals) and `decayLevel` for weeks 1–4: 39.50 / L4, 45.73 / L3, 48.45 / L3, 48.68 / L3. Week 1 breakdown: `momentum` ≈ 6.52, base ≈ 32.99, `levelProgress` ≈ 0.98; weeks 3–4 have `momentum` equal to `MOMENTUM_MAX`.
     - The week-1 delta over the start (32.74) is within +5 and +8.
+    - Task 5.2 left `momentum.test.ts` with example tests only, so this task also adds its module-level properties.
+    - Module-level properties (required by the `conventions.md` Testing rule, in addition to the end-to-end properties in task 12): tag each `// Feature: haunting-engine, Property N: ...` with ≥ 100 runs, using the matching `design.md` property number or a new numbered property added to `design.md` first; build generators inline if `testArbitraries.ts` does not exist yet.
+      - Properties 10 and 11 at the function level on `computeMomentum`: the result is always in [0, `MOMENTUM_MAX`]; it is 0 when income is below `MIN_INCOME_CENTS`; adding events dated outside the window (including future dates) does not change it; adding an in-window event with non-negative amounts never lowers it.
+      - Robustness: events with `NaN`, `Infinity` or negative `amountCents` / `extraPrincipalCents` contribute 0 and never throw.
+      - No mutation: deep-frozen event arrays do not throw and are unchanged.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.8_
 
   - [ ] 10.4 Write the L4 Poltergeist unit test in `tests/haunting/ghosts.test.ts`
@@ -264,8 +292,8 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     { "id": 1, "tasks": ["2.1"] },
     { "id": 2, "tasks": ["2.2", "3.1"] },
     { "id": 3, "tasks": ["2.3", "3.2", "4.1", "5.1", "6.1", "8.1", "9.1"] },
-    { "id": 4, "tasks": ["4.2", "5.2", "6.2", "8.2", "9.2", "10.1"] },
-    { "id": 5, "tasks": ["4.3", "10.2", "10.3", "10.4", "11.1", "13.1"] },
+    { "id": 4, "tasks": ["3.3", "4.2", "5.2", "6.2", "8.2", "9.2", "10.1"] },
+    { "id": 5, "tasks": ["4.3", "6.3", "10.2", "10.3", "10.4", "11.1", "13.1"] },
     { "id": 6, "tasks": ["12.1", "12.2", "12.5", "12.8", "12.9", "12.10"] },
     { "id": 7, "tasks": ["12.3", "12.4", "12.7", "12.11", "12.12"] },
     { "id": 8, "tasks": ["12.6", "12.13"] }

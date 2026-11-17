@@ -44,6 +44,10 @@
 
 - Every function in `src/lib/haunting/` and `src/lib/exorcism/` has at least one Vitest unit test.
 - Property-based tests with fast-check cover invariants (output range, output length, no thrown exceptions on arbitrary valid input).
+- Every module test file in `tests/haunting/` includes fast-check properties for that module's own invariants, written against the module's exported functions: output bounds, conservation (counts and sums that must match the input), no mutation of inputs, and robustness to `NaN`, `Infinity` and negative values. This is in addition to, not a replacement for, the end-to-end properties on `computeHouseState` in task 12 of the haunting-engine spec. Do not wait for the end-to-end task or for a request to add them.
+  - Tag each property `// Feature: haunting-engine, Property N: <property text>` and run at least 100 iterations (`{ numRuns: 100 }` or more).
+  - Use the matching property number from `design.md` when one exists. When none does, add a new numbered property to `design.md` first and use that number.
+  - Until `src/lib/haunting/testArbitraries.ts` exists, build the generators inline in the test file.
 - Test descriptions use plain English sentences: `"returns decay level 5 when light score is 10"`.
 - No snapshot tests for pure functions — assert on specific output values.
 

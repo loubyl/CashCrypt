@@ -110,6 +110,37 @@
         "chatSessionId": "sess_45d22b7c-d3e7-4c59-adeb-c9c41d101fa3",
         "timestamp": 1794892105414
       }
+    ],
+    "6.1 Create `src/lib/haunting/decay.ts`": [
+      {
+        "executionId": "b75e3212-d70e-46fb-85d9-3b67ea35c735",
+        "chatSessionId": "sess_e4228dde-a798-4566-bc42-da0792ba933d",
+        "timestamp": 1794892567593
+      },
+      {
+        "executionId": "b75e3212-d70e-46fb-85d9-3b67ea35c735",
+        "chatSessionId": "sess_e4228dde-a798-4566-bc42-da0792ba933d",
+        "timestamp": 1794892607856
+      }
+    ],
+    "6.2 Write unit tests in `tests/haunting/decay.test.ts`": [
+      {
+        "executionId": "2e69b718-33db-4c33-a1c4-188729a4776a",
+        "chatSessionId": "sess_7222ad9b-08d6-4218-b646-c9afea059159",
+        "timestamp": 1794892729608
+      },
+      {
+        "executionId": "2e69b718-33db-4c33-a1c4-188729a4776a",
+        "chatSessionId": "sess_7222ad9b-08d6-4218-b646-c9afea059159",
+        "timestamp": 1794892808124
+      }
+    ],
+    "6. Implement decay level, level progress and window brightness": [
+      {
+        "executionId": "2e69b718-33db-4c33-a1c4-188729a4776a",
+        "chatSessionId": "sess_7222ad9b-08d6-4218-b646-c9afea059159",
+        "timestamp": 1794892808177
+      }
     ]
   }
 }

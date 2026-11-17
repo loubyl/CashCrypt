@@ -129,6 +129,8 @@ export type Poltergeist = {
   byCategory: Record<string, number>; // integer cents; values sum to totalAmount
 };
 
+export type DecayLevel = 1 | 2 | 3 | 4 | 5;
+
 export type HouseState = {
   lightScore: number; // real number [0, 100]; = min(100, baseScore + momentum)
   baseScore: number; // 100 / (1 + S), or exactly 0/100 on the zero-income path
