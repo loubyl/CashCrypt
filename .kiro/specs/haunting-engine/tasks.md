@@ -78,13 +78,13 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Three properties: `computeBaseScore` is finite and in (0, 100] when income ≥ `MIN_INCOME_CENTS`; growing any one burden by ≥ 1 cent strictly raises S and strictly lowers the score; any two snapshots are ordered by S in reverse (pairs closer than floating-point resolution are skipped).
     - **Validates: Requirements 2.6**
 
-- [ ] 5. Implement momentum
-  - [ ] 5.1 Create `src/lib/haunting/momentum.ts`
+- [x] 5. Implement momentum
+  - [x] 5.1 Create `src/lib/haunting/momentum.ts`
     - Export `filterInWindowEvents(events, now)` (uses `isInWindow`) and `computeMomentum(events, monthlyIncomeCents, now)` following the 7 steps in design.md.
     - Returns 0 when `monthlyIncomeCents < MIN_INCOME_CENTS`; negative or non-finite event amounts contribute 0; result clamped to [0, `MOMENTUM_MAX`]; never throws; does not mutate inputs.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.9, 12.4, 13.8, 13.9_
 
-  - [ ] 5.2 Write unit tests in `tests/haunting/momentum.test.ts`
+  - [x] 5.2 Write unit tests in `tests/haunting/momentum.test.ts`
     - Each contribution in isolation: extra principal ($300 on $3,000 income → 3.00), cancellation ($15.49 → ≈ 0.52), three completed actions → 3.00.
     - Clamp at `MOMENTUM_MAX`; zero-income returns 0; empty events returns 0; events outside the window (including future dates) return 0.
     - Negative and non-finite amounts contribute 0; input events array is not mutated.

@@ -79,6 +79,37 @@
         "chatSessionId": "sess_0e4491e1-707a-4eb5-91bf-6b8a7294d9a7",
         "timestamp": 1794890926082
       }
+    ],
+    "5.1 Create `src/lib/haunting/momentum.ts`": [
+      {
+        "executionId": "53feb31a-92d2-497b-9cbb-5bbb710a58ae",
+        "chatSessionId": "sess_af86b5e7-76c3-44fa-896b-5d868d85f0a3",
+        "timestamp": 1794891639294
+      },
+      {
+        "executionId": "53feb31a-92d2-497b-9cbb-5bbb710a58ae",
+        "chatSessionId": "sess_af86b5e7-76c3-44fa-896b-5d868d85f0a3",
+        "timestamp": 1794891726497
+      }
+    ],
+    "5.2 Write unit tests in `tests/haunting/momentum.test.ts`": [
+      {
+        "executionId": "949cb469-c8bd-4986-b978-f9ace618dfa9",
+        "chatSessionId": "sess_45d22b7c-d3e7-4c59-adeb-c9c41d101fa3",
+        "timestamp": 1794891865231
+      },
+      {
+        "executionId": "949cb469-c8bd-4986-b978-f9ace618dfa9",
+        "chatSessionId": "sess_45d22b7c-d3e7-4c59-adeb-c9c41d101fa3",
+        "timestamp": 1794892105333
+      }
+    ],
+    "5. Implement momentum": [
+      {
+        "executionId": "949cb469-c8bd-4986-b978-f9ace618dfa9",
+        "chatSessionId": "sess_45d22b7c-d3e7-4c59-adeb-c9c41d101fa3",
+        "timestamp": 1794892105414
+      }
     ]
   }
 }
