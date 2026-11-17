@@ -24,7 +24,7 @@ Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js 24+ and npm
 
 ### Install
 
@@ -60,10 +60,12 @@ npm start
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 14+ (App Router) |
+| Runtime and package manager | Node.js 24, npm |
+| Framework | Next.js 16.4.6 (App Router) |
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS |
-| Animation | Framer Motion |
+| Chrome animation | Framer Motion (Motion) |
+| Scene animation | GSAP + `@gsap/react` |
 | House graphics | Inline SVG |
 | Local storage | Dexie.js (IndexedDB) |
 | Testing | Vitest + fast-check |

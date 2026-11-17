@@ -4,7 +4,7 @@
 
 | Layer | Choice | Rationale |
 |---|---|---|
-| Framework | Next.js 15 (App Router) | File-based routing, React Server Components, easy Vercel deploy |
+| Framework | Next.js 16.4.6 (App Router) | File-based routing, React Server Components, easy Vercel deploy |
 | Language | TypeScript (strict mode) | Safety for the haunting engine's pure functions |
 | Styling | Tailwind CSS | Utility-first, good dark-mode support, purges unused CSS |
 | Chrome animation | Framer Motion (Motion) | Declarative, spring-based, `useReducedMotion` built in; owns all chrome micro-interactions |
@@ -96,6 +96,7 @@ dexie
 lucide-react
 vitest
 @vitest/coverage-v8
+@vitest/ui
 fast-check
 @testing-library/react
 @testing-library/user-event
