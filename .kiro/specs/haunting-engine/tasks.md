@@ -23,20 +23,20 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Status: all checks above passed on 2026-11-17 (`strict: true`, `tests/` covered by `**/*.ts`, `@/` alias resolved by the probe test, `vitest` 5.1.0, `@vitest/coverage-v8` 5.1.0 and `fast-check` 4.10.2 installed, `npm test` and `npm run typecheck` exit 0), so no file changes were needed.
     - _Requirements: 12.3, 14.4_
 
-- [ ] 2. Define types and configuration
-  - [ ] 2.1 Create `src/lib/haunting/types.ts`
+- [x] 2. Define types and configuration
+  - [x] 2.1 Create `src/lib/haunting/types.ts`
     - Export `Cadence`, `Usage`, `InputDebt`, `InputSubscription`, `InputTransaction`, `FinancialEventType`, `FinancialEvent`, `FinancialSnapshot`, `InternalDebt`, `InternalSubscription`, `InternalTransaction`, `InternalSnapshot`, `SubscriptionInCents`, `CentsSnapshot`, `Zombie`, `Ghost`, `Poltergeist`, `HouseState` exactly as in design.md.
     - Prefer `type` aliases for plain data shapes (steering conventions); no `any`.
     - _Requirements: 2.4, 3.8, 6.4, 7.2, 8.1_
 
-  - [ ] 2.2 Create `src/lib/haunting/config.ts` with `HauntingConfig` and `validateConfig`
+  - [x] 2.2 Create `src/lib/haunting/config.ts` with `HauntingConfig` and `validateConfig`
     - Export every constant from design.md: `WEIGHT_FACTOR_A`, `WEIGHT_FACTOR_B`, `WEIGHT_FACTOR_C`, `MOMENTUM_MAX`, `COEFF_EXTRA_PRINCIPAL`, `COEFF_SUB_CANCEL_COST`, `COEFF_ACTIONS_COMPLETED`, `BAND_L1_MIN` to `BAND_L5_MIN`, `SMALL_EXPENSE_THRESHOLD_CENTS`, `POLTERGEIST_RATIO`, `CADENCE_WEEKLY_FACTOR`, `CADENCE_YEARLY_FACTOR`.
     - Add the supporting constants the other modules need so they contain no literals: `WINDOW_DAYS` (30), `SCORE_MIN` (0), `SCORE_MAX` (100), `CENTS_PER_DOLLAR` (100), `MIN_INCOME_CENTS` (100), `MONTHS_PER_YEAR` (12).
     - Export a `HauntingConfig` type and a default `HAUNTING_CONFIG` object built from the constants.
     - Implement `validateConfig(config: HauntingConfig): string[]`: all checks from design.md plus the remaining band-order checks (`BAND_L1_MIN > BAND_L2_MIN > BAND_L3_MIN > BAND_L4_MIN > BAND_L5_MIN`, `BAND_L5_MIN === 0`). Never throws for any input, including non-finite or missing values; no module-initialisation validation.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.6, 2.5_
 
-  - [ ] 2.3 Write unit tests for config in `tests/haunting/config.test.ts`
+  - [x] 2.3 Write unit tests for config in `tests/haunting/config.test.ts`
     - `validateConfig(HAUNTING_CONFIG)` returns `[]` (Req 1 AC5).
     - Invalid configs return non-empty problem lists: `WEIGHT_FACTOR_A < 2 × WEIGHT_FACTOR_C`, `WEIGHT_FACTOR_B < 2 × WEIGHT_FACTOR_C`, non-positive threshold, ratio and `MOMENTUM_MAX`, negative coefficients, misordered bands.
     - `validateConfig` does not throw for `NaN`, `Infinity` or missing fields.
