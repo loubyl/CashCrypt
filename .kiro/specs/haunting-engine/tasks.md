@@ -120,17 +120,18 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
 - [ ] 7. Checkpoint - pure-math modules
   - Run `npm test` and `npm run typecheck`; ensure both pass, ask the user if questions arise.
 
-- [ ] 8. Implement subscriptions and zombies
-  - [ ] 8.1 Create `src/lib/haunting/zombies.ts`
+- [x] 8. Implement subscriptions and zombies
+  - [x] 8.1 Create `src/lib/haunting/zombies.ts`
     - Export `isValidSubscription`, `normalizeSubscription` (dollars already converted to cents by the caller; applies `CADENCE_WEEKLY_FACTOR` / `CADENCE_YEARLY_FACTOR` and rounds the monthly cost to integer cents), `computeZombies`, and `computeFactorC` as specified in design.md.
     - Keep money in integer cents: `Zombie.monthlyCost` is an integer.
     - Invalid-but-active subscriptions are silently excluded; returns `[]` for empty input; never throws.
     - `normalizeSubscription` accepts a `SubscriptionInCents` (already converted by the Cents_Boundary) and returns an `InternalSubscription` with `valid` set; `index.ts` performs the dollars-to-cents step before calling it. This matches design.md.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 2.3, 11.4, 11.5_
 
-  - [ ] 8.2 Write unit tests in `tests/haunting/zombies.test.ts`
+  - [x] 8.2 Write unit tests in `tests/haunting/zombies.test.ts`
     - Each cadence factor: monthly × 1, weekly × 52/12 (for example $10 weekly → 4333 cents), yearly × 1/12 (for example $120 yearly → 1000 cents).
-    - Validity filter: empty id, empty name, amount ≤ 0, invalid cadence, invalid usage, and `active: false` are each excluded; excluded entries are also excluded from `computeFactorC`.
+    - Validity filter: empty id, empty name, amount ≤ 0, invalid cadence and invalid usage are each marked `valid: false` and excluded; excluded entries are also excluded from `computeFactorC`.
+    - Canceled subscription (`active: false`, well-formed data): stays `valid: true`, produces no zombie and adds nothing to `computeFactorC`.
     - `computeZombies` returns one zombie per valid active subscription with shape `{ subscriptionId, name, monthlyCost, usage }` and `[]` for empty input.
     - `computeFactorC` returns 0 when income is 0 and the exact ratio otherwise.
     - Module-level properties (required by the `conventions.md` Testing rule, in addition to the end-to-end properties in task 12): tag each `// Feature: haunting-engine, Property N: ...` with ≥ 100 runs, using the matching `design.md` property number or a new numbered property added to `design.md` first; build generators inline if `testArbitraries.ts` does not exist yet.

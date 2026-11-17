@@ -126,7 +126,7 @@ The Haunting Engine is a pure, deterministic TypeScript module located at `src/l
 #### Acceptance Criteria
 
 1. WHEN `computeHouseState` is called, THE Haunting_Engine SHALL produce exactly one Zombie per valid active subscription.
-2. A subscription is **valid** for zombie generation if `active` is `true`, `subscriptionId` is a non-empty string, `name` is a non-empty string, `amount` is a finite number > 0, `cadence` is one of `"weekly"`, `"monthly"`, or `"yearly"`, and `usage` is one of `"often"`, `"rarely"`, or `"never"`.
+2. A subscription is **valid** when its data is well formed: `subscriptionId` is a non-empty string, `name` is a non-empty string, `amount` is a finite number > 0, `cadence` is one of `"weekly"`, `"monthly"`, or `"yearly"`, and `usage` is one of `"often"`, `"rarely"`, or `"never"`. Validity does not depend on `active`: an inactive (canceled) subscription with well-formed data stays valid, and is excluded from the `zombies` list and from Factor_C because it is inactive. The UI uses valid inactive subscriptions as graveyard tombstones.
 3. THE Haunting_Engine SHALL compute `monthlyCost` for each valid subscription by applying the cadence conversion from Config: `amount` for `"monthly"`, `amount × CADENCE_WEEKLY_FACTOR` for `"weekly"`, `amount × CADENCE_YEARLY_FACTOR` for `"yearly"`.
 4. THE Haunting_Engine SHALL produce each Zombie with shape `{ subscriptionId, name, monthlyCost, usage }` where `monthlyCost` is the computed Normalized_MonthlyCost.
 5. IF a subscription has `active` set to `true` but fails any validity criterion from Acceptance Criterion 2, THEN THE Haunting_Engine SHALL exclude it from the `zombies` list and from Factor_C without throwing.

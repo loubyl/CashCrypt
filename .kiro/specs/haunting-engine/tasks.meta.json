@@ -141,6 +141,37 @@
         "chatSessionId": "sess_7222ad9b-08d6-4218-b646-c9afea059159",
         "timestamp": 1794892808177
       }
+    ],
+    "8.1 Create `src/lib/haunting/zombies.ts`": [
+      {
+        "executionId": "8f039ba0-0351-4b28-8e79-b0bd46c03f67",
+        "chatSessionId": "sess_a50aff08-7e2c-45e3-91fa-3e0c90381c86",
+        "timestamp": 1794894832717
+      },
+      {
+        "executionId": "8f039ba0-0351-4b28-8e79-b0bd46c03f67",
+        "chatSessionId": "sess_a50aff08-7e2c-45e3-91fa-3e0c90381c86",
+        "timestamp": 1794894970248
+      }
+    ],
+    "8.2 Write unit tests in `tests/haunting/zombies.test.ts`": [
+      {
+        "executionId": "1d8ee0e8-d79d-4ebc-bbbc-95de24f87e4f",
+        "chatSessionId": "sess_96f5f0bc-75e6-46f9-b472-a2d6dd4cc018",
+        "timestamp": 1794895541521
+      },
+      {
+        "executionId": "1d8ee0e8-d79d-4ebc-bbbc-95de24f87e4f",
+        "chatSessionId": "sess_96f5f0bc-75e6-46f9-b472-a2d6dd4cc018",
+        "timestamp": 1794895625868
+      }
+    ],
+    "8. Implement subscriptions and zombies": [
+      {
+        "executionId": "1d8ee0e8-d79d-4ebc-bbbc-95de24f87e4f",
+        "chatSessionId": "sess_96f5f0bc-75e6-46f9-b472-a2d6dd4cc018",
+        "timestamp": 1794895625927
+      }
     ]
   }
 }

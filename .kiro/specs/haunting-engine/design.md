@@ -378,8 +378,9 @@ Handles subscription normalisation and zombie generation.
 
 ```typescript
 export function isValidSubscription(sub: InternalSubscription): boolean;
-// Returns true if subscriptionId non-empty, name non-empty, monthlyCostCents > 0,
-// cadence is valid, usage is valid, and active is true.
+// Returns true if the data is well formed: subscriptionId non-empty, name non-empty,
+// monthlyCostCents finite and > 0 (which requires a known cadence), and usage is valid.
+// Does NOT check active: a canceled subscription stays valid (graveyard tombstone in the UI).
 
 export function normalizeSubscription(sub: SubscriptionInCents): InternalSubscription;
 // Receives a subscription already converted to cents by the Cents_Boundary in index.ts
@@ -394,7 +395,7 @@ export function computeFactorC(
   monthlyIncomeCents: number
 ): number;
 // Returns sum(monthlyCostCents for valid active subs) / monthlyIncomeCents.
-// Returns 0 if monthlyIncomeCents === 0.
+// Returns 0 if monthlyIncomeCents is not finite or is below MIN_INCOME_CENTS (the zero-income path).
 ```
 
 **Cadence normalisation** (all factors from `config.ts`):
@@ -402,7 +403,7 @@ export function computeFactorC(
 - `"weekly"` → `amount × CADENCE_WEEKLY_FACTOR` (≈ 4.3333)
 - `"yearly"` → `amount × CADENCE_YEARLY_FACTOR` (≈ 0.0833)
 
-A subscription with `active: true` that fails any validity criterion is silently excluded from both `zombies` and Factor_C without throwing.
+A subscription that fails any validity criterion is marked `valid: false` and silently excluded from both `zombies` and Factor_C without throwing. A well-formed subscription with `active: false` is a real canceled subscription: it stays `valid: true` and is excluded from `zombies` and Factor_C only because it is inactive. Valid inactive subscriptions are the source for graveyard tombstones in the UI.
 
 ---
 
@@ -936,6 +937,38 @@ Momentum rewards recent effort so that realistic weekly actions are visible: bas
 *For any* valid calendar date between 1900-01-01 and 2100-12-31, `dateToJulian` SHALL give the next calendar day a Julian Day Number exactly 1 higher. *For any* valid `now` in that range, exactly `WINDOW_DAYS` calendar dates SHALL satisfy `isInWindow(date, now)`, namely `now − (WINDOW_DAYS − 1)` through `now`; every date after `now` SHALL be outside the window. *For any* string, `isInWindow` SHALL not throw, and SHALL return `false` whenever either argument is not a real calendar date in strict `YYYY-MM-DD` form.
 
 **Validates: Requirements 3.1, 3.7, 7.1, 7.4**
+
+---
+
+### Property 15: Subscription normalisation is total and non-negative
+
+*For any* `SubscriptionInCents`, including `NaN`, `Infinity` and negative amounts, `normalizeSubscription` SHALL NOT throw and SHALL return a `monthlyCostCents` that is a non-negative integer. A non-finite or negative amount SHALL yield `valid: false`. Validity SHALL be independent of `active`: the same subscription normalised with `active: true` and `active: false` SHALL get the same `valid` flag and the same `monthlyCostCents`.
+
+**Validates: Requirements 6.1, 6.2, 6.3, 6.4**
+
+---
+
+### Property 16: Zombie conservation
+
+*For any* list of internal subscriptions, `computeZombies` SHALL return exactly one zombie per valid active subscription, with the same `subscriptionId` values, and none for invalid or inactive subscriptions.
+
+**Validates: Requirements 6.5, 2.3**
+
+---
+
+### Property 17: Factor C bounds and invariance
+
+*For any* list of internal subscriptions and any income, `computeFactorC` SHALL be finite and ≥ 0. It SHALL be 0 when income is 0, `NaN`, or below `MIN_INCOME_CENTS`. Adding invalid or inactive subscriptions SHALL NOT change it.
+
+**Validates: Requirements 6.6, 2.3**
+
+---
+
+### Property 18: Subscription functions do not mutate their inputs
+
+*For any* deep-frozen input, every exported function of `zombies.ts` SHALL complete without throwing and leave the input unchanged.
+
+**Validates: Requirements 6.1-6.6**
 
 ---
 
