@@ -5,11 +5,12 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   forwardRef,
   useId,
+  useState,
   type ChangeEvent,
   type ComponentPropsWithoutRef,
   type FocusEvent,
 } from "react";
-import { formatMoneyOnBlur, sanitizeMoneyInput } from "@/lib/utils/money";
+import { commitMoneyInput, filterMoneyKeystroke } from "@/lib/utils/money";
 import { SHAKE_DURATION_S, SHAKE_PX, type LayoutClassName } from "./motionTokens";
 
 const ICON_SIZE_PX = 16;
@@ -29,11 +30,21 @@ const FILL_CLASSES: Record<InputFill, string> = {
 };
 
 const BASE_FIELD_CLASSES =
-  "peer h-13 w-full rounded-md border bg-clip-padding px-4 pb-1 pt-5 font-sans text-body-lg text-ink " +
+  "peer h-13 w-full rounded-md border bg-clip-padding pb-1 pt-5 font-sans text-body-lg text-ink " +
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
-const MONEY_FIELD_CLASSES = "px-10 text-center font-display text-title tabular-nums";
+const TEXT_FIELD_CLASSES = "px-4";
+
+// The "$" prefix and the number are centered together as one group. The prefix sits in a
+// fixed-width box (w-5) right before the number, so the input text is shifted right by half
+// that width: left padding = right padding (px-4) + prefix box (w-5) = pl-9.
+const MONEY_FIELD_CLASSES = "pl-9 pr-4 text-center font-display text-title tabular-nums";
+const MONEY_PREFIX_GROUP_CLASSES =
+  "pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden pb-1 pt-5";
+const MONEY_PREFIX_CLASSES = "w-5 shrink-0 text-left font-display text-title text-ink-secondary";
+// Invisible copy of the shown text, in the input's font, so the group has the text's width.
+const MONEY_GHOST_CLASSES = "invisible whitespace-pre font-display text-title tabular-nums";
 
 const LABEL_BASE_CLASSES =
   "pointer-events-none absolute left-4 font-sans text-ink-secondary transition-all duration-200 " +
@@ -96,6 +107,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   },
   ref,
 ) {
+  // Text currently shown in an uncontrolled money field, used only to place the "$" prefix.
+  const [typed, setTyped] = useState(() =>
+    rest.value !== undefined ? String(rest.value) : String(rest.defaultValue ?? ""),
+  );
   const generatedId = useId();
   const reduced = Boolean(useReducedMotion());
   const inputId = id ?? generatedId;
@@ -110,31 +125,39 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     hint ? hintId : undefined,
   );
 
+  // While typing, the money field only filters characters and keeps the raw text, because the
+  // comma rule needs the whole value ("1," must not become "1." before "000" arrives).
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (isMoney) {
-      const sanitized = sanitizeMoneyInput(event.target.value);
-      if (sanitized !== event.target.value) {
-        event.target.value = sanitized;
+      const filtered = filterMoneyKeystroke(event.target.value);
+      if (filtered !== event.target.value) {
+        event.target.value = filtered;
       }
+      setTyped(filtered);
     }
     onChange?.(event);
   };
 
+  // On blur the money field commits: full sanitizing and 2-decimal formatting. The committed
+  // value is written through the native setter, so the parent's onChange receives it, and
+  // onBlur then sees it in event.target.value.
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
     if (isMoney) {
-      const formatted = formatMoneyOnBlur(event.target.value);
-      if (formatted !== event.target.value) {
-        writeNativeValue(event.target, formatted);
+      const committed = commitMoneyInput(event.target.value);
+      if (committed !== event.target.value) {
+        writeNativeValue(event.target, committed);
       }
     }
     onBlur?.(event);
   };
 
+  const shownMoneyText = rest.value !== undefined ? String(rest.value) : typed;
+
   const fieldClasses = [
     BASE_FIELD_CLASSES,
     FILL_CLASSES[fill],
     hasError ? "border-blood" : "border-control",
-    isMoney ? MONEY_FIELD_CLASSES : "",
+    isMoney ? MONEY_FIELD_CLASSES : TEXT_FIELD_CLASSES,
   ]
     .filter(Boolean)
     .join(" ");
@@ -152,11 +175,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         transition={{ duration: shake ? SHAKE_DURATION_S : 0 }}
       >
         {isMoney ? (
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-5 font-display text-title text-ink-secondary"
-          >
-            {CURRENCY_PREFIX}
+          <span aria-hidden="true" data-money-prefix-group className={MONEY_PREFIX_GROUP_CLASSES}>
+            <span className={MONEY_PREFIX_CLASSES}>{CURRENCY_PREFIX}</span>
+            <span className={MONEY_GHOST_CLASSES}>{shownMoneyText === "" ? MONEY_PLACEHOLDER : shownMoneyText}</span>
           </span>
         ) : null}
         <input

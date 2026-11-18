@@ -1,6 +1,11 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { formatMoneyOnBlur, sanitizeMoneyInput } from "@/lib/utils/money";
+import {
+  commitMoneyInput,
+  filterMoneyKeystroke,
+  formatMoneyOnBlur,
+  sanitizeMoneyInput,
+} from "@/lib/utils/money";
 
 const NUM_RUNS = 200;
 const WELL_FORMED = /^\d*(\.\d{0,2})?$/;
@@ -94,6 +99,60 @@ describe("sanitizeMoneyInput thousands commas", () => {
       }),
       { numRuns: NUM_RUNS },
     );
+  });
+});
+
+describe("Money_Input typing and commit", () => {
+  /** Simulates typing `s` one character at a time through the onChange filter. */
+  function typeThroughFilter(s: string): string {
+    let value = "";
+    for (const char of s) {
+      value = filterMoneyKeystroke(value + char);
+    }
+    return value;
+  }
+
+  const digitRun = (min: number, max: number) =>
+    fc
+      .array(fc.constantFrom("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"), { minLength: min, maxLength: max })
+      .map((chars) => chars.join(""));
+  // Amount-shaped strings: comma-separated digit groups (often exactly 3 digits, the case a
+  // per-keystroke comma conversion breaks), an optional "." or "," fraction, and some noise.
+  const amountLike = fc
+    .tuple(
+      fc.constantFrom("", "$", "$ ", " "),
+      digitRun(0, 4),
+      fc.array(fc.oneof(digitRun(3, 3), digitRun(1, 4)), { maxLength: 3 }),
+      fc.option(fc.tuple(fc.constantFrom(".", ","), digitRun(0, 3)), { nil: undefined }),
+      fc.constantFrom("", " ", "x"),
+    )
+    .map(([prefix, lead, groups, fraction, suffix]) =>
+      `${prefix}${[lead, ...groups].join(",")}${fraction ? fraction.join("") : ""}${suffix}`,
+    );
+
+  // Feature: design-system-foundation, Property 18: Typing key by key then blurring equals committing the whole string
+  it("gives the same committed value when s is typed one character at a time and then blurred", () => {
+    fc.assert(
+      fc.property(fc.oneof(rawInput, amountLike), (s) => {
+        expect(commitMoneyInput(typeThroughFilter(s))).toBe(formatMoneyOnBlur(sanitizeMoneyInput(s)));
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  it.each([
+    ["1,000", "1000.00"],
+    ["15,49", "15.49"],
+    ["1,234,567", "1234567.00"],
+    ["$ 12.5", "12.50"],
+  ])("commits %j typed key by key as %j", (typed, expected) => {
+    expect(commitMoneyInput(typeThroughFilter(typed))).toBe(expected);
+  });
+
+  it("keeps only digits, commas and dots while typing, without converting separators", () => {
+    expect(filterMoneyKeystroke("1,")).toBe("1,");
+    expect(filterMoneyKeystroke("$ 1,000.5x")).toBe("1,000.5");
+    expect(filterMoneyKeystroke("")).toBe("");
   });
 });
 

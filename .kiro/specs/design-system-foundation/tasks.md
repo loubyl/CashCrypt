@@ -167,7 +167,7 @@ Conventions that apply to every task:
     - Generators: strings biased toward digits, `.`, `,`, `-`, `e`, whitespace. Add example edge cases (`""`, `"."`, `".5"`, `"1.234"`).
     - **Validates: Requirements 13.10, 13.12, 13.13**
 
-- [ ] 8. Checkpoint - first primitives
+- [x] 8. Checkpoint - first primitives
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck` and `npm run lint`; ensure all pass, ask the user if questions arise.
 
 - [ ] 9. Toast and ToastRegion increment

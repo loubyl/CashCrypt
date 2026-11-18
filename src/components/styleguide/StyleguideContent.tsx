@@ -476,6 +476,7 @@ function ChipSection() {
 
 const INPUT_ERROR_TEXT = "Enter an amount greater than zero.";
 const INPUT_HINT_TEXT = "Use the amount from your statement.";
+const NAME_HINT_TEXT = "Use the name shown on your bank statement.";
 
 function InputSection() {
   return (
@@ -493,7 +494,7 @@ function InputSection() {
         <Input label="Debt name" defaultValue="Visa card" disabled />
       </CardShowcaseItem>
       <CardShowcaseItem label="Input, text, with hint">
-        <Input label="Subscription name" hint={INPUT_HINT_TEXT} />
+        <Input label="Subscription name" hint={NAME_HINT_TEXT} />
       </CardShowcaseItem>
       <CardShowcaseItem label="Input, text, raised fill">
         <Card>

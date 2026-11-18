@@ -417,6 +417,8 @@ Structure, top to bottom: `@import "tailwindcss";` → `:root` (surfaces, divide
 // money.ts
 export function sanitizeMoneyInput(raw: string): string;      // /^\d*(\.\d{0,2})?$/, idempotent; comma rule below
 export function formatMoneyOnBlur(sanitized: string): string; // "" and "." → ""; otherwise exactly 2 fractional digits
+export function filterMoneyKeystroke(raw: string): string;   // while typing: keeps digits, "," and ".", drops the rest, converts nothing
+export function commitMoneyInput(raw: string): string;       // on blur: formatMoneyOnBlur(sanitizeMoneyInput(raw))
 export type CurrencyParts = { symbol: string; integer: string; cents: string };
 export function formatCurrencyParts(value: number): CurrencyParts; // non-finite → 0; grouping via en-US
 
@@ -468,7 +470,7 @@ Common rules (Requirement 5): named exports, `type` aliases, no `any`, props ext
 | `ListRow` | `icon`, `tone`, `title`, `subtitle?`, `amount?`, `amountDirection?: "in"\|"out"`, `onClick?` / `href?`, `divider?` | Row height 64. Interactive form renders `<button>` or `<a>`, otherwise a `<div>`. The avatar is a 40px circle with a tinted background. Sign (`+`/`−`) is text. `divider` draws a 1px `divider` rule inset by the avatar width. Amount at `body-lg`. |
 | `Chip` | `tone: "success"\|"warning"\|"danger"\|"info"\|"spirit"\|"neutral"`, `icon`, `children` (required label) | 24px pill, tinted background, accent color for icon and text. Every tone except `neutral` requires an icon (union type). |
 | `SegmentedControl` | `options: { value; label; disabled? }[]`, `value`, `onChange`, `aria-label` or `aria-labelledby` (required by type) | `role="radiogroup"`; each segment is `<button role="radio" aria-checked>` with roving `tabIndex`. Keys map to `getNextEnabledIndex` (`ArrowRight`/`ArrowDown` → next, `ArrowLeft`/`ArrowUp` → prev, `Home`, `End`). The selected indicator is a `motion.span` with `layoutId`, a 200ms tween, or a ≤150ms opacity fade when reduced. |
-| `Input` | `label`, `id?`, `error?`, `hint?`, `variant: "text"\|"money"` | 52px, `rounded-md`, `border-control`, floating label tied by `htmlFor`/`id` (`useId` fallback). `error` sets `aria-invalid`, shows an icon and text and links `aria-describedby`; the 3×4px shake runs once when `error` first appears (not when reduced). `money` uses `inputMode="decimal"`, Manrope, centered, `tabular-nums`, `onChange` through `sanitizeMoneyInput`, `onBlur` through `formatMoneyOnBlur`. |
+| `Input` | `label`, `id?`, `error?`, `hint?`, `variant: "text"\|"money"` | 52px, `rounded-md`, `border-control`, floating label tied by `htmlFor`/`id` (`useId` fallback). `error` sets `aria-invalid`, shows an icon and text and links `aria-describedby`; the 3×4px shake runs once when `error` first appears (not when reduced). `money` uses `inputMode="decimal"`, Manrope, `tabular-nums`. While typing, `onChange` only runs `filterMoneyKeystroke` and keeps the raw text, because the comma rule needs the whole value ("1," must not become "1." before "000" arrives). On blur, `commitMoneyInput` runs the full `sanitizeMoneyInput` + `formatMoneyOnBlur`, writes the committed value through the native setter (so the parent's `onChange` receives it) and `onBlur` sees it in `event.target.value`. The `$` prefix and the number are centered together as one group: an `aria-hidden` overlay centers a fixed-width prefix box (`w-5`) next to an invisible copy of the shown text, and the input's left padding is the right padding plus that box (`pl-9` vs `pr-4`), so the input text lands right after the prefix. |
 | `BottomSheet` | `open`, `onClose`, `title`, `children` | Decision 4. `role="dialog" aria-modal="true" aria-labelledby`. |
 | `Toast` | `tone`, `message`, `duration` (default 4000), `actionLabel?`, `onAction?`, `onDismiss` | Pill on overlay surface with overlay shadow, tone icon (distinct shape per tone), one line of text. A timer calls `onDismiss` once after `duration`; pointer enter/leave and focus in/out pause and resume the remaining time. Enter animation: rise `TOAST_RISE_PX` with fade, or ≤150ms fade when reduced. |
 | `ToastRegion` (+ `useToast`) | `children` | See below. |
@@ -638,6 +640,14 @@ Properties target the pure helpers. Rendering, ARIA wiring, motion and keyboard 
 ### Property 17: Commas before 3-digit groups are thousands separators
 
 *For any* digit string `a` of 1 to 3 digits and any list `g` of 3-digit strings, `sanitizeMoneyInput([a, ...g].join(","))` equals `[a, ...g].join("")`.
+
+**Validates: Requirements 13.10, 13.12**
+
+---
+
+### Property 18: Typing key by key then blurring equals committing the whole string
+
+*For any* string `s`, typing `s` one character at a time through `filterMoneyKeystroke` (each step filters the previous value plus the new character) and then committing with `commitMoneyInput` gives the same result as `formatMoneyOnBlur(sanitizeMoneyInput(s))`. The generator mixes arbitrary text with amount-shaped strings (comma-separated groups, often of exactly 3 digits), the case that per-keystroke sanitizing breaks.
 
 **Validates: Requirements 13.10, 13.12**
 

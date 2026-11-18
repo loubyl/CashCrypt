@@ -79,6 +79,30 @@ export function sanitizeMoneyInput(raw: string): string {
 }
 
 /**
+ * Keystroke filter for the Money_Input while the user is typing: keeps digits, "," and "."
+ * and drops every other character, without interpreting separators. The comma rule needs
+ * the whole value (a comma followed by 3 digits is a thousands separator), so it runs only
+ * on commit, in `commitMoneyInput`.
+ */
+export function filterMoneyKeystroke(raw: string): string {
+  if (typeof raw !== "string") {
+    return "";
+  }
+  let result = "";
+  for (const char of raw) {
+    if (isDigit(char) || char === COMMA || char === DECIMAL_SEPARATOR) {
+      result += char;
+    }
+  }
+  return result;
+}
+
+/** The committed Money_Input value: full sanitizing, then 2-decimal formatting. */
+export function commitMoneyInput(raw: string): string {
+  return formatMoneyOnBlur(sanitizeMoneyInput(raw));
+}
+
+/**
  * Formats a sanitized value to exactly 2 fractional digits.
  * Returns "" when the value holds no digit ("" or ".").
  */

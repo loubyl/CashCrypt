@@ -73,20 +73,87 @@ describe("Input money variant", () => {
     expect(input).toHaveValue("12");
   });
 
-  it("rejects a second decimal separator", async () => {
+  it("ignores a second decimal separator when the value is committed", async () => {
     const user = userEvent.setup();
     render(<Input variant="money" label="Amount" />);
     const input = screen.getByRole("textbox", { name: "Amount" });
     await user.type(input, "1.2.3");
+    await user.tab();
     expect(input).toHaveValue("1.23");
   });
 
-  it("caps the fraction at 2 digits", async () => {
+  it("caps the fraction at 2 digits when the value is committed", async () => {
     const user = userEvent.setup();
     render(<Input variant="money" label="Amount" />);
     const input = screen.getByRole("textbox", { name: "Amount" });
     await user.type(input, "1.2345");
+    await user.tab();
     expect(input).toHaveValue("1.23");
+  });
+
+  it("keeps the raw text while typing, so a comma is not converted early", async () => {
+    const user = userEvent.setup();
+    render(<Input variant="money" label="Amount" />);
+    const input = screen.getByRole("textbox", { name: "Amount" });
+    await user.type(input, "1,");
+    expect(input).toHaveValue("1,");
+    await user.type(input, "000");
+    expect(input).toHaveValue("1,000");
+  });
+
+  it("commits 1,000 typed key by key as 1000.00 on blur", async () => {
+    const user = userEvent.setup();
+    render(<Input variant="money" label="Amount" />);
+    const input = screen.getByRole("textbox", { name: "Amount" });
+    await user.type(input, "1,000");
+    await user.tab();
+    expect(input).toHaveValue("1000.00");
+  });
+
+  it("commits 15,49 typed key by key as 15.49 on blur", async () => {
+    const user = userEvent.setup();
+    render(<Input variant="money" label="Amount" />);
+    const input = screen.getByRole("textbox", { name: "Amount" });
+    await user.type(input, "15,49");
+    await user.tab();
+    expect(input).toHaveValue("15.49");
+  });
+
+  it("gives the parent the committed value through onChange and onBlur", async () => {
+    const user = userEvent.setup();
+    const changes: string[] = [];
+    let blurred = "";
+    render(
+      <Input
+        variant="money"
+        label="Amount"
+        onChange={(event) => changes.push(event.target.value)}
+        onBlur={(event) => {
+          blurred = event.target.value;
+        }}
+      />,
+    );
+    await user.type(screen.getByRole("textbox", { name: "Amount" }), "1,000");
+    await user.tab();
+    expect(changes.at(-1)).toBe("1000.00");
+    expect(blurred).toBe("1000.00");
+  });
+
+  it("centers the currency prefix and the number together as one group", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Input variant="money" label="Amount" />);
+    const input = screen.getByRole("textbox", { name: "Amount" });
+    const group = container.querySelector("[data-money-prefix-group]") as HTMLElement;
+    expect(group).toHaveAttribute("aria-hidden", "true");
+    expect(group).toHaveClass("absolute", "inset-0", "flex", "justify-center");
+    const [prefix, ghost] = Array.from(group.children) as HTMLElement[];
+    expect(prefix).toHaveTextContent("$");
+    expect(prefix.className).not.toMatch(/\b(left|right)-/);
+    expect(ghost).toHaveTextContent("0.00");
+    await user.type(input, "15,4");
+    expect(ghost).toHaveTextContent("15,4");
+    await user.tab();
+    expect(ghost).toHaveTextContent("15.40");
   });
 
   it("formats 5 to 5.00 on blur", async () => {
