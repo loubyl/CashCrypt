@@ -257,17 +257,17 @@ Conventions that apply to every task:
     - Generator for scores: `fc.double` including `NaN`, ±`Infinity` and out-of-range values.
     - **Validates: Requirements 16.2, 16.3, 16.5, 16.6**
 
-- [ ] 13. ExorcismActionRow increment
-  - [ ] 13.1 Create `src/components/ui/ExorcismActionRow.tsx`
+- [x] 13. ExorcismActionRow increment
+  - [x] 13.1 Create `src/components/ui/ExorcismActionRow.tsx`
     - Built on `ListRow` layout. Native `<input type="checkbox">` styled round (`appearance-none`) inside a 44px label target; accessible name `Mark "<title>" as done`; `onToggle(next)` called once on Space or click.
     - Impact text in ecto with `+` and `/mo`. Done state: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card), checkbox filled with candle and a check icon, 200ms fill transition within the 700ms limit, ≤150ms opacity fade when reduced. Disabled sets the native attribute and ignores activation. No imports from `src/lib/db/`, `src/lib/exorcism/` or `src/hooks/`.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.11, 20.9, 18.1_
 
-  - [ ] 13.2 Add the ExorcismActionRow section to `StyleguideContent`
+  - [x] 13.2 Add the ExorcismActionRow section to `StyleguideContent`
     - Open, done and disabled states, with interactive local state for the open row.
     - _Requirements: 19.5, 19.8, 19.11, 19.14, 26.2_
 
-  - [ ] 13.3 Write component tests in `tests/ui/ExorcismActionRow.test.tsx`
+  - [x] 13.3 Write component tests in `tests/ui/ExorcismActionRow.test.tsx`
     - Checkbox role and accessible name with the title, Space and click each call `onToggle` once with the next value, done styling (strike-through class, checked state), disabled ignores activation, impact text format, reduced motion fade only (`data-reduced-motion`).
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.6, 17.7, 17.8, 18.5, 22.5_
 

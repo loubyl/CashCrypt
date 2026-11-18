@@ -550,6 +550,49 @@
         "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
         "timestamp": 1794997343225
       }
+    ],
+    "13.1 Create `src/components/ui/ExorcismActionRow.tsx`": [
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997594825
+      },
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997714211
+      }
+    ],
+    "13.2 Add the ExorcismActionRow section to `StyleguideContent`": [
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997714954
+      },
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997805899
+      }
+    ],
+    "13.3 Write component tests in `tests/ui/ExorcismActionRow.test.tsx`": [
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997805161
+      },
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997930980
+      }
+    ],
+    "13. ExorcismActionRow increment": [
+      {
+        "executionId": "b33d76e5-46b4-41d4-ace9-6f1228c6f38b",
+        "chatSessionId": "sess_49b0b326-4cdc-4a66-b296-f6945e400153",
+        "timestamp": 1794997931035
+      }
     ]
   }
 }

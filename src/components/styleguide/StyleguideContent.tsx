@@ -20,6 +20,7 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { ExorcismActionRow } from "@/components/ui/ExorcismActionRow";
 import { Input } from "@/components/ui/Input";
 import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { ListRow } from "@/components/ui/ListRow";
@@ -640,6 +641,53 @@ function LightScoreBarSection() {
   );
 }
 
+const EXORCISM_IMPACT_TEXT = "$22.99";
+
+function ExorcismActionRowSection() {
+  const [openDone, setOpenDone] = useState(false);
+  return (
+    <>
+      <CardShowcaseItem label="ExorcismActionRow, open (toggle it)">
+        <Card>
+          <ExorcismActionRow
+            id="styleguide-exorcism-open"
+            title="Cancel StreamMax"
+            subtitle="Renews on the 4th"
+            impactText={EXORCISM_IMPACT_TEXT}
+            done={openDone}
+            onToggle={setOpenDone}
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ExorcismActionRow, done">
+        <Card>
+          <ExorcismActionRow
+            id="styleguide-exorcism-done"
+            title="Cancel TuneBox"
+            subtitle="Canceled this week"
+            impactText={EXORCISM_IMPACT_TEXT}
+            done
+            onToggle={noop}
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ExorcismActionRow, disabled">
+        <Card>
+          <ExorcismActionRow
+            id="styleguide-exorcism-disabled"
+            title="Cancel CloudVault"
+            subtitle="Unavailable"
+            impactText={EXORCISM_IMPACT_TEXT}
+            done={false}
+            onToggle={noop}
+            disabled
+          />
+        </Card>
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -658,6 +706,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "bottomsheet", title: "BottomSheet", render: () => <BottomSheetSection /> },
   { id: "toast", title: "Toast", render: () => <ToastSection /> },
   { id: "lightscorebar", title: "LightScoreBar", render: () => <LightScoreBarSection /> },
+  { id: "exorcismactionrow", title: "ExorcismActionRow", render: () => <ExorcismActionRowSection /> },
 ];
 
 export function StyleguideContent() {
