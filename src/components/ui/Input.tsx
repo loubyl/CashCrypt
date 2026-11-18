@@ -31,9 +31,13 @@ const FILL_CLASSES: Record<InputFill, string> = {
 
 const BASE_FIELD_CLASSES =
   "peer h-13 w-full rounded-md border bg-clip-padding pb-1 pt-5 font-sans text-body-lg text-ink " +
-  "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
+  "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-1 " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
+// Input focus is one line, not the offset ring: the 2px outline sits on the 1px border (offset -1px
+// covers the border and adds 1px outside), and the border takes the same color, so no grey line shows.
+const FOCUS_CLASSES = "focus-visible:border-candle focus-visible:outline-focus";
+const FOCUS_ERROR_CLASSES = "focus-visible:border-blood focus-visible:outline-blood";
 const TEXT_FIELD_CLASSES = "px-4";
 
 // The "$" prefix and the number are centered together as one group. The prefix sits in a
@@ -156,7 +160,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const fieldClasses = [
     BASE_FIELD_CLASSES,
     FILL_CLASSES[fill],
-    hasError ? "border-blood" : "border-control",
+    hasError ? `border-blood ${FOCUS_ERROR_CLASSES}` : `border-control ${FOCUS_CLASSES}`,
     isMoney ? MONEY_FIELD_CLASSES : TEXT_FIELD_CLASSES,
   ]
     .filter(Boolean)

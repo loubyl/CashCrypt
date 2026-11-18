@@ -403,6 +403,8 @@ Every keyboard-focusable primitive uses exactly these classes for the Focus_Ring
 
 `focus-visible:outline-solid` is required. In Tailwind v4, `outline-none` (and `outline-hidden`) also set `--tw-outline-style: none`, and `outline-2` draws `outline-style: var(--tw-outline-style)`. Without `outline-solid` the ring gets its color, width and offset but `outline-style: none`, so nothing is drawn. `tests/design-system/focusRing.test.ts` checks every interactive primitive for these classes, and `tests/design-system/tokens.test.ts` compiles the theme to check that the focus color utility exists and that the ring compiles to a solid outline.
 
+**Exception: Input uses a single-line focus style.** With the offset ring the field showed two lines, the grey 1px border and the candle outline 2px away. `Input` therefore uses `outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-1` plus a color pair. Offset -1px puts the outline over the 1px border (it extends 1px outside and 1px inside the border box edge), and the border takes the same color, so one 2px line shows. Normal: `focus-visible:border-candle focus-visible:outline-focus`. With an error: `focus-visible:border-blood focus-visible:outline-blood`, so the focused line stays blood. `Input` must not use `focus-visible:outline-offset-2`. It is still a visible 2px solid outline. `focusRing.test.ts` holds Input to this class set and every other primitive to the offset ring, and checks the classes on the native `<input>` itself.
+
 ## Decision 7 — Hex labels in the styleguide without hex literals
 
 Requirement 19.6 needs swatches that show a hex value, and Requirement 3 bans hex literals under `src/` outside `globals.css`. The swatch component renders its token name and fills the hex label at runtime from `getComputedStyle(document.documentElement).getPropertyValue(token)` inside a ref callback (writes `textContent`, no React state, no effect). The value comes from the token sheet, so it cannot drift. In jsdom the stylesheet is not loaded, so tests assert the token name; the hex values themselves are asserted by `tokens.test.ts` (Requirement 24.7).
@@ -467,7 +469,7 @@ All are total: they never throw, whatever the input (Error Handling).
 
 ### Primitives (`src/components/ui/`)
 
-Common rules (Requirement 5): named exports, `type` aliases, no `any`, props extend the native element's props minus `className` (Decision 5), `ref` forwarded to the native focusable element (React 19 passes `ref` as a prop), `"use client"` only where state, effects, handlers or Framer Motion are used, Framer variants in the same file, `:focus-visible` ring `outline-2 outline-offset-2 outline-focus`, decorative Lucide icons `aria-hidden="true"` at 20px (22px in QuickAction), stroke 2.
+Common rules (Requirement 5): named exports, `type` aliases, no `any`, props extend the native element's props minus `className` (Decision 5), `ref` forwarded to the native focusable element (React 19 passes `ref` as a prop), `"use client"` only where state, effects, handlers or Framer Motion are used, Framer variants in the same file, `:focus-visible` ring `outline-2 outline-offset-2 outline-focus` (Input: single-line exception, Decision 6b), decorative Lucide icons `aria-hidden="true"` at 20px (22px in QuickAction), stroke 2.
 
 | Primitive | Key props | Structure and notes |
 |---|---|---|

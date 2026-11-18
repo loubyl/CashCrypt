@@ -229,7 +229,7 @@ Conventions that apply to every task:
     - Render `StyleguideContent` inside a `ToastRegion`; run `expectNoAxeViolations` with the sheet closed and with the sheet open (open it through the trigger). If axe reports `aria-hidden-focus`-style findings because jsdom does not model `inert`, also set `aria-hidden="true"` on the inerted siblings in `BottomSheet.tsx` instead of disabling a rule.
     - _Requirements: 23.1, 23.2, 23.3, 23.6, 14.4_
 
-- [ ] 11. Checkpoint - overlays and toasts
+- [x] 11. Checkpoint - overlays and toasts
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck`, `npm run lint` and `npm run build`; ensure all pass and `/styleguide` is in the build output, ask the user if questions arise.
 
 - [ ] 12. LightScoreBar increment

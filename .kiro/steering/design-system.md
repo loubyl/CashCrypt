@@ -45,7 +45,7 @@ Cards have **no border**. Separation comes from the surface step and spacing. Ro
 | Token | Hex | Usage |
 |---|---|---|
 | `--border-control` | `#6B6B75` | Input, select and checkbox boundaries. ≥3:1 on void, card and raised (WCAG 1.4.11) |
-| `--focus-ring` | candle `#FFB547` | 2px ring with 2px offset on every focusable element |
+| `--focus-ring` | candle `#FFB547` | 2px ring with 2px offset on every focusable element. Exception: Input (see Input) |
 
 ### Primary action = white
 
@@ -214,7 +214,7 @@ All primitives live in `src/components/ui/`. Each has visible focus, pressed and
 - **ListRow**: 40px circle icon avatar (tinted accent background), title (body-lg) + subtitle (caption, secondary), amount right-aligned (body-lg, tabular; sign and color for in/out). Row height 64.
 - **Chip / Badge**: pill, 24px, tinted background, icon + text.
 - **SegmentedControl**: pill track on raised, selected segment white with black text.
-- **Input**: radius 16, 52px tall, card or raised fill + `--border-control` 1px, floating label. Money input: large Manrope number centered, currency prefix in secondary.
+- **Input**: radius 16, 52px tall, card or raised fill + `--border-control` 1px, floating label. **Focus (exception to the offset ring):** one line, not two. On `:focus-visible` the field's border turns candle and a 2px candle outline sits on the border with no gap (offset -1px, covering the 1px border), so a single 2px candle line shows and the grey border never appears next to the ring. With an error the focused line stays blood, not candle. Other primitives keep the 2px ring with 2px offset. Money input: large Manrope number centered, currency prefix in secondary.
 - **BottomSheet / Modal**: card surface, radius 24 top (sheet on mobile) or all corners (modal on desktop), drag handle on mobile, focus trap, Esc closes.
 - **Toast**: overlay surface, pill, icon + one line ("+$11.99/mo saved").
 - **LightScoreBar**: 10px pill track (raised), fill blood → candle → ecto by score, number always shown.
