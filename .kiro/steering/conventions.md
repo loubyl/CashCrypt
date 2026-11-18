@@ -48,6 +48,7 @@
   - Tag each property `// Feature: haunting-engine, Property N: <property text>` and run at least 100 iterations (`{ numRuns: 100 }` or more).
   - Use the matching property number from `design.md` when one exists. When none does, add a new numbered property to `design.md` first and use that number.
   - Until `src/lib/haunting/testArbitraries.ts` exists, build the generators inline in the test file.
+- When a property or test is added to cover a bug fix, check that it can actually catch the bug: temporarily reintroduce the bug (for example, revert the changed condition), run the new test and confirm it fails with a counterexample or a clear assertion failure, then restore the fix and confirm the test passes. Leave no trace of the mutation in the code. Mention the check and the counterexample in the task summary. If the new test still passes with the bug back in place, it does not cover the fix and must be changed.
 - Test descriptions use plain English sentences: `"returns decay level 5 when light score is 10"`.
 - No snapshot tests for pure functions — assert on specific output values.
 

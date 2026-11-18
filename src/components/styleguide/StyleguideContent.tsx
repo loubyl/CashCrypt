@@ -19,6 +19,7 @@ import { useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
 
 type StyleguideSection = {
@@ -473,6 +474,51 @@ function ChipSection() {
   );
 }
 
+const INPUT_ERROR_TEXT = "Enter an amount greater than zero.";
+const INPUT_HINT_TEXT = "Use the amount from your statement.";
+
+function InputSection() {
+  return (
+    <>
+      <CardShowcaseItem label="Input, text, default">
+        <Input label="Debt name" />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Input, text, filled">
+        <Input label="Debt name" defaultValue="Visa card" />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Input, text, error">
+        <Input label="Debt name" defaultValue="V" error="Use at least two characters." />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Input, text, disabled">
+        <Input label="Debt name" defaultValue="Visa card" disabled />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Input, text, with hint">
+        <Input label="Subscription name" hint={INPUT_HINT_TEXT} />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Input, text, raised fill">
+        <Card>
+          <Input label="Note" fill="raised" />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Money input, default">
+        <Input variant="money" label="Payment amount" />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Money input, filled">
+        <Input variant="money" label="Payment amount" defaultValue="300.00" />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Money input, error">
+        <Input variant="money" label="Payment amount" defaultValue="0.00" error={INPUT_ERROR_TEXT} />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Money input, disabled">
+        <Input variant="money" label="Payment amount" defaultValue="300.00" disabled />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Money input, with hint">
+        <Input variant="money" label="Monthly cost" hint={INPUT_HINT_TEXT} />
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -484,6 +530,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "card", title: "Card", render: () => <CardSection /> },
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },
+  { id: "input", title: "Input", render: () => <InputSection /> },
 ];
 
 export function StyleguideContent() {

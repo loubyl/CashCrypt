@@ -415,7 +415,7 @@ Structure, top to bottom: `@import "tailwindcss";` → `:root` (surfaces, divide
 
 ```ts
 // money.ts
-export function sanitizeMoneyInput(raw: string): string;      // /^\d*(\.\d{0,2})?$/, idempotent
+export function sanitizeMoneyInput(raw: string): string;      // /^\d*(\.\d{0,2})?$/, idempotent; comma rule below
 export function formatMoneyOnBlur(sanitized: string): string; // "" and "." → ""; otherwise exactly 2 fractional digits
 export type CurrencyParts = { symbol: string; integer: string; cents: string };
 export function formatCurrencyParts(value: number): CurrencyParts; // non-finite → 0; grouping via en-US
@@ -445,6 +445,13 @@ export type ToastAction = { type: "show"; toast: ToastItem } | { type: "dismiss"
 export function toastReducer(state: readonly ToastItem[], action: ToastAction): readonly ToastItem[];
 export function getToastRegion(tone: ToastTone): "polite" | "assertive"; // success, info → polite; warning, danger → assertive
 ```
+
+**Money_Input comma rule.** `sanitizeMoneyInput` resolves commas before it keeps digits and the first `.`. Cents never have 3 digits, so a comma followed by exactly 3 digits is a thousands separator.
+- If the raw string contains a `.`, every comma is a thousands separator and is removed: `"1,234.50"` → `"1234.50"`, `"1,000.00"` → `"1000.00"`.
+- If it contains no `.` and every comma is followed by exactly 3 digits and then another comma or the end, every comma is a thousands separator and is removed: `"1,000"` → `"1000"`, `"1,234,567"` → `"1234567"`. The check looks only at the digits and commas, because every other character is dropped anyway, so `" 1,000 "` → `"1000"`.
+- Otherwise the first comma is the decimal separator and any later commas are removed: `"15,49"` → `"15.49"`, `"12,5"` → `"12.5"`, `"0,5"` → `"0.5"`, `",5"` → `".5"`, `"1,2,3"` → `"1.23"`.
+
+The output still matches `^\d*(\.\d{0,2})?$` and contains no comma, so the function stays idempotent. Before this rule, commas were dropped, so `"15,49"` became `"1549"`, 100 times the intended amount. Property 16 covers the decimal comma and Property 17 covers thousands groups.
 
 All are total: they never throw, whatever the input (Error Handling).
 
@@ -619,9 +626,24 @@ Properties target the pure helpers. Rendering, ARIA wiring, motion and keyboard 
 
 ---
 
+
+### Property 16: A decimal comma is read the same as a decimal point
+
+*For any* digit string `a` (possibly empty) and digit string `b` of 1 or 2 digits, `sanitizeMoneyInput(a + "," + b)` equals `sanitizeMoneyInput(a + "." + b)`.
+
+**Validates: Requirements 13.10, 13.12**
+
+---
+
+### Property 17: Commas before 3-digit groups are thousands separators
+
+*For any* digit string `a` of 1 to 3 digits and any list `g` of 3-digit strings, `sanitizeMoneyInput([a, ...g].join(","))` equals `[a, ...g].join("")`.
+
+**Validates: Requirements 13.10, 13.12**
+
 ## Error Handling
 
-- **Pure helpers never throw.** `sanitizeMoneyInput` accepts any string (including pasted text with letters, `-`, `e`, whitespace and multiple dots). `formatCurrencyParts` and `clampScore` treat non-finite input as 0 (and clamp ±Infinity); `getNextEnabledIndex` returns `current` when no segment is enabled or when `current` is out of range; `getNextFocusIndex` returns −1 for an empty list.
+- **Pure helpers never throw.** `sanitizeMoneyInput` accepts any string (including pasted text with letters, `-`, `e`, whitespace, commas and multiple dots); commas follow the Money_Input comma rule. `formatCurrencyParts` and `clampScore` treat non-finite input as 0 (and clamp ±Infinity); `getNextEnabledIndex` returns `current` when no segment is enabled or when `current` is out of range; `getNextFocusIndex` returns −1 for an empty list.
 - **`useToast` outside `ToastRegion`** throws `Error("useToast must be used inside a ToastRegion")`, which names both as Requirement 15.9 requires. This is a programming error, not a runtime condition.
 - **Missing accessible names** are compile-time errors: icon-only `Button` requires `aria-label`; `SegmentedControl` requires `aria-label` or `aria-labelledby`; `Chip` requires `children`; `Input` requires `label`; `LightScoreBar` requires `aria-label` (Requirement 21.6). Type-level checks are covered by `// @ts-expect-error` lines in component tests so `npm run typecheck` fails if a union is loosened.
 - **`BottomSheet` without focusable content** keeps focus on the dialog container. If the previously focused element has been removed from the DOM by the time the sheet closes, focus restore is skipped.

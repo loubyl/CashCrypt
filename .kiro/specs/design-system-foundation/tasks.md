@@ -140,27 +140,27 @@ Conventions that apply to every task:
     - Label rendered for each tone, icon present and `aria-hidden` for non-neutral tones, `// @ts-expect-error` for a missing icon on a colored tone.
     - _Requirements: 11.2, 11.3, 22.4_
 
-- [ ] 7. Input and Money_Input increment
-  - [ ] 7.1 Create `src/lib/utils/money.ts` (sanitizer and blur formatter)
+- [x] 7. Input and Money_Input increment
+  - [x] 7.1 Create `src/lib/utils/money.ts` (sanitizer and blur formatter)
     - Export `sanitizeMoneyInput(raw)` (result matches `^\d*(\.\d{0,2})?$`, idempotent, total) and `formatMoneyOnBlur(sanitized)` (`""` and `"."` give `""`, otherwise exactly 2 fractional digits). Named constants, no throw.
     - _Requirements: 13.10, 13.12, 13.13_
 
-  - [ ] 7.2 Create `src/components/ui/Input.tsx`
+  - [x] 7.2 Create `src/components/ui/Input.tsx`
     - 52px, radius 16, card or raised fill, 1px `--border-control`, floating label bound by `htmlFor`/`id` (`useId` fallback) that stays readable in every state.
     - `error`: `aria-invalid`, icon plus text, `aria-describedby`, blood border, one 3 × 4px shake over 240ms when first shown (not when reduced). `hint` linked through `aria-describedby`. Disabled sets the native attribute and stays readable.
     - `variant="money"`: currency prefix in secondary, Manrope centered number at `title` size or larger, `inputMode="decimal"`, `tabular-nums`, `onChange` through `sanitizeMoneyInput`, `onBlur` through `formatMoneyOnBlur`.
     - Forward `ref` to the `<input>`.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10, 13.11, 13.13, 5.9, 18.1_
 
-  - [ ] 7.3 Add the Input section to `StyleguideContent`
+  - [x] 7.3 Add the Input section to `StyleguideContent`
     - Text input and Money_Input in default, filled, error and disabled states, plus a hint example.
     - _Requirements: 19.5, 19.8, 19.12, 19.14, 26.2_
 
-  - [ ] 7.4 Write component tests in `tests/ui/Input.test.tsx`
+  - [x] 7.4 Write component tests in `tests/ui/Input.test.tsx`
     - Label is the accessible name, `aria-invalid` and `aria-describedby` for error and hint, disabled attribute, money input rejects letters and a second dot and caps at 2 decimals on typing, blur formats `5` to `5.00`, `inputmode="decimal"`, reduced motion shows the error without a shake (`data-reduced-motion`).
     - _Requirements: 13.2, 13.4, 13.6, 13.7, 13.8, 13.9, 13.10, 13.13, 18.5, 22.4, 22.6_
 
-  - [ ] 7.5 Write property tests in `tests/utils/money.test.ts`
+  - [x] 7.5 Write property tests in `tests/utils/money.test.ts`
     - **Property 1: Money sanitizer output is always well formed**
     - **Property 2: Money sanitizer is idempotent**
     - **Property 3: Money blur formatting yields exactly two decimals and preserves the value**
