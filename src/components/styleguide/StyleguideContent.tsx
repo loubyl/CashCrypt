@@ -3,6 +3,7 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 type StyleguideSection = {
   id: string;
@@ -292,6 +293,37 @@ function ButtonSection() {
   );
 }
 
+function CardShowcaseItem({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <ButtonLabel>{label}</ButtonLabel>
+      {children}
+    </div>
+  );
+}
+
+function CardSection() {
+  return (
+    <>
+      <CardShowcaseItem label="Card, untitled">
+        <Card>
+          <p className="text-body text-ink">An untitled card is a plain container.</p>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Card, titled">
+        <Card title="Subscriptions">
+          <p className="text-body text-ink-secondary">Five zombies in the basement.</p>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Card, titled with action">
+        <Card title="Debts" action={{ label: "See all", href: "#styleguide-card" }}>
+          <p className="text-body text-ink-secondary">Three debts, one payment due this week.</p>
+        </Card>
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -300,6 +332,7 @@ function ButtonSection() {
 const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
   { id: "button", title: "Button", render: () => <ButtonSection /> },
+  { id: "card", title: "Card", render: () => <CardSection /> },
 ];
 
 export function StyleguideContent() {

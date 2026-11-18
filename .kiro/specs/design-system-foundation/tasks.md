@@ -100,16 +100,16 @@ Conventions that apply to every task:
     - Reduced motion: `setReducedMotion(true)`, assert `data-reduced-motion="true"` and no scale configured, same behavior.
     - _Requirements: 6.1, 6.6, 6.7, 6.8, 6.10, 6.11, 6.12, 18.5, 21.3, 22.4, 22.5, 22.6_
 
-- [ ] 4. Card increment
-  - [ ] 4.1 Create `src/components/ui/Card.tsx`
+- [x] 4. Card increment
+  - [x] 4.1 Create `src/components/ui/Card.tsx`
     - `--surface-card`, radius 24, padding 20, no border, outline or shadow; optional `title` rendered as a heading (`headingLevel`, default `h2`); `<section aria-labelledby>` when titled; optional `action` (`label` plus `href` or `onClick`) as a ghost link or button whose accessible name includes the title.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 5.2, 5.3, 5.4_
 
-  - [ ] 4.2 Add the Card section to `StyleguideContent`
+  - [x] 4.2 Add the Card section to `StyleguideContent`
     - Untitled, titled, and titled with action; labelled.
     - _Requirements: 19.5, 19.8, 19.14, 26.2_
 
-  - [ ] 4.3 Write component tests in `tests/ui/Card.test.tsx`
+  - [x] 4.3 Write component tests in `tests/ui/Card.test.tsx`
     - Titled card is a labelled region, heading level prop, action name includes the title, untitled card has no region role, no border classes.
     - _Requirements: 9.2, 9.3, 9.4, 9.5, 22.4_
 
