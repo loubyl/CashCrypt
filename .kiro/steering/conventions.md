@@ -62,6 +62,7 @@
 
 - Every interactive element has an accessible name (via visible label, `aria-label`, or `aria-labelledby`).
 - Color is never the sole differentiator for any state or status (see `visual-language.md`).
+- Any text or icon on a solid accent fill (`bg-candle`, `bg-ecto`, `bg-blood`, `bg-ghost`, `bg-spirit`) uses `text-on-accent` (`--on-accent` = `--surface-void`), never `text-ink`, `text-ink-secondary` or `text-ink-tertiary`. Content on a 14% tint uses the full accent color. See `design-system.md` → "Content on accent fills"; `tests/design-system/contrast.test.ts` enforces the ratios.
 - Chrome components (`src/components/ui/`) use Framer Motion's `useReducedMotion()` hook to disable animations.
 - Scene components (`src/components/house/`, `src/components/moments/`) check `window.matchMedia('(prefers-reduced-motion: reduce)')` and skip or collapse GSAP timelines accordingly (see `visual-language.md` → `prefers-reduced-motion`).
 - Run `axe` or equivalent in development to catch regressions early.

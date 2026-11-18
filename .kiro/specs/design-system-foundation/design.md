@@ -383,6 +383,7 @@ All aliases live in `@theme inline`, so utilities compile to `var(--text-primary
 | `--text-primary` / `--text-secondary` / `--text-tertiary` | `--color-ink` / `--color-ink-secondary` / `--color-ink-tertiary` | `text-ink`, `text-ink-secondary`, `text-ink-tertiary` |
 | `--surface-void` / `-card` / `-raised` / `-overlay` | `--color-surface-void` / `-card` / `-raised` / `-overlay` | `bg-surface-*` |
 | `--accent-candle` / `-ecto` / `-blood` / `-ghost` / `-spirit` | `--color-candle` / `ecto` / `blood` / `ghost` / `spirit` | `text-candle`, `bg-ecto`, … |
+| `--on-accent` (= `var(--surface-void)`) | `--color-on-accent` | `text-on-accent`: the only text and icon color allowed on a solid accent fill |
 | `--border-control` | `--color-control` | `border-control` |
 | `--focus-ring` | `--color-focus` | `ring-focus`, `outline-focus` |
 | `--divider` | `--color-divider` | `bg-divider` |
@@ -465,7 +466,7 @@ Common rules (Requirement 5): named exports, `type` aliases, no `any`, props ext
 | `Toast` | `tone`, `message`, `duration` (default 4000), `actionLabel?`, `onAction?`, `onDismiss` | Pill on overlay surface with overlay shadow, tone icon (distinct shape per tone), one line of text. A timer calls `onDismiss` once after `duration`; pointer enter/leave and focus in/out pause and resume the remaining time. Enter animation: rise `TOAST_RISE_PX` with fade, or ≤150ms fade when reduced. |
 | `ToastRegion` (+ `useToast`) | `children` | See below. |
 | `LightScoreBar` | `score`, `baseScore?`, `momentum?`, `aria-label` | 10px track on raised surface. `role="meter"` with `aria-valuemin=0`, `aria-valuemax=100`, `aria-valuenow`, `aria-valuetext` ("Light score 39 of 100"). Fill is a `motion.div` that animates `width` and `backgroundSize` in `%` over 600ms so the gradient stays anchored to the track; reduced motion sets both immediately. The number is always rendered as text; the breakdown line appears when both parts are provided. It takes numbers only and never imports the haunting engine. |
-| `ExorcismActionRow` | `title`, `subtitle?`, `impactText`, `done`, `onToggle(next)`, `disabled?`, `id` | `ListRow` layout. A native `<input type="checkbox">` styled round (`appearance-none`) inside a 44px label target; the accessible name is `Mark "<title>" as done`. Done: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card surface, 5.5), checkbox filled with candle and a check icon. Impact text is ecto with `+` and `/mo`. |
+| `ExorcismActionRow` | `title`, `subtitle?`, `impactText`, `done`, `onToggle(next)`, `disabled?`, `id` | `ListRow` layout. A native `<input type="checkbox">` styled round (`appearance-none`) inside a 44px label target; the accessible name is `Mark "<title>" as done`. Done: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card surface, 5.5), checkbox filled with candle and a check icon in `text-on-accent`. Impact text is ecto with `+` and `/mo`. |
 
 **Primitives must not close over data.** None of them imports Dexie, hooks or domain types; they receive plain props.
 

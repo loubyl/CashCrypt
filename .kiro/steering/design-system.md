@@ -63,9 +63,25 @@ The primary button is a **white pill with near-black text** (`#F7F7F8` on `#0808
 
 Semantic aliases: `--color-success` = ecto, `--color-warning` = candle, `--color-danger` = blood, `--color-info` = ghost.
 
-Tinted backgrounds (badges, quick-action icon circles, banners): the accent at 14% alpha over the current surface, with the full accent color for the icon or text.
+Tinted backgrounds (badges, quick-action icon circles, banners): the accent at 14% alpha over the current surface, with the full accent color for the icon or text. On `--surface-card` each accent reaches at least 5.4:1 on its own tint (candle 7.85, ecto 7.82, blood 5.44, ghost 6.43, spirit 6.26).
 
-Destructive button: blood background with `#08080A` text (7.3:1). Never white text on blood.
+### Content on accent fills: `--on-accent`
+
+| Token | Value | Utility |
+|---|---|---|
+| `--on-accent` | `var(--surface-void)` | `text-on-accent` (theme alias `--color-on-accent`) |
+
+**Rule:** any text or icon placed on a **solid** accent fill (candle, ecto, blood, ghost, spirit) uses `--on-accent`, never ink. Light ink on an accent fill fails WCAG (1.6–2.6:1). `--on-accent` on each fill:
+
+| Fill | `--on-accent` on fill | Ink on fill (forbidden) |
+|---|---|---|
+| candle | 11.39 | 1.64 |
+| ecto | 11.32 | 1.65 |
+| blood | 7.27 | 2.57 |
+| ghost | 9.03 | 2.07 |
+| spirit | 8.76 | 2.13 |
+
+This covers the destructive button (blood background, `text-on-accent`), the checked `ExorcismActionRow` checkbox (candle fill, check icon in `text-on-accent`), filled badges, and any future solid accent surface. Tinted (14%) backgrounds keep the full accent color for their content. `tests/design-system/contrast.test.ts` enforces both rules.
 
 Rules:
 - Black, white and grays do 90% of the work. Accents carry meaning, not branding.
@@ -191,7 +207,7 @@ The chrome stays calm at rest. The Halloween comes out as **moments**: short, pl
 
 All primitives live in `src/components/ui/`. Each has visible focus, pressed and disabled states.
 
-- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood/black text. Heights 36 / 44 / 52. Min touch target 44px.
+- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood fill with `text-on-accent`. Heights 36 / 44 / 52. Min touch target 44px.
 - **QuickAction**: 52px circle on raised surface with a 22px icon, label underneath (13/500). Row of 4 under the hero: Log payment, Add expense, Import CSV, Exorcise.
 - **BalanceHero**: label (secondary), `hero` number, delta chip underneath (ecto "−$640 this month" with ↓ icon, or blood with ↑).
 - **Card**: card surface, radius 24, padding 20, no border. Optional header: `title` + ghost "See all" link.
@@ -202,7 +218,7 @@ All primitives live in `src/components/ui/`. Each has visible focus, pressed and
 - **BottomSheet / Modal**: card surface, radius 24 top (sheet on mobile) or all corners (modal on desktop), drag handle on mobile, focus trap, Esc closes.
 - **Toast**: overlay surface, pill, icon + one line ("+$11.99/mo saved").
 - **LightScoreBar**: 10px pill track (raised), fill blood → candle → ecto by score, number always shown.
-- **ExorcismActionRow**: ListRow with a round checkbox on the left; impact in ecto ("+$22.99/mo"); when done, title strikes through and the row dims to tertiary.
+- **ExorcismActionRow**: ListRow with a round checkbox on the left; impact in ecto ("+$22.99/mo"); when done, title strikes through and the row dims to tertiary, and the checkbox fills with candle with its check icon in `text-on-accent`.
 
 Icons: Lucide, 20px in rows, 22px in quick actions, stroke 2, inherit color.
 
@@ -226,3 +242,4 @@ Icons: Lucide, 20px in rows, 22px in quick actions, stroke 2, inherit color.
 - ❌ Gothic fonts outside the wordmark and house nameplate.
 - ❌ Neon glows, blood drips, cobwebs or Halloween clip-art in the chrome.
 - ❌ New hex values in components: always use tokens.
+- ❌ Ink (`text-ink*`) on a solid accent fill: use `text-on-accent`.

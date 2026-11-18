@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
@@ -8,12 +8,30 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
-    include: ["tests/**/*.test.{ts,tsx}"],
     passWithNoTests: true,
     coverage: {
       provider: "v8",
       include: ["src/lib/**/*.ts"],
     },
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "node",
+          environment: "node",
+          include: ["tests/**/*.test.{ts,tsx}"],
+          exclude: [...configDefaults.exclude, "tests/ui/**"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "ui",
+          environment: "jsdom",
+          include: ["tests/ui/**/*.test.{ts,tsx}"],
+          setupFiles: ["./tests/ui/setup.ts"],
+        },
+      },
+    ],
   },
 });

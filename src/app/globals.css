@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
+/*
+ * Crypt UI token sheet. This is the only source file allowed to contain color literals.
+ * Color tokens live in :root (not @theme) so Tailwind does not read --text-* as font sizes.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --surface-void: #08080a;
+  --surface-card: #151518;
+  --surface-raised: #1f1f23;
+  --surface-overlay: #2a2a2f;
+  --divider: #232328;
+
+  /* Text */
+  --text-primary: #f7f7f8;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #8c8c96;
+
+  /* Controls */
+  --border-control: #6b6b75;
+  --focus-ring: var(--accent-candle);
+
+  /* Accents */
+  --accent-candle: #ffb547;
+  --accent-ecto: #3ddc97;
+  --accent-blood: #ff6b78;
+  --accent-ghost: #7ab0ff;
+  --accent-spirit: #b69cff;
+
+  /* Semantic aliases */
+  --color-success: var(--accent-ecto);
+  --color-warning: var(--accent-candle);
+  --color-danger: var(--accent-blood);
+  --color-info: var(--accent-ghost);
+
+  /* Content on a solid accent fill (text and icons). Never use ink on an accent fill. */
+  --on-accent: var(--surface-void);
+
+  /* Tinted backgrounds: accent at 14% alpha */
+  --tint-candle: color-mix(in srgb, var(--accent-candle) 14%, transparent);
+  --tint-ecto: color-mix(in srgb, var(--accent-ecto) 14%, transparent);
+  --tint-blood: color-mix(in srgb, var(--accent-blood) 14%, transparent);
+  --tint-ghost: color-mix(in srgb, var(--accent-ghost) 14%, transparent);
+  --tint-spirit: color-mix(in srgb, var(--accent-spirit) 14%, transparent);
+
+  /* Data visualization palette (ordered) */
+  --dataviz-1: var(--accent-candle);
+  --dataviz-2: var(--accent-ecto);
+  --dataviz-3: var(--accent-ghost);
+  --dataviz-4: var(--accent-spirit);
+  --dataviz-5: var(--accent-blood);
+  --dataviz-6: #a1a1aa;
+
+  /* Light-score bar fill */
+  --light-score-gradient: linear-gradient(
+    to right,
+    var(--accent-blood),
+    var(--accent-candle),
+    var(--accent-ecto)
+  );
+
+  /* Scrim behind sheets and modals */
+  --scrim: color-mix(in srgb, var(--surface-void) 70%, transparent);
+
+  /* Motion */
+  --duration-press: 120ms;
+  --duration-tab: 200ms;
+  --duration-sheet: 280ms;
+  --duration-count: 600ms;
+  --duration-shimmer: 1600ms;
+  --duration-reduced-fade-max: 150ms;
+  --press-scale: 0.97;
+
+  /* Layout */
+  --page-padding: 16px;
+  --card-padding: 20px;
+  --card-gap: 12px;
+  --content-width: 560px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (min-width: 1024px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --page-padding: 24px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  /* Colors (Color_Utility_Map) */
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-tertiary: var(--text-tertiary);
+  --color-surface-void: var(--surface-void);
+  --color-surface-card: var(--surface-card);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-candle: var(--accent-candle);
+  --color-ecto: var(--accent-ecto);
+  --color-blood: var(--accent-blood);
+  --color-ghost: var(--accent-ghost);
+  --color-spirit: var(--accent-spirit);
+  --color-on-accent: var(--on-accent);
+  --color-control: var(--border-control);
+  --color-focus: var(--focus-ring);
+  --color-divider: var(--divider);
+  --color-candle-tint: var(--tint-candle);
+  --color-ecto-tint: var(--tint-ecto);
+  --color-blood-tint: var(--tint-blood);
+  --color-ghost-tint: var(--tint-ghost);
+  --color-spirit-tint: var(--tint-spirit);
+  --color-scrim: var(--scrim);
+
+  /* Radius */
+  --radius-*: initial;
+  --radius-pill: 999px;
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-circle: 50%;
+
+  /* Spacing: 4px base scale (4, 8, 12, 16, 20, 24, 32, 40, 56 are multiples) */
+  --spacing: 4px;
+  --spacing-page: var(--page-padding);
+  --spacing-card: var(--card-padding);
+  --spacing-gap: var(--card-gap);
+
+  /* Shadow */
+  --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.6);
+
+  /* Type scale */
+  --text-hero: 48px;
+  --text-hero--line-height: 52px;
+  --text-hero--letter-spacing: -0.03em;
+  --text-hero--font-weight: 800;
+  --text-display: 32px;
+  --text-display--line-height: 38px;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 700;
+  --text-title: 22px;
+  --text-title--line-height: 28px;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 700;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--letter-spacing: 0;
+  --text-body-lg--font-weight: 500;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-body--letter-spacing: 0;
+  --text-body--font-weight: 400;
+  --text-label: 13px;
+  --text-label--line-height: 18px;
+  --text-label--letter-spacing: 0;
+  --text-label--font-weight: 500;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--letter-spacing: 0;
+  --text-caption--font-weight: 400;
+
+  /* Fonts (variables are set by next/font in layout.tsx) */
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-wordmark: var(--font-cinzel), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Containers */
+  --container-content: var(--content-width);
+
+  /* Animations */
+  --animate-shimmer: shimmer var(--duration-shimmer) linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scrollbar-gutter: stable;
+  }
+
+  html[data-scroll-locked] body {
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--surface-void);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+  }
 }

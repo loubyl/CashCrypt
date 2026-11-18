@@ -16,14 +16,14 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Foundation increment: dependencies, test infrastructure, tokens, fonts, styleguide skeleton
-  - [ ] 1.1 Install dependencies
+- [x] 1. Foundation increment: dependencies, test infrastructure, tokens, fonts, styleguide skeleton
+  - [x] 1.1 Install dependencies
     - Add `framer-motion` and `lucide-react` to `dependencies`.
     - Add `jsdom`, `@testing-library/react`, `@testing-library/dom`, `@testing-library/user-event`, `@testing-library/jest-dom` and `axe-core` to `devDependencies` (no `vitest-axe`, no `jest-axe`).
     - Verify no other runtime dependency was added.
     - _Requirements: 5.12, 25.6_
 
-  - [ ] 1.2 Configure Vitest projects, jsdom setup and test helpers
+  - [x] 1.2 Configure Vitest projects, jsdom setup and test helpers
     - Rewrite `vitest.config.ts` with `test.projects`: `node` (`tests/**/*.test.{ts,tsx}` excluding `tests/ui/**`, so `tests/haunting/` runs unchanged) and `ui` (`tests/ui/**/*.test.{ts,tsx}`, `environment: "jsdom"`, `setupFiles: ["./tests/ui/setup.ts"]`), both `extends: true`; keep the `@` alias, `passWithNoTests` and root-level `coverage`.
     - Create `tests/ui/setup.ts`: jest-dom matchers, explicit `cleanup()` in `afterEach`, `matchMedia` stub, partial `vi.mock("framer-motion")` that replaces only `useReducedMotion`, reset of reduced motion and viewport after each test.
     - Create `tests/ui/helpers/motion.ts` (`setReducedMotion`, `isReducedMotion`), `tests/ui/helpers/viewport.ts` (`installMatchMediaStub`, `setViewportWidth`, `resetViewport`) and `tests/ui/helpers/axe.ts` (`runAxe`, `formatViolations`, `expectNoAxeViolations`; WCAG A/AA and best-practice tags; only `color-contrast` disabled, named in a comment).
@@ -31,7 +31,7 @@ Conventions that apply to every task:
     - Verify `npm test` runs both projects and `tests/haunting/` still passes.
     - _Requirements: 22.1, 22.3, 22.8, 22.10, 23.1, 23.5, 23.6, 18.3, 18.5_
 
-  - [ ] 1.3 Create the token sheet in `src/app/globals.css`
+  - [x] 1.3 Create the token sheet in `src/app/globals.css`
     - Replace the `create-next-app` defaults (`--background`, `--foreground`, `prefers-color-scheme` block, Arial stack).
     - `:root`: surfaces, `--divider`, text tokens, `--border-control`, `--focus-ring`, accents, semantic aliases, 14% tinted accent variants through `color-mix`, data-viz palette, light-score gradient, duration tokens (120, 200, 280, 600ms), press scale 0.97, reduced-motion fade ceiling 150ms, page/card/gap spacing, content width 560px, scrim token (`--surface-void` at partial opacity).
     - `@theme inline` per design.md Decision 6: color aliases per the Color_Utility_Map (`ink`, `surface-*`, `candle`, `ecto`, `blood`, `ghost`, `spirit`, `control`, `focus`, `divider`, tint colors), radius (`pill`, `lg`, `md`), 4px spacing scale, overlay shadow, font-size tokens `hero` to `caption` with line-height, tracking and weight companions, `--font-display|sans|wordmark|mono` with system fallbacks, `--container-content`.
@@ -39,31 +39,31 @@ Conventions that apply to every task:
     - Base layer: `color-scheme: dark`, body background and color, Inter default, `scrollbar-gutter: stable`, `html[data-scroll-locked] body { overflow: hidden }`, `@keyframes shimmer` (1.6s) disabled under `prefers-reduced-motion: reduce`. No custom `tabular-nums` class.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 4.4, 4.5, 4.6, 14.8, 14.11_
 
-  - [ ] 1.4 Load fonts and update the root layout
+  - [x] 1.4 Load fonts and update the root layout
     - In `src/app/layout.tsx` replace Geist with `next/font/google`: Manrope 700/800, Inter 400/500/600, Cinzel 500, JetBrains Mono 400, each with `display: "swap"` and CSS variables `--font-manrope`, `--font-inter`, `--font-cinzel`, `--font-jetbrains-mono`; apply all four variable classes to `<html>`.
     - Replace the scaffold `title` and `description` with the CashCrypt name and a one-sentence description. Keep the `LayoutProps<"/">` signature.
     - _Requirements: 4.1, 4.2, 4.3, 4.7, 4.8, 4.9_
 
-  - [ ] 1.5 Create `src/components/ui/motionTokens.ts`
+  - [x] 1.5 Create `src/components/ui/motionTokens.ts`
     - Export named constants mirroring the CSS durations: `PRESS_DURATION_S`, `TAB_DURATION_S`, `SHEET_DURATION_S`, `COUNT_DURATION_S`, `PRESS_SCALE`, `REDUCED_FADE_MAX_S`, `TOAST_RISE_PX`, plus the other shared motion numbers later primitives need (wiggle degrees, shake pixels, success morph ms, toast default duration).
     - Export the `LayoutClassName` type alias documented as layout-only and a small `getPressMotion(reduced)` helper that returns `{}` when reduced.
     - _Requirements: 2.6, 2.7, 5.8, 18.1, 18.2_
 
-  - [ ] 1.6 Create the styleguide route skeleton
+  - [x] 1.6 Create the styleguide route skeleton
     - `src/app/styleguide/page.tsx`: server component, no `"use client"`, exports `metadata = { title: "Styleguide", robots: { index: false, follow: false } }` and renders `<StyleguideContent />`.
     - `src/components/styleguide/StyleguideContent.tsx`: `"use client"`, named export, one `<main>`, one `<h1>`, `h2` per section, `h3` inside cards; single centered column (max 560px) below 1024px and a 2-column grid from 1024px, no horizontal scroll at 375px.
     - Tokens section: labelled swatches for every surface, text and accent token (token name plus hex written at runtime from `getComputedStyle` through a ref callback, no hex literal in source), type scale with token names, radius tokens and the four font families. Sentence-case copy.
     - Build the section list as a structure that later tasks append to in Req 19.5 order; a section for a not-yet-built primitive is omitted.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.6, 19.14, 19.15, 19.16, 19.17, 19.18, 21.7, 26.6_
 
-  - [ ] 1.7 Write the token value test in `tests/design-system/tokens.test.ts`
+  - [x] 1.7 Write the token value test in `tests/design-system/tokens.test.ts`
     - Parse `src/app/globals.css` and assert every token value of Requirements 1 and 2 (surfaces, divider, text, control, focus equals candle, accents, semantic aliases, tinted variants, palette order, radii, spacing, shadow, durations, press scale, type scale, gradient, shimmer).
     - Assert every Color_Utility_Map entry in `@theme inline` references the matching CSS variable (for example `--color-ink: var(--text-primary)`).
     - Assert `motionTokens.ts` constants equal the CSS durations.
     - Assert `layout.tsx` loads the four families with the required weights and `display: "swap"`, and no Geist import remains.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 4.1, 4.2, 4.3, 4.7, 24.6, 24.7_
 
-  - [ ] 1.8 Install the source scans in `tests/design-system/sourceScan.test.ts`
+  - [x] 1.8 Install the source scans in `tests/design-system/sourceScan.test.ts`
     - Hex and color-function scan: every `.ts`, `.tsx` and `.css` file under `src/` except `src/app/globals.css`, `src/lib/haunting/`, `src/lib/exorcism/`, `src/components/house/` and `src/components/moments/`; failures report file and line.
     - Import scans on `src/components/ui/`: no GSAP, `@/lib/db`, `@/hooks` or `@/lib/haunting` imports, no default exports; `ExorcismActionRow.tsx` has no `@/lib/exorcism` import. `StyleguideContent` imports nothing from `@/lib/db`, `@/hooks`, `@/components/house` or `@/components/moments`. `src/app/styleguide/page.tsx` contains no `"use client"` directive.
     - `className` scan over every `.tsx` under `src/app/**` and `src/components/**` except `src/components/ui/**`: fails when a primitive imported from `@/components/ui/*` receives a visual utility (`bg-`, color `text-`, `border`, `rounded`, `p*-`, `shadow`, `font-`, `ring-`, `outline-`). Fixture strings prove `<Button className="bg-ecto">` is flagged and `<Button className="mt-4 w-full">` passes.
@@ -72,7 +72,7 @@ Conventions that apply to every task:
     - Create `tests/ui/styleguide.page.test.ts`, which imports the page module and asserts `metadata.robots` has `index` and `follow` false.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 5.4, 5.6, 5.8, 16.8, 17.9, 19.1, 19.2, 19.15, 22.11, 23.8_
 
-  - [ ] 1.9 Create the contrast helper and `tests/design-system/contrast.test.ts`
+  - [x] 1.9 Create the contrast helper and `tests/design-system/contrast.test.ts`
     - `tests/design-system/helpers/contrast.ts`: `parseHex`, `relativeLuminance`, `contrastRatio` (test-only).
     - Parse color tokens from `globals.css`; assert every pair of Req 20.1 to 20.5 meets its threshold (text on surfaces ≥4.5 except tertiary on overlay which is not used, `--border-control` ≥3 on void, card and raised, focus ring ≥3 on every surface, accents on card ≥4.5, void text on primary and danger buttons ≥4.5, done-state text on card ≥4.5) and that computed ratios match the published `design-system.md` values within 0.1.
     - **Property 14: Contrast ratio is bounded, symmetric and reflexive**
@@ -84,7 +84,7 @@ Conventions that apply to every task:
 
 - [ ] 3. Button increment
   - [ ] 3.1 Create `src/components/ui/Button.tsx`
-    - Variants `primary` (default), `secondary`, `ghost`, `danger`; sizes `sm` 36, `md` 44 (default), `lg` 52; pill radius; native `<button type="button">`; `sm` extends the hit area to 44px with a pseudo-element.
+    - Variants `primary` (default), `secondary`, `ghost`, `danger` (blood fill with `text-on-accent` for the label, spinner and icons, never `text-ink`); sizes `sm` 36, `md` 44 (default), `lg` 52; pill radius; native `<button type="button">`; `sm` extends the hit area to 44px with a pseudo-element.
     - `loading`: spinner, `aria-busy="true"`, activation ignored, width kept by a fixed-width label wrapper. Disabled or loading never calls `onClick`.
     - Optional `leadingIcon` at 20px; icon-only form requires `aria-label` through a discriminated union.
     - `success`: label morphs to a check for 600ms, announced through a visually hidden `aria-live="polite"` span.
@@ -260,7 +260,7 @@ Conventions that apply to every task:
 - [ ] 13. ExorcismActionRow increment
   - [ ] 13.1 Create `src/components/ui/ExorcismActionRow.tsx`
     - Built on `ListRow` layout. Native `<input type="checkbox">` styled round (`appearance-none`) inside a 44px label target; accessible name `Mark "<title>" as done`; `onToggle(next)` called once on Space or click.
-    - Impact text in ecto with `+` and `/mo`. Done state: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card), checkbox filled with candle and a check icon, 200ms fill transition within the 700ms limit, ≤150ms opacity fade when reduced. Disabled sets the native attribute and ignores activation. No imports from `src/lib/db/`, `src/lib/exorcism/` or `src/hooks/`.
+    - Impact text in ecto with `+` and `/mo`. Done state: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card), checkbox filled with candle and a check icon in `text-on-accent` (never `text-ink`), 200ms fill transition within the 700ms limit, ≤150ms opacity fade when reduced. Disabled sets the native attribute and ignores activation. No imports from `src/lib/db/`, `src/lib/exorcism/` or `src/hooks/`.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.11, 20.9, 18.1_
 
   - [ ] 13.2 Add the ExorcismActionRow section to `StyleguideContent`

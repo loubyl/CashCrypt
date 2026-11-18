@@ -1,0 +1,125 @@
+{
+  "pbtResults": {
+    "1.9 Create the contrast helper and `tests/design-system/contrast.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794979248897
+    }
+  },
+  "executionHistory": {
+    "1.1 Install dependencies": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794978671556
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979061926
+      }
+    ],
+    "1.2 Configure Vitest projects, jsdom setup and test helpers": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979068785
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979165056
+      }
+    ],
+    "1.3 Create the token sheet in `src/app/globals.css`": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979069338
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979165863
+      }
+    ],
+    "1.4 Load fonts and update the root layout": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979070143
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979166907
+      }
+    ],
+    "1.5 Create `src/components/ui/motionTokens.ts`": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979070979
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979167646
+      }
+    ],
+    "1.6 Create the styleguide route skeleton": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979173669
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979295513
+      }
+    ],
+    "1.7 Write the token value test in `tests/design-system/tokens.test.ts`": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979174479
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979296632
+      }
+    ],
+    "1.9 Create the contrast helper and `tests/design-system/contrast.test.ts`": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979175221
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979297261
+      }
+    ],
+    "1.8 Install the source scans in `tests/design-system/sourceScan.test.ts`": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979300227
+      },
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979682309
+      }
+    ],
+    "1. Foundation increment: dependencies, test infrastructure, tokens, fonts, styleguide skeleton": [
+      {
+        "executionId": "9c37cf18-cf15-4fbd-acd1-1bf0189beb81",
+        "chatSessionId": "sess_e16832c2-77f9-4c3c-a9d1-a274fe1eb141",
+        "timestamp": 1794979682350
+      }
+    ]
+  }
+}
