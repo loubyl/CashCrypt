@@ -15,6 +15,10 @@
     "10.5 Write property tests in `tests/utils/focusTrap.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1794991767869
+    },
+    "12.5 Write property tests in `tests/utils/score.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794997268297
     }
   },
   "executionHistory": {
@@ -478,6 +482,73 @@
         "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
         "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
         "timestamp": 1794992653440
+      }
+    ],
+    "12.1 Create `src/lib/utils/score.ts`": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997065509
+      },
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997162527
+      }
+    ],
+    "12.2 Create `src/components/ui/LightScoreBar.tsx`": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997163539
+      },
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997286220
+      }
+    ],
+    "12.5 Write property tests in `tests/utils/score.test.ts`": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997164299
+      },
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997285323
+      }
+    ],
+    "12.3 Add the LightScoreBar section to `StyleguideContent`": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997289134
+      },
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997343179
+      }
+    ],
+    "12.4 Write component tests in `tests/ui/LightScoreBar.test.tsx`": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997290002
+      },
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997342280
+      }
+    ],
+    "12. LightScoreBar increment": [
+      {
+        "executionId": "79ef5827-e7ba-42a5-9c89-a0b2ec646895",
+        "chatSessionId": "sess_4ab49f73-ffd1-474e-895e-ade24764d8d8",
+        "timestamp": 1794997343225
       }
     ]
   }

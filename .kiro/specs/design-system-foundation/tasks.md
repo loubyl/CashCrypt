@@ -232,25 +232,25 @@ Conventions that apply to every task:
 - [x] 11. Checkpoint - overlays and toasts
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck`, `npm run lint` and `npm run build`; ensure all pass and `/styleguide` is in the build output, ask the user if questions arise.
 
-- [ ] 12. LightScoreBar increment
-  - [ ] 12.1 Create `src/lib/utils/score.ts`
+- [x] 12. LightScoreBar increment
+  - [x] 12.1 Create `src/lib/utils/score.ts`
     - Export `clampScore` (NaN gives 0, ±Infinity clamped, result in [0, 100]), `getFillPercent`, `formatScoreText` (`String(Math.floor(clampScore(v)))`) and `formatBreakdown(base, momentum, score)` (`"39 = 33 base + 6 momentum"`). Named constants from the score bounds; no import from `src/lib/haunting/`.
     - _Requirements: 16.2, 16.3, 16.5, 16.6, 16.8_
 
-  - [ ] 12.2 Create `src/components/ui/LightScoreBar.tsx`
+  - [x] 12.2 Create `src/components/ui/LightScoreBar.tsx`
     - 10px pill track on raised surface; fill is a `motion.div` animating `width` and `backgroundSize` in `%` over 600ms so the blood → candle → ecto gradient stays anchored to the track; immediate when reduced.
     - `role="meter"` with `aria-valuemin=0`, `aria-valuemax=100`, `aria-valuenow`, `aria-valuetext` ("Light score 39 of 100") and a required `aria-label`; always renders the numeric score as text; renders the breakdown line only when `baseScore` and `momentum` are both given. Takes numbers only.
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.7, 16.8, 21.6, 18.1_
 
-  - [ ] 12.3 Add the LightScoreBar section to `StyleguideContent`
+  - [x] 12.3 Add the LightScoreBar section to `StyleguideContent`
     - Bars at scores 0, 19, 20, 39, 40, 59, 60, 79, 80 and 100 (with at least one showing the breakdown), each labelled.
     - _Requirements: 19.5, 19.10, 19.14, 26.2_
 
-  - [ ] 12.4 Write component tests in `tests/ui/LightScoreBar.test.tsx`
+  - [x] 12.4 Write component tests in `tests/ui/LightScoreBar.test.tsx`
     - Meter role and attributes, accessible name, floored number text, breakdown text only with both parts, out-of-range and `NaN` inputs clamp, reduced motion applies the fill immediately (`data-reduced-motion`), `// @ts-expect-error` for a missing `aria-label`.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.7, 18.5, 22.6_
 
-  - [ ] 12.5 Write property tests in `tests/utils/score.test.ts`
+  - [x] 12.5 Write property tests in `tests/utils/score.test.ts`
     - **Property 4: Score clamp is total and bounded**
     - **Property 5: Fill percent is bounded and monotonic, and the number is the floor**
     - **Property 6: Breakdown text floors every part**

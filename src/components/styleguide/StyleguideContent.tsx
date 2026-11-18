@@ -21,6 +21,7 @@ import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/But
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
+import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { ListRow } from "@/components/ui/ListRow";
 import { useToast } from "@/components/ui/ToastRegion";
 import type { ToastTone } from "@/lib/utils/toastReducer";
@@ -597,6 +598,48 @@ function BottomSheetSection() {
   );
 }
 
+type LightScoreSample = {
+  score: number;
+  baseScore?: number;
+  momentum?: number;
+};
+
+const LIGHT_SCORE_SAMPLES: LightScoreSample[] = [
+  { score: 0 },
+  { score: 19 },
+  { score: 20 },
+  { score: 39 },
+  { score: 40, baseScore: 35, momentum: 5 },
+  { score: 59 },
+  { score: 60 },
+  { score: 79 },
+  { score: 80 },
+  { score: 100 },
+];
+
+function LightScoreBarSection() {
+  return (
+    <>
+      {LIGHT_SCORE_SAMPLES.map((sample) => {
+        const withBreakdown = sample.baseScore !== undefined;
+        const label = `LightScoreBar, score ${sample.score}${withBreakdown ? ", with breakdown" : ""}`;
+        return (
+          <CardShowcaseItem key={sample.score} label={label}>
+            <Card>
+              <LightScoreBar
+                score={sample.score}
+                baseScore={sample.baseScore}
+                momentum={sample.momentum}
+                aria-label={`Light score ${sample.score}${withBreakdown ? " with breakdown" : ""}`}
+              />
+            </Card>
+          </CardShowcaseItem>
+        );
+      })}
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -614,6 +657,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "input", title: "Input", render: () => <InputSection /> },
   { id: "bottomsheet", title: "BottomSheet", render: () => <BottomSheetSection /> },
   { id: "toast", title: "Toast", render: () => <ToastSection /> },
+  { id: "lightscorebar", title: "LightScoreBar", render: () => <LightScoreBarSection /> },
 ];
 
 export function StyleguideContent() {
