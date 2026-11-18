@@ -113,17 +113,17 @@ Conventions that apply to every task:
     - Titled card is a labelled region, heading level prop, action name includes the title, untitled card has no region role, no border classes.
     - _Requirements: 9.2, 9.3, 9.4, 9.5, 22.4_
 
-- [ ] 5. ListRow increment
-  - [ ] 5.1 Create `src/components/ui/ListRow.tsx`
+- [x] 5. ListRow increment
+  - [x] 5.1 Create `src/components/ui/ListRow.tsx`
     - 64px row, 40px tinted circle avatar, `body-lg` title, `caption` secondary subtitle, right-aligned `tabular-nums` amount (≥15px), `+`/`−` sign as text with ecto or primary color for `in`/`out`, optional inset 1px divider.
     - Interactive form renders `<button>` or `<a>` with raised pressed surface and Focus_Ring; non-interactive form has no button or link role.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 20.9, 5.9, 5.10_
 
-  - [ ] 5.2 Add the ListRow section to `StyleguideContent`
+  - [x] 5.2 Add the ListRow section to `StyleguideContent`
     - Static row, interactive button row, link row, amount in/out, with and without divider, disabled where supported.
     - _Requirements: 19.5, 19.8, 19.14, 26.2_
 
-  - [ ] 5.3 Write component tests in `tests/ui/ListRow.test.tsx`
+  - [x] 5.3 Write component tests in `tests/ui/ListRow.test.tsx`
     - Role per form (button, link, none), sign text for in/out, title and subtitle, divider presence, Enter and Space call the handler once on the interactive row.
     - _Requirements: 10.2, 10.3, 10.4, 10.5, 21.3, 22.4_
 

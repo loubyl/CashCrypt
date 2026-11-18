@@ -206,6 +206,54 @@
         "chatSessionId": "sess_46ddefa0-bdf3-4952-b644-5bd6580fedc0",
         "timestamp": 1794983632003
       }
+    ],
+    "5. ListRow increment": [
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794983875016
+      },
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984139205
+      }
+    ],
+    "5.1 Create `src/components/ui/ListRow.tsx`": [
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794983878900
+      },
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984002866
+      }
+    ],
+    "5.2 Add the ListRow section to `StyleguideContent`": [
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984003471
+      },
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984087036
+      }
+    ],
+    "5.3 Write component tests in `tests/ui/ListRow.test.tsx`": [
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984086384
+      },
+      {
+        "executionId": "b7b4aa2e-9411-4ade-aa6e-ff3d71ef0e9b",
+        "chatSessionId": "sess_638b4f0c-3df9-4a2a-b993-6d78db35ed27",
+        "timestamp": 1794984139156
+      }
     ]
   }
 }

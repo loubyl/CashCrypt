@@ -1,9 +1,20 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  CreditCard,
+  Ghost,
+  Landmark,
+  Music,
+  Plus,
+  Trash2,
+  Tv,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ListRow } from "@/components/ui/ListRow";
 
 type StyleguideSection = {
   id: string;
@@ -324,6 +335,97 @@ function CardSection() {
   );
 }
 
+function noop() {}
+
+function ListRowSection() {
+  return (
+    <>
+      <CardShowcaseItem label="ListRow, static, with subtitle and amount">
+        <Card>
+          <ListRow icon={Tv} tone="ghost" title="StreamMax" subtitle="Renews on the 4th" amount="$22.99" />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, static, title only">
+        <Card>
+          <ListRow icon={Ghost} tone="spirit" title="Small expenses" />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, interactive button">
+        <Card>
+          <ListRow
+            icon={CreditCard}
+            tone="candle"
+            title="Visa card"
+            subtitle="Minimum $35.00"
+            amount="$1,240.00"
+            onClick={noop}
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, link">
+        <Card>
+          <ListRow
+            icon={Landmark}
+            tone="neutral"
+            title="Student loan"
+            subtitle="See details"
+            amount="$8,300.00"
+            href="#styleguide-listrow"
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, amount in (plus sign, ecto)">
+        <Card>
+          <ListRow
+            icon={ArrowDownLeft}
+            tone="ecto"
+            title="Extra payment"
+            subtitle="Saved this month"
+            amount="$300.00"
+            amountDirection="in"
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, amount out (minus sign)">
+        <Card>
+          <ListRow
+            icon={ArrowUpRight}
+            tone="blood"
+            title="Coffee shop"
+            subtitle="Yesterday"
+            amount="$4.50"
+            amountDirection="out"
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, with divider (two rows)">
+        <Card>
+          <ListRow icon={Tv} tone="ghost" title="StreamMax" amount="$22.99" amountDirection="out" divider />
+          <ListRow icon={Music} tone="spirit" title="TuneBox" amount="$11.99" amountDirection="out" />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, without divider (two rows)">
+        <Card>
+          <ListRow icon={Tv} tone="ghost" title="StreamMax" amount="$22.99" amountDirection="out" />
+          <ListRow icon={Music} tone="spirit" title="TuneBox" amount="$11.99" amountDirection="out" />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, link, disabled">
+        <Card>
+          <ListRow
+            icon={Landmark}
+            tone="neutral"
+            title="Closed account"
+            subtitle="Unavailable"
+            href="#styleguide-listrow"
+            disabled
+          />
+        </Card>
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -333,6 +435,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
   { id: "button", title: "Button", render: () => <ButtonSection /> },
   { id: "card", title: "Card", render: () => <CardSection /> },
+  { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
 ];
 
 export function StyleguideContent() {
