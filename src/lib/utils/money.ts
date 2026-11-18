@@ -116,3 +116,29 @@ export function formatMoneyOnBlur(sanitized: string): string {
   const fraction = fractionPart.padEnd(MAX_FRACTION_DIGITS, ZERO_PAD);
   return `${integer}${DECIMAL_SEPARATOR}${fraction}`;
 }
+
+const CURRENCY_SYMBOL = "$";
+const GROUPING_LOCALE = "en-US";
+const CENTS_PER_UNIT = 100;
+const NEGATIVE_PREFIX = "-";
+
+export type CurrencyParts = { symbol: string; integer: string; cents: string };
+
+/**
+ * Splits a currency amount into symbol, grouped integer part (en-US) and a two-digit
+ * cents string. Non-finite values are treated as 0. Negative values keep a "-" prefix
+ * on the integer part.
+ */
+export function formatCurrencyParts(value: number): CurrencyParts {
+  const safe = Number.isFinite(value) ? value : 0;
+  const totalCents = Math.round(Math.abs(safe) * CENTS_PER_UNIT);
+  const integerValue = Math.floor(totalCents / CENTS_PER_UNIT);
+  const centsValue = totalCents % CENTS_PER_UNIT;
+  const grouped = integerValue.toLocaleString(GROUPING_LOCALE, { maximumFractionDigits: 0 });
+  const isNegative = safe < 0 && totalCents > 0;
+  return {
+    symbol: CURRENCY_SYMBOL,
+    integer: isNegative ? `${NEGATIVE_PREFIX}${grouped}` : grouped,
+    cents: String(centsValue).padStart(MAX_FRACTION_DIGITS, ZERO_PAD),
+  };
+}

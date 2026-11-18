@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  ArrowDown,
   ArrowDownLeft,
+  ArrowUp,
   ArrowUpRight,
   Banknote,
   Check,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
+import { BalanceHero } from "@/components/ui/BalanceHero";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -28,6 +31,7 @@ import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { ListRow } from "@/components/ui/ListRow";
 import { QuickAction } from "@/components/ui/QuickAction";
 import { useToast } from "@/components/ui/ToastRegion";
+import { getDeltaPresentation, type DeltaDirection, type DeltaIntent } from "@/lib/utils/delta";
 import type { ToastTone } from "@/lib/utils/toastReducer";
 
 type StyleguideSection = {
@@ -344,6 +348,52 @@ function CardShowcaseItem({ label, children }: { label: string; children: ReactN
       <ButtonLabel>{label}</ButtonLabel>
       {children}
     </div>
+  );
+}
+
+const DELTA_DIRECTIONS: DeltaDirection[] = ["up", "down"];
+const DELTA_INTENTS: DeltaIntent[] = ["good", "bad"];
+const DELTA_AMOUNT_TEXT = "$120.00";
+
+function BalanceHeroSection() {
+  return (
+    <>
+      <CardShowcaseItem label="BalanceHero, currency, down and good">
+        <Card>
+          <BalanceHero
+            label="Total debt"
+            value={12480.5}
+            delta={{ direction: "down", intent: "good", amount: DELTA_AMOUNT_TEXT }}
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="BalanceHero, score, up and good">
+        <Card>
+          <BalanceHero
+            label="Light score"
+            format="score"
+            showMax
+            value={72}
+            delta={{ direction: "up", intent: "good", amount: "4" }}
+          />
+        </Card>
+      </CardShowcaseItem>
+      {DELTA_DIRECTIONS.map((direction) =>
+        DELTA_INTENTS.map((intent) => {
+          const presentation = getDeltaPresentation(direction, intent, DELTA_AMOUNT_TEXT);
+          const Icon = presentation.icon === "arrow-up" ? ArrowUp : ArrowDown;
+          return (
+            <CardShowcaseItem key={`${direction}-${intent}`} label={`Delta chip, ${direction} and ${intent}`}>
+              <Card>
+                <Chip tone={presentation.tone} icon={Icon}>
+                  {presentation.text}
+                </Chip>
+              </Card>
+            </CardShowcaseItem>
+          );
+        }),
+      )}
+    </>
   );
 }
 
@@ -723,6 +773,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
   { id: "button", title: "Button", render: () => <ButtonSection /> },
   { id: "quickaction", title: "QuickAction", render: () => <QuickActionSection /> },
+  { id: "balancehero", title: "BalanceHero", render: () => <BalanceHeroSection /> },
   { id: "card", title: "Card", render: () => <CardSection /> },
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },

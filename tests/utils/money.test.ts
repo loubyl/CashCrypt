@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   commitMoneyInput,
   filterMoneyKeystroke,
+  formatCurrencyParts,
   formatMoneyOnBlur,
   sanitizeMoneyInput,
 } from "@/lib/utils/money";
@@ -187,5 +188,35 @@ describe("formatMoneyOnBlur", () => {
     ["1.234", "1.23"],
   ])("formats %j to %j", (input, expected) => {
     expect(formatMoneyOnBlur(input)).toBe(expected);
+  });
+});
+
+describe("formatCurrencyParts", () => {
+  // Feature: design-system-foundation, Property 7: Currency parts reconstruct the rounded value
+  it("rebuilds the value rounded to cents from the integer and cents parts", () => {
+    fc.assert(
+      fc.property(fc.double({ min: -1e9, max: 1e9, noNaN: true }), (value) => {
+        const parts = formatCurrencyParts(value);
+        const expectedCents = Math.round(Math.abs(value) * CENTS_FACTOR);
+        const isNegative = parts.integer.startsWith("-");
+        const integerDigits = parts.integer.replace(/^-/, "").replaceAll(",", "");
+        expect(parts.cents).toMatch(/^\d{2}$/);
+        expect(integerDigits).toMatch(/^\d+$/);
+        const rebuiltCents = Number(integerDigits) * CENTS_FACTOR + Number(parts.cents);
+        expect(rebuiltCents).toBe(expectedCents);
+        expect(isNegative).toBe(value < 0 && expectedCents > 0);
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  it("treats non-finite values as zero", () => {
+    for (const value of [Number.NaN, Infinity, -Infinity]) {
+      expect(formatCurrencyParts(value)).toEqual({ symbol: "$", integer: "0", cents: "00" });
+    }
+  });
+
+  it("groups thousands and pads cents", () => {
+    expect(formatCurrencyParts(1234567.5)).toEqual({ symbol: "$", integer: "1,234,567", cents: "50" });
   });
 });

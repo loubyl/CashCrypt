@@ -19,6 +19,10 @@
     "12.5 Write property tests in `tests/utils/score.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1794997268297
+    },
+    "15.5 Write property tests in `tests/utils/money.test.ts`, `tests/utils/score.test.ts` and `tests/utils/delta.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1795000372906
     }
   },
   "executionHistory": {
@@ -635,6 +639,73 @@
         "executionId": "9c824b1d-bb42-407e-83a8-d02af057178d",
         "chatSessionId": "sess_839193ee-16b2-4814-a6fa-47e02bc9c07a",
         "timestamp": 1794999852477
+      }
+    ],
+    "15.1 Add `formatCurrencyParts` to `src/lib/utils/money.ts` and create `src/lib/utils/delta.ts`": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1794999975096
+      },
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000113572
+      }
+    ],
+    "15.2 Create `src/components/ui/BalanceHero.tsx`": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000114272
+      },
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000189672
+      }
+    ],
+    "15.3 Add the BalanceHero section to `StyleguideContent`": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000190326
+      },
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000233576
+      }
+    ],
+    "15.4 Write component tests in `tests/ui/BalanceHero.test.tsx`": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000233151
+      },
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000286667
+      }
+    ],
+    "15.5 Write property tests in `tests/utils/money.test.ts`, `tests/utils/score.test.ts` and `tests/utils/delta.test.ts`": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000285955
+      },
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000381576
+      }
+    ],
+    "15. BalanceHero increment": [
+      {
+        "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
+        "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
+        "timestamp": 1795000381654
       }
     ]
   }

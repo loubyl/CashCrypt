@@ -289,27 +289,27 @@ Conventions that apply to every task:
     - Role and name from the label, Enter and Space activate once, disabled ignores activation, reduced motion applies neither press scale nor wiggle (`data-reduced-motion`).
     - _Requirements: 7.2, 7.5, 7.6, 18.5, 21.3, 22.5_
 
-- [ ] 15. BalanceHero increment
-  - [ ] 15.1 Add `formatCurrencyParts` to `src/lib/utils/money.ts` and create `src/lib/utils/delta.ts`
+- [x] 15. BalanceHero increment
+  - [x] 15.1 Add `formatCurrencyParts` to `src/lib/utils/money.ts` and create `src/lib/utils/delta.ts`
     - `formatCurrencyParts(value)` returns `{ symbol, integer, cents }` (en-US grouping, non-finite treated as 0, cents always two digits).
     - `delta.ts` exports `DeltaDirection`, `DeltaIntent`, `DeltaPresentation` and `getDeltaPresentation(direction, intent, amountText)`: `up` gives `+` and `arrow-up`, `down` gives `−` and `arrow-down`, `good` gives tone `success`, `bad` gives `danger`; text starts with the sign.
     - _Requirements: 8.3, 8.6, 8.7, 8.8, 8.12_
 
-  - [ ] 15.2 Create `src/components/ui/BalanceHero.tsx`
+  - [x] 15.2 Create `src/components/ui/BalanceHero.tsx`
     - Label in secondary, value in `hero` scale with `tabular-nums`; `format="currency"` (default) renders symbol, integer at full size and cents at 60%; `format="score"` renders `formatScoreText(value)` with no decimal point and a "/100" suffix only with `showMax`.
     - Optional delta rendered as a `Chip` from `getDeltaPresentation` (direction and intent independent).
     - 600ms count-up driven by a motion value; animated spans are `aria-hidden` and a visually hidden span always carries the final value; reduced motion shows the new value immediately.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.11, 5.9, 18.1_
 
-  - [ ] 15.3 Add the BalanceHero section to `StyleguideContent`
+  - [x] 15.3 Add the BalanceHero section to `StyleguideContent`
     - One `BalanceHero` per section card (Req 8.14): the currency hero with a `down`/`good` delta in one card, and the score hero with an `up`/`good` delta in its own card. Show the `up`/`bad` and the other direction and intent combinations as Chip rows built from `getDeltaPresentation`, so every combination of Req 19.13 is visible.
     - _Requirements: 19.5, 19.13, 19.14, 8.14, 26.2_
 
-  - [ ] 15.4 Write component tests in `tests/ui/BalanceHero.test.tsx`
+  - [x] 15.4 Write component tests in `tests/ui/BalanceHero.test.tsx`
     - Currency parts rendering (cents at the smaller size class), score format shows the floored integer and no decimal point, "/100" only with `showMax`, delta icon, sign text and tone for the three combinations, final value available to assistive technology, reduced motion shows the value immediately (`data-reduced-motion`).
     - _Requirements: 8.3, 8.4, 8.6, 8.7, 8.10, 8.11, 18.5, 22.4_
 
-  - [ ] 15.5 Write property tests in `tests/utils/money.test.ts`, `tests/utils/score.test.ts` and `tests/utils/delta.test.ts`
+  - [x] 15.5 Write property tests in `tests/utils/money.test.ts`, `tests/utils/score.test.ts` and `tests/utils/delta.test.ts`
     - **Property 7: Currency parts reconstruct the rounded value**
     - **Property 8: Score text is the integer floor with no decimal point**
     - **Property 9: Delta direction and intent are independent**

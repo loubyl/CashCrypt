@@ -94,3 +94,27 @@ describe("score helpers", () => {
     );
   });
 });
+
+describe("formatScoreText", () => {
+  // Feature: design-system-foundation, Property 8: Score text is the integer floor with no decimal point
+  it("returns the floor of the clamped score as an integer string with no decimal point", () => {
+    fc.assert(
+      fc.property(anyScore, (value) => {
+        const text = formatScoreText(value);
+        expect(text).toMatch(/^\d+$/);
+        expect(text).not.toContain(".");
+        expect(text).toBe(String(Math.floor(clampScore(value))));
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  it("equals Math.floor for in-range values", () => {
+    fc.assert(
+      fc.property(inRangeScore, (value) => {
+        expect(formatScoreText(value)).toBe(String(Math.floor(value)));
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+});
