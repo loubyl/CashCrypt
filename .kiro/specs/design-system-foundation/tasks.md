@@ -79,23 +79,23 @@ Conventions that apply to every task:
     - Runs on every later increment through `npm test`; later tasks must not weaken it.
     - **Validates: Requirements 17.5, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8**
 
-- [ ] 2. Checkpoint - foundation
+- [x] 2. Checkpoint - foundation
   - Run `npm test` (including the source scans of 1.8 and the contrast test of 1.9), `npm run typecheck` and `npm run lint`; ensure all pass, ask the user if questions arise.
 
-- [ ] 3. Button increment
-  - [ ] 3.1 Create `src/components/ui/Button.tsx`
-    - Variants `primary` (default), `secondary`, `ghost`, `danger` (blood fill with `text-on-accent` for the label, spinner and icons, never `text-ink`); sizes `sm` 36, `md` 44 (default), `lg` 52; pill radius; native `<button type="button">`; `sm` extends the hit area to 44px with a pseudo-element.
+- [x] 3. Button increment
+  - [x] 3.1 Create `src/components/ui/Button.tsx`
+    - Variants `primary` (default), `secondary`, `ghost`, `danger`; sizes `sm` 36, `md` 44 (default), `lg` 52; pill radius; native `<button type="button">`; `sm` extends the hit area to 44px with a pseudo-element.
     - `loading`: spinner, `aria-busy="true"`, activation ignored, width kept by a fixed-width label wrapper. Disabled or loading never calls `onClick`.
     - Optional `leadingIcon` at 20px; icon-only form requires `aria-label` through a discriminated union.
     - `success`: label morphs to a check for 600ms, announced through a visually hidden `aria-live="polite"` span.
     - Press: `whileTap` scale 0.97 over 120ms unless reduced; `data-reduced-motion`; forward `ref`; Focus_Ring on `:focus-visible`.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11, 5.13, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 18.1, 18.3_
 
-  - [ ] 3.2 Add the Button section to `StyleguideContent`
+  - [x] 3.2 Add the Button section to `StyleguideContent`
     - All 4 variants × 3 sizes, plus disabled and loading for each variant, the `success` morph, leading icon and icon-only examples, each labelled with variant and state.
     - _Requirements: 19.5, 19.7, 19.14, 26.2_
 
-  - [ ] 3.3 Write component tests in `tests/ui/Button.test.tsx`
+  - [x] 3.3 Write component tests in `tests/ui/Button.test.tsx`
     - Role and accessible name, each variant and size reflected in output, default `type="button"`, disabled and loading do not call `onClick`, `aria-busy`, Enter and Space activate once (user-event), success announcement region, `// @ts-expect-error` for an icon-only button without `aria-label`.
     - Reduced motion: `setReducedMotion(true)`, assert `data-reduced-motion="true"` and no scale configured, same behavior.
     - _Requirements: 6.1, 6.6, 6.7, 6.8, 6.10, 6.11, 6.12, 18.5, 21.3, 22.4, 22.5, 22.6_
@@ -260,7 +260,7 @@ Conventions that apply to every task:
 - [ ] 13. ExorcismActionRow increment
   - [ ] 13.1 Create `src/components/ui/ExorcismActionRow.tsx`
     - Built on `ListRow` layout. Native `<input type="checkbox">` styled round (`appearance-none`) inside a 44px label target; accessible name `Mark "<title>" as done`; `onToggle(next)` called once on Space or click.
-    - Impact text in ecto with `+` and `/mo`. Done state: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card), checkbox filled with candle and a check icon in `text-on-accent` (never `text-ink`), 200ms fill transition within the 700ms limit, ≤150ms opacity fade when reduced. Disabled sets the native attribute and ignores activation. No imports from `src/lib/db/`, `src/lib/exorcism/` or `src/hooks/`.
+    - Impact text in ecto with `+` and `/mo`. Done state: title `line-through`, row text `ink-tertiary` (still ≥4.5:1 on the card), checkbox filled with candle and a check icon, 200ms fill transition within the 700ms limit, ≤150ms opacity fade when reduced. Disabled sets the native attribute and ignores activation. No imports from `src/lib/db/`, `src/lib/exorcism/` or `src/hooks/`.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.11, 20.9, 18.1_
 
   - [ ] 13.2 Add the ExorcismActionRow section to `StyleguideContent`

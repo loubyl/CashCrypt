@@ -1,6 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Plus, Trash2 } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 
 type StyleguideSection = {
   id: string;
@@ -182,6 +184,114 @@ function TokensSection() {
   );
 }
 
+const BUTTON_VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger"];
+const BUTTON_SIZES: ButtonSize[] = ["sm", "md", "lg"];
+
+function ButtonLabel({ children }: { children: ReactNode }) {
+  return <p className="mb-2 text-caption text-ink-secondary">{children}</p>;
+}
+
+function ButtonSuccessDemo({ variant }: { variant: ButtonVariant }) {
+  const [success, setSuccess] = useState(false);
+  return (
+    <Button
+      variant={variant}
+      success={success}
+      successAnnouncement="Payment saved"
+      onClick={() => {
+        setSuccess(false);
+        // Re-trigger the morph on every click.
+        requestAnimationFrame(() => setSuccess(true));
+      }}
+    >
+      Save payment
+    </Button>
+  );
+}
+
+function ButtonSection() {
+  return (
+    <>
+      {BUTTON_VARIANTS.map((variant) => (
+        <ShowcaseCard key={variant} title={`Button ${variant}`}>
+          <div className="flex flex-col gap-4">
+            <div>
+              <ButtonLabel>{variant}, sizes sm, md, lg</ButtonLabel>
+              <div className="flex flex-wrap items-center gap-3">
+                {BUTTON_SIZES.map((size) => (
+                  <Button key={size} variant={variant} size={size}>
+                    {`Label ${size}`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <ButtonLabel>{variant}, disabled, sizes sm, md, lg</ButtonLabel>
+              <div className="flex flex-wrap items-center gap-3">
+                {BUTTON_SIZES.map((size) => (
+                  <Button key={size} variant={variant} size={size} disabled>
+                    {`Disabled ${size}`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <ButtonLabel>{variant}, loading, sizes sm, md, lg</ButtonLabel>
+              <div className="flex flex-wrap items-center gap-3">
+                {BUTTON_SIZES.map((size) => (
+                  <Button key={size} variant={variant} size={size} loading>
+                    {`Loading ${size}`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ShowcaseCard>
+      ))}
+      <ShowcaseCard title="Button success morph">
+        <ButtonLabel>primary, success: label morphs to a check for 600ms</ButtonLabel>
+        <div className="flex flex-wrap items-center gap-3">
+          <ButtonSuccessDemo variant="primary" />
+        </div>
+      </ShowcaseCard>
+      <ShowcaseCard title="Button icons">
+        <div className="flex flex-col gap-4">
+          <div>
+            <ButtonLabel>secondary, leading icon</ButtonLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="secondary" leadingIcon={Plus}>
+                Add expense
+              </Button>
+            </div>
+          </div>
+          <div>
+            <ButtonLabel>danger, leading icon</ButtonLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="danger" leadingIcon={Trash2}>
+                Delete
+              </Button>
+            </div>
+          </div>
+          <div>
+            <ButtonLabel>primary, icon-only, sizes sm, md, lg</ButtonLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              {BUTTON_SIZES.map((size) => (
+                <Button key={size} size={size} leadingIcon={Plus} aria-label={`Add, size ${size}`} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <ButtonLabel>ghost, icon-only, disabled</ButtonLabel>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="ghost" leadingIcon={Plus} aria-label="Add, disabled" disabled />
+            </div>
+          </div>
+        </div>
+      </ShowcaseCard>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -189,6 +299,7 @@ function TokensSection() {
  */
 const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
+  { id: "button", title: "Button", render: () => <ButtonSection /> },
 ];
 
 export function StyleguideContent() {
