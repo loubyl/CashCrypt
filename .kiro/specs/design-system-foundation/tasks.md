@@ -127,16 +127,16 @@ Conventions that apply to every task:
     - Role per form (button, link, none), sign text for in/out, title and subtitle, divider presence, Enter and Space call the handler once on the interactive row.
     - _Requirements: 10.2, 10.3, 10.4, 10.5, 21.3, 22.4_
 
-- [ ] 6. Chip increment
-  - [ ] 6.1 Create `src/components/ui/Chip.tsx`
+- [x] 6. Chip increment
+  - [x] 6.1 Create `src/components/ui/Chip.tsx`
     - 24px pill, tinted background, full accent color for icon and text; tones `success`, `warning`, `danger`, `info`, `spirit`, `neutral`; required children label; icon required for every tone except `neutral` (discriminated union); `label` or `caption` scale, never below 12px.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 20.9_
 
-  - [ ] 6.2 Add the Chip section to `StyleguideContent`
+  - [x] 6.2 Add the Chip section to `StyleguideContent`
     - Every tone with icon and label.
     - _Requirements: 19.5, 19.8, 19.14, 26.2_
 
-  - [ ] 6.3 Write component tests in `tests/ui/Chip.test.tsx`
+  - [x] 6.3 Write component tests in `tests/ui/Chip.test.tsx`
     - Label rendered for each tone, icon present and `aria-hidden` for non-neutral tones, `// @ts-expect-error` for a missing icon on a colored tone.
     - _Requirements: 11.2, 11.3, 22.4_
 

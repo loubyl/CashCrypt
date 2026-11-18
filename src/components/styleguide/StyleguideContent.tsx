@@ -3,17 +3,22 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Check,
   CreditCard,
   Ghost,
+  Info,
   Landmark,
+  Minus,
   Music,
   Plus,
   Trash2,
+  TriangleAlert,
   Tv,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Chip } from "@/components/ui/Chip";
 import { ListRow } from "@/components/ui/ListRow";
 
 type StyleguideSection = {
@@ -426,6 +431,48 @@ function ListRowSection() {
   );
 }
 
+function ChipSection() {
+  return (
+    <>
+      <CardShowcaseItem label="Chip, success">
+        <Card>
+          <Chip tone="success" icon={Check}>Paid off</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, warning">
+        <Card>
+          <Chip tone="warning" icon={TriangleAlert}>Due soon</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, danger">
+        <Card>
+          <Chip tone="danger" icon={ArrowUpRight}>Overdue</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, info">
+        <Card>
+          <Chip tone="info" icon={Info}>Small expense</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, spirit">
+        <Card>
+          <Chip tone="spirit" icon={Ghost}>Poltergeist</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, neutral, with icon">
+        <Card>
+          <Chip tone="neutral" icon={Minus}>No change</Chip>
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="Chip, neutral, label only">
+        <Card>
+          <Chip tone="neutral">Draft</Chip>
+        </Card>
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -436,6 +483,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "button", title: "Button", render: () => <ButtonSection /> },
   { id: "card", title: "Card", render: () => <CardSection /> },
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
+  { id: "chip", title: "Chip", render: () => <ChipSection /> },
 ];
 
 export function StyleguideContent() {
