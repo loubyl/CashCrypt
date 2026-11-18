@@ -267,15 +267,15 @@ Test conventions: every property test carries the tag `// Feature: haunting-engi
     - Empty `debts`, `subscriptions`, `transactions` and `events` arrays; all-zero APRs; amounts at 1e12; negative debt balances, minimum payments and transaction amounts treated as 0; events all outside the window. Each completes without throwing and has finite numeric fields.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 10.3_
 
-- [ ] 13. Static purity and no-magic-number check
-  - [ ] 13.1 Create `tests/haunting/staticChecks.test.ts`
+- [x] 13. Static purity and no-magic-number check
+  - [x] 13.1 Create `tests/haunting/staticChecks.test.ts`
     - Read every `.ts` file in `src/lib/haunting/` with `node:fs`. In every file except the test-only `testArbitraries.ts`, fail on any of: `Date.now`, `new Date`, `Math.random`, `performance.now`, `crypto.getRandomValues`, `console.`, `fetch(`, `localStorage`, `window`/`document` references, and imports from `react`, `dexie`, `next` or any `next/*` module.
     - Numeric-literal rule: fail on any numeric literal other than `0`, `1` and `-1` (a negative one is the unary minus plus `1`). Exempt files: `config.ts`, `dates.ts` (the Julian Day formula is calendar arithmetic, not a tunable constant; document this exemption in a comment) and test files (`testArbitraries.ts`; files under `tests/` are not scanned at all). Ignore comments and string contents when scanning.
     - Assert that `Math.round(` combined with the cents constant appears only in `index.ts`.
     - Name each offending file and line in the failure message.
     - _Requirements: 1.1, 1.2, 12.2, 12.3, 7.4_
 
-- [ ] 14. Final checkpoint - Ensure all tests pass
+- [x] 14. Final checkpoint - Ensure all tests pass
   - Run `npm test` and `npm run typecheck`; ensure both pass, ask the user if questions arise.
 
 ## Notes

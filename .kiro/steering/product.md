@@ -63,6 +63,12 @@ Financial health has a direct, visual consequence: a living, breathing haunted h
 - "Log a Payment" action on any debt reduces its balance.
 - CSV import for transactions (no bank APIs, no server-side data).
 
+### Data-layer rule: user actions and momentum events
+The haunting engine reads both the current snapshot and the `events` list, so every user action must update both, together. Each action below is one operation (one Dexie transaction): either every change is saved or none is.
+- **Log a payment:** reduce the debt's `balance` by the amount paid, and create one `debt_payment` event dated the payment day, with `extraPrincipalCents` set to the part of the payment above the debt's minimum monthly payment (0 when the payment is at or below the minimum).
+- **Cancel a subscription:** set the subscription's `active` to `false` (it stays a valid record and becomes a graveyard tombstone), and create one `subscription_canceled` event with `amountCents` set to its normalized monthly cost. Never create more than one `subscription_canceled` event per subscription, even if the cancel action is repeated or the subscription is reactivated and canceled again.
+- **Complete an exorcism plan action:** create one `exorcism_action_completed` event dated the completion day. Marking the same action done again does not create another event.
+
 ## Privacy Model
 - Strictly local-first: all data lives in the user's browser (IndexedDB).
 - No accounts, no login, no telemetry.

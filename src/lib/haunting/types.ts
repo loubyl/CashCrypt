@@ -1,6 +1,9 @@
 // Shared types for the haunting engine. Input types use decimal dollars;
 // internal and output types use integer cents.
 
+import type { DecayLevel } from "./config";
+
+export type { DecayLevel };
 export type Cadence = "weekly" | "monthly" | "yearly";
 export type Usage = "often" | "rarely" | "never";
 
@@ -129,13 +132,12 @@ export type Poltergeist = {
   byCategory: Record<string, number>; // integer cents; values sum to totalAmount
 };
 
-export type DecayLevel = 1 | 2 | 3 | 4 | 5;
 
 export type HouseState = {
   lightScore: number; // real number [0, 100]; = min(100, baseScore + momentum)
   baseScore: number; // 100 / (1 + S), or exactly 0/100 on the zero-income path
   momentum: number; // bonus from in-window events; in [0, MOMENTUM_MAX]
-  decayLevel: 1 | 2 | 3 | 4 | 5;
+  decayLevel: DecayLevel;
   windowBrightness: number; // lightScore / 100, in [0.0, 1.0]
   levelProgress: number; // position in current band, [0.0, 1.0]
   zombies: Zombie[];

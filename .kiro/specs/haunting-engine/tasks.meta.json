@@ -284,6 +284,25 @@
         "chatSessionId": "sess_753f26ae-7546-4d03-9e5c-ebc6eb3d3b22",
         "timestamp": 1794910960463
       }
+    ],
+    "13.1 Create `tests/haunting/staticChecks.test.ts`": [
+      {
+        "executionId": "91402fbd-cd12-4fbc-bc22-138fda35c292",
+        "chatSessionId": "sess_dfc1a74f-16d0-4c3a-b09a-29c9f5411592",
+        "timestamp": 1794974292226
+      },
+      {
+        "executionId": "91402fbd-cd12-4fbc-bc22-138fda35c292",
+        "chatSessionId": "sess_dfc1a74f-16d0-4c3a-b09a-29c9f5411592",
+        "timestamp": 1794974490752
+      }
+    ],
+    "13. Static purity and no-magic-number check": [
+      {
+        "executionId": "91402fbd-cd12-4fbc-bc22-138fda35c292",
+        "chatSessionId": "sess_dfc1a74f-16d0-4c3a-b09a-29c9f5411592",
+        "timestamp": 1794974490823
+      }
     ]
   }
 }

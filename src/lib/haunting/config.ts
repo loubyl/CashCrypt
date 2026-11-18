@@ -32,6 +32,9 @@ export const CENTS_PER_DOLLAR = 100; // used only by the Cents_Boundary
 export const MIN_INCOME_CENTS = 100; // incomes below this take the zero-income path
 export const MONTHS_PER_YEAR = 12; // annual income = monthly income × 12
 
+/** Decay level 1 (Pristine) to 5 (Condemned). Numeric literal types live here, the only place literals are allowed. */
+export type DecayLevel = 1 | 2 | 3 | 4 | 5;
+
 export type HauntingConfig = {
   WEIGHT_FACTOR_A: number;
   WEIGHT_FACTOR_B: number;

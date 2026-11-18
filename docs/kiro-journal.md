@@ -67,3 +67,26 @@ A dated log of how Kiro features shaped CashCrypt, kept for the Kiroween write-u
 - **Kiro feature:** Spec (tasks), property-based testing with fast-check
 - **What happened:** Added Property 14 (calendar arithmetic and window size) to `design.md` and as sub-task 3.3, then implemented it in `dates.test.ts`. It runs 500 times per property over valid dates from 1900 to 2100 and checks four things: consecutive days differ by exactly 1 Julian day, exactly `WINDOW_DAYS` dates fall inside the window for any `now`, future dates are never inside, and malformed strings never throw. The day counts are cross-checked against `Date.UTC`, used only inside the test; `dates.ts` still never touches `Date`. To prove the properties protect the earlier off-by-one fix, the `>=` bug was reintroduced on purpose. The window-size property failed immediately with a counterexample. The original example tests had passed with the same bug, because they were written from the same wrong assumption. The fix was then restored.
 - **What it changed:** The window rule is now enforced by a property that states the rule itself, not by examples that copy one person's reading of it. A deliberate mutation is a cheap way to confirm a new property can actually fail.
+
+## 2026-11-17 — Milestone: haunting engine spec complete
+
+- **Kiro feature:** Spec, property-based testing with fast-check
+- **What happened:** All tasks (1–14) in the `haunting-engine` spec are checked. Counted from the repo:
+  - 10 test files in `tests/haunting/`, 209 tests, all passing.
+  - 46 fast-check properties, every one tagged with a `design.md` property number. All 20 properties in `design.md` (1–20) have at least one test, and no test uses a number that is not in `design.md`.
+  - Properties per file: `dates` P14 · `decay` P2, P3 · `ghosts` P8, P19, P20 · `integration` P5, P7 · `lightScore` P1, P4, P6, P13 · `momentum` P10, P11 · `robustness` P9, P12 · `zombies` P15–P18.
+- **Calibration results covered by tests:**
+  - Five demo personas land on levels 1–5 with scores 87.22, 62.74, 42.74, 32.74 and 17.07 (`integration.test.ts`).
+  - The L4 weekly plan goes 32.74 → 39.50 in week 1 (still level 4) → 45.73 in week 2 (level 3), then 48.45 and 48.68 with momentum capped (`momentum.test.ts`).
+  - The L4 Poltergeist forms with 30 × $12 = $360 on $3,000 income (above the $300 threshold), and 30 × $9 = $270 stays as 30 separate ghosts (`ghosts.test.ts`).
+- **Issues caught, by when they were found:**
+  - **Requirements review** ([details](#2026-11-16--spec-review-requirements)): integer-only bands with a real-valued score, a strict property impossible at score 0, throwing at module init, refunds becoming ghosts.
+  - **Design review** ([requirements](#2026-11-16--spec-review-requirements), [design](#2026-11-16--spec-review-design)): float money (switched to integer cents), and the realistic-plan calibration that led to the momentum component.
+  - **Implementation:**
+    - The 30-day off-by-one ([details](#2026-11-17--spec-off-by-one-in-the-30-day-window), [guard](#2026-11-17--property-based-testing-property-14-guards-the-window-fix)).
+    - Property tests deferred to the end, fixed with a steering rule ([details](#2026-11-17--steering-module-level-property-tests-by-default)).
+    - "valid" wrongly included "active". It was found because canceled subscriptions must become graveyard tombstones, so they have to stay valid while being excluded from zombies and Factor C.
+    - A flaky property: the malformed-date generator could produce valid dates (for example `2100-12-21` through the "no padding" template). It was fixed with an independently tested calendar oracle, after which 20 out of 20 runs passed.
+    - While implementing the static check, numeric literal types in `types.ts` (`DecayLevel = 1 | 2 | 3 | 4 | 5`) violated the rule and were moved to `config.ts`.
+  - **End-to-end properties (task 12)** found no new bugs, which confirms the earlier reviews caught them before or during implementation.
+- **Test-construction findings in the L4 trajectory:** a realistic weekly plan has to change the snapshot as well as add events. An extra payment must also reduce the debt balance, and a cancellation counts once, because a subscription can only be canceled once. The cancellation event is added in week 1 only, and the subscription leaves the list from then on. This became the data-layer rule in [`product.md`](../.kiro/steering/product.md) (Data Input → "Data-layer rule: user actions and momentum events"): each user action updates the snapshot and creates its event in one operation, and a subscription produces at most one `subscription_canceled` event.
