@@ -21,6 +21,8 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
+import { useToast } from "@/components/ui/ToastRegion";
+import type { ToastTone } from "@/lib/utils/toastReducer";
 
 type StyleguideSection = {
   id: string;
@@ -520,6 +522,55 @@ function InputSection() {
   );
 }
 
+type ToastTrigger = {
+  tone: ToastTone;
+  label: string;
+  message: string;
+};
+
+const TOAST_TRIGGERS: ToastTrigger[] = [
+  { tone: "success", label: "Toast, success", message: "+$11.99/mo saved" },
+  { tone: "info", label: "Toast, info", message: "Small expenses are up this week" },
+  { tone: "warning", label: "Toast, warning", message: "Visa card payment is due in 3 days" },
+  { tone: "danger", label: "Toast, danger", message: "Payment could not be saved" },
+];
+
+const TOAST_ACTION_LABEL = "Undo";
+const TOAST_ACTION_MESSAGE = "StreamMax canceled, saves $22.99/mo";
+
+function ToastSection() {
+  const { show } = useToast();
+  return (
+    <>
+      {TOAST_TRIGGERS.map((trigger) => (
+        <CardShowcaseItem key={trigger.tone} label={trigger.label}>
+          <Button
+            variant="secondary"
+            onClick={() => show({ tone: trigger.tone, message: trigger.message })}
+          >
+            {`Show ${trigger.tone} toast`}
+          </Button>
+        </CardShowcaseItem>
+      ))}
+      <CardShowcaseItem label="Toast, success, with action">
+        <Button
+          variant="secondary"
+          onClick={() =>
+            show({
+              tone: "success",
+              message: TOAST_ACTION_MESSAGE,
+              actionLabel: TOAST_ACTION_LABEL,
+              onAction: noop,
+            })
+          }
+        >
+          Show toast with action
+        </Button>
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
@@ -532,6 +583,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },
   { id: "input", title: "Input", render: () => <InputSection /> },
+  { id: "toast", title: "Toast", render: () => <ToastSection /> },
 ];
 
 export function StyleguideContent() {

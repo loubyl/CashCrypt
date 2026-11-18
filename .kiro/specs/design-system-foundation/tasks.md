@@ -170,31 +170,31 @@ Conventions that apply to every task:
 - [x] 8. Checkpoint - first primitives
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck` and `npm run lint`; ensure all pass, ask the user if questions arise.
 
-- [ ] 9. Toast and ToastRegion increment
-  - [ ] 9.1 Create `src/lib/utils/toastReducer.ts`
+- [x] 9. Toast and ToastRegion increment
+  - [x] 9.1 Create `src/lib/utils/toastReducer.ts`
     - Export `ToastTone`, `ToastItem`, `ToastAction`, `toastReducer` (`show` appends, `dismiss` of an unknown id returns the same array reference) and `getToastRegion(tone)` (`success`, `info` polite; `warning`, `danger` assertive).
     - _Requirements: 15.3, 15.7, 15.8_
 
-  - [ ] 9.2 Create `src/components/ui/Toast.tsx`
+  - [x] 9.2 Create `src/components/ui/Toast.tsx`
     - Pill on `--surface-overlay` with overlay shadow, one line of `--text-primary`, a distinct icon shape per tone (ecto for success), optional ghost action button with a 44px target.
     - Timer calls `onDismiss` once after `duration` (default 4000ms); pointer enter/leave and focus in/out pause and resume it. Enter: rise 12px with fade, or ≤150ms fade when reduced; animated exit, immediate removal when reduced.
     - _Requirements: 15.1, 15.2, 15.10, 15.11, 15.12, 15.13, 15.14, 15.15, 15.16, 20.9_
 
-  - [ ] 9.3 Create `src/components/ui/ToastRegion.tsx` and mount it in the layout
+  - [x] 9.3 Create `src/components/ui/ToastRegion.tsx` and mount it in the layout
     - `"use client"`; export `ToastRegion` and `useToast` (`show`, `dismiss`; stable callbacks in their own context, deterministic ids from a ref counter). `useToast` outside a region throws an error naming `useToast` and `ToastRegion`.
     - Render `{children}` plus a `data-inert-exempt` wrapper that always contains both live regions on first render: `role="status"` polite and `role="alert"` assertive.
     - Mount `<ToastRegion>` once in `src/app/layout.tsx` around `{children}`.
     - _Requirements: 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 15.9, 15.10, 26.5_
 
-  - [ ] 9.4 Add the Toast section to `StyleguideContent`
+  - [x] 9.4 Add the Toast section to `StyleguideContent`
     - One trigger per tone calling `useToast().show`, plus one example with an action. No second `ToastRegion`.
     - _Requirements: 19.5, 19.9, 19.14, 15.5, 26.2_
 
-  - [ ] 9.5 Write component tests in `tests/ui/Toast.test.tsx` and `tests/ui/ToastRegion.test.tsx`
+  - [x] 9.5 Write component tests in `tests/ui/Toast.test.tsx` and `tests/ui/ToastRegion.test.tsx`
     - Both live regions exist before any toast; success and info land in `role="status"`, warning and danger in `role="alert"`; `show` returns an id, `dismiss` removes it and an unknown id changes nothing; `useToast` outside a region throws; auto-dismiss after `duration` with fake timers; hover and focus pause the timer; action button works; reduced motion removes the rise (`data-reduced-motion`).
     - _Requirements: 15.3, 15.4, 15.7, 15.8, 15.9, 15.12, 15.13, 15.15, 18.5, 22.6_
 
-  - [ ] 9.6 Write property tests in `tests/utils/toastReducer.test.ts`
+  - [x] 9.6 Write property tests in `tests/utils/toastReducer.test.ts`
     - **Property 13: Toast reducer adds to the matching region and ignores unknown dismissals**
     - **Validates: Requirements 15.3, 15.7, 15.8**
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, Inter, JetBrains_Mono, Manrope } from "next/font/google";
+import { ToastRegion } from "@/components/ui/ToastRegion";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -44,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       {/* A browser extension adds attributes to <body> before hydration (confirmed in incognito). */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        {children}
+        <ToastRegion>{children}</ToastRegion>
       </body>
     </html>
   );
