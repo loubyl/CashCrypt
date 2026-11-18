@@ -38,7 +38,7 @@ const ROW_CLASSES = "relative flex h-16 w-full items-center gap-3 text-left font
 
 const INTERACTIVE_CLASSES =
   "rounded-md outline-none transition-colors active:bg-surface-raised " +
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
+  "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
   "disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:opacity-40";
 
 type ListRowContentProps = {

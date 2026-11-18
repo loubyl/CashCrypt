@@ -16,6 +16,7 @@ import {
   Tv,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -330,12 +331,12 @@ function CardSection() {
         </Card>
       </CardShowcaseItem>
       <CardShowcaseItem label="Card, titled">
-        <Card title="Subscriptions">
+        <Card title="Subscriptions" headingLevel="h3">
           <p className="text-body text-ink-secondary">Five zombies in the basement.</p>
         </Card>
       </CardShowcaseItem>
       <CardShowcaseItem label="Card, titled with action">
-        <Card title="Debts" action={{ label: "See all", href: "#styleguide-card" }}>
+        <Card title="Debts" headingLevel="h3" action={{ label: "See all", href: "#styleguide-card" }}>
           <p className="text-body text-ink-secondary">Three debts, one payment due this week.</p>
         </Card>
       </CardShowcaseItem>
@@ -571,11 +572,39 @@ function ToastSection() {
   );
 }
 
+const SHEET_TITLE = "Log a payment";
+
+function BottomSheetSection() {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+  return (
+    <>
+      <CardShowcaseItem label="BottomSheet, opens a sheet below 1024px and a modal from 1024px">
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Open sheet
+        </Button>
+      </CardShowcaseItem>
+      <BottomSheet open={open} onClose={close} title={SHEET_TITLE}>
+        <Input variant="money" label="Payment amount" />
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={close}>Save payment</Button>
+          <Button variant="secondary" onClick={close}>
+            Cancel
+          </Button>
+        </div>
+      </BottomSheet>
+    </>
+  );
+}
+
 /**
  * Sections in the Req 19.5 order. Later tasks insert their primitive section at
  * the right position; a section for a primitive that is not built yet is omitted.
  * Tokens comes first, followed by the primitives.
  */
+// Tokens first, then one section per built primitive in the Requirement 19.5 order:
+// Button, QuickAction, BalanceHero, Card, ListRow, Chip, SegmentedControl, Input,
+// BottomSheet, Toast, LightScoreBar, ExorcismActionRow. Unbuilt primitives are omitted.
 const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
   { id: "button", title: "Button", render: () => <ButtonSection /> },
@@ -583,6 +612,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },
   { id: "input", title: "Input", render: () => <InputSection /> },
+  { id: "bottomsheet", title: "BottomSheet", render: () => <BottomSheetSection /> },
   { id: "toast", title: "Toast", render: () => <ToastSection /> },
 ];
 

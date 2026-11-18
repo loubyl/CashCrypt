@@ -31,7 +31,7 @@ const FILL_CLASSES: Record<InputFill, string> = {
 
 const BASE_FIELD_CLASSES =
   "peer h-13 w-full rounded-md border bg-clip-padding pb-1 pt-5 font-sans text-body-lg text-ink " +
-  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
+  "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
 const TEXT_FIELD_CLASSES = "px-4";

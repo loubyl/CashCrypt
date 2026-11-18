@@ -395,6 +395,14 @@ Other theme entries: `--radius-*: initial` then `--radius-pill: 999px`, `--radiu
 
 Motion durations exist twice, on purpose: as CSS custom properties in `:root` for CSS transitions, and as constants in `src/components/ui/motionTokens.ts` (`PRESS_DURATION_S = 0.12`, `TAB_DURATION_S = 0.2`, `SHEET_DURATION_S = 0.28`, `COUNT_DURATION_S = 0.6`, `PRESS_SCALE = 0.97`, `REDUCED_FADE_MAX_S = 0.15`, `TOAST_RISE_PX = 12`, …) for Framer Motion. `tokens.test.ts` parses the CSS and asserts both agree.
 
+## Decision 6b — Focus_Ring classes
+
+Every keyboard-focusable primitive uses exactly these classes for the Focus_Ring:
+
+`outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus`
+
+`focus-visible:outline-solid` is required. In Tailwind v4, `outline-none` (and `outline-hidden`) also set `--tw-outline-style: none`, and `outline-2` draws `outline-style: var(--tw-outline-style)`. Without `outline-solid` the ring gets its color, width and offset but `outline-style: none`, so nothing is drawn. `tests/design-system/focusRing.test.ts` checks every interactive primitive for these classes, and `tests/design-system/tokens.test.ts` compiles the theme to check that the focus color utility exists and that the ring compiles to a solid outline.
+
 ## Decision 7 — Hex labels in the styleguide without hex literals
 
 Requirement 19.6 needs swatches that show a hex value, and Requirement 3 bans hex literals under `src/` outside `globals.css`. The swatch component renders its token name and fills the hex label at runtime from `getComputedStyle(document.documentElement).getPropertyValue(token)` inside a ref callback (writes `textContent`, no React state, no effect). The value comes from the token sheet, so it cannot drift. In jsdom the stylesheet is not loaded, so tests assert the token name; the hex values themselves are asserted by `tokens.test.ts` (Requirement 24.7).

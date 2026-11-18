@@ -198,34 +198,34 @@ Conventions that apply to every task:
     - **Property 13: Toast reducer adds to the matching region and ignores unknown dismissals**
     - **Validates: Requirements 15.3, 15.7, 15.8**
 
-- [ ] 10. BottomSheet increment
-  - [ ] 10.1 Create `src/lib/utils/focusTrap.ts`
+- [x] 10. BottomSheet increment
+  - [x] 10.1 Create `src/lib/utils/focusTrap.ts`
     - Export `FOCUSABLE_SELECTOR`, `getNextFocusIndex(count, current, shift)` and `shouldSkipInert(tagName, hasInertExemptAttribute)` exactly as in design.md Decision 4. Total functions, never throw.
     - _Requirements: 14.3, 14.4_
 
-  - [ ] 10.2 Create `src/components/ui/BottomSheet.tsx`
+  - [x] 10.2 Create `src/components/ui/BottomSheet.tsx`
     - `isClient` through `useSyncExternalStore`; `createPortal` into `document.body` inside `AnimatePresence`; `role="dialog"`, `aria-modal="true"`, `aria-labelledby` title; card surface, 24px radius (top radius plus drag handle below 1024px, full radius at 1024px and above); one DOM structure with responsive classes and a `matchMedia` query for the motion variant.
     - On open: record the previously focused element, set `inert` on `body` children except those matched by `shouldSkipInert`, restoring prior state on cleanup; set `data-scroll-locked` on `<html>`; focus the first focusable element or the dialog container.
     - Tab and Shift+Tab trap via `getNextFocusIndex`; Escape through a `document` keydown listener calls `onClose` once; scrim (`role="presentation"`, `aria-hidden`) click calls `onClose` once; 44px "Close" button with `aria-label="Close"`; focus restored on close even during the exit animation.
     - Spring `{ type: "spring", duration: 0.28, bounce: 0.1 }`; reduced motion uses an opacity fade ≤150ms.
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 14.10, 14.11, 14.12, 18.1, 18.2_
 
-  - [ ] 10.3 Add the BottomSheet section to `StyleguideContent`
+  - [x] 10.3 Add the BottomSheet section to `StyleguideContent`
     - A trigger button that opens a sheet containing a title, an Input and two Buttons (so focus trapping is exercised); local `useState` for open state.
     - _Requirements: 19.5, 19.9, 19.14, 26.2_
 
-  - [ ] 10.4 Write component tests in `tests/ui/BottomSheet.test.tsx`
+  - [x] 10.4 Write component tests in `tests/ui/BottomSheet.test.tsx`
     - Dialog role, `aria-modal`, accessible name; focus moves in on open and returns to the trigger on close; Tab and Shift+Tab wrap inside the dialog; Escape and scrim click call `onClose` once; "Close" button name; `data-scroll-locked` set and removed; portal parent is `document.body`; closed sheet renders nothing.
     - Inert cases: with a `data-inert-exempt` div, a `next-route-announcer`, a `nextjs-portal` (and an upper-case variant) and an ordinary sibling, only the ordinary sibling gets `inert`; closing restores it; an element already `inert` before opening stays `inert` after.
     - Viewport helper: below and at 1024px width; reduced motion fade (`data-reduced-motion`).
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 14.12, 18.5, 22.5_
 
-  - [ ] 10.5 Write property tests in `tests/utils/focusTrap.test.ts`
+  - [x] 10.5 Write property tests in `tests/utils/focusTrap.test.ts`
     - **Property 12: Focus index wraps within the trap**
     - **Property 15: Inert exemptions depend only on the tag name and the exempt attribute**
     - **Validates: Requirements 14.4**
 
-  - [ ] 10.6 Create the first axe test in `tests/ui/styleguide.axe.test.tsx`
+  - [x] 10.6 Create the first axe test in `tests/ui/styleguide.axe.test.tsx`
     - Render `StyleguideContent` inside a `ToastRegion`; run `expectNoAxeViolations` with the sheet closed and with the sheet open (open it through the trigger). If axe reports `aria-hidden-focus`-style findings because jsdom does not model `inert`, also set `aria-hidden="true"` on the inerted siblings in `BottomSheet.tsx` instead of disabling a rule.
     - _Requirements: 23.1, 23.2, 23.3, 23.6, 14.4_
 

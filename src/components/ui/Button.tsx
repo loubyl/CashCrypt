@@ -52,7 +52,7 @@ const ICON_ONLY_WIDTH: Record<ButtonSize, string> = {
 
 const BASE_CLASSES =
   "relative inline-flex shrink-0 select-none items-center justify-center rounded-pill font-sans font-semibold " +
-  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
+  "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
   "disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-progress";
 
 const buttonVariants: Variants = {

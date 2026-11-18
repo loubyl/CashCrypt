@@ -11,6 +11,10 @@
     "9.6 Write property tests in `tests/utils/toastReducer.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1794987985300
+    },
+    "10.5 Write property tests in `tests/utils/focusTrap.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1794991767869
     }
   },
   "executionHistory": {
@@ -395,6 +399,85 @@
         "executionId": "4da79669-4041-440d-99e1-1e426b32d164",
         "chatSessionId": "sess_9904ce02-0801-439a-bf5c-493ce4d5ce18",
         "timestamp": 1794990448448
+      }
+    ],
+    "10.1 Create `src/lib/utils/focusTrap.ts`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991491688
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991641756
+      }
+    ],
+    "10.2 Create `src/components/ui/BottomSheet.tsx`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991651022
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991859464
+      }
+    ],
+    "10.5 Write property tests in `tests/utils/focusTrap.test.ts`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991651180
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991860256
+      }
+    ],
+    "10.3 Add the BottomSheet section to `StyleguideContent`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794991860831
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992099202
+      }
+    ],
+    "10.4 Write component tests in `tests/ui/BottomSheet.test.tsx`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992099744
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992568937
+      }
+    ],
+    "10.6 Create the first axe test in `tests/ui/styleguide.axe.test.tsx`": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992569475
+      },
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992653348
+      }
+    ],
+    "10. BottomSheet increment": [
+      {
+        "executionId": "8d78cd99-d617-4a79-97f0-e0fb15d4275a",
+        "chatSessionId": "sess_41b31103-1afa-4a97-b0f4-6eb64998fcf2",
+        "timestamp": 1794992653440
       }
     ]
   }

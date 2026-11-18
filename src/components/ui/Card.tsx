@@ -29,7 +29,7 @@ const TITLE_CLASSES = "font-display text-title text-ink";
 
 const ACTION_CLASSES =
   "inline-flex min-h-11 shrink-0 items-center rounded-pill bg-transparent px-2 font-sans text-label font-semibold text-candle " +
-  "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+  "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 type CardActionControlProps = {
   action: CardAction;

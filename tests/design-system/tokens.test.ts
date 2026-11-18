@@ -331,3 +331,34 @@ describe("root layout fonts", () => {
     expect(layout).not.toMatch(/geist/i);
   });
 });
+
+describe("compiled theme: focus ring utilities", () => {
+  // Compiles globals.css with the same Tailwind version the app uses (Turbopack loader).
+  async function compileCandidates(candidates: string[]): Promise<string> {
+    const { compile } = await import("@tailwindcss/node");
+    const compiler = await compile(css, { base: ROOT_DIR, onDependency: () => undefined });
+    return compiler.build(candidates).replace(/\s+/g, " ");
+  }
+
+  it("generates the focus color utility from --color-focus", async () => {
+    const out = await compileCandidates(["outline-focus", "focus-visible:outline-focus"]);
+    expect(out).toContain(".outline-focus { outline-color: var(--focus-ring); }");
+    expect(out).toContain(".focus-visible\\:outline-focus:focus-visible { outline-color: var(--focus-ring); }");
+  });
+
+  it("compiles the ring to a solid 2px outline even though outline-none cancels the style variable", async () => {
+    const out = await compileCandidates([
+      "outline-none",
+      "focus-visible:outline-solid",
+      "focus-visible:outline-2",
+      "focus-visible:outline-offset-2",
+    ]);
+    // The trap: outline-none sets the variable to none and outline-2 reads the variable.
+    expect(out).toContain("--tw-outline-style: none;");
+    expect(out).toContain(".focus-visible\\:outline-2:focus-visible { outline-style: var(--tw-outline-style); outline-width: 2px; }");
+    // The fix: on focus the style is set back to solid.
+    expect(out).toContain(".focus-visible\\:outline-solid:focus-visible { --tw-outline-style: solid; outline-style: solid; }");
+    expect(out).toContain(".focus-visible\\:outline-offset-2:focus-visible { outline-offset: 2px; }");
+  });
+});
+

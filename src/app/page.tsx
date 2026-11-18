@@ -11,7 +11,7 @@ export default function Home() {
       </p>
       <Link
         href="/styleguide"
-        className="self-start rounded-md text-body-lg text-candle underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="self-start rounded-md text-body-lg text-candle underline underline-offset-4 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
       >
         View the styleguide
       </Link>
