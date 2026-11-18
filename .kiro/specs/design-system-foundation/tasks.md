@@ -276,16 +276,16 @@ Conventions that apply to every task:
     - Extend `tests/ui/ExorcismActionRow.test.tsx`: three droplets appear on check, none appear when reduced, droplets are hidden from assistive technology.
     - _Requirements: 17.10, 17.11_
 
-- [ ] 14. QuickAction increment
-  - [ ] 14.1 Create `src/components/ui/QuickAction.tsx`
+- [x] 14. QuickAction increment
+  - [x] 14.1 Create `src/components/ui/QuickAction.tsx`
     - Native `<button>` with a 52px circle on the raised surface, 22px icon, label beneath in the `label` scale as the accessible name, 44px minimum target. Press scale 0.97 over 120ms and a ±6° icon wiggle over 200ms on activation, both disabled when reduced; disabled dims and ignores activation.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 5.13, 18.1_
 
-  - [ ] 14.2 Add the QuickAction section to `StyleguideContent`
+  - [x] 14.2 Add the QuickAction section to `StyleguideContent`
     - A row of four actions (Log payment, Add expense, Import CSV, Exorcise) plus a disabled example.
     - _Requirements: 19.5, 19.8, 19.14, 26.2_
 
-  - [ ] 14.3 Write component tests in `tests/ui/QuickAction.test.tsx`
+  - [x] 14.3 Write component tests in `tests/ui/QuickAction.test.tsx`
     - Role and name from the label, Enter and Space activate once, disabled ignores activation, reduced motion applies neither press scale nor wiggle (`data-reduced-motion`).
     - _Requirements: 7.2, 7.5, 7.6, 18.5, 21.3, 22.5_
 

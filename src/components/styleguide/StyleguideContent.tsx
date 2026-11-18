@@ -3,6 +3,7 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Banknote,
   Check,
   CreditCard,
   Ghost,
@@ -14,6 +15,7 @@ import {
   Trash2,
   TriangleAlert,
   Tv,
+  Upload,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
@@ -24,6 +26,7 @@ import { ExorcismActionRow } from "@/components/ui/ExorcismActionRow";
 import { Input } from "@/components/ui/Input";
 import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { ListRow } from "@/components/ui/ListRow";
+import { QuickAction } from "@/components/ui/QuickAction";
 import { useToast } from "@/components/ui/ToastRegion";
 import type { ToastTone } from "@/lib/utils/toastReducer";
 
@@ -311,6 +314,26 @@ function ButtonSection() {
           </div>
         </div>
       </ShowcaseCard>
+    </>
+  );
+}
+
+function QuickActionSection() {
+  return (
+    <>
+      <CardShowcaseItem label="QuickAction, row of four">
+        <div className="flex flex-wrap items-start gap-4">
+          <QuickAction icon={Banknote} label="Log payment" onClick={noop} />
+          <QuickAction icon={Plus} label="Add expense" onClick={noop} />
+          <QuickAction icon={Upload} label="Import CSV" onClick={noop} />
+          <QuickAction icon={Ghost} label="Exorcise" onClick={noop} />
+        </div>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="QuickAction, disabled">
+        <div className="flex flex-wrap items-start gap-4">
+          <QuickAction icon={Banknote} label="Log payment" onClick={noop} disabled />
+        </div>
+      </CardShowcaseItem>
     </>
   );
 }
@@ -699,6 +722,7 @@ function ExorcismActionRowSection() {
 const SECTIONS: StyleguideSection[] = [
   { id: "tokens", title: "Tokens", render: () => <TokensSection /> },
   { id: "button", title: "Button", render: () => <ButtonSection /> },
+  { id: "quickaction", title: "QuickAction", render: () => <QuickActionSection /> },
   { id: "card", title: "Card", render: () => <CardSection /> },
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },
