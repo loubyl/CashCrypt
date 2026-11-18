@@ -315,31 +315,31 @@ Conventions that apply to every task:
     - **Property 9: Delta direction and intent are independent**
     - **Validates: Requirements 8.3, 8.4, 8.6, 8.7, 8.8, 8.12, 8.13**
 
-- [ ] 16. SegmentedControl increment
-  - [ ] 16.1 Create `src/lib/utils/segmentedNav.ts`
+- [x] 16. SegmentedControl increment
+  - [x] 16.1 Create `src/lib/utils/segmentedNav.ts`
     - Export `SegmentNavKey` and `getNextEnabledIndex(disabled, current, key)`: cyclic next and prev skipping disabled entries, `first` and `last` pick the lowest and highest enabled index, returns `current` when nothing is enabled or `current` is out of range. Total.
     - _Requirements: 12.4, 12.5, 12.6, 12.8_
 
-  - [ ] 16.2 Create `src/components/ui/SegmentedControl.tsx`
+  - [x] 16.2 Create `src/components/ui/SegmentedControl.tsx`
     - `role="radiogroup"` with a required `aria-label` or `aria-labelledby` (union type); each segment `<button role="radio" aria-checked>` with roving `tabIndex`; selected segment white with near-black text on a raised pill track.
     - Keys: Right and Down → next, Left and Up → previous, Home, End, all through `getNextEnabledIndex`; `onChange` called once per selection; disabled segments skipped and ignore pointer activation.
     - Selected indicator is a `motion.span` with `layoutId` over 200ms, or an opacity fade ≤150ms when reduced.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 21.6, 18.1_
 
-  - [ ] 16.3 Add the SegmentedControl section to `StyleguideContent`
+  - [x] 16.3 Add the SegmentedControl section to `StyleguideContent`
     - Two- and three-option controls with interactive local state, and one with a disabled segment.
     - _Requirements: 19.5, 19.8, 19.14, 26.2_
 
-  - [ ] 16.4 Write component tests in `tests/ui/SegmentedControl.test.tsx`
+  - [x] 16.4 Write component tests in `tests/ui/SegmentedControl.test.tsx`
     - Radiogroup and radio roles, `aria-checked`, roving tabindex, arrow keys, Home, End and wrap-around with user-event, disabled segment skipped and not selectable by click, `onChange` called once per change, `// @ts-expect-error` for a missing accessible name, reduced motion (`data-reduced-motion`).
     - _Requirements: 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 18.5, 22.5, 22.6_
 
-  - [ ] 16.5 Write property tests in `tests/utils/segmentedNav.test.ts`
+  - [x] 16.5 Write property tests in `tests/utils/segmentedNav.test.ts`
     - **Property 10: Segmented navigation always lands on an enabled segment**
     - **Property 11: Segmented navigation forms a cycle**
     - **Validates: Requirements 12.4, 12.5, 12.6, 12.8**
 
-- [ ] 17. Checkpoint - all primitives
+- [x] 17. Checkpoint - all primitives
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck`, `npm run lint` and `npm run build`; ensure all pass and the styleguide contains a section for every primitive, ask the user if questions arise.
 
 - [ ] 18. Closing pass: final axe run, keyboard test, documentation

@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/Input";
 import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { ListRow } from "@/components/ui/ListRow";
 import { QuickAction } from "@/components/ui/QuickAction";
+import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
 import { useToast } from "@/components/ui/ToastRegion";
 import { getDeltaPresentation, type DeltaDirection, type DeltaIntent } from "@/lib/utils/delta";
 import type { ToastTone } from "@/lib/utils/toastReducer";
@@ -552,6 +553,57 @@ function ChipSection() {
   );
 }
 
+const TWO_OPTIONS: SegmentedControlOption[] = [
+  { value: "monthly", label: "Monthly" },
+  { value: "yearly", label: "Yearly" },
+];
+
+const THREE_OPTIONS: SegmentedControlOption[] = [
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+  { value: "year", label: "Year" },
+];
+
+const DISABLED_SEGMENT_OPTIONS: SegmentedControlOption[] = [
+  { value: "debts", label: "Debts" },
+  { value: "subscriptions", label: "Subscriptions" },
+  { value: "archive", label: "Archive", disabled: true },
+];
+
+function SegmentedControlSection() {
+  const [twoValue, setTwoValue] = useState("monthly");
+  const [threeValue, setThreeValue] = useState("month");
+  const [disabledValue, setDisabledValue] = useState("debts");
+  return (
+    <>
+      <CardShowcaseItem label="SegmentedControl, two options">
+        <SegmentedControl
+          aria-label="Billing period, two options"
+          options={TWO_OPTIONS}
+          value={twoValue}
+          onChange={setTwoValue}
+        />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="SegmentedControl, three options">
+        <SegmentedControl
+          aria-label="Time range, three options"
+          options={THREE_OPTIONS}
+          value={threeValue}
+          onChange={setThreeValue}
+        />
+      </CardShowcaseItem>
+      <CardShowcaseItem label="SegmentedControl, with a disabled segment">
+        <SegmentedControl
+          aria-label="List type, one segment disabled"
+          options={DISABLED_SEGMENT_OPTIONS}
+          value={disabledValue}
+          onChange={setDisabledValue}
+        />
+      </CardShowcaseItem>
+    </>
+  );
+}
+
 const INPUT_ERROR_TEXT = "Enter an amount greater than zero.";
 const INPUT_HINT_TEXT = "Use the amount from your statement.";
 const NAME_HINT_TEXT = "Use the name shown on your bank statement.";
@@ -777,6 +829,7 @@ const SECTIONS: StyleguideSection[] = [
   { id: "card", title: "Card", render: () => <CardSection /> },
   { id: "listrow", title: "ListRow", render: () => <ListRowSection /> },
   { id: "chip", title: "Chip", render: () => <ChipSection /> },
+  { id: "segmentedcontrol", title: "SegmentedControl", render: () => <SegmentedControlSection /> },
   { id: "input", title: "Input", render: () => <InputSection /> },
   { id: "bottomsheet", title: "BottomSheet", render: () => <BottomSheetSection /> },
   { id: "toast", title: "Toast", render: () => <ToastSection /> },

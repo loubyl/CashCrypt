@@ -23,6 +23,10 @@
     "15.5 Write property tests in `tests/utils/money.test.ts`, `tests/utils/score.test.ts` and `tests/utils/delta.test.ts`": {
       "status": "passed",
       "lastRunTimestamp": 1795000372906
+    },
+    "16.5 Write property tests in `tests/utils/segmentedNav.test.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1795000642599
     }
   },
   "executionHistory": {
@@ -706,6 +710,73 @@
         "executionId": "b9d6b6e7-d3eb-4f46-b139-f1472971ffac",
         "chatSessionId": "sess_ae3dbdd0-2ef4-4587-a088-8ddd5b8cf651",
         "timestamp": 1795000381654
+      }
+    ],
+    "16.1 Create `src/lib/utils/segmentedNav.ts`": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000521172
+      },
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000587330
+      }
+    ],
+    "16.2 Create `src/components/ui/SegmentedControl.tsx`": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000588167
+      },
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000709224
+      }
+    ],
+    "16.5 Write property tests in `tests/utils/segmentedNav.test.ts`": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000596492
+      },
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000710189
+      }
+    ],
+    "16.3 Add the SegmentedControl section to `StyleguideContent`": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000711050
+      },
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000842089
+      }
+    ],
+    "16.4 Write component tests in `tests/ui/SegmentedControl.test.tsx`": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000711933
+      },
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000842923
+      }
+    ],
+    "16. SegmentedControl increment": [
+      {
+        "executionId": "61aa9d25-980f-4ced-b5d4-8dde90a4bc05",
+        "chatSessionId": "sess_f4e9adca-0550-40a3-b875-556f7e4f9e9b",
+        "timestamp": 1795000842961
       }
     ]
   }
