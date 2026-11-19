@@ -321,62 +321,62 @@ Conventions that apply to every task:
     - Create `tests/ui/landing.test.tsx`: wordmark and pitch render, one primary Button, "Enter the demo crypt" sets mode `demo`, seeds `level-4` and navigates to `/`, onboarding creates the Profile and sets mode `real`, income of $0.99 keeps the sheet open with an error and writes nothing, "Continue to my crypt" appears when a Profile exists, link to `/styleguide` present
     - _Requirements: 16.2, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 31.8_
 
-- [ ] 9. Group 8: Dashboard
-  - [ ] 9.1 Implement pure plan and score view helpers
+- [x] 9. Group 8: Dashboard
+  - [x] 9.1 Implement pure plan and score view helpers
     - Create `src/lib/utils/planView.ts` (`summarizePlan`, `getDoItTarget`, `getPaymentPrefill`, `getExtraAboveMinimum`, `getActionImpactText`, `getToastForCompletion`) and `src/lib/utils/scoreView.ts` (`getScoreDelta`, `getLevelLabel`, `getLevelAnnouncement`)
     - _Requirements: 21.2, 21.3, 21.13, 22.1, 22.3, 22.4, 22.9, 25.3, 25.4, 25.8_
 
-  - [ ] 9.2 Write property test for Do it targets and pre-fill
+  - [x] 9.2 Write property test for Do it targets and pre-fill
     - **Property 24: Do it is offered only where it can work, with a safe pre-fill**
     - **Validates: Requirements 13.8, 14.6, 22.9, 22.10, 25.3, 25.4, 25.8, 25.9**
 
-  - [ ] 9.3 Write property test for the plan summary
+  - [x] 9.3 Write property test for the plan summary
     - **Property 25: The plan summary adds up**
     - **Validates: Requirements 22.1, 22.4, 22.5**
 
-  - [ ] 9.4 Write property test for the weekly delta
+  - [x] 9.4 Write property test for the weekly delta
     - **Property 26: The weekly delta appears only when the displayed score changed**
     - **Validates: Requirements 21.2, 21.3**
 
-  - [ ] 9.5 Make `ExorcismActionRow.impactText` optional
+  - [x] 9.5 Make `ExorcismActionRow.impactText` optional
     - In `src/components/ui/ExorcismActionRow.tsx` make `impactText` optional and skip rendering the impact span when it is omitted; extend `tests/ui/ExorcismActionRow.test.tsx` with a case asserting no impact span, and confirm existing cases still pass
     - _Requirements: 22.2, 28.6_
 
-  - [ ] 9.6 Implement `LogPaymentSheet`
+  - [x] 9.6 Implement `LogPaymentSheet`
     - Create `src/components/sheets/LogPaymentSheet.tsx` with props `debts`, `initialDebtId?`, `prefillCents?`: Debt picker (ListRows) when several debts have a balance and none is given, debt name, balance and minimum, money Input "Payment amount" pre-filled with the minimum limited to the balance (or `prefillCents`), "$X goes above your minimum" text, primary "Save payment", error on the Input for empty, 0 or above-balance amounts while the sheet stays open, success toast "Payment saved. $X off your balance."
     - _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 25.8, 25.9, 28.5_
 
-  - [ ] 9.7 Implement `CancelSubscriptionSheet`
+  - [x] 9.7 Implement `CancelSubscriptionSheet`
     - Create `src/components/sheets/CancelSubscriptionSheet.tsx` stating "Cancel <name> — saves $X/mo" with "Keep it" and a danger "Cancel subscription" Button; on confirm call `cancelSubscription` and show the success toast "+$X/mo saved"
     - _Requirements: 23.5, 23.6, 28.5_
 
-  - [ ] 9.8 Implement `AddExpenseSheet`
+  - [x] 9.8 Implement `AddExpenseSheet`
     - Create `src/components/sheets/AddExpenseSheet.tsx`: money Input "Amount", text Input "What was it?", category SegmentedControl (Coffee, Food, Transport, Other), dated with `now`, errors on empty amount, 0 or empty description with the sheet kept open, toast "Ghost added: $X" below `SMALL_EXPENSE_THRESHOLD_CENTS`
     - _Requirements: 26.5, 26.6, 26.7_
 
-  - [ ] 9.9 Implement the plan card with Do it
+  - [x] 9.9 Implement the plan card with Do it
     - Create `src/components/exorcism/ExorcismPlan.tsx` (`variant="card"` or `"page"`, owns the Do it sheets, skeleton while the plan is generated) and `src/components/exorcism/ExorcismPlanAction.tsx` (`ExorcismActionRow` id `plan-<weekKey>-<actionId>`, secondary Do it Button named `Do it: <title>` shown only when `getDoItTarget` returns a target, checkbox always usable, row disabled while its mutation runs)
     - Do it opens `CancelSubscriptionSheet` or `LogPaymentSheet` (pre-filled); the completed action appears done through Auto_Completion with no second toast; focus moves to that row's checkbox when the Do it button disappears; ticking uses `useExorcismPlan().toggleAction` with the toast of `getToastForCompletion` and the error toast "Could not save that action. Try again."
     - _Requirements: 14.6, 14.7, 22.2, 22.3, 22.6, 22.7, 22.9, 22.10, 22.11, 22.12, 28.7, 30.5_
 
-  - [ ] 9.10 Implement `DemoControls`
+  - [x] 9.10 Implement `DemoControls`
     - Create `src/components/demo/DemoControls.tsx`: Card with a "Level 1" to "Level 5" SegmentedControl, "Reset demo" and "Skip to next week" Buttons, toasts "Demo reset" and the new date, polite live region "Loaded demo level N"; rendered only while the Demo_Crypt is active
     - _Requirements: 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 30.3_
 
-  - [ ] 9.11 Implement `PoltergeistBanner` and `ScenePlaceholder`
+  - [x] 9.11 Implement `PoltergeistBanner` and `ScenePlaceholder`
     - Create `src/components/dashboard/PoltergeistBanner.tsx` (Card with Chip icon and text "A Poltergeist is haunting you: $X in small expenses in 30 days") and `src/components/dashboard/ScenePlaceholder.tsx` (visible "House scene arrives in the next update" and the level label such as "Level 4 — Crumbling")
     - _Requirements: 21.11, 21.12, 30.4_
 
-  - [ ] 9.12 Implement the Dashboard and wire it into the home route
+  - [x] 9.12 Implement the Dashboard and wire it into the home route
     - Create `src/components/dashboard/Dashboard.tsx` (replace the stub from task 8.2): one `BalanceHero` `format="score"` with `showMax` and the delta from `getScoreDelta`, `LightScoreBar` with base and momentum, four QuickActions (Log payment disabled with no debt balance, Add expense, Import CSV disabled, Exorcise navigates to `/exorcism`), "This week's exorcism" Card with "See all" using `ExorcismPlan`, Poltergeist banner, scene placeholder, `DemoControls` in demo mode, visually hidden `aria-live="polite"` level announcement, at most one primary Button
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.8, 21.9, 21.10, 21.11, 21.12, 21.13, 21.14, 21.15, 29.5, 30.3_
 
-  - [ ] 9.13 Write Dashboard tests
+  - [x] 9.13 Write Dashboard tests
     - Create `tests/ui/dashboard.test.tsx` against a `fake-indexeddb` crypt: render with the L4 demo, light score and breakdown, delta appears only when floored scores differ, QuickAction order and disabled states, Poltergeist banner, placeholder text, live region, Skip to next week generates a new plan
     - Do it flows: the cancellation Do it opens the cancel sheet and the action shows done afterwards with one toast; the extra-payment Do it opens the Log payment sheet pre-filled with minimum plus $300 and shows done afterwards; no Do it on `fallback` or `reduce_small_expenses` actions; ticking works; an invalid payment keeps the sheet open
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.8, 21.11, 21.12, 21.13, 21.15, 22.9, 22.10, 22.11, 31.8_
 
-  - [ ] 9.14 Write sheet tests
+  - [x] 9.14 Write sheet tests
     - Create `tests/ui/sheets.test.tsx` covering `LogPaymentSheet` (picker, pre-fill, above-minimum text, empty, 0 and above-balance errors, focus returns to the opener on close), `CancelSubscriptionSheet` ("Keep it" writes nothing, confirm writes and toasts) and `AddExpenseSheet` (valid ghost toast, invalid fields)
     - _Requirements: 23.5, 23.6, 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 26.5, 26.6, 26.7, 30.5_
 

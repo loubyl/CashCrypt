@@ -75,6 +75,18 @@
     "5.6 Write property test for demo isolation": {
       "status": "passed",
       "lastRunTimestamp": 1795074821794
+    },
+    "9.3 Write property test for the plan summary": {
+      "status": "passed",
+      "lastRunTimestamp": 1795081015987
+    },
+    "9.2 Write property test for Do it targets and pre-fill": {
+      "status": "passed",
+      "lastRunTimestamp": 1795081019692
+    },
+    "9.4 Write property test for the weekly delta": {
+      "status": "passed",
+      "lastRunTimestamp": 1795081036476
     }
   },
   "executionHistory": {
@@ -949,6 +961,191 @@
         "executionId": "213dad99-e8c3-4528-8d59-1bc030ab4db6",
         "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
         "timestamp": 1795080388234
+      }
+    ],
+    "9.1 Implement pure plan and score view helpers": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080820759
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080927436
+      }
+    ],
+    "9.5 Make `ExorcismActionRow.impactText` optional": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080821418
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080926736
+      }
+    ],
+    "9.2 Write property test for Do it targets and pre-fill": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080931327
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081046567
+      }
+    ],
+    "9.3 Write property test for the plan summary": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080932164
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081044782
+      }
+    ],
+    "9.4 Write property test for the weekly delta": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080932943
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081044007
+      }
+    ],
+    "9.6 Implement `LogPaymentSheet`": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080933756
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081047436
+      }
+    ],
+    "9.7 Implement `CancelSubscriptionSheet`": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795080934459
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081045791
+      }
+    ],
+    "9.8 Implement `AddExpenseSheet`": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081048218
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081106635
+      }
+    ],
+    "9.10 Implement `DemoControls`": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081049028
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081104250
+      }
+    ],
+    "9.11 Implement `PoltergeistBanner` and `ScenePlaceholder`": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081049869
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081105331
+      }
+    ],
+    "9.9 Implement the plan card with Do it": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081109955
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081252457
+      }
+    ],
+    "9.14 Write sheet tests": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081110534
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081253374
+      },
+      {
+        "executionId": "f9d8c08f-ef80-4988-a047-97b194579d01",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081705860
+      },
+      {
+        "executionId": "f9d8c08f-ef80-4988-a047-97b194579d01",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795082383561
+      }
+    ],
+    "9.12 Implement the Dashboard and wire it into the home route": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081256933
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081471781
+      }
+    ],
+    "9.13 Write Dashboard tests": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081472413
+      },
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081643700
+      }
+    ],
+    "9. Group 8: Dashboard": [
+      {
+        "executionId": "1121726a-bc09-4558-99dd-26de747c89b8",
+        "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
+        "timestamp": 1795081643755
       }
     ]
   }

@@ -28,8 +28,8 @@ export type ExorcismActionRowProps = {
   id: string;
   title: string;
   subtitle?: string;
-  /** Monthly impact without sign or suffix, for example "$22.99". */
-  impactText: string;
+  /** Monthly impact without sign or suffix, for example "$22.99". When omitted, no impact is rendered. */
+  impactText?: string;
   done: boolean;
   /** Called once per activation with the next done value. */
   onToggle: (next: boolean) => void;
@@ -88,11 +88,13 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
           <span className={`truncate text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>{title}</span>
           {subtitle ? <span className={`truncate text-caption ${subtitleColor}`}>{subtitle}</span> : null}
         </span>
-        <span className={`shrink-0 text-right text-body-lg tabular-nums ${impactColor}`}>
-          {IMPACT_SIGN}
-          {impactText}
-          {IMPACT_SUFFIX}
-        </span>
+        {impactText ? (
+          <span className={`shrink-0 text-right text-body-lg tabular-nums ${impactColor}`}>
+            {IMPACT_SIGN}
+            {impactText}
+            {IMPACT_SUFFIX}
+          </span>
+        ) : null}
       </motion.div>
     );
   },

@@ -101,6 +101,13 @@ describe("ExorcismActionRow", () => {
     expect(impact).not.toHaveClass("text-ink-tertiary");
   });
 
+  it("renders no impact span when impactText is omitted", () => {
+    const { container } = renderRow({ impactText: undefined });
+    expect(screen.queryByText(/\/mo/)).toBeNull();
+    expect(container.querySelector(".text-ecto")).toBeNull();
+    expect(screen.getByText(TITLE)).toBeInTheDocument();
+  });
+
   it("renders the subtitle only when one is given", () => {
     const { rerender, onToggle } = renderRow();
     expect(screen.queryByText("Streaming")).toBeNull();

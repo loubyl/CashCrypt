@@ -1,0 +1,154 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { Landmark } from "lucide-react";
+import { BottomSheet } from "@/components/ui/BottomSheet";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { ListRow } from "@/components/ui/ListRow";
+import { useToast } from "@/components/ui/ToastRegion";
+import { useCryptActions } from "@/hooks/useCryptActions";
+import { centsToMoneyText, formatCents, formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
+import { getExtraAboveMinimum, getPaymentPrefill } from "@/lib/utils/planView";
+import { validatePaymentAmount } from "@/lib/validation/inputs";
+import type { DebtRow } from "@/types/finance";
+
+const SHEET_TITLE = "Log payment";
+const PICKER_TITLE = "Choose a debt";
+const EMPTY_AMOUNT_ERROR = "Enter the payment amount.";
+const GENERIC_ERROR = "Could not save the payment. Try again.";
+
+export type LogPaymentSheetProps = {
+  open: boolean;
+  onClose: () => void;
+  debts: readonly DebtRow[];
+  /** Skips the picker and shows this Debt. */
+  initialDebtId?: string;
+  /** Pre-fill in cents (minimum plus suggested amount), limited to the balance. */
+  prefillCents?: number;
+};
+
+type PaymentFormProps = {
+  debt: DebtRow;
+  prefillCents?: number;
+  onClose: () => void;
+};
+
+function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
+  const { logPayment } = useCryptActions();
+  const toast = useToast();
+  const initialCents =
+    prefillCents === undefined ? getPaymentPrefill(debt) : Math.min(Math.max(prefillCents, 0), debt.balanceCents);
+  const [text, setText] = useState(initialCents > 0 ? centsToMoneyText(initialCents) : "");
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [submitting, setSubmitting] = useState(false);
+
+  const parsed = parseMoneyToCents(text);
+  const extraCents = parsed === null ? 0 : getExtraAboveMinimum(parsed, debt.minimumPaymentCents);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (submitting) return;
+    if (text.trim() === "" || parsed === null) {
+      setError(EMPTY_AMOUNT_ERROR);
+      return;
+    }
+    const checked = validatePaymentAmount(parsed, debt);
+    if (!checked.ok) {
+      setError(checked.errors[0]?.message ?? GENERIC_ERROR);
+      return;
+    }
+    setError(undefined);
+    setSubmitting(true);
+    const result = await logPayment(debt.id, checked.value);
+    setSubmitting(false);
+    if (!result.ok) {
+      setError(
+        result.error.kind === "validation"
+          ? (result.error.errors[0]?.message ?? GENERIC_ERROR)
+          : result.error.message,
+      );
+      return;
+    }
+    onClose();
+    toast.show({
+      tone: "success",
+      message: `Payment saved. ${formatCentsShort(checked.value)} off your balance.`,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <p className="text-body-lg text-ink">{debt.name}</p>
+        <p className="text-body text-ink-secondary">
+          Balance {formatCents(debt.balanceCents)}. Minimum {formatCents(debt.minimumPaymentCents)}/mo.
+        </p>
+      </div>
+      <Input
+        label="Payment amount"
+        variant="money"
+        fill="raised"
+        value={text}
+        error={error}
+        onChange={(event) => {
+          setText(event.target.value);
+          setError(undefined);
+        }}
+      />
+      {extraCents > 0 ? (
+        <p className="text-body text-ecto">{formatCentsShort(extraCents)} goes above your minimum</p>
+      ) : null}
+      <Button type="submit" variant="primary" size="lg" loading={submitting}>
+        Save payment
+      </Button>
+    </form>
+  );
+}
+
+export function LogPaymentSheet({
+  open,
+  onClose,
+  debts,
+  initialDebtId,
+  prefillCents,
+}: LogPaymentSheetProps) {
+  const [pickedId, setPickedId] = useState<string | undefined>(undefined);
+  const payable = debts.filter((debt) => debt.balanceCents > 0);
+  const givenDebt = initialDebtId === undefined ? undefined : debts.find((debt) => debt.id === initialDebtId);
+  const pickedDebt = payable.find((debt) => debt.id === pickedId);
+  const selected = givenDebt ?? pickedDebt ?? (payable.length === 1 ? payable[0] : undefined);
+  const usePrefill = givenDebt !== undefined;
+
+  const handleClose = () => {
+    setPickedId(undefined);
+    onClose();
+  };
+
+  return (
+    <BottomSheet open={open} onClose={handleClose} title={selected ? SHEET_TITLE : PICKER_TITLE}>
+      {selected ? (
+        <PaymentForm
+          key={selected.id}
+          debt={selected}
+          prefillCents={usePrefill ? prefillCents : undefined}
+          onClose={handleClose}
+        />
+      ) : (
+        <div className="flex flex-col">
+          {payable.map((debt) => (
+            <ListRow
+              key={debt.id}
+              icon={Landmark}
+              tone="blood"
+              title={debt.name}
+              subtitle={`Minimum ${formatCents(debt.minimumPaymentCents)}/mo`}
+              amount={formatCents(debt.balanceCents)}
+              onClick={() => setPickedId(debt.id)}
+            />
+          ))}
+        </div>
+      )}
+    </BottomSheet>
+  );
+}
