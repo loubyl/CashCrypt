@@ -101,7 +101,8 @@ export function getWeekEnd(weekKey: LocalDate): LocalDate {
   return addDays(weekKey, LAST_DAY_OF_WEEK_OFFSET);
 }
 
-function formatMonthDay(date: LocalDate): string {
+/** Formats a date as "Jun 2". */
+export function formatMonthDay(date: LocalDate): string {
   const parsed = new Date(parseLocalDate(date));
   return `${MONTH_LABELS[parsed.getUTCMonth()]} ${parsed.getUTCDate()}`;
 }

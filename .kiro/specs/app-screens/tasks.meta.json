@@ -1190,6 +1190,49 @@
         "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
         "timestamp": 1795130911048
       }
+    ],
+    "12.1 Implement subscription list helpers": [
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131013963
+      },
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131147295
+      }
+    ],
+    "12.2 Implement the Subscriptions screen": [
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131147980
+      },
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131456921
+      }
+    ],
+    "12.3 Write Subscriptions screen tests": [
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131457553
+      },
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131568654
+      }
+    ],
+    "12. Group 10: Subscriptions": [
+      {
+        "executionId": "a93a5b73-4b0b-4b12-8832-62ef2beb6abc",
+        "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
+        "timestamp": 1795131568700
+      }
     ]
   }
 }

@@ -393,16 +393,16 @@ Conventions that apply to every task:
     - Create `tests/ui/exorcism.screen.test.tsx`: progress line and money freed update after ticking, completion message when all three are done, failed mutation shows "Could not save that action. Try again." and leaves the row unchanged, row disabled while saving, Do it flows for a cancellation and for an extra payment (sheet pre-filled, action done afterwards, one toast), no Do it on `fallback` and `reduce_small_expenses` actions, checkbox stays usable on actions with Do it, skeleton shown while loading
     - _Requirements: 22.1, 22.3, 22.4, 22.5, 22.6, 22.7, 22.9, 22.10, 22.11, 22.12, 31.8_
 
-- [ ] 12. Group 10: Subscriptions
-  - [ ] 12.1 Implement subscription list helpers
+- [x] 12. Group 10: Subscriptions
+  - [x] 12.1 Implement subscription list helpers
     - Create `src/lib/utils/listViews.ts` with `sortSubscriptionsByMonthlyCost` (using the engine's `normalizeSubscription`) and `sortDebtsByBalance`
     - _Requirements: 23.1, 24.1_
 
-  - [ ] 12.2 Implement the Subscriptions screen
+  - [x] 12.2 Implement the Subscriptions screen
     - Create `src/components/screens/SubscriptionsScreen.tsx` and `src/app/(app)/subscriptions/page.tsx`: active rows ("Monthly · Rarely used") sorted by monthly cost with a usage Chip (icon and text), summary Card with total monthly cost, primary "Add subscription" sheet (name, amount, cadence and usage SegmentedControls, field errors for empty name and amount 0), details sheet with usage change and danger "Cancel subscription" that opens `CancelSubscriptionSheet`, Graveyard Card with "R.I.P. $X/mo" and cancellation date, "Bring it back" calling `reactivateSubscription`, empty states "No zombies in the basement. Suspiciously quiet." and "No tombstones yet. Suspiciously quiet."
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 28.6, 30.1, 30.4_
 
-  - [ ] 12.3 Write Subscriptions screen tests
+  - [x] 12.3 Write Subscriptions screen tests
     - Create `tests/ui/subscriptions.test.tsx`: sorted rows and subtitles, total card, empty states, add flow with toast, invalid add (empty name, amount 0) creates no row, cancel flow toast "+$120/mo saved" and graveyard entry, "Bring it back" toast, focus returns to the opener after the sheet closes
     - _Requirements: 23.1, 23.3, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 31.8_
 
