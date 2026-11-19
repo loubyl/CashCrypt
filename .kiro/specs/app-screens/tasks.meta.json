@@ -1147,6 +1147,18 @@
         "chatSessionId": "sess_c58aa798-3eba-4e8b-8ffb-43847cf56c32",
         "timestamp": 1795081643755
       }
+    ],
+    "10. Checkpoint - Dashboard and demo flow": [
+      {
+        "executionId": "c12c6d04-b7d0-4cb8-aa3d-95d391b5e3d1",
+        "chatSessionId": "sess_aa20edc4-9d7f-4d79-9b96-6e7f28fc9be8",
+        "timestamp": 1795083281092
+      },
+      {
+        "executionId": "c12c6d04-b7d0-4cb8-aa3d-95d391b5e3d1",
+        "chatSessionId": "sess_aa20edc4-9d7f-4d79-9b96-6e7f28fc9be8",
+        "timestamp": 1795083583278
+      }
     ]
   }
 }

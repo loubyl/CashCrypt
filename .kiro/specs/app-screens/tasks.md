@@ -380,7 +380,7 @@ Conventions that apply to every task:
     - Create `tests/ui/sheets.test.tsx` covering `LogPaymentSheet` (picker, pre-fill, above-minimum text, empty, 0 and above-balance errors, focus returns to the opener on close), `CancelSubscriptionSheet` ("Keep it" writes nothing, confirm writes and toasts) and `AddExpenseSheet` (valid ghost toast, invalid fields)
     - _Requirements: 23.5, 23.6, 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 26.5, 26.6, 26.7, 30.5_
 
-- [ ] 10. Checkpoint - Dashboard and demo flow
+- [x] 10. Checkpoint - Dashboard and demo flow
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass and fix any failure. The agent does not start a dev server.
   - Ask the user to do a manual browser check by running `npm run dev` in their own terminal: open the app, press "Enter the demo crypt", confirm the Dashboard shows the light score (32 at level 4) and "This week's exorcism" with three actions, tick one action and use "Do it" on another, confirm the score and the done state update without a reload, then press "Skip to next week" and confirm a fresh plan appears. Wait for the user's confirmation or reported problems before continuing, ask the user if questions arise.
 
