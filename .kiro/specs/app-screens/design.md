@@ -49,7 +49,7 @@ flowchart TD
   end
   subgraph Components["src/components (Client Components)"]
     Screens["screens, sheets, shell, common"]
-    UI["ui/ primitives (unchanged except ExorcismActionRow.impactText)"]
+    UI["ui/ primitives (unchanged except ExorcismActionRow and LightScoreBar.caption)"]
   end
   subgraph Hooks["src/hooks"]
     H["useCrypt, useNow, useHouseState, useExorcismPlan, useDemo, useCryptData, useCryptActions, useCreateCrypt"]
@@ -169,7 +169,8 @@ sequenceDiagram
 | File | Change | Why |
 |---|---|---|
 | `src/lib/haunting/index.ts` | Also export `normalizeSubscription`, `dollarsToCents` and the `SubscriptionInCents` type. No computed output changes; no numeric literal is added. | Requirement 7.2 (cancellation event amount uses the engine's cadence normalization) and the planner's money conversion. `tests/haunting/staticChecks.test.ts` must keep passing. |
-| `src/components/ui/ExorcismActionRow.tsx` | `impactText` becomes optional. When omitted, the impact span is not rendered. Add a test in `tests/ui/ExorcismActionRow.test.tsx`. | D8 |
+| `src/components/ui/ExorcismActionRow.tsx` | `impactText` becomes optional. When omitted, the impact span is not rendered. The title may wrap to two lines (`line-clamp-2`, row `min-h-16` with `py-2`) so the saving in it stays visible; the subtitle stays one line (`truncate`). Tests in `tests/ui/ExorcismActionRow.test.tsx`. | D8; titles like "Cancel Wraithcast — saves $120/mo" were cut before the amount |
+| `src/components/ui/LightScoreBar.tsx` | Optional `caption?: string \| null` replaces the score number above the track: a string renders as a caption, `null` renders nothing, omitted keeps the number. `aria-valuetext` always states the score. | The Dashboard shows the score in its BalanceHero, so the bar shows the next-level distance (Requirement 21.4) |
 | `src/app/page.tsx` → `src/app/(app)/page.tsx`, `src/app/layout.tsx` | Move and wrap with `CryptProvider`. | Routing |
 | `.kiro/steering/structure.md` | Add `src/components/{shell,common,landing,dashboard,sheets,settings,screens}/`, `src/lib/validation/`, `src/hooks/useCrypt.tsx`, `tests/db/`, `tests/demo/`. | Keep the steering layout true. |
 | `package.json` | Add `dexie`, `dexie-react-hooks` (dependencies) and `fake-indexeddb` (devDependency). Versions: Dexie 4 line, current `dexie-react-hooks` and `fake-indexeddb` majors at install time. | Requirement 1.1 |
@@ -394,7 +395,7 @@ All files are Client Components unless noted. Folders follow `structure.md` and 
 | `common/StorageBlockedCard` | `Card`, link | Text from Requirement 10.7. |
 | `landing/Landing` | native `main`, `h1` (wordmark font), `Button` ×2, `OnboardingSheet`, link `/styleguide` | One primary Button ("Enter the demo crypt"). "Continue to my crypt" replaces "Start my own crypt" semantics when `hasRealProfile` is true (the latter stays as secondary). |
 | `sheets/OnboardingSheet` | `BottomSheet`, money `Input`, primary `Button` | Validates with `validateIncome`; keeps the sheet open and sets `Input.error` on failure. Also used by Settings. |
-| `dashboard/Dashboard` | `BalanceHero`, `LightScoreBar`, `QuickAction`×4, `ExorcismPlan` (card variant), `PoltergeistBanner`, `ScenePlaceholder`, `DemoControls`, visually hidden live region | Delta from `getScoreDelta(lightScore, plan.startLightScore)`. |
+| `dashboard/Dashboard` | `BalanceHero`, `LightScoreBar`, `QuickAction`×4, `ExorcismPlan` (card variant), `PoltergeistBanner`, `ScenePlaceholder`, `DemoControls`, visually hidden live region | Delta from `getScoreDelta(lightScore, plan.startLightScore)`. The LightScoreBar gets `caption={getNextLevelText(decayLevel, lightScore)}` (`src/lib/utils/scoreView.ts`): "17 to Level 2" from the floored score to the next band minimum, `null` at level 1, so the score number appears once, in the BalanceHero. |
 | `dashboard/PoltergeistBanner` | `Card`, `Chip` (icon + text) | "A Poltergeist is haunting you: $X in small expenses in 30 days". |
 | `dashboard/ScenePlaceholder` | native region | Visible text "House scene arrives in the next update" and `getLevelLabel(level)`. |
 | `exorcism/ExorcismPlan` | `ExorcismPlanAction`, `LogPaymentSheet`, `CancelSubscriptionSheet`, skeleton | `variant="card"` (Dashboard) or `"page"`. Owns the Do it sheets so both screens behave the same. After a Do it sheet closes and the Do it button is gone, focus moves to that row's checkbox. |
@@ -405,8 +406,8 @@ All files are Client Components unless noted. Folders follow `structure.md` and 
 | `screens/TransactionsScreen` | `ListRow`, `Chip` ("Ghost" with icon), `Card`, `AddExpenseSheet` | Summary Card, empty state. |
 | `screens/SettingsScreen` | `Input`, `Button`, `SegmentedControl`, `BottomSheet`, `DemoControls` | Income, Crypt switcher, optional export/import, Clear all data (real only). |
 | `demo/DemoControls` | `Card`, `SegmentedControl` (Level 1–5), `Button` ×2, polite live region | Rendered only while the Demo_Crypt is active. |
-| `sheets/LogPaymentSheet` | `BottomSheet`, `ListRow` picker, money `Input`, primary `Button` | Props: `debts`, `initialDebtId?`, `prefillCents?`. Skips the picker when a debt is given. |
-| `sheets/CancelSubscriptionSheet` | `BottomSheet`, "Keep it" and danger buttons | States "Cancel Wraithcast — saves $120/mo" (`formatCentsShort`). |
+| `sheets/LogPaymentSheet` | `BottomSheet`, `ListRow` picker, money `Input`, primary `Button` | Props: `debts`, `initialDebtId?`, `prefillCents?`. Skips the picker when a debt is given. The facts line is one sentence with `formatCentsShort` ("Balance $18,000. Minimum $400/mo."). |
+| `sheets/CancelSubscriptionSheet` | `BottomSheet`, secondary "Keep it" and primary "Cancel subscription" buttons (canceling is the good action; `danger` is only for deleting data) | States "Cancel Wraithcast — saves $120/mo" (`formatCentsShort`). |
 | `sheets/AddExpenseSheet` | `BottomSheet`, money `Input`, text `Input`, category `SegmentedControl` | Dates with `now`; toast "Ghost added: $X" below the threshold. |
 
 Each Screen renders exactly one `h1` and sits inside the shell's `<main>`. Landing renders its own `<main>` because it has no shell. Each Screen keeps at most one primary Button and at most one `hero`-scale number. Mutation toasts use `success` for savings and payments and `danger` for failures.

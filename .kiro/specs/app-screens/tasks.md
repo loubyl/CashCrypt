@@ -180,7 +180,7 @@ Conventions that apply to every task:
 
   - [x] 3.4 Write property test for plan structure
     - **Property 15: The plan always has three distinct, sorted, pending actions**
-    - Mutation check: temporarily skip the final re-sort after the forced extra payment and confirm the property fails
+    - Final re-sort removed as redundant: `extra` is outside the top three, so the first two non-extra actions are `ranking[0]` and `ranking[1]`, already in order. Before removing it, the generator was measured to force the extra payment in about 11% of cases (100% in the dedicated forced generator), and property 15 was confirmed to detect a wrong order (putting `extra` first fails both properties)
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.6, 13.5, 13.7, 15.2, 15.3, 15.5, 15.12**
 
   - [x] 3.5 Write property test for planner determinism and purity
@@ -347,7 +347,7 @@ Conventions that apply to every task:
     - _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 25.8, 25.9, 28.5_
 
   - [x] 9.7 Implement `CancelSubscriptionSheet`
-    - Create `src/components/sheets/CancelSubscriptionSheet.tsx` stating "Cancel <name> — saves $X/mo" with "Keep it" and a danger "Cancel subscription" Button; on confirm call `cancelSubscription` and show the success toast "+$X/mo saved"
+    - Create `src/components/sheets/CancelSubscriptionSheet.tsx` stating "Cancel <name> — saves $X/mo" with a secondary "Keep it" and a primary "Cancel subscription" Button; on confirm call `cancelSubscription` and show the success toast "+$X/mo saved"
     - _Requirements: 23.5, 23.6, 28.5_
 
   - [x] 9.8 Implement `AddExpenseSheet`
@@ -368,7 +368,7 @@ Conventions that apply to every task:
     - _Requirements: 21.11, 21.12, 30.4_
 
   - [x] 9.12 Implement the Dashboard and wire it into the home route
-    - Create `src/components/dashboard/Dashboard.tsx` (replace the stub from task 8.2): one `BalanceHero` `format="score"` with `showMax` and the delta from `getScoreDelta`, `LightScoreBar` with base and momentum, four QuickActions (Log payment disabled with no debt balance, Add expense, Import CSV disabled, Exorcise navigates to `/exorcism`), "This week's exorcism" Card with "See all" using `ExorcismPlan`, Poltergeist banner, scene placeholder, `DemoControls` in demo mode, visually hidden `aria-live="polite"` level announcement, at most one primary Button
+    - Create `src/components/dashboard/Dashboard.tsx` (replace the stub from task 8.2): one `BalanceHero` `format="score"` with `showMax` and the delta from `getScoreDelta`, `LightScoreBar` with base and momentum and `caption={getNextLevelText(...)}` instead of a second score number, four QuickActions (Log payment disabled with no debt balance, Add expense, Import CSV disabled, Exorcise navigates to `/exorcism`), "This week's exorcism" Card with "See all" using `ExorcismPlan`, Poltergeist banner, scene placeholder, `DemoControls` in demo mode, visually hidden `aria-live="polite"` level announcement, at most one primary Button
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.8, 21.9, 21.10, 21.11, 21.12, 21.13, 21.14, 21.15, 29.5, 30.3_
 
   - [x] 9.13 Write Dashboard tests

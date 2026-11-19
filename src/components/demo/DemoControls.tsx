@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
@@ -14,6 +14,7 @@ const SCENARIO_PREFIX = "level-";
 const RESET_MESSAGE = "Demo reset";
 const ERROR_MESSAGE = "Something went wrong. Try again.";
 
+const SCENARIO_LABEL = "Start scenario";
 const LEVEL_OPTIONS: readonly SegmentedControlOption[] = LEVELS.map((level) => ({
   value: `${SCENARIO_PREFIX}${level}`,
   label: `Level ${level}`,
@@ -30,6 +31,7 @@ export function DemoControls() {
   const toast = useToast();
   const [announcement, setAnnouncement] = useState("");
   const [busy, setBusy] = useState(false);
+  const scenarioLabelId = useId();
 
   if (status !== "demo") return null;
 
@@ -72,8 +74,12 @@ export function DemoControls() {
   return (
     <Card title="Demo controls" headingLevel="h2">
       <div className="mt-3 flex flex-col gap-3">
+        {/* Visible name: this picks the scenario to load, not the current house level. */}
+        <p id={scenarioLabelId} className="text-label text-ink-secondary">
+          {SCENARIO_LABEL}
+        </p>
         <SegmentedControl
-          aria-label="Demo level"
+          aria-labelledby={scenarioLabelId}
           options={LEVEL_OPTIONS}
           value={demo.scenarioId ?? ""}
           onChange={(value) => void handleSelect(value)}

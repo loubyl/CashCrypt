@@ -63,7 +63,8 @@ export function CancelSubscriptionSheet({
             {ERROR_MESSAGE}
           </p>
         ) : null}
-        <Button type="button" variant="danger" size="lg" loading={submitting} onClick={handleConfirm}>
+        {/* Canceling a zombie is the good action, so it is the primary pill. Danger is for deleting data. */}
+        <Button type="button" variant="primary" size="lg" loading={submitting} onClick={handleConfirm}>
           Cancel subscription
         </Button>
         <Button type="button" variant="secondary" size="lg" disabled={submitting} onClick={onClose}>

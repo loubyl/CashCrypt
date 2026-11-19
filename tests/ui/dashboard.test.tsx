@@ -68,7 +68,11 @@ describe("Dashboard on the level 4 demo", () => {
     expect(screen.getByText("Light score", { selector: "p" })).toBeTruthy();
     expect(screen.getByText(L4_SCORE_TEXT)).toBeTruthy();
     expect(screen.getByText("32 = 32 base + 0 momentum")).toBeTruthy();
-    expect(screen.getByRole("meter", { name: "Light score" })).toBeTruthy();
+    const meter = screen.getByRole("meter", { name: "Light score" });
+    // The BalanceHero shows the score once; the bar shows the distance to the next level.
+    expect(within(meter).getByText("8 to Level 3")).toBeTruthy();
+    expect(within(meter).queryByText("32")).toBeNull();
+    expect(meter.getAttribute("aria-valuetext")).toBe("Light score 32 of 100");
     expect(screen.getByText(POLTERGEIST_TEXT)).toBeTruthy();
     expect(screen.getByText("Poltergeist")).toBeTruthy();
     expect(screen.getByText("House scene arrives in the next update")).toBeTruthy();
@@ -222,9 +226,11 @@ describe("Delta baseline", () => {
 describe("Demo controls visibility", () => {
   it("shows the level control, Reset demo and Skip to next week in demo mode", async () => {
     await renderDemo();
-    expect(screen.getByRole("radiogroup", { name: "Demo level" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "Start scenario" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Reset demo" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Skip to next week" })).toBeTruthy();
+    // The name is visible text, so it is not mistaken for the current house level.
+    expect(screen.getByText("Start scenario", { selector: "p" })).toBeTruthy();
   });
 
   it("renders none of the demo controls in real mode with data", async () => {
@@ -234,7 +240,7 @@ describe("Demo controls visibility", () => {
       seed: { plans: [storedPlan([action({ id: "a" }), action({ id: "b" }), action({ id: "c" })])] },
     });
     await screen.findByRole("heading", { name: "This week's exorcism" });
-    expect(screen.queryByRole("radiogroup", { name: "Demo level" })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "Start scenario" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Reset demo" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Skip to next week" })).toBeNull();
     expect(screen.queryByText("Demo controls")).toBeNull();

@@ -207,7 +207,7 @@ The chrome stays calm at rest. The Halloween comes out as **moments**: short, pl
 
 All primitives live in `src/components/ui/`. Each has visible focus, pressed and disabled states.
 
-- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood fill with `text-on-accent`. Heights 36 / 44 / 52. Min touch target 44px.
+- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood fill with `text-on-accent`, only for destructive data actions (deleting a row). Canceling a subscription is the good action in CashCrypt, so it uses `primary`. Heights 36 / 44 / 52. Min touch target 44px.
 - **QuickAction**: 52px circle on raised surface with a 22px icon, label underneath (13/500). Row of 4 under the hero: Log payment, Add expense, Import CSV, Exorcise.
 - **BalanceHero**: label (secondary), `hero` number, delta chip underneath (ecto "−$640 this month" with ↓ icon, or blood with ↑).
 - **Card**: card surface, radius 24, padding 20, no border. Optional header: `title` + ghost "See all" link.
@@ -217,8 +217,8 @@ All primitives live in `src/components/ui/`. Each has visible focus, pressed and
 - **Input**: radius 16, 52px tall, card or raised fill + `--border-control` 1px, floating label. **Focus (exception to the offset ring):** one line, not two. On `:focus-visible` the field's border turns candle and a 2px candle outline sits on the border with no gap (offset -1px, covering the 1px border), so a single 2px candle line shows and the grey border never appears next to the ring. With an error the focused line stays blood, not candle. Other primitives keep the 2px ring with 2px offset. Money input: large Manrope number centered, currency prefix in secondary.
 - **BottomSheet / Modal**: card surface, radius 24 top (sheet on mobile) or all corners (modal on desktop), drag handle on mobile, focus trap, Esc closes.
 - **Toast**: overlay surface, pill, icon + one line ("+$11.99/mo saved").
-- **LightScoreBar**: 10px pill track (raised), fill blood → candle → ecto by score, number always shown.
-- **ExorcismActionRow**: ListRow with a round checkbox on the left; impact in ecto ("+$22.99/mo"); when done, title strikes through and the row dims to tertiary, and the checkbox fills with candle with its check icon in `text-on-accent`.
+- **LightScoreBar**: 10px pill track (raised), fill blood → candle → ecto by score, number always shown: by the bar itself, or by a BalanceHero next to it, in which case the bar's optional `caption` shows the distance to the next level instead ("17 to Level 2"). `aria-valuetext` always states the score.
+- **ExorcismActionRow**: ListRow with a round checkbox on the left; the title wraps to at most two lines so the saving stays visible, the subtitle stays on one line; impact in ecto ("+$22.99/mo"); when done, title strikes through and the row dims to tertiary, and the checkbox fills with candle with its check icon in `text-on-accent`.
 
 Icons: Lucide, 20px in rows, 22px in quick actions, stroke 2, inherit color.
 

@@ -115,8 +115,18 @@ describe("LogPaymentSheet", () => {
     const input = (await screen.findByLabelText(PAYMENT_LABEL)) as HTMLInputElement;
     expect(input.value).toBe("50.00");
     expect(screen.getByText("Gloom Card")).toBeTruthy();
-    expect(screen.getByText(/Balance \$2,000\.00\. Minimum \$50\.00\/mo\./)).toBeTruthy();
+    expect(screen.getByText("Balance $2,000. Minimum $50/mo.")).toBeTruthy();
     expect(screen.queryByText(/goes above your minimum/)).toBeNull();
+  });
+
+  it("keeps cents in the debt facts sentence when the amount has them", async () => {
+    const user = userEvent.setup();
+    await renderWithCrypt(
+      <PaymentHost />,
+      realSeed({ debts: [{ ...CARD, balanceCents: 200_050, minimumPaymentCents: 4_999 }] }),
+    );
+    await openSheet(user);
+    expect(await screen.findByText("Balance $2,000.50. Minimum $49.99/mo.")).toBeTruthy();
   });
 
   it("limits the pre-fill to the balance", async () => {
@@ -223,6 +233,10 @@ describe("CancelSubscriptionSheet", () => {
       (button) => button.textContent?.includes(CANCEL_LABEL) && !button.textContent.includes(KEEP_LABEL),
     );
     expect(confirm).toBeTruthy();
+    // Canceling a zombie is the good action: primary pill, with "Keep it" as secondary.
+    expect(confirm?.getAttribute("data-variant")).toBe("primary");
+    expect(screen.getByRole("button", { name: KEEP_LABEL }).getAttribute("data-variant")).toBe("secondary");
+    expect(dialog.querySelector('button[data-variant="danger"]')).toBeNull();
     await user.click(confirm as HTMLButtonElement);
     expect(await screen.findByText("+$120/mo saved")).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());

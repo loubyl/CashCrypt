@@ -58,6 +58,19 @@ describe("LightScoreBar", () => {
     expect(getFill(meter).style.width).toBe(`${expected}%`);
   });
 
+  it("replaces the score number with a caption, or with nothing, and keeps the score in aria-valuetext", () => {
+    const { rerender } = render(<LightScoreBar score={43.49} caption="17 to Level 2" aria-label={LABEL} />);
+    const meter = screen.getByRole("meter");
+    expect(screen.getByText("17 to Level 2")).toBeTruthy();
+    expect(screen.queryByText("43")).toBeNull();
+    expect(meter.getAttribute("aria-valuetext")).toBe("Light score 43 of 100");
+    rerender(<LightScoreBar score={85} caption={null} aria-label={LABEL} />);
+    expect(screen.queryByText("85")).toBeNull();
+    expect(meter.textContent).toBe("");
+    rerender(<LightScoreBar score={85} aria-label={LABEL} />);
+    expect(screen.getByText("85")).toBeTruthy();
+  });
+
   it("applies the fill immediately when motion is reduced", () => {
     setReducedMotion(true);
     render(<LightScoreBar score={64} aria-label={LABEL} />);

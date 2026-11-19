@@ -300,7 +300,7 @@ Tailwind CSS v4 is configured in CSS with `@theme` and has no `tailwind.config.t
 #### Acceptance Criteria
 
 1. THE LightScoreBar SHALL render a 10px-high pill track on `--surface-raised` with a fill whose width equals the score percentage and whose color follows the Token gradient blood → candle → ecto by score.
-2. THE LightScoreBar SHALL always render the numeric score as text, as `Math.floor(score)`.
+2. THE LightScoreBar SHALL always render the numeric score as text, as `Math.floor(score)`, unless the optional `caption` prop is given (added by the app-screens spec for a bar that sits next to a BalanceHero showing the same score); a `caption` string replaces the number and `null` renders nothing. `aria-valuetext` SHALL always state the score.
 3. WHERE `baseScore` and `momentum` props are provided, THE LightScoreBar SHALL render the breakdown text in the form "39 = 33 base + 6 momentum", using `Math.floor` on each part.
 4. THE LightScoreBar SHALL expose `role="meter"` with `aria-valuemin="0"`, `aria-valuemax="100"`, `aria-valuenow` equal to the score, `aria-valuetext` describing the score, and an accessible name.
 5. IF the `score` prop is outside [0, 100] or is not a finite number, THEN THE LightScoreBar SHALL clamp it to [0, 100], treating `NaN` as 0, before computing the fill width and the numeric text.

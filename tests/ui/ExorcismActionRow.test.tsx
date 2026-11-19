@@ -66,6 +66,14 @@ describe("ExorcismActionRow", () => {
     expect(screen.getByText(TITLE)).toHaveClass("line-through");
   });
 
+  it("lets the title wrap to two lines and keeps the subtitle to one line", () => {
+    renderRow({ subtitle: "Open Subscriptions to cancel it" });
+    const title = screen.getByText(TITLE);
+    expect(title).toHaveClass("line-clamp-2");
+    expect(title).not.toHaveClass("truncate");
+    expect(screen.getByText("Open Subscriptions to cancel it")).toHaveClass("truncate");
+  });
+
   it("does not strike through the title when open", () => {
     renderRow();
     expect(screen.getByText(TITLE)).not.toHaveClass("line-through");

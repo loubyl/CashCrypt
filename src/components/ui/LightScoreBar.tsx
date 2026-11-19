@@ -28,6 +28,7 @@ const FILL_CLASSES = "h-full rounded-pill bg-[image:var(--light-score-gradient)]
 const SCORE_CLASSES = "font-display text-title text-ink tabular-nums";
 
 const BREAKDOWN_CLASSES = "font-sans text-label text-ink-secondary";
+const CAPTION_CLASSES = BREAKDOWN_CLASSES;
 
 type FillTarget = {
   width: string;
@@ -57,6 +58,7 @@ const fillVariants: Variants = {
 };
 
 type OwnPropNames =
+  | "caption"
   | "score"
   | "baseScore"
   | "momentum"
@@ -73,6 +75,12 @@ export type LightScoreBarProps = NativeProps & {
   baseScore?: number;
   /** Momentum part of the score. */
   momentum?: number;
+  /**
+   * Replaces the score number above the track. Use only when the score is already shown next to
+   * the bar (for example by a BalanceHero in the same card). A string renders as a caption, null
+   * renders nothing. Omitted: the score number. `aria-valuetext` always states the score.
+   */
+  caption?: string | null;
   /** Accessible name of the meter. Required. */
   "aria-label": string;
   /** Layout utilities only (margin, width, grid placement). Never colors or spacing. */
@@ -81,7 +89,7 @@ export type LightScoreBarProps = NativeProps & {
 
 export const LightScoreBar = forwardRef<HTMLDivElement, LightScoreBarProps>(
   function LightScoreBar(
-    { score, baseScore, momentum, "aria-label": ariaLabel, className, ...rest },
+    { score, baseScore, momentum, caption, "aria-label": ariaLabel, className, ...rest },
     ref,
   ) {
     const reduced = Boolean(useReducedMotion());
@@ -104,7 +112,11 @@ export const LightScoreBar = forwardRef<HTMLDivElement, LightScoreBarProps>(
         className={classes}
         data-reduced-motion={reduced ? "true" : "false"}
       >
-        <span className={SCORE_CLASSES}>{scoreText}</span>
+        {caption === undefined ? (
+          <span className={SCORE_CLASSES}>{scoreText}</span>
+        ) : caption === null ? null : (
+          <span className={CAPTION_CLASSES}>{caption}</span>
+        )}
         <div className={TRACK_CLASSES}>
           <motion.div
             className={FILL_CLASSES}

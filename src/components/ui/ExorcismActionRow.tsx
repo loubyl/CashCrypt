@@ -11,8 +11,9 @@ const MS_PER_S = 1000;
 const IMPACT_SIGN = "+";
 const IMPACT_SUFFIX = "/mo";
 
-// Same row metrics as ListRow (64px high, 12px gap), with a checkbox in place of the avatar.
-const ROW_CLASSES = "relative flex h-16 w-full items-center gap-3 text-left font-sans";
+// Same row metrics as ListRow (at least 64px high, 12px gap). The title may wrap to two lines so
+// the saving in it stays visible; the row then grows instead of truncating.
+const ROW_CLASSES = "relative flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
 
 // 44px touch target around the 24px round checkbox.
 const TARGET_CLASSES = "relative inline-flex size-11 shrink-0 cursor-pointer items-center justify-center";
@@ -85,7 +86,7 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
           </motion.span>
         </label>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`truncate text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>{title}</span>
+          <span className={`line-clamp-2 text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>{title}</span>
           {subtitle ? <span className={`truncate text-caption ${subtitleColor}`}>{subtitle}</span> : null}
         </span>
         {impactText ? (

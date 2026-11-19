@@ -82,7 +82,7 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
       <div className="flex flex-col gap-1">
         <p className="text-body-lg text-ink">{debt.name}</p>
         <p className="text-body text-ink-secondary">
-          Balance {formatCents(debt.balanceCents)}. Minimum {formatCents(debt.minimumPaymentCents)}/mo.
+          Balance {formatCentsShort(debt.balanceCents)}. Minimum {formatCentsShort(debt.minimumPaymentCents)}/mo.
         </p>
       </div>
       <Input

@@ -15,7 +15,7 @@ import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { QuickAction } from "@/components/ui/QuickAction";
 import { useExorcismPlan } from "@/hooks/useExorcismPlan";
 import { useHouseState } from "@/hooks/useHouseState";
-import { getLevelAnnouncement, getScoreDelta } from "@/lib/utils/scoreView";
+import { getLevelAnnouncement, getNextLevelText, getScoreDelta } from "@/lib/utils/scoreView";
 import { PoltergeistBanner } from "./PoltergeistBanner";
 import { ScenePlaceholder } from "./ScenePlaceholder";
 
@@ -82,6 +82,8 @@ export function Dashboard() {
             score={houseState.lightScore}
             baseScore={houseState.baseScore}
             momentum={houseState.momentum}
+            // The BalanceHero above already shows the score, so the bar shows the next level instead.
+            caption={getNextLevelText(houseState.decayLevel, houseState.lightScore)}
             className="mt-4"
           />
           <div className="mt-6 grid grid-cols-4 gap-2">

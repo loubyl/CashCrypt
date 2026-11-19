@@ -365,7 +365,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 1. WHILE the Demo_Crypt is active, THE Navigation_Shell SHALL show a "Demo mode" Chip, with the Demo_Now date as text, on every Screen except Landing.
 2. WHILE the Demo_Crypt is active, THE Dashboard and the Settings screen SHALL show a Demo controls Card that contains the scenario switcher, a "Reset demo" Button and a "Skip to next week" Button.
-3. THE scenario switcher SHALL be a SegmentedControl with five options labelled "Level 1" to "Level 5", whose selected option is the current scenario id.
+3. THE scenario switcher SHALL be a SegmentedControl with five options labelled "Level 1" to "Level 5", whose selected option is the current scenario id, named by the visible label "Start scenario" so that it is not read as the current house level.
 4. WHEN the user selects another scenario, THE Demo_Service SHALL load it, replacing the Demo_Crypt contents, and THE App SHALL announce "Loaded demo level N" in an `aria-live="polite"` region.
 5. WHEN the user activates "Reset demo", THE Demo_Service SHALL reload the current scenario with Demo_Now set to the current Local_Date, and THE App SHALL show a toast "Demo reset".
 6. WHEN the user activates "Skip to next week", THE Demo_Service SHALL set Demo_Now to Demo_Now plus 7 days in the Demo_Crypt Profile, and THE App SHALL show a toast that states the new date.
@@ -413,7 +413,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 1. THE Dashboard SHALL show one BalanceHero with `format="score"`, label "Light score", the light score from the House_State and `showMax`, and no other `hero`-scale number.
 2. WHEN the displayed light score differs from the displayed `startLightScore` of the current Weekly_Plan (both floored), THE Dashboard SHALL show a BalanceHero delta that states the signed difference followed by "this week", with direction and intent matching the sign.
 3. WHEN the two floored scores are equal, THE Dashboard SHALL show no delta.
-4. THE Dashboard SHALL show a LightScoreBar with the light score, the base score and the momentum, so that the displayed breakdown reads like "39 = 33 base + 6 momentum".
+4. THE Dashboard SHALL show a LightScoreBar with the light score, the base score and the momentum, so that the displayed breakdown reads like "39 = 33 base + 6 momentum". Because the BalanceHero in the same card already shows the score, the LightScoreBar SHALL show the distance from the displayed score to the next healthier level instead of a second score number ("17 to Level 2" at 43), and nothing in its place at level 1.
 5. THE Dashboard SHALL show four QuickActions in this order: "Log payment", "Add expense", "Import CSV" and "Exorcise".
 6. WHEN the user activates "Log payment", THE Dashboard SHALL open the Log payment BottomSheet of Requirement 25, and WHEN there is no Debt with a balance above 0, THE QuickAction SHALL be disabled.
 7. WHEN the user activates "Add expense", THE Dashboard SHALL open the Add expense BottomSheet of Requirement 26.
@@ -455,8 +455,8 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 1. THE Subscriptions Screen SHALL list every active Subscription as a ListRow with its name, a subtitle that states the cadence and the usage ("Monthly · Rarely used"), and its monthly cost as the amount, sorted by monthly cost descending.
 2. THE Subscriptions Screen SHALL show the usage as text and a Chip, and SHALL NOT rely on color alone.
 3. THE Subscriptions Screen SHALL show a primary "Add subscription" Button that opens a BottomSheet with Inputs for name and amount, a SegmentedControl for cadence and a SegmentedControl for usage.
-4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details, a SegmentedControl to change the usage and a danger "Cancel subscription" Button.
-5. WHEN the user activates "Cancel subscription", or activates the Do_It_Button of a `cancel_subscription` Plan_Action, THE App SHALL ask for confirmation in a BottomSheet that states "Cancel Wraithcast — saves $120/mo" with a "Keep it" Button and a danger "Cancel subscription" Button.
+4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details, a SegmentedControl to change the usage and a primary "Cancel subscription" Button (canceling a zombie is the good action; the `danger` variant is only for destructive data actions such as deleting a row).
+5. WHEN the user activates "Cancel subscription", or activates the Do_It_Button of a `cancel_subscription` Plan_Action, THE App SHALL ask for confirmation in a BottomSheet that states "Cancel Wraithcast — saves $120/mo" with a secondary "Keep it" Button and a primary "Cancel subscription" Button.
 6. WHEN the user confirms, THE Subscriptions Screen SHALL call `cancelSubscription` and SHALL show a success toast "+$120/mo saved" with the exact monthly cost.
 7. THE Subscriptions Screen SHALL show a "Graveyard" Card that lists every inactive Subscription as a ListRow with its name, "R.I.P. $X/mo" and the cancellation date, and WHEN the list is empty THE Card SHALL show "No tombstones yet. Suspiciously quiet."
 8. WHEN the user selects a graveyard row, THE Subscriptions Screen SHALL offer a "Bring it back" Button that calls `reactivateSubscription` and SHALL show a toast that states the monthly cost returning.
@@ -486,7 +486,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 #### Acceptance Criteria
 
-1. THE Log payment BottomSheet SHALL show the Debt name, the current balance and the minimum monthly payment, and a money Input labelled "Payment amount".
+1. THE Log payment BottomSheet SHALL show the Debt name, the current balance and the minimum monthly payment as one sentence formatted per Requirement 28.8 ("Balance $18,000. Minimum $400/mo."), and a money Input labelled "Payment amount".
 2. WHEN more than one Debt has a balance above 0 and the sheet opens from the Dashboard, THE sheet SHALL first list those Debts as ListRows so that the user picks one.
 3. WHEN the user opens the sheet from a Debt, THE money Input SHALL be pre-filled with the minimum monthly payment, limited to the balance.
 4. THE Log payment BottomSheet SHALL show a primary "Save payment" Button, and WHEN the payment is larger than the minimum THE sheet SHALL show the text "$X goes above your minimum" with `$X` equal to the extra principal.
