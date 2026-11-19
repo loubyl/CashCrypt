@@ -332,9 +332,13 @@ export async function uncompletePlanAction(
     if (!plan.actions.some((action) => action.id === actionId)) {
       throw new DbNotFoundError(actionId);
     }
-    const actions = plan.actions.map((action) =>
-      action.id === actionId ? { ...action, done: false } : action,
-    );
+    // The completion Event stays (Requirement 8.3); only the action's state is reset.
+    const actions = plan.actions.map((action) => {
+      if (action.id !== actionId) return action;
+      const { completedOn: _cleared, ...rest } = action;
+      void _cleared;
+      return { ...rest, done: false };
+    });
     await db.weeklyPlans.put({ ...plan, actions });
   });
 }

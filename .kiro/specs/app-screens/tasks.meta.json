@@ -614,6 +614,59 @@
         "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
         "timestamp": 1795071978059
       }
+    ],
+    "4.1 Implement `ensureWeeklyPlan`": [
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073428465
+      },
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073483581
+      }
+    ],
+    "4.2 Write property test for one plan per week": [
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073484628
+      },
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073951970
+      }
+    ],
+    "4.3 Write plan service unit tests": [
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073485314
+      },
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073952492
+      },
+      {
+        "executionId": "9c6f55f9-6e2c-46d4-a2ff-77685b8f90db",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795074189486
+      },
+      {
+        "executionId": "9c6f55f9-6e2c-46d4-a2ff-77685b8f90db",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795074281928
+      }
+    ],
+    "4. Group 4: Plan service": [
+      {
+        "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
+        "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
+        "timestamp": 1795073952579
+      }
     ]
   }
 }

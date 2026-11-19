@@ -213,18 +213,18 @@ Conventions that apply to every task:
     - **Property 22: Fallbacks fill only what is missing**
     - **Validates: Requirements 13.1, 13.2, 13.3, 13.4, 13.6, 13.9**
 
-- [ ] 4. Group 4: Plan service
-  - [ ] 4.1 Implement `ensureWeeklyPlan`
+- [x] 4. Group 4: Plan service
+  - [x] 4.1 Implement `ensureWeeklyPlan`
     - Create `src/lib/db/plans.ts`: one `rw` transaction over all tables; return the existing row for `getPlanWeekStart(now)` without calling the planner; otherwise adapt rows, call `computeHouseState` and `generateExorcismPlan`, and add the row with `startLightScore` and `generatedOn`; catch a primary-key `ConstraintError` and answer with a fresh `get`
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.7_
 
-  - [ ] 4.2 Write property test for one plan per week
+  - [x] 4.2 Write property test for one plan per week
     - **Property 23: One plan per week, unchanged once stored**
     - Include concurrent `ensureWeeklyPlan` calls per date
     - Mutation check: temporarily remove the existing-row early return and confirm the property fails
     - **Validates: Requirements 14.1, 14.2, 14.3, 14.4, 14.5, 18.9**
 
-  - [ ] 4.3 Write plan service unit tests
+  - [x] 4.3 Write plan service unit tests
     - Create `tests/db/plans.test.ts`: generated plan has three actions and the current light score as `startLightScore`; second read returns the same row without calling the planner (spy); new Monday generates a new row and keeps the old one; completing and unchecking changes only that action's `done` and `completedOn`
     - _Requirements: 14.1, 14.2, 14.3, 14.5_
 

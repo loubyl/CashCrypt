@@ -232,7 +232,7 @@ Rules: money is a finite integer in `[1, MAX_MONEY_CENTS]` (income: from 100; de
 | `snapshotAdapter.ts` | `toFinancialSnapshot(rows: CryptRows, now): FinancialSnapshot` (pure) |
 | `queries.ts` | `readAllRows(db)` (a missing profile gives `profile: null`, never a throw), `getTransactionsInWindow(db, now)`, `getPlan(db, weekKey)` |
 | `mutations.ts` | All mutations (below) |
-| `plans.ts` | `ensureWeeklyPlan(db, now, newId?)` |
+| `plans.ts` | `ensureWeeklyPlan(db, now)` |
 | `exportImport.ts` | Optional (Requirement 33): `serializeExport`, `parseExport`, `exportRows`, `replaceAllRows` |
 | `csv.ts` | Optional (Requirement 32): `parseTransactionsCsv`, `serializeTransactionsCsv`, `importTransactions` |
 
@@ -263,7 +263,7 @@ Common shape of each mutation: validate with `src/lib/validation` first (no tran
 - **`logPayment`**: `debts.get` (not-found if missing); reject when balance is 0 or `amountCents > balance`; `debts.update(balanceCents - amount)`; `extra = max(0, amount - minimumPaymentCents)`; `events.add({ type: "debt_payment", date: now, extraPrincipalCents: extra })`; if `extra > 0` call `autoCompletePlanAction(db, "extra_payment", debtId, ctx)`.
 - **`cancelSubscription`**: `subscriptions.get`; if `!active` return `{ changed: false }` without writing; `monthly = normalizeSubscription({...}).monthlyCostCents`; `update({ active: false, canceledOn: now })`; `events.add` with `refKey: "cancel:" + id` only when no event with that key exists (checked with `events.where("refKey").equals(key).first()`, backed by the unique index); then `autoCompletePlanAction(db, "cancel_subscription", id, ctx)`.
 - **`completePlanAction`**: read the plan row for `weekKey`, find the action (not-found otherwise); set `done: true` and `completedOn: now` unless already done; `events.add({ type: "exorcism_action_completed", date: now, refKey: "plan:" + weekKey + ":" + actionId })` only when no such event exists. Changes no debt, subscription or transaction row (Requirement 8.5).
-- **`uncompletePlanAction`**: sets `done: false`, keeps `completedOn` and the event.
+- **`uncompletePlanAction`**: sets `done: false`, removes `completedOn` from the action and keeps the event.
 - **`autoCompletePlanAction(db, kind, targetId, ctx)`** (internal, same transaction): takes the caller's `MutationContext`, not just `now`, because the completion Event needs `ctx.newId`. `plan = weeklyPlans.get(getPlanWeekStart(ctx.now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
 - **`clearAllData`**: `assertRealDb(db)`, then `db.transaction("rw", allTables, () => Promise.all(tables.map(t => t.clear())))`.
 
