@@ -885,6 +885,71 @@
         "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
         "timestamp": 1795078144780
       }
+    ],
+    "8.1 Implement the navigation shell and common components": [
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079261598
+      },
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079563374
+      }
+    ],
+    "8.2 Implement Landing, onboarding and the home route": [
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079563883
+      },
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079692268
+      }
+    ],
+    "8.3 Write navigation shell tests": [
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079567830
+      },
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079692829
+      }
+    ],
+    "8.4 Write Landing tests": [
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079695821
+      },
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079798171
+      }
+    ],
+    "8. Group 7: Navigation shell and Landing": [
+      {
+        "executionId": "78f22e19-8671-4f53-a8be-224d6be10acb",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079798230
+      },
+      {
+        "executionId": "213dad99-e8c3-4528-8d59-1bc030ab4db6",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795079949895
+      },
+      {
+        "executionId": "213dad99-e8c3-4528-8d59-1bc030ab4db6",
+        "chatSessionId": "sess_54ac327c-50e5-499a-8fb1-09cd1ed7dcae",
+        "timestamp": 1795080388234
+      }
     ]
   }
 }

@@ -43,6 +43,8 @@ export type CryptContextValue = {
   getClock: Clock;
   /** Opens the Demo_Crypt database on demand, even before the mode is demo. Rejects when it cannot open. */
   openDemoDb: () => Promise<CryptDb>;
+  /** Opens the Real_Crypt database on demand, even before it has a Profile. Rejects when it cannot open. */
+  openRealDb: () => Promise<CryptDb>;
 };
 
 export type CryptProviderProps = {
@@ -136,6 +138,14 @@ export function CryptProvider({
     return state.db;
   }, [openByName]);
 
+  const openRealDb = useCallback(async (): Promise<CryptDb> => {
+    const state = await openByName(CRYPT_DB_NAME);
+    if (state.status !== "open" || !state.db) {
+      throw new Error("Your crypt could not be opened.");
+    }
+    return state.db;
+  }, [openByName]);
+
   const wantsDemo = mode === "demo";
   useEffect(() => {
     if (mode === MODE_UNKNOWN) return;
@@ -190,8 +200,9 @@ export function CryptProvider({
       clearMode,
       getClock,
       openDemoDb,
+      openRealDb,
     }),
-    [status, db, hasRealProfile, setMode, clearMode, getClock, openDemoDb],
+    [status, db, hasRealProfile, setMode, clearMode, getClock, openDemoDb, openRealDb],
   );
 
   return <CryptContext.Provider value={value}>{children}</CryptContext.Provider>;

@@ -86,7 +86,7 @@ This covers the destructive button (blood background, `text-on-accent`), the che
 Rules:
 - Black, white and grays do 90% of the work. Accents carry meaning, not branding.
 - Accent color is never the only signal: always pair with an icon, sign (+/−) or label.
-- No gradients in the chrome except the light-score bar.
+- No gradients in the chrome except two: the light-score bar and the loading-skeleton shimmer (`Skeleton`, surface tones only, no accent colors). The shimmer animation is disabled under `prefers-reduced-motion: reduce`.
 
 ### Data visualization
 
@@ -238,7 +238,7 @@ Icons: Lucide, 20px in rows, 22px in quick actions, stroke 2, inherit color.
 - ✅ Black canvas, borderless rounded cards, white pill primary, big bold numbers.
 - ✅ One primary action per screen; quick actions as circles.
 - ✅ Color only when it means something (saved, debt, ghosts, light).
-- ❌ Colored primary buttons, gradients on buttons, card borders.
+- ❌ Colored primary buttons, card borders, and gradients anywhere in the chrome except the light-score bar and the skeleton shimmer.
 - ❌ Gothic fonts outside the wordmark and house nameplate.
 - ❌ Neon glows, blood drips, cobwebs or Halloween clip-art in the chrome.
 - ❌ New hex values in components: always use tokens.

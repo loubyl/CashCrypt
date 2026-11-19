@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useCrypt } from "@/hooks/useCrypt";
 import { useNow } from "@/hooks/useNow";
 import { DbNotFoundError, DbValidationError } from "@/lib/db/errors";
@@ -126,5 +126,19 @@ export function useCryptActions(): CryptActions {
   return useMemo(
     () => (db ? bindActions(db, now) : createNotReadyActions()),
     [db, now],
+  );
+}
+
+/** Creates the Real_Crypt Profile from a monthly income, then sets the mode to real. Works before any crypt is active. */
+export function useCreateCrypt(): (incomeCents: number) => Promise<MutationResult<void>> {
+  const { openRealDb, setMode } = useCrypt();
+  return useCallback(
+    (incomeCents) =>
+      run(async () => {
+        const target = await openRealDb();
+        await setMonthlyIncome(target, incomeCents);
+        setMode("real");
+      }),
+    [openRealDb, setMode],
   );
 }

@@ -302,22 +302,22 @@ Conventions that apply to every task:
     - In `src/app/layout.tsx` render `<CryptProvider><ToastRegion>{children}</ToastRegion></CryptProvider>` and keep fonts and global styles unchanged
     - _Requirements: 10.1, 29.7_
 
-- [ ] 8. Group 7: Navigation shell and Landing
-  - [ ] 8.1 Implement the navigation shell and common components
+- [x] 8. Group 7: Navigation shell and Landing
+  - [x] 8.1 Implement the navigation shell and common components
     - Move `src/app/page.tsx` into `src/app/(app)/page.tsx` and add `src/app/(app)/layout.tsx` rendering `AppShell`; keep `src/app/styleguide/` outside the group and unchanged
     - Create `src/components/shell/{AppShell,NavLink,TabBar,Sidebar,DemoChip}.tsx` and `src/components/common/{PageHeader,Skeleton,EmptyState,StorageBlockedCard}.tsx`: one `<nav aria-label="Main">` chosen with `matchMedia("(min-width: 1024px)")`, `aria-current="page"` from `usePathname()`, 44px targets, Lucide icons 20px stroke 2 with text labels, "Demo mode" Chip with the Demo_Now date, `router.replace("/")` in an effect when no Active_Crypt on a non-root route, bottom padding for the Tab_Bar plus safe area, `max-w-content` column below 1024px and a two-column grid from 1024px, skeleton with `animate-shimmer` and `aria-busy="true"`, blocked-storage Card text of Requirement 10.7
     - _Requirements: 10.6, 10.7, 18.1, 18.7, 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.7, 19.8, 29.1, 29.2, 29.3, 30.1_
 
-  - [ ] 8.2 Implement Landing, onboarding and the home route
+  - [x] 8.2 Implement Landing, onboarding and the home route
     - Create `src/components/sheets/OnboardingSheet.tsx` (BottomSheet "Your monthly income", money Input "Monthly income", primary "Create my crypt", keeps the sheet open and sets `Input.error` from `validateIncome`), `src/components/landing/Landing.tsx` (wordmark `h1`, pitch line, one primary "Enter the demo crypt", secondary "Start my own crypt" or "Continue to my crypt" when a Real_Crypt Profile exists, link to `/styleguide`) and `src/components/screens/HomeScreen.tsx` (skeleton while loading, Landing with no Active_Crypt, otherwise a minimal `Dashboard` stub component showing the light score from `useHouseState`)
     - Make `src/app/(app)/page.tsx` export `metadata` and render `HomeScreen`; delete `tests/ui/home.page.test.tsx`
     - _Requirements: 9.2, 16.2, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 29.9, 30.1_
 
-  - [ ] 8.3 Write navigation shell tests
+  - [x] 8.3 Write navigation shell tests
     - Create `tests/ui/shell.test.tsx` using `setViewportWidth`: Tab_Bar below 1024px and Sidebar from 1024px, exactly one `<nav>`, `aria-current` on the active link (and `/` matches exactly), 44px targets, redirect to `/` with no Active_Crypt on another route, "Demo mode" Chip only in demo mode, bottom padding present
     - _Requirements: 18.1, 18.7, 19.1, 19.2, 19.3, 19.4, 19.6, 31.9_
 
-  - [ ] 8.4 Write Landing tests
+  - [x] 8.4 Write Landing tests
     - Create `tests/ui/landing.test.tsx`: wordmark and pitch render, one primary Button, "Enter the demo crypt" sets mode `demo`, seeds `level-4` and navigates to `/`, onboarding creates the Profile and sets mode `real`, income of $0.99 keeps the sheet open with an error and writes nothing, "Continue to my crypt" appears when a Profile exists, link to `/styleguide` present
     - _Requirements: 16.2, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 31.8_
 
