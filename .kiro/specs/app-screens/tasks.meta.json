@@ -27,6 +27,22 @@
     "1.19 Write property test for adapter structure and purity": {
       "status": "passed",
       "lastRunTimestamp": 1795064363940
+    },
+    "2.8 Write property test for payment monotonicity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795065030814
+    },
+    "2.7 Write property test for logging a payment": {
+      "status": "passed",
+      "lastRunTimestamp": 1795065035191
+    },
+    "2.6 Write property test for invalid mutation input": {
+      "status": "passed",
+      "lastRunTimestamp": 1795065045449
+    },
+    "2.11 Write property test for strict score improvement on cancel": {
+      "status": "passed",
+      "lastRunTimestamp": 1795065468573
     }
   },
   "executionHistory": {
@@ -263,6 +279,181 @@
         "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
         "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
         "timestamp": 1795064435476
+      }
+    ],
+    "2.1 Implement queries": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064794679
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064862843
+      }
+    ],
+    "2.2 Implement data-entry mutations": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064794745
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064863008
+      }
+    ],
+    "2.3 Implement payment, cancellation and plan-action mutations with auto-completion": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064874391
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064968867
+      }
+    ],
+    "2.4 Write unit tests for every mutation": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064969646
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065253197
+      }
+    ],
+    "2.5 Write auto-completion tests": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064970332
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065253947
+      }
+    ],
+    "2.6 Write property test for invalid mutation input": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064975287
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065254957
+      }
+    ],
+    "2.7 Write property test for logging a payment": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064975403
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065255781
+      }
+    ],
+    "2.8 Write property test for payment monotonicity": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795064975844
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065256597
+      }
+    ],
+    "2.9 Write property test for canceling a subscription": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065257411
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065754994
+      }
+    ],
+    "2.10 Write property test for cancel and reactivate sequences": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065258456
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065755811
+      }
+    ],
+    "2.11 Write property test for strict score improvement on cancel": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065259263
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065756855
+      }
+    ],
+    "2.12 Write property test for at-most-once plan completion": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065260070
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065757661
+      }
+    ],
+    "2.13 Write property test for atomic auto-completion": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065260885
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065758412
+      }
+    ],
+    "2.14 Write property test for the 30-day transaction query": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065754927
+      },
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065894541
+      }
+    ],
+    "2. Group 2: Mutations with auto-completion": [
+      {
+        "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
+        "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
+        "timestamp": 1795065894581
       }
     ]
   }

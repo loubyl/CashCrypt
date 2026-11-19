@@ -97,69 +97,69 @@ Conventions that apply to every task:
     - **Property 5: The snapshot adapter preserves structure and purity**
     - **Validates: Requirements 4.1, 4.3, 4.4, 4.5, 4.6, 4.8**
 
-- [ ] 2. Group 2: Mutations with auto-completion
-  - [ ] 2.1 Implement queries
+- [x] 2. Group 2: Mutations with auto-completion
+  - [x] 2.1 Implement queries
     - Create `src/lib/db/queries.ts` with `readAllRows(db)`, `getTransactionsInWindow(db, now)` (same boundaries as `isInWindow`, sorted by date descending then id ascending) and `getPlan(db, weekKey)`
     - _Requirements: 9.7_
 
-  - [ ] 2.2 Implement data-entry mutations
+  - [x] 2.2 Implement data-entry mutations
     - Create `src/lib/db/mutations.ts` with `MutationContext` (`now`, injectable `newId`), `setMonthlyIncome`, `addDebt`, `editDebt`, `addSubscription` (stores `active: true`), `editSubscription` (never changes `active`), `addTransaction` and `clearAllData` (real crypt only via `assertRealDb`)
     - Note: every profile write (in `setMonthlyIncome` and anywhere else the Profile is written) must use `id: PROFILE_ID` from `src/lib/db/schema.ts` (type `ProfileRecord`), since `ProfileRow` itself has no primary key
     - Validate first so no transaction opens on invalid input; each mutation runs in exactly one `db.transaction("rw", ...)`; throw `DbValidationError` or `DbNotFoundError`; none creates an Event
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 27.7_
 
-  - [ ] 2.3 Implement payment, cancellation and plan-action mutations with auto-completion
+  - [x] 2.3 Implement payment, cancellation and plan-action mutations with auto-completion
     - In `src/lib/db/mutations.ts` add `logPayment`, `cancelSubscription`, `reactivateSubscription`, `completePlanAction`, `uncompletePlanAction` and the internal `autoCompletePlanAction(db, kind, targetId, now)`
     - `logPayment`: reduce balance, one `debt_payment` Event with `extraPrincipalCents = max(0, amount - minimum)`, auto-complete the `extra_payment` action only when extra principal is above 0
     - `cancelSubscription`: inactive is a no-op returning `{ changed: false }`; otherwise set `active: false` and `canceledOn`, add one `subscription_canceled` Event with `refKey` `cancel:<id>` and the engine's normalized monthly cost, only when no Event has that key; then auto-complete the `cancel_subscription` action
     - Completion uses `refKey` `plan:<weekKey>:<actionId>`, creates at most one Event, keeps `completedOn` when already done; auto-completion reads `getPlanWeekStart(now)`, never generates a plan, and any throw aborts the whole transaction; the transaction table list includes `weeklyPlans`
     - _Requirements: 5.1, 5.2, 6.1, 6.2, 6.3, 6.4, 6.5, 6.8, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.9, 8.1, 8.2, 8.3, 8.4, 8.5, 8.7, 8.8, 8.9, 8.10, 8.11, 8.12_
 
-  - [ ] 2.4 Write unit tests for every mutation
+  - [x] 2.4 Write unit tests for every mutation
     - Create `tests/db/mutations.test.ts`: exact rows after each success, unchanged tables after each rejection, injected id generator gives stable ids, forced failure (`vi.spyOn(db.events, "add").mockRejectedValueOnce(...)`) leaves every table unchanged
     - _Requirements: 5.1, 5.2, 5.6, 31.2, 31.3_
 
-  - [ ] 2.5 Write auto-completion tests
+  - [x] 2.5 Write auto-completion tests
     - Create `tests/db/autoCompletion.test.ts` with the cases of Requirement 31.7: completion by cancel, completion by payment with extra principal, no completion for extra principal 0, no second Event when ticked first, no completion and no generated plan when no plan exists, no completion for a plan of another week, full rollback when the Event write fails
     - Mutation check: temporarily remove the "extra principal above 0" condition and confirm the extra-0 case fails
     - _Requirements: 8.8, 8.9, 8.10, 8.11, 8.12, 31.7_
 
-  - [ ] 2.6 Write property test for invalid mutation input
+  - [x] 2.6 Write property test for invalid mutation input
     - **Property 6: Invalid mutation input is rejected and writes nothing**
     - **Validates: Requirements 4.9, 5.3, 5.4, 5.7, 5.8, 6.4, 6.5, 8.4, 9.1, 9.2, 9.5, 9.6**
 
-  - [ ] 2.7 Write property test for logging a payment
+  - [x] 2.7 Write property test for logging a payment
     - **Property 7: Logging a payment moves exactly the right rows**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.7**
 
-  - [ ] 2.8 Write property test for payment monotonicity
+  - [x] 2.8 Write property test for payment monotonicity
     - **Property 8: A payment never lowers the light score**
     - **Validates: Requirements 6.6**
 
-  - [ ] 2.9 Write property test for canceling a subscription
+  - [x] 2.9 Write property test for canceling a subscription
     - **Property 9: Canceling a subscription changes only that subscription and records one event**
     - **Validates: Requirements 7.1, 7.2, 7.3, 7.7**
 
-  - [ ] 2.10 Write property test for cancel and reactivate sequences
+  - [x] 2.10 Write property test for cancel and reactivate sequences
     - **Property 10: Cancel and reactivate sequences never farm momentum**
     - **Validates: Requirements 7.4, 7.5, 7.6, 7.7**
 
-  - [ ] 2.11 Write property test for strict score improvement on cancel
+  - [x] 2.11 Write property test for strict score improvement on cancel
     - **Property 11: Canceling a subscription strictly raises the score**
     - **Validates: Requirements 7.8**
 
-  - [ ] 2.12 Write property test for at-most-once plan completion
+  - [x] 2.12 Write property test for at-most-once plan completion
     - **Property 12: Plan actions complete at most once**
     - Mutation check: temporarily remove the existing-`refKey` check and confirm the property fails with a counterexample
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.5, 8.6, 8.7, 8.13**
 
-  - [ ] 2.13 Write property test for atomic auto-completion
+  - [x] 2.13 Write property test for atomic auto-completion
     - **Property 13: Auto-completion happens together with the change, or not at all**
     - Include the rollback clause by forcing the completion write to fail and comparing every table with its pre-call snapshot
     - Mutation check: temporarily make auto-completion run outside the mutation's transaction and confirm the rollback case fails
     - **Validates: Requirements 6.8, 7.9, 8.8, 8.9, 8.10, 8.11, 8.12**
 
-  - [ ] 2.14 Write property test for the 30-day transaction query
+  - [x] 2.14 Write property test for the 30-day transaction query
     - **Property 14: The 30-day transaction query matches the engine window**
     - **Validates: Requirements 9.7**
 
