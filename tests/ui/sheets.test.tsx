@@ -103,6 +103,10 @@ describe("LogPaymentSheet", () => {
     expect(await screen.findByText("Gloom Card")).toBeTruthy();
     expect(screen.getByText("Crypt Loan")).toBeTruthy();
     expect(screen.queryByText("Tiny Debt")).toBeNull();
+    // Subtitles are text, so whole dollars drop ".00"; the amount column keeps cents.
+    expect(screen.getByText("Minimum $50/mo")).toBeTruthy();
+    expect(screen.getByText("Minimum $30/mo")).toBeTruthy();
+    expect(screen.getByText("$2,000.00")).toBeTruthy();
     expect(screen.queryByLabelText(PAYMENT_LABEL)).toBeNull();
     await user.click(screen.getByText("Crypt Loan"));
     expect(await screen.findByLabelText(PAYMENT_LABEL)).toBeTruthy();

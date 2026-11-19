@@ -142,7 +142,8 @@ export function LogPaymentSheet({
               icon={Landmark}
               tone="blood"
               title={debt.name}
-              subtitle={`Minimum ${formatCents(debt.minimumPaymentCents)}/mo`}
+              // Subtitles are text (formatCentsShort); only the amount column keeps cents.
+              subtitle={`Minimum ${formatCentsShort(debt.minimumPaymentCents)}/mo`}
               amount={formatCents(debt.balanceCents)}
               onClick={() => setPickedId(debt.id)}
             />

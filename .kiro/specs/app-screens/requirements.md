@@ -540,7 +540,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 5. WHEN a Mutation changes money, THE App SHALL show a toast that states the exact figure, using the Toast primitive with the `success` tone for savings and payments.
 6. THE Screens SHALL show an empty state, with one line of text and a clear next action, wherever a list can be empty (Subscriptions, Graveyard, Debts, Transactions, Exorcism plan before it loads).
 7. WHILE the Weekly_Plan is being generated, THE Dashboard and the Exorcism Screen SHALL show a skeleton for the plan rows.
-8. THE App SHALL format money inside sentences (Plan_Action titles, impact text, toasts, sheet headings and validation messages) with `formatCentsShort`: whole-dollar amounts omit ".00" ("$120/mo", "$60", "$300", "$1,800") and other amounts keep two decimals ("$5.50/mo", "$15.49/mo"). Balances and amount columns in lists SHALL keep `formatCents` with cents ("$18,000.00", "$12.00").
+8. THE App SHALL format money inside sentences (Plan_Action titles, impact text, toasts, sheet headings and validation messages) with `formatCentsShort`: whole-dollar amounts omit ".00" ("$120/mo", "$60", "$300", "$1,800") and other amounts keep two decimals ("$5.50/mo", "$15.49/mo"). List row titles and subtitles are text and follow the same rule ("Minimum $400/mo", "APR 22% · Minimum $400/mo"). Only balances shown as figures (the BalanceHero, summary totals) and the amount column of list rows SHALL keep `formatCents` with cents ("$18,000.00", "$12.00").
 
 ### Requirement 29: Design-system conformance
 

@@ -200,7 +200,7 @@ export function centsToMoneyText(cents: number): string;     // 30000 → "300.0
 export function aprPercentToFraction(percent: number): number;  // 22 → 0.22
 export function aprFractionToPercent(fraction: number): number; // 0.22 → 22 (rounded to 2 decimals)
 ```
-**Money text rule (Requirement 28.8).** Amounts inside sentences use `formatCentsShort`: Plan_Action titles, the ExorcismActionRow `impactText` (`formatCentsShort(monthlyAmountCents)`, rendered as "+$120/mo"), toasts ("+$120/mo saved", "+$120/mo freed"), sheet headings ("Cancel Wraithcast — saves $120/mo") and validation messages ("The balance is $1,800."). Balances and amount columns in lists keep `formatCents` with cents ("$18,000.00" in a DebtCard, "$12.00" in a transaction row). `formatCentsPerMonth` stays for per-month amounts in list columns.
+**Money text rule (Requirement 28.8).** Amounts inside sentences use `formatCentsShort`: Plan_Action titles, the ExorcismActionRow `impactText` (`formatCentsShort(monthlyAmountCents)`, rendered as "+$120/mo"), toasts ("+$120/mo saved", "+$120/mo freed"), sheet headings ("Cancel Wraithcast — saves $120/mo") validation messages ("The balance is $1,800.") and list row titles and subtitles ("Minimum $400/mo"). Only the amount column of list rows and balances shown as figures keep `formatCents` with cents ("$18,000.00" as a debt row amount, "$12.00" in a transaction row). `formatCentsPerMonth` stays for per-month amounts in list columns.
 
 `parseMoneyToCents` takes the committed text from `commitMoneyInput` (`^\d*(\.\d{0,2})?$`) and builds cents from the integer and fraction digit strings, so there is no floating-point rounding.
 
