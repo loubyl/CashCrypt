@@ -228,39 +228,39 @@ Conventions that apply to every task:
     - Create `tests/db/plans.test.ts`: generated plan has three actions and the current light score as `startLightScore`; second read returns the same row without calling the planner (spy); new Monday generates a new row and keeps the old one; completing and unchecking changes only that action's `done` and `completedOn`
     - _Requirements: 14.1, 14.2, 14.3, 14.5_
 
-- [ ] 5. Group 5: Demo service and seeds with the calibration test
-  - [ ] 5.1 Implement scenario seeds
+- [x] 5. Group 5: Demo service and seeds with the calibration test
+  - [x] 5.1 Implement scenario seeds
     - Create `src/lib/demo/seed.ts` with `buildScenario(id, demoNow)` for `level-1` to `level-5` using the fictional names of Requirement 17.11, deterministic ids (`demo:<scenario>:debt:<slug>`, `demo:<scenario>:tx:<index>`), transactions dated `addDays(demoNow, -offset)` and the `level-4` data of Requirement 17.3 and 17.4 (30 × $12.00 "Coffee" within 23 days)
     - Use no real brand name in any debt name, subscription name or transaction description
     - _Requirements: 17.1, 17.3, 17.4, 17.5, 17.6, 17.11, 17.12_
 
-  - [ ] 5.2 Implement the demo service
+  - [x] 5.2 Implement the demo service
     - Create `src/lib/demo/service.ts` with `loadScenario`, `skipWeek`, `resetDemo`; each starts with `assertDemoDb`; `loadScenario` clears every table, bulk-adds the seed, stores `demoNow` and `scenarioId` in the Profile and runs the plan generation of `ensureWeeklyPlan` in one transaction; `skipWeek` only moves `demoNow` by 7 days; `resetDemo` reloads the current scenario with the given today
     - _Requirements: 16.3, 16.5, 17.7, 18.5, 18.6, 18.8, 18.9, 18.10_
 
-  - [ ] 5.3 Write property test for scenario determinism and scores
+  - [x] 5.3 Write property test for scenario determinism and scores
     - **Property 30: Scenarios are deterministic and date-independent**
     - Also assert the level-4 Poltergeist is still active at `addDays(demoNow, 7)` and exact level-4 content of Requirement 17.3 and 17.4 in `tests/demo/seed.test.ts`
     - **Validates: Requirements 17.1, 17.2, 17.4, 17.5, 17.6**
 
-  - [ ] 5.4 Write the brand-free seed scan test
+  - [x] 5.4 Write the brand-free seed scan test
     - Create `tests/demo/seedBrandScan.test.ts` with the named constant `FORBIDDEN_BRAND_NAMES` (Visa, Mastercard, Netflix, Spotify, Amazon, Apple, Disney, Hulu, YouTube) defined in the test file; read every debt name, subscription name and transaction description of all five scenarios and compare case-insensitively and by whole word; fail when any row matches
     - Mutation check: temporarily rename one seed row to contain "Netflix", confirm the scan fails and names the row, then restore it
     - _Requirements: 17.12, 31.14_
 
-  - [ ] 5.5 Write demo service tests
+  - [x] 5.5 Write demo service tests
     - Create `tests/demo/service.test.ts`: all five scenarios give the Calibration scores after `loadScenario`; a plan is stored at load; `skipWeek` and `resetDemo` reject on the Real_Crypt and write nothing; reset shows demoNow equal to the passed today
     - _Requirements: 16.5, 17.2, 17.7, 18.5, 18.8, 31.5_
 
-  - [ ] 5.6 Write property test for demo isolation
+  - [x] 5.6 Write property test for demo isolation
     - **Property 29: Demo operations never touch the real crypt**
     - **Validates: Requirements 16.1, 16.3, 16.4, 16.5, 16.6**
 
-  - [ ] 5.7 Write property test for skipping a week
+  - [x] 5.7 Write property test for skipping a week
     - **Property 31: Skipping a week only moves the date**
     - **Validates: Requirements 18.6, 18.8, 18.10**
 
-  - [ ] 5.8 Write the calibration path integration test
+  - [x] 5.8 Write the calibration path integration test
     - Create `tests/demo/calibration.test.ts` on `level-4` starting 2025-06-02 through the real mutations: each week read the stored plan, do what it says in stored order (`cancelSubscription` for cancellations, `logPayment` with minimum plus `suggestedAmountCents` for the extra payment, `completePlanAction` for anything not done), call `skipWeek` after week 1 only
     - Assert every action is `done` and exactly three `exorcism_action_completed` Events exist per week; print light score, base score, momentum and decay level at start, after week 1 and after week 2 (expected 32.74 / 32.74 / 0.00 / L4, then 43.49 / 33.49 / 10.00 / L3, then 49.16 / 34.16 / 15.00 / L3); assert the decay level number after week 2 is lower than at the start; require no fixed target score
     - _Requirements: 17.8, 17.9, 17.10, 31.6_

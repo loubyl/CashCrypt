@@ -63,6 +63,18 @@
     "3.9 Write property test for the Poltergeist action": {
       "status": "passed",
       "lastRunTimestamp": 1795071967962
+    },
+    "5.3 Write property test for scenario determinism and scores": {
+      "status": "passed",
+      "lastRunTimestamp": 1795074677563
+    },
+    "5.7 Write property test for skipping a week": {
+      "status": "passed",
+      "lastRunTimestamp": 1795074749113
+    },
+    "5.6 Write property test for demo isolation": {
+      "status": "passed",
+      "lastRunTimestamp": 1795074821794
     }
   },
   "executionHistory": {
@@ -666,6 +678,109 @@
         "executionId": "edd9ef73-8c0b-41c0-9cec-cc3076e87833",
         "chatSessionId": "sess_daef9ca6-8143-40d5-9b0f-4d52004cbabe",
         "timestamp": 1795073952579
+      }
+    ],
+    "5.1 Implement scenario seeds": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074354673
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074486216
+      }
+    ],
+    "5.2 Implement the demo service": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074489628
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074686131
+      }
+    ],
+    "5.3 Write property test for scenario determinism and scores": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074490453
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074687169
+      }
+    ],
+    "5.4 Write the brand-free seed scan test": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074491044
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074687769
+      }
+    ],
+    "5.5 Write demo service tests": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074690980
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074861898
+      }
+    ],
+    "5.6 Write property test for demo isolation": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074691781
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074862634
+      }
+    ],
+    "5.7 Write property test for skipping a week": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074692590
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074863449
+      }
+    ],
+    "5.8 Write the calibration path integration test": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074693165
+      },
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074864155
+      }
+    ],
+    "5. Group 5: Demo service and seeds with the calibration test": [
+      {
+        "executionId": "26e0c2ef-538d-451a-aad0-3842212e3fd1",
+        "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
+        "timestamp": 1795074864193
       }
     ]
   }
