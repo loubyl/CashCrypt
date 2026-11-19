@@ -361,12 +361,12 @@ Conventions that apply to every task:
     - Document the `/styleguide` route and the test commands (`npm test`, `npx vitest --run --project ui`, `npx vitest --run --project node`).
     - _Requirements: 24.5, 22.10_
 
-- [ ] 19. Quality gates
-  - [ ] 19.1 Run and fix the quality gates
+- [x] 19. Quality gates
+  - [x] 19.1 Run and fix the quality gates
     - Run `npm run typecheck`, `npm run lint`, `npm test` (which includes the source scans of 1.8 and the contrast test of 1.9) and `npm run build`; fix any failure in the files this spec created, never by weakening a scan or the contrast test. Confirm `/styleguide` appears in the build output, fonts make no runtime request to Google, and `git status` shows no change under `src/lib/haunting/` or `tests/haunting/`.
     - _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 4.9, 22.10, 26.4, 26.7_
 
-- [ ] 20. Final checkpoint - Ensure all tests pass
+- [x] 20. Final checkpoint - Ensure all tests pass
   - Run `npm test` (scans and contrast test included, unmodified), `npm run typecheck`, `npm run lint` and `npm run build`; ensure all pass, ask the user if questions arise.
 
 ## Notes
