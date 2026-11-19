@@ -3,11 +3,11 @@ import { isInWindow } from "@/lib/haunting/dates";
 import type {
   CryptRows,
   LocalDate,
+  ProfileRow,
   TransactionRow,
   WeeklyPlanRow,
 } from "@/types/finance";
-import { DbNotFoundError } from "./errors";
-import { PROFILE_ID, type CryptDb } from "./schema";
+import { PROFILE_ID, type CryptDb, type ProfileRecord } from "./schema";
 
 /** Date descending, then id ascending (code-point order, not locale order). */
 function compareTransactions(a: TransactionRow, b: TransactionRow): number {
@@ -16,7 +16,16 @@ function compareTransactions(a: TransactionRow, b: TransactionRow): number {
   return a.id < b.id ? -1 : 1;
 }
 
-/** Reads every table in one read-only transaction so the rows are consistent. */
+function withoutId(record: ProfileRecord): ProfileRow {
+  const { id: _id, ...profile } = record;
+  void _id;
+  return profile;
+}
+
+/**
+ * Reads every table in one read-only transaction so the rows are consistent.
+ * A missing profile row gives `profile: null`, never an error (Requirement 4.8).
+ */
 export function readAllRows(db: CryptDb): Promise<CryptRows> {
   return db.transaction(
     "r",
@@ -38,10 +47,14 @@ export function readAllRows(db: CryptDb): Promise<CryptRows> {
           db.events.toArray(),
           db.weeklyPlans.toArray(),
         ]);
-      if (record === undefined) throw new DbNotFoundError(PROFILE_ID);
-      const { id: _id, ...profile } = record;
-      void _id;
-      return { profile, debts, subscriptions, transactions, events, plans };
+      return {
+        profile: record === undefined ? null : withoutId(record),
+        debts,
+        subscriptions,
+        transactions,
+        events,
+        plans,
+      };
     },
   );
 }

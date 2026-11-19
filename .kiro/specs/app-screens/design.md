@@ -230,7 +230,7 @@ Rules: money is a finite integer in `[1, MAX_MONEY_CENTS]` (income: from 100; de
 | `errors.ts` | `DbValidationError`, `DbNotFoundError` (both carry `FieldError[]` / the missing id) |
 | `modeStore.ts` | Mode_Store helpers (see Architecture) |
 | `snapshotAdapter.ts` | `toFinancialSnapshot(rows: CryptRows, now): FinancialSnapshot` (pure) |
-| `queries.ts` | `readAllRows(db)`, `getTransactionsInWindow(db, now)`, `getPlan(db, weekKey)` |
+| `queries.ts` | `readAllRows(db)` (a missing profile gives `profile: null`, never a throw), `getTransactionsInWindow(db, now)`, `getPlan(db, weekKey)` |
 | `mutations.ts` | All mutations (below) |
 | `plans.ts` | `ensureWeeklyPlan(db, now, newId?)` |
 | `exportImport.ts` | Optional (Requirement 33): `serializeExport`, `parseExport`, `exportRows`, `replaceAllRows` |
@@ -239,7 +239,7 @@ Rules: money is a finite integer in `[1, MAX_MONEY_CENTS]` (income: from 100; de
 ```ts
 export type MutationContext = { now: LocalDate; newId?: () => string }; // default newId: crypto.randomUUID
 
-export function setMonthlyIncome(db: CryptDb, cents: number, ctx: MutationContext): Promise<void>;
+export function setMonthlyIncome(db: CryptDb, cents: number): Promise<void>; // no ctx: writes no Event and creates no id
 export function addDebt(db: CryptDb, input: DebtInput, ctx: MutationContext): Promise<DebtRow>;
 export function editDebt(db: CryptDb, id: string, input: DebtInput): Promise<DebtRow>;
 export function addSubscription(db: CryptDb, input: SubscriptionInput, ctx: MutationContext): Promise<SubscriptionRow>;
@@ -260,11 +260,11 @@ export type CancelOutcome =
 
 Common shape of each mutation: validate with `src/lib/validation` first (no transaction opened on invalid input), then `db.transaction("rw", [...tables], async () => { ... })`. The table list always includes `events` and, for `logPayment`, `cancelSubscription` and `completePlanAction`, `weeklyPlans` (Requirement 5.1).
 
-- **`logPayment`**: `debts.get` (not-found if missing); reject when balance is 0 or `amountCents > balance`; `debts.update(balanceCents - amount)`; `extra = max(0, amount - minimumPaymentCents)`; `events.add({ type: "debt_payment", date: now, extraPrincipalCents: extra })`; if `extra > 0` call `autoCompletePlanAction("extra_payment", debtId)`.
-- **`cancelSubscription`**: `subscriptions.get`; if `!active` return `{ changed: false }` without writing; `monthly = normalizeSubscription({...}).monthlyCostCents`; `update({ active: false, canceledOn: now })`; `events.add` with `refKey: "cancel:" + id` only when no event with that key exists (checked with `events.where("refKey").equals(key).first()`, backed by the unique index); then `autoCompletePlanAction("cancel_subscription", id)`.
+- **`logPayment`**: `debts.get` (not-found if missing); reject when balance is 0 or `amountCents > balance`; `debts.update(balanceCents - amount)`; `extra = max(0, amount - minimumPaymentCents)`; `events.add({ type: "debt_payment", date: now, extraPrincipalCents: extra })`; if `extra > 0` call `autoCompletePlanAction(db, "extra_payment", debtId, ctx)`.
+- **`cancelSubscription`**: `subscriptions.get`; if `!active` return `{ changed: false }` without writing; `monthly = normalizeSubscription({...}).monthlyCostCents`; `update({ active: false, canceledOn: now })`; `events.add` with `refKey: "cancel:" + id` only when no event with that key exists (checked with `events.where("refKey").equals(key).first()`, backed by the unique index); then `autoCompletePlanAction(db, "cancel_subscription", id, ctx)`.
 - **`completePlanAction`**: read the plan row for `weekKey`, find the action (not-found otherwise); set `done: true` and `completedOn: now` unless already done; `events.add({ type: "exorcism_action_completed", date: now, refKey: "plan:" + weekKey + ":" + actionId })` only when no such event exists. Changes no debt, subscription or transaction row (Requirement 8.5).
 - **`uncompletePlanAction`**: sets `done: false`, keeps `completedOn` and the event.
-- **`autoCompletePlanAction(db, kind, targetId, now)`** (internal, same transaction): `plan = weeklyPlans.get(getPlanWeekStart(now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
+- **`autoCompletePlanAction(db, kind, targetId, ctx)`** (internal, same transaction): takes the caller's `MutationContext`, not just `now`, because the completion Event needs `ctx.newId`. `plan = weeklyPlans.get(getPlanWeekStart(ctx.now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
 - **`clearAllData`**: `assertRealDb(db)`, then `db.transaction("rw", allTables, () => Promise.all(tables.map(t => t.clear())))`.
 
 ### `src/lib/exorcism/` (Planner, pure)
@@ -451,7 +451,7 @@ export type WeeklyPlanRow = {
   generatedOn: LocalDate;
 };
 export type CryptRows = {
-  profile: ProfileRow | undefined;
+  profile: ProfileRow | null; // null when no profile row exists; the adapter maps it to income 0 (Requirement 4.8)
   debts: DebtRow[]; subscriptions: SubscriptionRow[]; transactions: TransactionRow[];
   events: EventRow[]; plans: WeeklyPlanRow[];
 };

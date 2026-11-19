@@ -62,7 +62,7 @@ describe("Property 4: Cents survive the dollars boundary", () => {
       fc.property(cryptRows, (rows) => {
         const snapshot = toFinancialSnapshot(rows, NOW);
         expect(toCents(snapshot.monthlyIncome)).toBe(
-          rows.profile.monthlyIncomeCents,
+          rows.profile?.monthlyIncomeCents,
         );
         rows.debts.forEach((d, i) => {
           expect(toCents(snapshot.debts[i].balance)).toBe(d.balanceCents);

@@ -13,6 +13,9 @@ import type {
 } from "@/types/finance";
 
 const NUM_RUNS = 100;
+// 100 database runs take about 0.3s alone but several seconds in a loaded parallel suite. With
+// the default 5s timeout a property could expire mid-run and keep running into the next test.
+const PROPERTY_TIMEOUT_MS = 60_000;
 const NOW = "2025-03-14"; // a Friday
 const WEEK_KEY = "2025-03-10"; // the Monday on or before NOW
 const OTHER_WEEK_KEY = "2025-03-03";
@@ -159,7 +162,6 @@ async function withDb(body: (db: CryptDb) => Promise<void>): Promise<void> {
     await db.open();
     await body(db);
   } finally {
-    vi.restoreAllMocks();
     db.close();
     await db.delete();
   }
@@ -230,7 +232,7 @@ describe("atomic auto-completion", () => {
       }),
       { numRuns: NUM_RUNS },
     );
-  });
+  }, PROPERTY_TIMEOUT_MS);
 
   // Feature: app-screens, Property 13: Auto-completion happens together with the change, or not at all
   // **Validates: Requirements 6.8, 7.9, 8.8, 8.9, 8.10, 8.11, 8.12**
@@ -244,18 +246,23 @@ describe("atomic auto-completion", () => {
           const before = await snapshot(db);
 
           const realAdd = db.events.add.bind(db.events);
-          vi.spyOn(db.events, "add").mockImplementation(((event: EventRow) =>
+          // Restore only this run's spy. A global vi.restoreAllMocks() could remove the spy of
+          // another run that is still in flight (seen after a timeout under parallel load).
+          const addSpy = vi.spyOn(db.events, "add").mockImplementation(((event: EventRow) =>
             event.type === COMPLETION_TYPE
               ? Promise.reject(new Error("forced completion failure"))
               : realAdd(event)) as typeof db.events.add);
 
-          await expect(runCall(db, s)).rejects.toThrow("forced completion failure");
+          try {
+            await expect(runCall(db, s)).rejects.toThrow("forced completion failure");
+          } finally {
+            addSpy.mockRestore();
+          }
 
-          vi.restoreAllMocks();
           expect(await snapshot(db)).toEqual(before);
         });
       }),
       { numRuns: NUM_RUNS },
     );
-  });
+  }, PROPERTY_TIMEOUT_MS);
 });

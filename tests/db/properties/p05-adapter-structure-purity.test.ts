@@ -115,7 +115,7 @@ describe("Property 5: The snapshot adapter preserves structure and purity", () =
   it("uses income 0 when the profile is null", () => {
     fc.assert(
       fc.property(rowsArb, dateArb, (rows, now) => {
-        const withoutProfile = { ...rows, profile: null } as unknown as CryptRows;
+        const withoutProfile: CryptRows = { ...rows, profile: null };
         expect(toFinancialSnapshot(withoutProfile, now).monthlyIncome).toBe(0);
       }),
       { numRuns: NUM_RUNS },

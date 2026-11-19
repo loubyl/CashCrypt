@@ -71,7 +71,8 @@ export type WeeklyPlanRow = {
 };
 
 export type CryptRows = {
-  profile: ProfileRow;
+  /** Null when no profile row exists yet (Requirement 4.8: income is then 0). */
+  profile: ProfileRow | null;
   debts: DebtRow[];
   subscriptions: SubscriptionRow[];
   transactions: TransactionRow[];

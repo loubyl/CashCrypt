@@ -57,6 +57,7 @@ export function toFinancialSnapshot(
     date: t.date,
   }));
   return {
+    // No profile row means income 0 (Requirement 4.8).
     monthlyIncome: centsToDollars(rows.profile?.monthlyIncomeCents ?? 0),
     debts,
     subscriptions,
