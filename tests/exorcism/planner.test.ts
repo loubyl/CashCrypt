@@ -85,10 +85,10 @@ describe("generateExorcismPlan: L4 persona week 1", () => {
     ]);
   });
 
-  it("puts the $120.00 never-used cancellation first", () => {
+  it("puts the $120 never-used cancellation first", () => {
     expect(plan[0]).toMatchObject({
       kind: "cancel_subscription",
-      title: "Cancel Wraithcast — saves $120.00/mo",
+      title: "Cancel Wraithcast — saves $120/mo",
       targetId: "wraithcast",
       monthlyAmountCents: 12000,
       priorityCents: 12000,
@@ -110,7 +110,7 @@ describe("generateExorcismPlan: L4 persona week 1", () => {
   it("forces the extra payment on Scarlet Moth Card into the third slot", () => {
     expect(plan[2]).toMatchObject({
       kind: "extra_payment",
-      title: "Pay $300.00 extra on Scarlet Moth Card — saves $5.50/mo in interest",
+      title: "Pay $300 extra on Scarlet Moth Card — saves $5.50/mo in interest",
       targetId: "scarlet",
       suggestedAmountCents: 30000,
       monthlyAmountCents: 550,
@@ -126,7 +126,7 @@ describe("generateExorcismPlan: L4 persona week 1", () => {
     };
     const dirgebox = generateExorcismPlan(computeHouseState(dirgeboxOnly), dirgeboxOnly);
     expect(dirgebox.find((action) => action.id === "cancel:dirgebox")).toMatchObject({
-      title: "Cancel Dirgebox — saves $60.00/mo",
+      title: "Cancel Dirgebox — saves $60/mo",
       priorityCents: 3600,
     });
   });

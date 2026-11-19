@@ -19,6 +19,12 @@ import type { LocalDate, WeeklyPlanRow } from "@/types/finance";
 const START: LocalDate = "2025-06-02";
 const ACTIONS_PER_WEEK = 3;
 const REPORT_DECIMALS = 2;
+// Calibration targets from Requirement 17.8: light score to 2 decimals and decay level.
+const EXPECTED = {
+  start: { light: 32.74, level: 4 },
+  afterWeek1: { light: 43.49, level: 3 },
+  afterWeek2: { light: 49.16, level: 3 },
+} as const;
 
 const opened: CryptDb[] = [];
 afterEach(() => {
@@ -108,5 +114,15 @@ describe("Calibration_Path on level-4", () => {
     expect(week2.weekKey).not.toBe(week1.weekKey);
 
     expect(afterWeek2.level).toBeLessThan(start.level);
+
+    const steps = [
+      ["start", start, EXPECTED.start],
+      ["after week 1", afterWeek1, EXPECTED.afterWeek1],
+      ["after week 2", afterWeek2, EXPECTED.afterWeek2],
+    ] as const;
+    for (const [label, reading, expected] of steps) {
+      expect(reading.light, `${label} light score`).toBeCloseTo(expected.light, REPORT_DECIMALS);
+      expect(reading.level, `${label} decay level`).toBe(expected.level);
+    }
   });
 });

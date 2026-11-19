@@ -4,7 +4,9 @@
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
 import { afterEach, describe, expect, it } from "vitest";
 import { openCrypt } from "@/lib/db/crypt";
-import { readAllRows } from "@/lib/db/queries";
+import { logPayment } from "@/lib/db/mutations";
+import { ensureWeeklyPlan } from "@/lib/db/plans";
+import { getPlan, readAllRows } from "@/lib/db/queries";
 import {
   CRYPT_DB_NAME,
   DEMO_DB_NAME,
@@ -100,6 +102,58 @@ describe("skipWeek", () => {
     await loadScenario(db, "level-4", DEMO_NOW);
     expect(await skipWeek(db)).toBe("2025-06-11");
     expect((await db.profile.get(PROFILE_ID))?.demoNow).toBe("2025-06-11");
+  });
+});
+
+describe("level-4 week-1 plan", () => {
+  it("is cancel Wraithcast, cut Coffee by $60, then $300 extra on Scarlet Moth Card", async () => {
+    const db = open(DEMO_DB_NAME);
+    await loadScenario(db, "level-4", DEMO_NOW);
+    const plan = await ensureWeeklyPlan(db, DEMO_NOW);
+    expect(plan.actions.map((a) => [a.kind, a.title, a.subtitle])).toEqual([
+      [
+        "cancel_subscription",
+        "Cancel Wraithcast — saves $120/mo",
+        "Open Subscriptions to cancel it",
+      ],
+      [
+        "reduce_small_expenses",
+        "Cut Coffee by $60 this month to dispel the Poltergeist",
+        "Open Transactions to review it. Tick it when you are done.",
+      ],
+      [
+        "extra_payment",
+        "Pay $300 extra on Scarlet Moth Card — saves $5.50/mo in interest",
+        "Open Debts to log the payment",
+      ],
+    ]);
+    expect(plan.actions[2].suggestedAmountCents).toBe(30_000);
+  });
+});
+
+describe("skipWeek then ensureWeeklyPlan", () => {
+  it("creates a new plan for the next week with its own startLightScore", async () => {
+    const db = open(DEMO_DB_NAME);
+    await loadScenario(db, "level-4", DEMO_NOW);
+    const week1 = await ensureWeeklyPlan(db, DEMO_NOW);
+    // Change the score during week 1 so week 2 must start from a different value.
+    const debt = (await db.debts.toArray()).find((d) => d.name === "Scarlet Moth Card");
+    if (!debt) throw new Error("Scarlet Moth Card is missing from the level-4 seed.");
+    await logPayment(db, debt.id, debt.minimumPaymentCents + 30_000, { now: DEMO_NOW });
+
+    const next = await skipWeek(db);
+    expect(next).toBe("2025-06-11");
+    const week2 = await ensureWeeklyPlan(db, next);
+
+    expect(week2.weekKey).toBe(getPlanWeekStart(next));
+    expect(week2.weekKey).not.toBe(week1.weekKey);
+    expect(week2.generatedOn).toBe(next);
+    const current = computeHouseState(toFinancialSnapshot(await readAllRows(db), next));
+    expect(week2.startLightScore).toBe(current.lightScore);
+    expect(week2.startLightScore).not.toBe(week1.startLightScore);
+    // Week 1 keeps its own row and start score.
+    expect((await getPlan(db, week1.weekKey))?.startLightScore).toBe(week1.startLightScore);
+    expect(await db.weeklyPlans.count()).toBe(2);
   });
 });
 

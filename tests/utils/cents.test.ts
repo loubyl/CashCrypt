@@ -5,6 +5,7 @@ import {
   centsToMoneyText,
   formatCents,
   formatCentsPerMonth,
+  formatCentsShort,
   parseMoneyToCents,
 } from "@/lib/utils/cents";
 
@@ -33,6 +34,27 @@ describe("formatCents", () => {
   it("treats non-finite input as zero", () => {
     expect(formatCents(Number.NaN)).toBe("$0.00");
     expect(formatCents(Number.POSITIVE_INFINITY)).toBe("$0.00");
+  });
+});
+
+describe("formatCentsShort", () => {
+  it("drops .00 for whole dollars", () => {
+    expect(formatCentsShort(12000)).toBe("$120");
+    expect(formatCentsShort(6000)).toBe("$60");
+    expect(formatCentsShort(30000)).toBe("$300");
+    expect(formatCentsShort(0)).toBe("$0");
+  });
+
+  it("keeps two decimals otherwise", () => {
+    expect(formatCentsShort(550)).toBe("$5.50");
+    expect(formatCentsShort(1549)).toBe("$15.49");
+    expect(formatCentsShort(5)).toBe("$0.05");
+  });
+
+  it("groups thousands and treats non-finite input as 0", () => {
+    expect(formatCentsShort(150000)).toBe("$1,500");
+    expect(formatCentsShort(123456789)).toBe("$1,234,567.89");
+    expect(formatCentsShort(Number.NaN)).toBe("$0");
   });
 });
 

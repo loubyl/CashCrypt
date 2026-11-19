@@ -153,6 +153,25 @@ describe("validateTransactionInput", () => {
   });
 });
 
+describe("amounts inside validation messages", () => {
+  const message = (result: ReturnType<typeof validateIncome>) => (!result.ok ? result.errors[0].message : null);
+  it("drops .00 for whole-dollar limits", () => {
+    expect(message(validateIncome(99))).toBe("Enter an amount of at least $1.");
+    expect(message(validateIncome(MAX_MONEY_CENTS + 1))).toBe("Enter an amount of at most $1,000,000.");
+  });
+  it("keeps the cents when the amount has them", () => {
+    expect(message(validatePaymentAmount(0, { balanceCents: 180000 }))).toBe(
+      "Enter an amount of at least $0.01.",
+    );
+    expect(message(validatePaymentAmount(1001, { balanceCents: 1000 }))).toBe(
+      "The payment cannot be more than the balance. The balance is $10.",
+    );
+    expect(message(validatePaymentAmount(1251, { balanceCents: 1250 }))).toBe(
+      "The payment cannot be more than the balance. The balance is $12.50.",
+    );
+  });
+});
+
 describe("validatePaymentAmount", () => {
   const debt = { balanceCents: 180000 };
 
@@ -162,7 +181,9 @@ describe("validatePaymentAmount", () => {
 
   it("rejects a payment above the balance with the balance in the message", () => {
     const result = validatePaymentAmount(180001, debt);
-    expect(!result.ok && result.errors[0].message).toContain("The balance is $1,800.00.");
+    expect(!result.ok && result.errors[0].message).toBe(
+      "The payment cannot be more than the balance. The balance is $1,800.",
+    );
   });
 
   it("rejects zero, non-integer and NaN payments", () => {

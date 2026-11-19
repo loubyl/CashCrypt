@@ -9,6 +9,7 @@ const GROUP_SIZE = 3;
 const CENTS_PER_UNIT = 100;
 const FRACTION_DIGITS = 2;
 const ZERO_PAD = "0";
+const WHOLE_FRACTION = "00";
 const RADIX = 10;
 const PERCENT_PER_UNIT = 100;
 /** Fractions are rounded to 2 percent decimals: fraction × 100 × 100. */
@@ -46,6 +47,17 @@ export function formatCents(cents: number): string {
   const { negative, integer, fraction } = splitCents(cents);
   const sign = negative ? NEGATIVE_PREFIX : "";
   return `${sign}${CURRENCY_SYMBOL}${groupThousands(integer)}${DECIMAL_SEPARATOR}${fraction}`;
+}
+
+/**
+ * Money in plan action titles: whole dollars drop ".00", anything else keeps
+ * two decimals. 12000 → "$120", 550 → "$5.50", 1549 → "$15.49", 150000 → "$1,500".
+ */
+export function formatCentsShort(cents: number): string {
+  const { negative, integer, fraction } = splitCents(cents);
+  const sign = negative ? NEGATIVE_PREFIX : "";
+  const centsPart = fraction === WHOLE_FRACTION ? "" : `${DECIMAL_SEPARATOR}${fraction}`;
+  return `${sign}${CURRENCY_SYMBOL}${groupThousands(integer)}${centsPart}`;
 }
 
 /** 12000 → "$120.00/mo". */

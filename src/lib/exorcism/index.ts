@@ -3,7 +3,7 @@
 import { dollarsToCents } from "@/lib/haunting";
 import { POLTERGEIST_RATIO } from "@/lib/haunting/config";
 import type { FinancialSnapshot, HouseState } from "@/lib/haunting";
-import { formatCents } from "@/lib/utils/cents";
+import { formatCentsShort } from "@/lib/utils/cents";
 import {
   BASIS_POINTS_DENOMINATOR,
   CENTS_PER_WHOLE_DOLLAR,
@@ -91,7 +91,7 @@ function buildCancellations(houseState: HouseState): ExorcismAction[] {
     return {
       id: `${CANCEL_PREFIX}${id}`,
       kind: "cancel_subscription",
-      title: `Cancel ${cleanText(zombie.name)} — saves ${formatCents(monthlyCost)}/mo`,
+      title: `Cancel ${cleanText(zombie.name)} — saves ${formatCentsShort(monthlyCost)}/mo`,
       subtitle: CANCEL_SUBTITLE,
       targetId: id,
       monthlyAmountCents: monthlyCost,
@@ -130,7 +130,7 @@ function buildExtraPayment(snapshot: FinancialSnapshot, incomeCents: number): Ex
   return {
     id: `${PAY_PREFIX}${target.debtId}`,
     kind: "extra_payment",
-    title: `Pay ${formatCents(suggested)} extra on ${target.name} — saves ${formatCents(interest)}/mo in interest`,
+    title: `Pay ${formatCentsShort(suggested)} extra on ${target.name} — saves ${formatCentsShort(interest)}/mo in interest`,
     subtitle: PAY_SUBTITLE,
     targetId: target.debtId,
     suggestedAmountCents: suggested,
@@ -168,7 +168,7 @@ function buildReduction(houseState: HouseState, incomeCents: number): ExorcismAc
   return {
     id: `${REDUCE_PREFIX}${category}`,
     kind: "reduce_small_expenses",
-    title: `Cut ${category} by $${excessDollars} this month to dispel the Poltergeist`,
+    title: `Cut ${category} by ${formatCentsShort(excessCents)} this month to dispel the Poltergeist`,
     subtitle: REDUCE_SUBTITLE,
     targetId: category,
     monthlyAmountCents: excessCents,
@@ -181,7 +181,7 @@ function emergencyFundTitle(incomeCents: number): string {
   const cents = wholeDollarsOfIncome(incomeCents, EMERGENCY_FUND_INCOME_BASIS_POINTS);
   return cents === 0
     ? EMERGENCY_FUND_GENERIC_TITLE
-    : `Set aside ${formatCents(cents).replace(/\.\d+$/, "")} for an emergency fund`;
+    : `Set aside ${formatCentsShort(cents)} for an emergency fund`;
 }
 
 function buildFallback(key: FallbackKey, incomeCents: number): ExorcismAction {

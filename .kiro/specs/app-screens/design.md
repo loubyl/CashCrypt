@@ -193,11 +193,13 @@ Implementation: validate with a strict regex plus a real-calendar check, convert
 ```ts
 export function formatCents(cents: number): string;          // 12000 → "$120.00" (en-US grouping, integer math)
 export function formatCentsPerMonth(cents: number): string;  // "$120.00/mo"
+export function formatCentsShort(cents: number): string;     // money in sentences: 12000 → "$120", 550 → "$5.50", 150000 → "$1,500"
 export function parseMoneyToCents(text: string): number | null; // "300.00" → 30000; "" or invalid → null; no float math
 export function centsToMoneyText(cents: number): string;     // 30000 → "300.00" (for Input prefill)
 export function aprPercentToFraction(percent: number): number;  // 22 → 0.22
 export function aprFractionToPercent(fraction: number): number; // 0.22 → 22 (rounded to 2 decimals)
 ```
+**Money text rule (Requirement 28.8).** Amounts inside sentences use `formatCentsShort`: Plan_Action titles, the ExorcismActionRow `impactText` (`formatCentsShort(monthlyAmountCents)`, rendered as "+$120/mo"), toasts ("+$120/mo saved", "+$120/mo freed"), sheet headings ("Cancel Wraithcast — saves $120/mo") and validation messages ("The balance is $1,800."). Balances and amount columns in lists keep `formatCents` with cents ("$18,000.00" in a DebtCard, "$12.00" in a transaction row). `formatCentsPerMonth` stays for per-month amounts in list columns.
 
 `parseMoneyToCents` takes the committed text from `commitMoneyInput` (`^\d*(\.\d{0,2})?$`) and builds cents from the integer and fraction digit strings, so there is no floating-point rounding.
 
@@ -219,7 +221,7 @@ export function validateTransactionInput(input: unknown, now: LocalDate): Valida
 export function validatePaymentAmount(cents: unknown, debt: { balanceCents: number }): ValidationResult<number>;
 ```
 
-Rules: money is a finite integer in `[1, MAX_MONEY_CENTS]` (income: from 100; debt balance and minimum payment may be 0 only where Requirement 24.8 allows it: balance ≥ 0, minimum payment ≥ 0 and present); names are trimmed, non-empty, at most 60 characters; APR is a finite number in `[0, 1]`; a transaction date must be a real date not later than `now`; a payment must be ≤ the balance and the message states the balance ("The balance is $1,800.00."). The same validators back the form fields and the mutations, so a form and a mutation can never disagree.
+Rules: money is a finite integer in `[1, MAX_MONEY_CENTS]` (income: from 100; debt balance and minimum payment may be 0 only where Requirement 24.8 allows it: balance ≥ 0, minimum payment ≥ 0 and present); names are trimmed, non-empty, at most 60 characters; APR is a finite number in `[0, 1]`; a transaction date must be a real date not later than `now`; a payment must be ≤ the balance and the message states the balance ("The balance is $1,800."). The same validators back the form fields and the mutations, so a form and a mutation can never disagree.
 
 ### `src/lib/db/` (Data_Layer)
 
@@ -301,15 +303,16 @@ export const FALLBACK_KEYS = ["emergency-fund", "review-small-expenses", "review
 
 Algorithm (all money in integer cents; the snapshot's dollar fields go through the exported `dollarsToCents`; zombies already carry cents):
 
+Money in every Plan_Action title goes through one formatter, `formatCentsShort` (the money text rule above): whole-dollar amounts drop ".00" ("$120/mo", "$60", "$300") and other amounts keep two decimals ("$5.50/mo", "$15.49/mo"), with en-US thousands grouping.
 1. **Sanitize**: any non-finite or negative number becomes 0; non-array fields become `[]`; this makes Requirement 11.8 hold by construction.
-2. **Cancellation candidates**: one per `houseState.zombies` entry (the engine already limits zombies to valid, active subscriptions). `priorityCents = Math.round(monthlyCost * USAGE_WEIGHTS[usage])`, `monthlyAmountCents = monthlyCost`, `id = "cancel:" + subscriptionId`, title `Cancel ${name} — saves ${formatCents(monthlyCost)}/mo`, subtitle "Open Subscriptions to cancel it".
-3. **Extra-payment candidate**: among snapshot debts with balance > 0 pick the highest `apr`, ties by larger balance, then `debtId` ascending. `suggested = min(balanceCents, floor(incomeCents * 1000 / (10000 * 100)) * 100)`. The floor uses an exact integer product, so `$3,000` gives exactly `$300.00`. If `suggested === 0` there is no candidate. `priorityCents = monthlyAmountCents = Math.round(suggested * apr / 12)` (`30000 × 0.22 / 12 = 550`). Title `Pay ${formatCents(suggested)} extra on ${name} — saves ${formatCents(interest)}/mo in interest`; `id = "pay:" + debtId`, subtitle "Open Debts to log the payment".
-4. **Poltergeist candidate**: only when `houseState.poltergeist` exists. Pick the category with the largest finite positive value in `byCategory` (ties by code-point-smallest name). `excessCents = ceil((totalAmount - POLTERGEIST_RATIO * incomeCents) / 100 - FLOAT_NOISE_EPSILON) * 100`; the epsilon keeps `0.1 × 300000` float noise from adding a whole dollar. No candidate when there is no valid category or `excessCents <= 0`. `id = "reduce:" + category`, title `Cut ${category} by $${excessCents / 100} this month to dispel the Poltergeist`, subtitle "Open Transactions to review it. Tick it when you are done.", `priorityCents = monthlyAmountCents = excessCents`.
+2. **Cancellation candidates**: one per `houseState.zombies` entry (the engine already limits zombies to valid, active subscriptions). `priorityCents = Math.round(monthlyCost * USAGE_WEIGHTS[usage])`, `monthlyAmountCents = monthlyCost`, `id = "cancel:" + subscriptionId`, title `Cancel ${name} — saves ${formatCentsShort(monthlyCost)}/mo`, subtitle "Open Subscriptions to cancel it".
+3. **Extra-payment candidate**: among snapshot debts with balance > 0 pick the highest `apr`, ties by larger balance, then `debtId` ascending. `suggested = min(balanceCents, floor(incomeCents * 1000 / (10000 * 100)) * 100)`. The floor uses an exact integer product, so `$3,000` gives exactly `$300.00`. If `suggested === 0` there is no candidate. `priorityCents = monthlyAmountCents = Math.round(suggested * apr / 12)` (`30000 × 0.22 / 12 = 550`). Title `Pay ${formatCentsShort(suggested)} extra on ${name} — saves ${formatCentsShort(interest)}/mo in interest` ("Pay $300 extra on Scarlet Moth Card — saves $5.50/mo in interest"); `id = "pay:" + debtId`, subtitle "Open Debts to log the payment".
+4. **Poltergeist candidate**: only when `houseState.poltergeist` exists. Pick the category with the largest finite positive value in `byCategory` (ties by code-point-smallest name). `excessCents = ceil((totalAmount - POLTERGEIST_RATIO * incomeCents) / 100 - FLOAT_NOISE_EPSILON) * 100`; the epsilon keeps `0.1 × 300000` float noise from adding a whole dollar. No candidate when there is no valid category or `excessCents <= 0`. `id = "reduce:" + category`, title `Cut ${category} by ${formatCentsShort(excessCents)} this month to dispel the Poltergeist` ("Cut Coffee by $60 this month to dispel the Poltergeist"), subtitle "Open Transactions to review it. Tick it when you are done.", `priorityCents = monthlyAmountCents = excessCents`.
 5. **Fallbacks**: three, in `FALLBACK_KEYS` order, ids `fallback:<key>`, `priorityCents = monthlyAmountCents = 0`. Exact texts:
 
    | Id | Title | Subtitle |
    |---|---|---|
-   | `fallback:emergency-fund` | `Set aside ${amount} for an emergency fund`, where `amount` is 5% of income floored to whole dollars, formatted with `formatCents` and the cents dropped (`$3,000` income → "Set aside $150 for an emergency fund"). When that amount is 0: "Set aside a small amount for an emergency fund" | "Move it to savings, then mark it done" (there is no savings screen, so it points to no screen) |
+   | `fallback:emergency-fund` | `Set aside ${amount} for an emergency fund`, where `amount` is 5% of income floored to whole dollars, formatted with `formatCentsShort` (`$3,000` income → "Set aside $150 for an emergency fund"). When that amount is 0: "Set aside a small amount for an emergency fund" | "Move it to savings, then mark it done" (there is no savings screen, so it points to no screen) |
    | `fallback:review-small-expenses` | "Review last week's small expenses" | "Open Transactions to review it" |
    | `fallback:review-subscriptions` | "Review your subscription list" | "Open Subscriptions to review it" |
 
@@ -402,7 +405,7 @@ All files are Client Components unless noted. Folders follow `structure.md` and 
 | `screens/SettingsScreen` | `Input`, `Button`, `SegmentedControl`, `BottomSheet`, `DemoControls` | Income, Crypt switcher, optional export/import, Clear all data (real only). |
 | `demo/DemoControls` | `Card`, `SegmentedControl` (Level 1–5), `Button` ×2, polite live region | Rendered only while the Demo_Crypt is active. |
 | `sheets/LogPaymentSheet` | `BottomSheet`, `ListRow` picker, money `Input`, primary `Button` | Props: `debts`, `initialDebtId?`, `prefillCents?`. Skips the picker when a debt is given. |
-| `sheets/CancelSubscriptionSheet` | `BottomSheet`, "Keep it" and danger buttons | States "Cancel Wraithcast — saves $120.00/mo". |
+| `sheets/CancelSubscriptionSheet` | `BottomSheet`, "Keep it" and danger buttons | States "Cancel Wraithcast — saves $120/mo" (`formatCentsShort`). |
 | `sheets/AddExpenseSheet` | `BottomSheet`, money `Input`, text `Input`, category `SegmentedControl` | Dates with `now`; toast "Ghost added: $X" below the threshold. |
 
 Each Screen renders exactly one `h1` and sits inside the shell's `<main>`. Landing renders its own `<main>` because it has no shell. Each Screen keeps at most one primary Button and at most one `hero`-scale number. Mutation toasts use `success` for savings and payments and `danger` for failures.
@@ -725,7 +728,7 @@ Structural and UI criteria (Requirements 1, 2, 10, 15.9 to 15.13 in part, 17.3, 
 | Situation | Behaviour |
 |---|---|
 | Invalid mutation input (amount, name, APR, date, income) | Validators run before a transaction opens. The mutation throws `DbValidationError` with `{ field, message }[]`. The hook returns `{ ok: false, error: { kind: "validation", errors } }`; sheets and forms put the message on the matching `Input.error`. Nothing is written. |
-| Payment above the balance, or on a paid-off debt | Same path; the message names the balance ("The balance is $1,800.00."). The Log payment sheet stays open. |
+| Payment above the balance, or on a paid-off debt | Same path; the message names the balance ("The balance is $1,800."). The Log payment sheet stays open. |
 | Missing row id (debt, subscription, plan, action) | `DbNotFoundError`. Hook result `not-found`. The screen shows a `danger` toast "That item no longer exists." and the live query refreshes the list. |
 | Any step of a mutation throws, including the Auto_Completion step | The Dexie transaction aborts, so every table is unchanged. The original error reaches the hook, which returns `kind: "unknown"`. The screen shows a `danger` toast. The Exorcism Screen uses "Could not save that action. Try again." and leaves the row state as stored. |
 | Duplicate completion or cancellation events | The unique `refKey` index and the explicit existence check prevent a second row. A `ConstraintError` in a concurrent race is caught inside `ensureWeeklyPlan` (re-read) and treated as a bug elsewhere. |

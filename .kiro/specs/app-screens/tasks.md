@@ -31,7 +31,7 @@ Conventions that apply to every task:
     - _Requirements: 3.1, 3.3, 3.5, 3.6_
 
   - [x] 1.4 Implement cents helpers
-    - Create `src/lib/utils/cents.ts` with `formatCents`, `formatCentsPerMonth`, `parseMoneyToCents`, `centsToMoneyText`, `aprPercentToFraction`, `aprFractionToPercent`, using integer math only (no float rounding)
+    - Create `src/lib/utils/cents.ts` with `formatCents`, `formatCentsPerMonth`, `formatCentsShort` (money inside sentences, Requirement 28.8), `parseMoneyToCents`, `centsToMoneyText`, `aprPercentToFraction`, `aprFractionToPercent`, using integer math only (no float rounding)
     - _Requirements: 4.2, 4.9, 24.4, 28.4_
 
   - [x] 1.5 Write property test for day arithmetic round trip
@@ -61,7 +61,7 @@ Conventions that apply to every task:
 
   - [x] 1.11 Implement pure input validators
     - Create `src/lib/validation/limits.ts` (`MAX_MONEY_CENTS` = 100,000,000, `MIN_INCOME_CENTS_INPUT`, `MAX_NAME_LENGTH` = 60) and `src/lib/validation/inputs.ts` (`validateIncome`, `validateDebtInput`, `validateSubscriptionInput`, `validateTransactionInput`, `validatePaymentAmount`) returning `ValidationResult` with `{ field, message }` errors
-    - Payment errors state the balance ("The balance is $1,800.00."); no React, Dexie or Next.js imports
+    - Payment errors state the balance ("The balance is $1,800."); no React, Dexie or Next.js imports
     - _Requirements: 4.9, 5.3, 5.7, 5.8, 6.4, 6.5, 9.1, 9.2, 9.5, 9.6_
 
   - [x] 1.12 Write unit tests for validators
@@ -175,7 +175,7 @@ Conventions that apply to every task:
     - _Requirements: 11.7, 13.5_
 
   - [x] 3.3 Write planner unit tests
-    - Create `tests/exorcism/planner.test.ts`: exact L4 persona week 1 output of Requirement 15.9 (Wraithcast, `reduce:Coffee`, forced `pay:` action with title "Pay $300.00 extra on Scarlet Moth Card — saves $5.50/mo in interest"); extra payment inside the top three gives the plain top three; empty snapshot gives three fallbacks; no Poltergeist, empty `byCategory` and excess 0 give no `reduce_small_expenses`
+    - Create `tests/exorcism/planner.test.ts`: exact L4 persona week 1 output of Requirement 15.9 (Wraithcast, `reduce:Coffee`, forced `pay:` action with title "Pay $300 extra on Scarlet Moth Card — saves $5.50/mo in interest"); extra payment inside the top three gives the plain top three; empty snapshot gives three fallbacks; no Poltergeist, empty `byCategory` and excess 0 give no `reduce_small_expenses`
     - _Requirements: 15.9, 15.10, 15.13_
 
   - [x] 3.4 Write property test for plan structure
@@ -403,7 +403,7 @@ Conventions that apply to every task:
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 28.6, 30.1, 30.4_
 
   - [ ] 12.3 Write Subscriptions screen tests
-    - Create `tests/ui/subscriptions.test.tsx`: sorted rows and subtitles, total card, empty states, add flow with toast, invalid add (empty name, amount 0) creates no row, cancel flow toast "+$120.00/mo saved" and graveyard entry, "Bring it back" toast, focus returns to the opener after the sheet closes
+    - Create `tests/ui/subscriptions.test.tsx`: sorted rows and subtitles, total card, empty states, add flow with toast, invalid add (empty name, amount 0) creates no row, cancel flow toast "+$120/mo saved" and graveyard entry, "Bring it back" toast, focus returns to the opener after the sheet closes
     - _Requirements: 23.1, 23.3, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 31.8_
 
 - [ ] 13. Group 11: Debts and Log payment sheet

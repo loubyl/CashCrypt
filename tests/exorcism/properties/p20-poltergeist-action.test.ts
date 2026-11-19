@@ -173,7 +173,7 @@ describe("Poltergeist action", () => {
           expect(action.monthlyAmountCents).toBe(expected.excessCents);
           expect(action.monthlyAmountCents % CENTS_PER_DOLLAR).toBe(0);
           expect(action.title).toBe(
-            `Cut ${expected.category} by $${expected.excessCents / CENTS_PER_DOLLAR} this month to dispel the Poltergeist`,
+            `Cut ${expected.category} by $${(expected.excessCents / CENTS_PER_DOLLAR).toLocaleString("en-US")} this month to dispel the Poltergeist`,
           );
         }
       }),

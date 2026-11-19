@@ -9,7 +9,8 @@ import type {
   Usage,
 } from "@/types/finance";
 import { addDays, type LocalDate } from "@/lib/utils/calendar";
-import { formatCents } from "@/lib/utils/cents";
+// Amounts inside sentences use formatCentsShort (no ".00" for whole dollars).
+import { formatCentsShort } from "@/lib/utils/cents";
 import {
   MAX_MONEY_CENTS,
   MAX_NAME_LENGTH,
@@ -48,12 +49,12 @@ function checkCents(value: unknown, min: number): Checked<number> {
     return {
       error:
         min >= MIN_POSITIVE_CENTS
-          ? `Enter an amount of at least ${formatCents(min)}.`
+          ? `Enter an amount of at least ${formatCentsShort(min)}.`
           : "The amount cannot be negative.",
     };
   }
   if (value > MAX_MONEY_CENTS) {
-    return { error: `Enter an amount of at most ${formatCents(MAX_MONEY_CENTS)}.` };
+    return { error: `Enter an amount of at most ${formatCentsShort(MAX_MONEY_CENTS)}.` };
   }
   return { value };
 }
@@ -219,7 +220,7 @@ export function validatePaymentAmount(
     return fail([
       {
         field,
-        message: `The payment cannot be more than the balance. The balance is ${formatCents(debt.balanceCents)}.`,
+        message: `The payment cannot be more than the balance. The balance is ${formatCentsShort(debt.balanceCents)}.`,
       },
     ]);
   }
