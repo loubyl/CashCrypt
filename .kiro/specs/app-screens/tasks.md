@@ -268,37 +268,37 @@ Conventions that apply to every task:
 - [ ] 6. Checkpoint - Data layer, planner and demo
   - Run `npm test`, `npm run lint` and `npm run typecheck`; ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Group 6: Hooks and CryptProvider
-  - [ ] 7.1 Implement `CryptProvider` and `useCrypt`
+- [x] 7. Group 6: Hooks and CryptProvider
+  - [x] 7.1 Implement `CryptProvider` and `useCrypt`
     - Create `src/hooks/useCrypt.tsx`: `useSyncExternalStore` over the mode store (server snapshot `"unknown"`), lazy opening of the two databases, status `loading | none | demo | real | unavailable` (`unavailable` when `db.open()` rejects), `hasRealProfile` from a read-only live query, `setMode`, `clearMode`; the provider accepts `{ openDb, storage, getClock }` props for tests; treat `real` without a Profile as `none`
     - `dexie-react-hooks` is imported only in `src/hooks/`
     - _Requirements: 1.2, 10.1, 10.7, 16.1, 16.7_
 
-  - [ ] 7.2 Implement `useNow`, `useCryptData` and `useHouseState`
+  - [x] 7.2 Implement `useNow`, `useCryptData` and `useHouseState`
     - Create `src/hooks/useNow.ts` (demo: Profile `demoNow`; real: `getLocalDate()` refreshed on `visibilitychange` and `focus`), `src/hooks/useCryptData.ts` (one `useLiveQuery` over every table) and `src/hooks/useHouseState.ts` (`useMemo` over `toFinancialSnapshot` and `computeHouseState`; the only source of a House_State for screens)
     - _Requirements: 3.7, 3.8, 10.2, 10.3, 10.6, 10.8_
 
-  - [ ] 7.3 Implement `useCryptActions` and `MutationResult`
+  - [x] 7.3 Implement `useCryptActions` and `MutationResult`
     - Create `src/hooks/useCryptActions.ts` with `MutationResult` and `MutationError` (`validation`, `not-found`, `unknown`) and bound actions `setIncome`, `addDebt`, `editDebt`, `addSubscription`, `editSubscription`, `addTransaction`, `logPayment`, `cancelSubscription`, `reactivateSubscription`, `clearAll`; each injects the current `db` and `now` and maps thrown errors to results
     - _Requirements: 5.1, 5.2, 5.5, 10.4_
 
-  - [ ] 7.4 Implement `useExorcismPlan` and `useDemo`
+  - [x] 7.4 Implement `useExorcismPlan` and `useDemo`
     - Create `src/hooks/useExorcismPlan.ts` (plan for the current week, `toggleAction`, calls `ensureWeeklyPlan` from an effect when the live query reports no plan for the week) and `src/hooks/useDemo.ts` (`scenarioId`, `demoNow`, `loadScenario`, `reset`, `skipWeek`, `enterDemo` that sets the mode and seeds `level-4` when the Demo_Crypt has no Profile)
     - _Requirements: 10.4, 10.5, 14.1, 16.2, 18.4, 18.5, 18.6_
 
-  - [ ] 7.5 Create the UI test helper `renderWithCrypt`
+  - [x] 7.5 Create the UI test helper `renderWithCrypt`
     - Create `tests/ui/helpers/crypt.tsx`: wraps the tree in `CryptProvider` with a `fake-indexeddb` factory, an in-memory `Storage`, a fixed clock and `ToastRegion`; options `{ mode, seed, now, width }`; helper `seedReal(...)`; `vi.mock("next/navigation")` for `useRouter` and `usePathname`
     - _Requirements: 31.8, 31.9_
 
-  - [ ] 7.6 Write hook tests
+  - [x] 7.6 Write hook tests
     - Create `tests/ui/hooks.test.tsx`: `useHouseState` returns a new House_State after a mutation without reload, reports loading before the first query result, `useCrypt` reports `unavailable` when `open()` rejects, demo mode uses `demoNow` as now
     - _Requirements: 3.7, 3.8, 10.2, 10.3, 10.6, 10.7_
 
-  - [ ] 7.7 Write module boundary source scans
+  - [x] 7.7 Write module boundary source scans
     - Create `tests/db/moduleBoundaries.test.ts`: only `src/lib/db/` imports `dexie`; only `src/hooks/` imports `dexie-react-hooks`; no `@/lib/db/` or `@/lib/demo/` import under `src/components/`; no `computeHouseState` call under `src/components/`; no `Date.now`, `new Date(` or `Math.random` under `src/lib/exorcism/` and the pure db files; no React import in `src/lib/exorcism/`, `src/lib/validation/` and the adapter; no GSAP import in this feature
     - _Requirements: 1.2, 1.3, 1.4, 1.5, 1.6, 10.8, 31.10_
 
-  - [ ] 7.8 Wire `CryptProvider` into the root layout
+  - [x] 7.8 Wire `CryptProvider` into the root layout
     - In `src/app/layout.tsx` render `<CryptProvider><ToastRegion>{children}</ToastRegion></CryptProvider>` and keep fonts and global styles unchanged
     - _Requirements: 10.1, 29.7_
 

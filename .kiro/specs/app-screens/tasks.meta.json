@@ -782,6 +782,109 @@
         "chatSessionId": "sess_5d0ae118-6ede-47ea-a8c5-e8f9b13b3904",
         "timestamp": 1795074864193
       }
+    ],
+    "7.1 Implement `CryptProvider` and `useCrypt`": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795076955052
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077107153
+      }
+    ],
+    "7.2 Implement `useNow`, `useCryptData` and `useHouseState`": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077110900
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077610158
+      }
+    ],
+    "7.3 Implement `useCryptActions` and `MutationResult`": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077111666
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077610922
+      }
+    ],
+    "7.5 Create the UI test helper `renderWithCrypt`": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077112508
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077611955
+      }
+    ],
+    "7.8 Wire `CryptProvider` into the root layout": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077113164
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077612766
+      }
+    ],
+    "7.4 Implement `useExorcismPlan` and `useDemo`": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077617828
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077741306
+      }
+    ],
+    "7.6 Write hook tests": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077750815
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795078144172
+      }
+    ],
+    "7.7 Write module boundary source scans": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795077750876
+      },
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795078144704
+      }
+    ],
+    "7. Group 6: Hooks and CryptProvider": [
+      {
+        "executionId": "77ba69ea-3712-4f75-a156-bd3f0bb9b5d7",
+        "chatSessionId": "sess_3c808725-3bba-4736-ae9e-021ea768b74f",
+        "timestamp": 1795078144780
+      }
     ]
   }
 }
