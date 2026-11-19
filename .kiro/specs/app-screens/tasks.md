@@ -163,53 +163,53 @@ Conventions that apply to every task:
     - **Property 14: The 30-day transaction query matches the engine window**
     - **Validates: Requirements 9.7**
 
-- [ ] 3. Group 3: Planner
-  - [ ] 3.1 Implement the planner
+- [x] 3. Group 3: Planner
+  - [x] 3.1 Implement the planner
     - Create `src/lib/exorcism/config.ts` (`PLAN_SIZE`, `USAGE_WEIGHTS`, basis-point constants, `MONTHS_PER_YEAR_FOR_INTEREST`, `FLOAT_NOISE_EPSILON`, `FALLBACK_KEYS`) and `src/lib/exorcism/index.ts` with `generateExorcismPlan(houseState, snapshot)`
     - Sanitize hostile numbers to 0; build cancellation, extra-payment (highest APR, ties by balance then id; 10% of income floored to whole dollars; interest saved = `round(suggested × apr / 12)`), Poltergeist (`reduce:<category>`, excess rounded up to whole dollars) and three fallback candidates; sort by `priorityCents` descending, real before fallback, then `id` ascending by code point; force the extra payment into the third slot when it ranks below the top three, then re-sort
     - Import no React, Dexie or Next.js module; never read the clock or a random source; never mutate inputs
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.10, 12.11, 12.12, 12.13, 12.15, 12.16, 12.17, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.9_
 
-  - [ ] 3.2 Write planner static checks
+  - [x] 3.2 Write planner static checks
     - Create `tests/exorcism/staticChecks.test.ts`: no numeric literals in `src/lib/exorcism/` outside `config.ts` except 0, 1, -1; fallback ids sort in the fixed key order
     - _Requirements: 11.7, 13.5_
 
-  - [ ] 3.3 Write planner unit tests
+  - [x] 3.3 Write planner unit tests
     - Create `tests/exorcism/planner.test.ts`: exact L4 persona week 1 output of Requirement 15.9 (Wraithcast, `reduce:Coffee`, forced `pay:` action with title "Pay $300.00 extra on Scarlet Moth Card — saves $5.50/mo in interest"); extra payment inside the top three gives the plain top three; empty snapshot gives three fallbacks; no Poltergeist, empty `byCategory` and excess 0 give no `reduce_small_expenses`
     - _Requirements: 15.9, 15.10, 15.13_
 
-  - [ ] 3.4 Write property test for plan structure
+  - [x] 3.4 Write property test for plan structure
     - **Property 15: The plan always has three distinct, sorted, pending actions**
     - Mutation check: temporarily skip the final re-sort after the forced extra payment and confirm the property fails
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.6, 13.5, 13.7, 15.2, 15.3, 15.5, 15.12**
 
-  - [ ] 3.5 Write property test for planner determinism and purity
+  - [x] 3.5 Write property test for planner determinism and purity
     - **Property 16: The planner is deterministic and pure**
     - **Validates: Requirements 11.4, 11.5, 15.4, 15.7**
 
-  - [ ] 3.6 Write property test for hostile input
+  - [x] 3.6 Write property test for hostile input
     - **Property 17: The planner tolerates hostile input**
     - **Validates: Requirements 11.8, 15.7**
 
-  - [ ] 3.7 Write property test for cancellation and debt targets
+  - [x] 3.7 Write property test for cancellation and debt targets
     - **Property 18: Cancellation and debt targets are real and scored by the formula**
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.6, 12.7, 15.6**
 
-  - [ ] 3.8 Write property test for forced debt inclusion
+  - [x] 3.8 Write property test for forced debt inclusion
     - **Property 19: Debt is always addressed with the right payment**
     - Mutation check: temporarily drop the forced inclusion and confirm the property fails
     - **Validates: Requirements 12.4, 12.5, 12.15, 15.11**
 
-  - [ ] 3.9 Write property test for the Poltergeist action
+  - [x] 3.9 Write property test for the Poltergeist action
     - **Property 20: The Poltergeist action is precise and optional**
     - **Validates: Requirements 12.10, 12.11, 12.12, 12.13, 15.8**
 
-  - [ ] 3.10 Write property test for selection against a reference model
+  - [x] 3.10 Write property test for selection against a reference model
     - **Property 21: Selection matches the reference rule**
     - Implement a second, simple reference selection directly from Requirement 12 criteria 16 and 17 inside the test
     - **Validates: Requirements 12.16, 12.17, 13.1, 13.6, 13.9, 15.10**
 
-  - [ ] 3.11 Write property test for fallbacks
+  - [x] 3.11 Write property test for fallbacks
     - **Property 22: Fallbacks fill only what is missing**
     - **Validates: Requirements 13.1, 13.2, 13.3, 13.4, 13.6, 13.9**
 

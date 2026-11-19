@@ -43,6 +43,26 @@
     "2.11 Write property test for strict score improvement on cancel": {
       "status": "passed",
       "lastRunTimestamp": 1795065468573
+    },
+    "3.5 Write property test for planner determinism and purity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795071302162
+    },
+    "3.6 Write property test for hostile input": {
+      "status": "passed",
+      "lastRunTimestamp": 1795071303246
+    },
+    "3.7 Write property test for cancellation and debt targets": {
+      "status": "passed",
+      "lastRunTimestamp": 1795071717401
+    },
+    "3.11 Write property test for fallbacks": {
+      "status": "passed",
+      "lastRunTimestamp": 1795071738353
+    },
+    "3.9 Write property test for the Poltergeist action": {
+      "status": "passed",
+      "lastRunTimestamp": 1795071967962
     }
   },
   "executionHistory": {
@@ -454,6 +474,145 @@
         "executionId": "664a1e7d-dcd8-425b-beb9-24c092a4cd0c",
         "chatSessionId": "sess_3ba7f82d-e5cc-423d-b833-e05e5de12b34",
         "timestamp": 1795065894581
+      }
+    ],
+    "3.1 Implement the planner": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071121315
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071205697
+      }
+    ],
+    "3.2 Write planner static checks": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071210401
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071658562
+      }
+    ],
+    "3.3 Write planner unit tests": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071210576
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071658637
+      }
+    ],
+    "3.4 Write property test for plan structure": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071211293
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071658695
+      }
+    ],
+    "3.5 Write property test for planner determinism and purity": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071212131
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071659487
+      }
+    ],
+    "3.6 Write property test for hostile input": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071212833
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071660278
+      }
+    ],
+    "3.7 Write property test for cancellation and debt targets": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071661355
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071853724
+      }
+    ],
+    "3.8 Write property test for forced debt inclusion": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071662178
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071853807
+      }
+    ],
+    "3.9 Write property test for the Poltergeist action": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071662969
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071978009
+      }
+    ],
+    "3.10 Write property test for selection against a reference model": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071673836
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071853954
+      }
+    ],
+    "3.11 Write property test for fallbacks": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071673943
+      },
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071855021
+      }
+    ],
+    "3. Group 3: Planner": [
+      {
+        "executionId": "442641bc-4a18-4c87-9566-9dfb65e498b6",
+        "chatSessionId": "sess_b825c21f-e7bf-4945-94c8-10e04b5cb691",
+        "timestamp": 1795071978059
       }
     ]
   }
