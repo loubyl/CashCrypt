@@ -384,12 +384,12 @@ Conventions that apply to every task:
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass and fix any failure. The agent does not start a dev server.
   - Ask the user to do a manual browser check by running `npm run dev` in their own terminal: open the app, press "Enter the demo crypt", confirm the Dashboard shows the light score (32 at level 4) and "This week's exorcism" with three actions, tick one action and use "Do it" on another, confirm the score and the done state update without a reload, then press "Skip to next week" and confirm a fresh plan appears. Wait for the user's confirmation or reported problems before continuing, ask the user if questions arise.
 
-- [ ] 11. Group 9: Exorcism screen with Do it flows
-  - [ ] 11.1 Implement the Exorcism screen
+- [x] 11. Group 9: Exorcism screen with Do it flows
+  - [x] 11.1 Implement the Exorcism screen
     - Create `src/components/screens/ExorcismScreen.tsx` and `src/app/(app)/exorcism/page.tsx` (Server Component with `metadata`): week range from `formatWeekRange`, "N of 3 done", `ExorcismPlan variant="page"` in stored order, "Money freed this week" with "of $T/mo possible" from `summarizePlan`, explanation "Tap Do it to make the change here, or tick an action you did somewhere else.", "Exorcism complete. The lights flicker back on." when all three are done, skeleton while generating, at most one primary Button
     - _Requirements: 22.1, 22.2, 22.4, 22.5, 22.8, 22.13, 28.6, 28.7, 30.1_
 
-  - [ ] 11.2 Write Exorcism screen tests
+  - [x] 11.2 Write Exorcism screen tests
     - Create `tests/ui/exorcism.screen.test.tsx`: progress line and money freed update after ticking, completion message when all three are done, failed mutation shows "Could not save that action. Try again." and leaves the row unchanged, row disabled while saving, Do it flows for a cancellation and for an extra payment (sheet pre-filled, action done afterwards, one toast), no Do it on `fallback` and `reduce_small_expenses` actions, checkbox stays usable on actions with Do it, skeleton shown while loading
     - _Requirements: 22.1, 22.3, 22.4, 22.5, 22.6, 22.7, 22.9, 22.10, 22.11, 22.12, 31.8_
 

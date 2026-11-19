@@ -1159,6 +1159,37 @@
         "chatSessionId": "sess_aa20edc4-9d7f-4d79-9b96-6e7f28fc9be8",
         "timestamp": 1795083583278
       }
+    ],
+    "11.1 Implement the Exorcism screen": [
+      {
+        "executionId": "751104ab-b4b9-4def-a603-17bf6e0a4cee",
+        "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
+        "timestamp": 1795130630177
+      },
+      {
+        "executionId": "751104ab-b4b9-4def-a603-17bf6e0a4cee",
+        "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
+        "timestamp": 1795130755212
+      }
+    ],
+    "11.2 Write Exorcism screen tests": [
+      {
+        "executionId": "751104ab-b4b9-4def-a603-17bf6e0a4cee",
+        "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
+        "timestamp": 1795130755675
+      },
+      {
+        "executionId": "751104ab-b4b9-4def-a603-17bf6e0a4cee",
+        "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
+        "timestamp": 1795130910948
+      }
+    ],
+    "11. Group 9: Exorcism screen with Do it flows": [
+      {
+        "executionId": "751104ab-b4b9-4def-a603-17bf6e0a4cee",
+        "chatSessionId": "sess_fd7323c5-23e9-491f-aaba-60f825fbdc4a",
+        "timestamp": 1795130911048
+      }
     ]
   }
 }
