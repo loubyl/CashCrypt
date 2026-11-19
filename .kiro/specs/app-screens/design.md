@@ -405,17 +405,19 @@ Classes passed to primitives are layout-only (`ml-14`, `w-full`, `mt-4`, `lg:col
 
 ### Row types (`src/types/finance.ts`)
 
+**Profile key rule:** every profile write must use `id: PROFILE_ID` from `src/lib/db/schema.ts` (type `ProfileRecord`), the single-row key of the `profile` table.
+
 ```ts
 export type LocalDate = string;                // "YYYY-MM-DD"
 export type Cadence = "weekly" | "monthly" | "yearly";
 export type Usage = "often" | "rarely" | "never";
 
 export type ProfileRow = {
-  id: "profile";                               // single row
   monthlyIncomeCents: number;
   demoNow?: LocalDate;                         // Demo_Crypt only
   scenarioId?: ScenarioId;                     // Demo_Crypt only
 };
+// Stored in the `profile` table as ProfileRecord = ProfileRow & { id: typeof PROFILE_ID } (src/lib/db/schema.ts); single row.
 export type DebtRow = {
   id: string; name: string;
   balanceCents: number;                        // ≥ 0

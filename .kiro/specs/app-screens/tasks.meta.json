@@ -1,0 +1,269 @@
+{
+  "pbtResults": {
+    "1.16 Write property test for mode store": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064063222
+    },
+    "1.5 Write property test for day arithmetic round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064065746
+    },
+    "1.8 Write property test for money and APR text round trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064066802
+    },
+    "1.6 Write property test for plan week start": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064185921
+    },
+    "1.7 Write property test for invalid dates": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064192619
+    },
+    "1.18 Write property test for cents surviving the dollars boundary": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064350950
+    },
+    "1.19 Write property test for adapter structure and purity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795064363940
+    }
+  },
+  "executionHistory": {
+    "1.1 Install dependencies": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063897632
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063946004
+      }
+    ],
+    "1.2 Export cadence normalization and money conversion from the engine": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063897756
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063946049
+      }
+    ],
+    "1.3 Implement calendar utilities": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063898582
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063946114
+      }
+    ],
+    "1.4 Implement cents helpers": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063899383
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063946956
+      }
+    ],
+    "1.10 Define shared domain types": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063899932
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063947752
+      }
+    ],
+    "1.14 Implement the mode store": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063953662
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063986840
+      }
+    ],
+    "1.11 Implement pure input validators": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063992048
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064144573
+      }
+    ],
+    "1.17 Implement the snapshot adapter": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063992106
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064145512
+      }
+    ],
+    "1.16 Write property test for mode store": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063992748
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064146414
+      }
+    ],
+    "1.5 Write property test for day arithmetic round trip": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063993568
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064148303
+      }
+    ],
+    "1.8 Write property test for money and APR text round trip": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795063994352
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064147207
+      }
+    ],
+    "1.6 Write property test for plan week start": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064157305
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064299363
+      }
+    ],
+    "1.7 Write property test for invalid dates": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064157807
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064299402
+      }
+    ],
+    "1.9 Write unit tests for calendar and cents helpers": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064158365
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064299447
+      }
+    ],
+    "1.12 Write unit tests for validators": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064306276
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064375300
+      }
+    ],
+    "1.13 Implement Dexie schema, factory and errors": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064306442
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064376350
+      }
+    ],
+    "1.18 Write property test for cents surviving the dollars boundary": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064307226
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064377314
+      }
+    ],
+    "1.19 Write property test for adapter structure and purity": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064307997
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064378209
+      }
+    ],
+    "1.15 Write schema tests": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064382180
+      },
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064435443
+      }
+    ],
+    "1. Group 1: Dependencies, calendar, schema, factory, adapter and engine exports": [
+      {
+        "executionId": "0fda0a42-1975-44db-95af-976e1158b463",
+        "chatSessionId": "sess_3fbc07dd-9e9f-4b7b-ad61-159153b588ba",
+        "timestamp": 1795064435476
+      }
+    ]
+  }
+}

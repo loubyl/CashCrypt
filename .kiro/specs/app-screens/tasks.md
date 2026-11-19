@@ -15,85 +15,85 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Group 1: Dependencies, calendar, schema, factory, adapter and engine exports
-  - [ ] 1.1 Install dependencies
+- [x] 1. Group 1: Dependencies, calendar, schema, factory, adapter and engine exports
+  - [x] 1.1 Install dependencies
     - Run `npm install dexie dexie-react-hooks` and `npm install -D fake-indexeddb`; confirm all three appear in `package.json` (Dexie 4 line)
     - _Requirements: 1.1_
 
-  - [ ] 1.2 Export cadence normalization and money conversion from the engine
+  - [x] 1.2 Export cadence normalization and money conversion from the engine
     - In `src/lib/haunting/index.ts`, also export `normalizeSubscription`, `dollarsToCents` and the `SubscriptionInCents` type; change no computed output and add no numeric literal
     - Run `tests/haunting/staticChecks.test.ts` and the rest of `tests/haunting/` to confirm they still pass
     - _Requirements: 7.2_
 
-  - [ ] 1.3 Implement calendar utilities
+  - [x] 1.3 Implement calendar utilities
     - Create `src/lib/utils/calendar.ts` with `LocalDate`, `Clock`, `getLocalDate`, `addDays`, `getPlanWeekStart`, `getWeekEnd`, `formatWeekRange`
     - Validate with a strict regex plus a real-calendar check, use `Date.UTC` arithmetic, throw `RangeError` naming the invalid value, use named constants for day-of-week values
     - _Requirements: 3.1, 3.3, 3.5, 3.6_
 
-  - [ ] 1.4 Implement cents helpers
+  - [x] 1.4 Implement cents helpers
     - Create `src/lib/utils/cents.ts` with `formatCents`, `formatCentsPerMonth`, `parseMoneyToCents`, `centsToMoneyText`, `aprPercentToFraction`, `aprFractionToPercent`, using integer math only (no float rounding)
     - _Requirements: 4.2, 4.9, 24.4, 28.4_
 
-  - [ ] 1.5 Write property test for day arithmetic round trip
+  - [x] 1.5 Write property test for day arithmetic round trip
     - **Property 1: Day arithmetic round trip**
     - **Validates: Requirements 3.3, 3.4**
 
-  - [ ] 1.6 Write property test for plan week start
+  - [x] 1.6 Write property test for plan week start
     - **Property 2: Plan week start is the Monday on or before the date**
     - **Validates: Requirements 3.3, 3.5**
 
-  - [ ] 1.7 Write property test for invalid dates
+  - [x] 1.7 Write property test for invalid dates
     - **Property 3: Invalid dates are rejected with the offending value**
     - **Validates: Requirements 3.6**
 
-  - [ ] 1.8 Write property test for money and APR text round trip
+  - [x] 1.8 Write property test for money and APR text round trip
     - **Property 27: Money and APR text round trip**
     - **Validates: Requirements 24.4, 28.4**
 
-  - [ ] 1.9 Write unit tests for calendar and cents helpers
+  - [x] 1.9 Write unit tests for calendar and cents helpers
     - Create `tests/utils/calendar.test.ts` and `tests/utils/cents.test.ts`: leap years, year boundaries, `getLocalDate` uses local fields, `$120.00` and `$3,000.00` formatting, `"300.00"` parses to 30000, invalid text returns `null`
     - _Requirements: 3.1, 3.3, 3.5, 3.6, 28.4_
 
-  - [ ] 1.10 Define shared domain types
+  - [x] 1.10 Define shared domain types
     - Create `src/types/finance.ts` with `LocalDate`, `Cadence`, `Usage`, `ScenarioId`, `ProfileRow`, `DebtRow`, `SubscriptionRow`, `TransactionRow`, `EventRow`, `StoredPlanAction`, `WeeklyPlanRow`, `CryptRows`, `DebtInput`, `SubscriptionInput`, `TransactionInput`, with no `any`
     - Create `src/lib/exorcism/types.ts` with `ExorcismActionKind` and `ExorcismAction` (types only)
     - _Requirements: 2.5, 2.7_
 
-  - [ ] 1.11 Implement pure input validators
+  - [x] 1.11 Implement pure input validators
     - Create `src/lib/validation/limits.ts` (`MAX_MONEY_CENTS` = 100,000,000, `MIN_INCOME_CENTS_INPUT`, `MAX_NAME_LENGTH` = 60) and `src/lib/validation/inputs.ts` (`validateIncome`, `validateDebtInput`, `validateSubscriptionInput`, `validateTransactionInput`, `validatePaymentAmount`) returning `ValidationResult` with `{ field, message }` errors
     - Payment errors state the balance ("The balance is $1,800.00."); no React, Dexie or Next.js imports
     - _Requirements: 4.9, 5.3, 5.7, 5.8, 6.4, 6.5, 9.1, 9.2, 9.5, 9.6_
 
-  - [ ] 1.12 Write unit tests for validators
+  - [x] 1.12 Write unit tests for validators
     - Create `tests/validation/inputs.test.ts`: limits at 99/100 cents income, name trimming and 60-character cap, APR 0 and 1 accepted and 1.01 rejected, future transaction date rejected, payment above balance message, non-integer and `NaN` amounts rejected
     - _Requirements: 4.9, 5.3, 5.7, 5.8, 6.4, 6.5, 9.2, 9.6_
 
-  - [ ] 1.13 Implement Dexie schema, factory and errors
+  - [x] 1.13 Implement Dexie schema, factory and errors
     - Create `src/lib/db/schema.ts` (`CRYPT_DB_NAME` = `cashcrypt`, `DEMO_DB_NAME` = `cashcrypt-demo`, version 1 stores `profile`, `debts`, `subscriptions`, `transactions`, `events` with unique `&refKey`, `weeklyPlans` keyed by `weekKey`, re-export of `MAX_MONEY_CENTS`), `src/lib/db/crypt.ts` (`openCrypt(name, opts?)` with injectable `indexedDB` and `IDBKeyRange`, lazy `getCryptDb(name)` singleton, `assertDemoDb`, `assertRealDb`) and `src/lib/db/errors.ts` (`DbValidationError`, `DbNotFoundError`)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8_
 
-  - [ ] 1.14 Implement the mode store
+  - [x] 1.14 Implement the mode store
     - Create `src/lib/db/modeStore.ts` with `readMode`, `writeMode`, `clearMode`, `subscribeMode` for key `cashcrypt:mode`; any value other than `demo` or `real` reads as `null`; in-tab listener set plus the `storage` event
     - _Requirements: 16.7_
 
-  - [ ] 1.15 Write schema tests
+  - [x] 1.15 Write schema tests
     - Create `tests/db/schema.test.ts` against `fake-indexeddb`: tables and indexes exist, duplicate `weekKey` is rejected, duplicate `refKey` is rejected, many `debt_payment` events without `refKey` are allowed, real and demo names differ
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.6, 31.1_
 
-  - [ ] 1.16 Write property test for mode store
+  - [x] 1.16 Write property test for mode store
     - **Property 32: Unknown mode values read as empty**
     - **Validates: Requirements 16.7**
 
-  - [ ] 1.17 Implement the snapshot adapter
+  - [x] 1.17 Implement the snapshot adapter
     - Create `src/lib/db/snapshotAdapter.ts` with pure `toFinancialSnapshot(rows, now)`: cents divided by 100, inactive subscriptions and zero-balance debts kept, events passed through unchanged, income 0 without a Profile, new object returned, inputs untouched
     - Import no React, Dexie or Next.js module
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.8_
 
-  - [ ] 1.18 Write property test for cents surviving the dollars boundary
+  - [x] 1.18 Write property test for cents surviving the dollars boundary
     - **Property 4: Cents survive the dollars boundary**
     - **Validates: Requirements 4.2, 4.7**
 
-  - [ ] 1.19 Write property test for adapter structure and purity
+  - [x] 1.19 Write property test for adapter structure and purity
     - **Property 5: The snapshot adapter preserves structure and purity**
     - **Validates: Requirements 4.1, 4.3, 4.4, 4.5, 4.6, 4.8**
 
@@ -104,6 +104,7 @@ Conventions that apply to every task:
 
   - [ ] 2.2 Implement data-entry mutations
     - Create `src/lib/db/mutations.ts` with `MutationContext` (`now`, injectable `newId`), `setMonthlyIncome`, `addDebt`, `editDebt`, `addSubscription` (stores `active: true`), `editSubscription` (never changes `active`), `addTransaction` and `clearAllData` (real crypt only via `assertRealDb`)
+    - Note: every profile write (in `setMonthlyIncome` and anywhere else the Profile is written) must use `id: PROFILE_ID` from `src/lib/db/schema.ts` (type `ProfileRecord`), since `ProfileRow` itself has no primary key
     - Validate first so no transaction opens on invalid input; each mutation runs in exactly one `db.transaction("rw", ...)`; throw `DbValidationError` or `DbNotFoundError`; none creates an Event
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 27.7_
 

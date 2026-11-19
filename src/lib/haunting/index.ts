@@ -26,8 +26,10 @@ export type {
   Ghost,
   HouseState,
   Poltergeist,
+  SubscriptionInCents,
   Zombie,
 } from "./types";
+export { normalizeSubscription };
 
 /** Sanitises a value that must be a non-negative finite number; anything else becomes 0. */
 function sanitize(value: number): number {
@@ -35,7 +37,7 @@ function sanitize(value: number): number {
 }
 
 /** Converts decimal dollars to integer cents. The only Math.round(x * CENTS_PER_DOLLAR) in the engine. */
-function dollarsToCents(dollars: number): number {
+export function dollarsToCents(dollars: number): number {
   return sanitize(Math.round(sanitize(dollars) * CENTS_PER_DOLLAR));
 }
 
