@@ -6,6 +6,8 @@ CashCrypt is a local-first personal finance web app where your financial health 
 
 Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 
+> **Status: work in progress.** Built so far: the Crypt UI design system (13 primitives in `src/components/ui/`), the `/styleguide` route, the pure haunting engine in `src/lib/haunting/`, and a placeholder home page. The dashboard, house scene, exorcism planner, Dexie storage, demo crypt, CSV import and settings below are planned and not built yet.
+
 ---
 
 ## ✨ Features
@@ -43,8 +45,24 @@ Open [http://localhost:3000](http://localhost:3000).
 ### Test
 
 ```bash
-npm test             # run all tests
-npm run test:ui      # Vitest UI in the browser
+npm test                          # run all tests once (node and ui projects)
+npx vitest --run --project node   # node project only: tests/**, excluding tests/ui/
+npx vitest --run --project ui     # ui project only: jsdom component tests in tests/ui/
+npm run test:ui                   # Vitest UI in the browser
+```
+
+Vitest is configured with two projects in `vitest.config.ts`. The `node` project runs the pure-logic, token, contrast and source-scan tests. The `ui` project runs component tests in a jsdom environment.
+
+### Style guide (`/styleguide`)
+
+The `/styleguide` route is a living reference for the Crypt UI design system. It renders the tokens (surfaces, text, accents, type scale, radius and font families) and one section per primitive in `src/components/ui/`, in their different states: Button, QuickAction, BalanceHero, Card, ListRow, Chip, SegmentedControl, Input, BottomSheet, Toast, LightScoreBar and ExorcismActionRow.
+
+The page is marked `noindex, nofollow`, so search engines do not list it.
+
+To open it, start the dev server and visit [http://localhost:3000/styleguide](http://localhost:3000/styleguide):
+
+```bash
+npm run dev
 ```
 
 ### Build
@@ -81,9 +99,13 @@ Key directories:
 
 ```
 src/lib/haunting/   — pure functions: financial data → house state
+src/lib/utils/      — pure UI helpers (money input, score text, delta chip, toast reducer)
+src/components/ui/  — Crypt UI primitives
+src/components/styleguide/ — the /styleguide page content
+Planned, not built yet:
 src/lib/exorcism/   — pure functions: house state → 3-action exorcism plan
 src/lib/db/         — Dexie schema and migrations
-src/components/     — React components (house SVG, creatures, UI)
+src/components/     — house SVG, creatures and feature components
 src/hooks/          — React hooks bridging Dexie and the haunting engine
 ```
 

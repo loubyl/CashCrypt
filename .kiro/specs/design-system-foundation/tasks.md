@@ -342,22 +342,22 @@ Conventions that apply to every task:
 - [x] 17. Checkpoint - all primitives
   - Run `npm test` (the source scans of 1.8 and the contrast test of 1.9 included, unmodified), `npm run typecheck`, `npm run lint` and `npm run build`; ensure all pass and the styleguide contains a section for every primitive, ask the user if questions arise.
 
-- [ ] 18. Closing pass: final axe run, keyboard test, documentation
-  - [ ] 18.1 Complete `tests/ui/styleguide.axe.test.tsx`
+- [x] 18. Closing pass: final axe run, keyboard test, documentation
+  - [x] 18.1 Complete `tests/ui/styleguide.axe.test.tsx`
     - With every section present, run axe on `StyleguideContent` inside one `ToastRegion` for: sheet closed, sheet open, and each toast tone visible (trigger through the real buttons). Only `color-contrast` is disabled, named in a comment, and no selector exclusions.
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 26.7_
 
-  - [ ] 18.2 Create `tests/ui/styleguide.keyboard.test.tsx`
+  - [x] 18.2 Create `tests/ui/styleguide.keyboard.test.tsx`
     - Render `StyleguideContent` inside a `ToastRegion` (not the page). Assert Tab order follows DOM order and skips disabled controls, no `tabindex` greater than 0, exactly one `<main>` and one `<h1>`, heading levels never skip, every interactive element has an accessible name, and no horizontal-scroll-causing fixed widths are asserted through class checks where jsdom allows.
     - _Requirements: 21.1, 21.2, 21.4, 21.7, 21.8, 19.17_
 
-  - [ ] 18.3 Update steering documents
+  - [x] 18.3 Update steering documents
     - `.kiro/steering/structure.md`: remove `tailwind.config.ts`; note the Tailwind v4 integration actually used (Turbopack loader rule in `next.config.ts`, tokens in `src/app/globals.css` with `@theme`); add `src/app/styleguide/page.tsx`, `src/components/styleguide/StyleguideContent.tsx`, `Toast.tsx`, `ToastRegion.tsx` (exports `ToastRegion` and `useToast`, mounted in the layout), `motionTokens.ts`, `src/lib/utils/` helpers, `tests/ui/`, `tests/utils/`, `tests/design-system/` and the Vitest setup file; add the note that hooks exported by a primitive file live beside it and `src/hooks/` is reserved for Dexie and haunting-engine bridges.
     - `.kiro/steering/conventions.md`: replace the "Tailwind config tokens" row with a note plus the Color_Utility_Map table (CSS variable, `@theme` variable, utility; names from `design-system.md` unchanged); document that `className` is for Layout_Properties only and why.
     - `.kiro/steering/tech.md`: state that Tailwind CSS v4 is configured in CSS; add `jsdom` and `axe-core` to the testing dependencies.
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.8_
 
-  - [ ] 18.4 Update `README.md`
+  - [x] 18.4 Update `README.md`
     - Document the `/styleguide` route and the test commands (`npm test`, `npx vitest --run --project ui`, `npx vitest --run --project node`).
     - _Requirements: 24.5, 22.10_
 

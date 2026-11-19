@@ -28,9 +28,46 @@
 | Types / interfaces | PascalCase | `HouseState`, `ExorcismAction` |
 | Constants | SCREAMING_SNAKE_CASE | `MAX_DECAY_LEVEL`, `GHOST_THRESHOLD_RATIO` |
 | CSS custom properties | kebab-case, following the prefixes in `design-system.md` | `--surface-card`, `--accent-candle`, `--text-primary` |
-| Tailwind config tokens | camelCase in JS, kebab-case in class names | `surfaceCard` → `bg-surface-card` |
+| Tailwind theme tokens | Tailwind v4 has no JS config. Aliases live in `@theme inline` in `src/app/globals.css`, kebab-case, with Tailwind's namespace prefix | `--color-surface-card` → `bg-surface-card` |
 | Test files | Same name as subject + `.test.ts(x)` | `decay.test.ts` |
 | Dexie table names | plural camelCase | `transactions`, `subscriptions` |
+
+## Tailwind color utilities (Color_Utility_Map)
+
+The design-system names (`--text-primary`, `--accent-candle`, …) are unchanged and declared in `:root`. Tailwind v4 reads `--text-*` in `@theme` as font sizes, so colors stay outside `@theme` and are aliased in `@theme inline`. See `design.md` Decision 6 of the design-system-foundation spec and `src/app/globals.css`.
+
+| CSS variable (`:root`) | `@theme inline` variable | Utility |
+|---|---|---|
+| `--text-primary` | `--color-ink` | `text-ink` |
+| `--text-secondary` | `--color-ink-secondary` | `text-ink-secondary` |
+| `--text-tertiary` | `--color-ink-tertiary` | `text-ink-tertiary` |
+| `--surface-void` | `--color-surface-void` | `bg-surface-void` |
+| `--surface-card` | `--color-surface-card` | `bg-surface-card` |
+| `--surface-raised` | `--color-surface-raised` | `bg-surface-raised` |
+| `--surface-overlay` | `--color-surface-overlay` | `bg-surface-overlay` |
+| `--accent-candle` | `--color-candle` | `text-candle` |
+| `--accent-ecto` | `--color-ecto` | `text-ecto` |
+| `--accent-blood` | `--color-blood` | `text-blood` |
+| `--accent-ghost` | `--color-ghost` | `text-ghost` |
+| `--accent-spirit` | `--color-spirit` | `text-spirit` |
+| `--on-accent` | `--color-on-accent` | `text-on-accent` |
+| `--border-control` | `--color-control` | `border-control` |
+| `--focus-ring` | `--color-focus` | `ring-focus`, `outline-focus` |
+| `--divider` | `--color-divider` | `bg-divider` |
+| `--tint-candle` | `--color-candle-tint` | `bg-candle-tint` |
+| `--tint-ecto` | `--color-ecto-tint` | `bg-ecto-tint` |
+| `--tint-blood` | `--color-blood-tint` | `bg-blood-tint` |
+| `--tint-ghost` | `--color-ghost-tint` | `bg-ghost-tint` |
+| `--tint-spirit` | `--color-spirit-tint` | `bg-spirit-tint` |
+| `--scrim` | `--color-scrim` | `bg-scrim` |
+
+The utility column shows the usual one; each color also works with the other color utilities (`bg-`, `text-`, `border-`, `outline-`). The tint variables are the accent at 14% alpha. `--dataviz-*`, `--light-score-gradient` and the semantic aliases (`--color-success`, `--color-warning`, `--color-danger`, `--color-info`) are declared in `:root` and have no utility. `LightScoreBar` reads the gradient through `var(--light-score-gradient)`.
+
+## `className` on primitives
+
+- `className` on `src/components/ui/` primitives is for **layout properties only**: margin, width and height, flex or grid placement, and positioning. Visual properties (color, background, border, radius, padding, font size, shadow) change only through props such as `variant`, `size` and `tone`.
+- The project does not use `tailwind-merge`. When two utilities conflict (for example `bg-ecto` and `bg-surface-card`), Tailwind does not guarantee which one wins, so a caller's visual override would be unpredictable. Each primitive puts its own classes first and the caller's last.
+- `tests/design-system/sourceScan.test.ts` ("className layout-only scan") enforces this. It reads every `.tsx` file in `src/app/` and `src/components/` except `src/components/ui/`, finds JSX elements whose tag is imported from `@/components/ui/*`, and fails when their `className` contains a visual utility: `bg-`, `border`, `rounded`, `shadow`, `font-`, `ring-`, `outline-`, padding (`p-`, `px-`, …) or a `text-` utility other than alignment and wrapping (`text-center` and similar). Native elements are not checked. For dynamic class strings it checks only the literal fragments, so review is still the backstop.
 
 ## File and Component Rules
 

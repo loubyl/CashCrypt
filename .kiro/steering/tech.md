@@ -6,12 +6,12 @@
 |---|---|---|
 | Framework | Next.js 16.4.6 (App Router) | File-based routing, React Server Components, easy Vercel deploy |
 | Language | TypeScript (strict mode) | Safety for the haunting engine's pure functions |
-| Styling | Tailwind CSS | Utility-first, good dark-mode support, purges unused CSS |
+| Styling | Tailwind CSS v4 | Utility-first. Configured in CSS (`src/app/globals.css`, `@theme inline`); there is no `tailwind.config.ts`. Compiled in Turbopack via the `@tailwindcss/turbopack` loader rule in `next.config.ts` |
 | Chrome animation | Framer Motion (Motion) | Declarative, spring-based, `useReducedMotion` built in; owns all chrome micro-interactions |
 | Scene animation | GSAP (core + MotionPathPlugin, DrawSVGPlugin, MorphSVGPlugin) + `@gsap/react` | Multi-step timelines, path-following, SVG morph; owns the house scene and all moments |
 | House graphics | Inline SVG | Full programmatic control; animated exclusively with GSAP |
 | Local storage | Dexie.js (IndexedDB wrapper) | Schema versioning, typed queries, works offline |
-| Testing | Vitest + fast-check | Unit tests + property-based tests for the haunting engine |
+| Testing | Vitest + fast-check + jsdom + axe-core | Unit and property-based tests for the engine; jsdom project for component tests; axe-core for accessibility checks |
 | Deploy | Vercel | Zero-config Next.js deploy |
 
 ## Architecture Principles
@@ -100,6 +100,8 @@ vitest
 fast-check
 @testing-library/react
 @testing-library/user-event
+jsdom
+axe-core
 ```
 
 ### Fonts (`next/font/google`)

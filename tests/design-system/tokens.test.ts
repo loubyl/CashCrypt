@@ -200,6 +200,7 @@ describe("theme tokens", () => {
       "--color-blood-tint": "var(--tint-blood)",
       "--color-ghost-tint": "var(--tint-ghost)",
       "--color-spirit-tint": "var(--tint-spirit)",
+      "--color-scrim": "var(--scrim)",
     };
     expectTokens(themeTokens, colorMap);
   });

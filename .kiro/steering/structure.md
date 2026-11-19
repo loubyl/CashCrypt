@@ -2,6 +2,8 @@
 
 ## Directory Layout
 
+The tree below is the target layout. Built so far: `src/app/` (layout, placeholder home, `/styleguide`, `globals.css`), `src/components/styleguide/`, the 13 primitive files and `motionTokens.ts` in `src/components/ui/`, `src/lib/haunting/`, `src/lib/utils/`, and the tests in `tests/haunting/`, `tests/design-system/`, `tests/ui/` and `tests/utils/`. Everything else (the other routes, `house/`, `moments/`, the feature component folders, `src/lib/db/`, `src/lib/exorcism/`, `src/lib/moments/`, `src/lib/demo/`, `src/hooks/`, `src/types/`, `tests/exorcism/`) is planned for later specs and does not exist yet.
+
 ```
 CashCrypt/
 ├── .kiro/
@@ -16,7 +18,7 @@ CashCrypt/
 ├── public/                     # Static assets (images, icons, etc.)
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── layout.tsx          # Root layout (fonts, global styles, Dexie provider)
+│   │   ├── layout.tsx          # Root layout (fonts, global styles, ToastRegion; Dexie provider planned)
 │   │   ├── page.tsx            # Home — house dashboard
 │   │   ├── transactions/
 │   │   │   └── page.tsx        # Transaction list + manual entry + CSV import
@@ -28,9 +30,13 @@ CashCrypt/
 │   │   │   └── page.tsx        # Weekly exorcism plan
 │   │   ├── settings/
 │   │   │   └── page.tsx        # Settings — sound toggle, data export / import, clear data
-│   │   └── globals.css         # Tailwind base + CSS custom properties
+│   │   ├── styleguide/
+│   │   │   └── page.tsx        # /styleguide route; renders StyleguideContent
+│   │   └── globals.css         # Tailwind v4 entry, :root tokens, @theme inline aliases, base layer
 │   │
 │   ├── components/
+│   │   ├── styleguide/
+│   │   │   └── StyleguideContent.tsx   # Living styleguide: every primitive and token
 │   │   ├── house/              # SVG house and all its animated states (GSAP)
 │   │   │   ├── HouseScene.tsx  # Root component; composes all house layers
 │   │   │   ├── HouseBase.tsx   # Static structural SVG
@@ -70,7 +76,9 @@ CashCrypt/
 │   │       ├── Input.tsx                   # Radius-16, floating label, money-input variant
 │   │       ├── LightScoreBar.tsx           # 10px pill track, blood→candle→ecto fill
 │   │       ├── BottomSheet.tsx             # Sheet on mobile, modal on desktop (single component)
-│   │       └── Toast.tsx
+│   │       ├── Toast.tsx                   # One toast (presentational)
+│   │       ├── ToastRegion.tsx             # Exports ToastRegion and useToast; mounted in layout.tsx
+│   │       └── motionTokens.ts             # Framer Motion duration/distance constants (mirror the CSS tokens)
 │   │
 │   ├── lib/
 │   │   ├── db/                 # Dexie schema and migrations
@@ -94,7 +102,13 @@ CashCrypt/
 │   │   │   └── queue.ts        # Plays moments one at a time; supports skip (Promise-based queue)
 │   │   ├── demo/
 │   │   │   └── seed.ts         # Five named demo scenarios (one per decay level)
-│   │   └── utils/              # Shared helpers (formatting, date utils, etc.)
+│   │   └── utils/              # Pure UI helpers (framework-agnostic)
+│   │       ├── money.ts            # Money input sanitising, blur formatting, currency parts
+│   │       ├── score.ts            # Score clamping, fill percent, score text and breakdown
+│   │       ├── delta.ts            # Delta chip presentation (sign, icon, tone)
+│   │       ├── segmentedNav.ts     # Arrow/Home/End navigation over enabled segments
+│   │       ├── focusTrap.ts        # Focusable selector, next focus index, inert skip rule
+│   │       └── toastReducer.ts     # Toast queue reducer and live-region choice
 │   │
 │   ├── hooks/                  # Custom React hooks
 │   │   ├── useHouseState.ts    # Subscribes to Dexie, returns live HouseState
@@ -116,25 +130,47 @@ CashCrypt/
 │   │   ├── integration.test.ts     # cancellation strict monotonicity, end-to-end properties
 │   │   ├── robustness.test.ts      # extreme inputs, zero income, empty arrays
 │   │   └── staticChecks.test.ts    # source scan: banned APIs/imports, no numeric literals outside config.ts and dates.ts
-│   └── exorcism/
-│       └── planner.test.ts
+│   ├── exorcism/
+│   │   └── planner.test.ts
+│   ├── design-system/          # Token, contrast, focus-ring and source-scan tests (node)
+│   │   ├── contrast.test.ts
+│   │   ├── focusRing.test.ts
+│   │   ├── sourceScan.test.ts
+│   │   ├── tokens.test.ts
+│   │   └── helpers/contrast.ts
+│   ├── ui/                     # Component and page tests (jsdom project)
+│   │   ├── setup.ts            # Vitest setup file: jest-dom, cleanup, matchMedia stub, reduced-motion mock
+│   │   ├── helpers/            # axe.ts, motion.ts, viewport.ts
+│   │   └── *.test.ts(x)        # One file per primitive, plus styleguide and home page tests
+│   └── utils/                  # Unit tests for src/lib/utils/ (one file per helper)
 │
 ├── .gitignore
 ├── LICENSE
 ├── README.md
 ├── next.config.ts
-├── tailwind.config.ts
 ├── tsconfig.json
 ├── vitest.config.ts
 └── package.json
 ```
+
+## Tailwind v4 integration
+
+There is no `tailwind.config.ts`. Tailwind CSS v4 is configured in CSS:
+
+- `next.config.ts` registers a Turbopack loader rule for `*.css` files that runs `@tailwindcss/turbopack`.
+- `src/app/globals.css` starts with `@import "tailwindcss";`, declares the design-system tokens in `:root`, and maps them to utilities in an `@theme inline` block.
+
+## Vitest setup
+
+`vitest.config.ts` defines two projects. `node` runs `tests/**` except `tests/ui/**`. `ui` runs `tests/ui/**` in jsdom with `tests/ui/setup.ts` as its setup file.
 
 ## Module Boundaries
 
 - `src/lib/haunting/` and `src/lib/exorcism/` must have **zero React, Dexie, or Next.js imports**. They are plain TypeScript.
 - `src/lib/db/` is the only place that imports Dexie.
 - `src/lib/moments/queue.ts` is framework-agnostic: no React imports. It operates on `Promise<void>` functions only.
-- `src/hooks/` bridges Dexie and the haunting engine for React components.
+- `src/hooks/` bridges Dexie and the haunting engine for React components. It is reserved for those bridges.
+- A hook that is part of a primitive's contract (for example `useToast`) is exported from that primitive's file and lives beside it in `src/components/ui/`, not in `src/hooks/`.
 - `src/components/` never imports from `src/lib/db/` directly; it uses hooks.
 - **Framer Motion** is imported only in `src/components/ui/` and in chrome-layer components. Never inside `src/components/house/` or `src/components/moments/`.
 - **GSAP** is imported only in `src/components/house/` and `src/components/moments/`. Never inside `src/components/ui/`.
