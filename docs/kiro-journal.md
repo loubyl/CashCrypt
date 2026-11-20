@@ -162,3 +162,32 @@ A dated log of how Kiro features shaped CashCrypt, kept for the Kiroween write-u
   The mutation rule in `conventions.md` is what surfaced them. A test that still passes with the bug put back does not cover the fix.
 - **Checkpoint 10:** 931 tests in 97 files pass, as do lint, typecheck and `npm run build`. The demo flow was also checked manually in the browser.
 - **What it changed:** for every fix in this spec, the mutation check now comes before a test is accepted, and test-side bugs are fixed in the test instead of being worked around in the code. Related: [the money input entry](#2026-11-18--property-based-testing--steering-the-money-input-comma-both-ways), [Spec 3 requirements review](#2026-11-19--spec-3-app-screens-what-the-requirements-review-caught).
+## 2026-11-20 — Spec 3 (app-screens) complete: what manual checks on the deployed app caught
+- **Kiro feature:** Spec (requirements, design, tasks), property-based testing with fast-check, Steering (mutation rule)
+- **Manual checks of the deployed demo.** After each screen, the demo was used in the browser. These issues passed every test and axe:
+  - The cancel confirmation used the red `danger` button, although canceling a zombie is the good action. It is now `primary`, and `danger` is reserved for deleting data.
+  - The light score appeared twice on the Dashboard. The bar now shows the distance to the next level ("17 to Level 2") instead of a second number.
+  - Plan titles were truncated to one line, which hid the savings. Titles now wrap to two lines.
+  - Done actions kept their instructions ("Open Subscriptions to cancel it"). They now show "Done Nov 19".
+  - "Exorcism complete" was plain text below the cards. It is now a Card with the week's result ("Light score 32 → 43 · Level 3 — Haunted"), announced politely to screen readers.
+- **Focus bug.** After canceling or reviving a subscription, the row that opened the sheet moved to the other list (Zombies or Graveyard). The sheet could not return focus to it, so focus fell to `<body>`. The screen now focuses the moved row in its new list. The new tests fail on the old code.
+- **Logic gap found by trying the app.** Canceling a subscription and then bringing it back kept its cancellation momentum: +2 for Dirgebox in the level-4 demo. The fixes:
+  - **Snapshot adapter:** `subscription_canceled` events only count while the subscription stays canceled. The stored event is kept, so canceling again restores it with its original date (Property 35).
+  - **Plan action:** reviving a subscription also reopens its plan action for the current week, so "Do it" shows again.
+  - **Deletion:** deleting a revived (active) subscription also deletes its cancellation event. Otherwise the undone cancellation would count again once no active row hides it (Property 37).
+- **Paid-off debts.** A debt with a balance of 0 still counted its minimum payment in factor A. This was fixed in the snapshot adapter, which passes a minimum of 0 for paid-off debts, and not in the closed haunting-engine spec. The stored minimum is unchanged (Property 36).
+- **Deletion was missing from the spec.** Requirements, design and a new task group were written before any code, first for debts and subscriptions, then for transactions. The rules:
+  - payment and cancellation events that still stand are kept;
+  - plan actions that target a deleted row stay in the frozen plan without "Do it", and can still be ticked;
+  - focus moves to the list heading after a delete.
+- **Money input.** Grouping thousands on blur ("2,500.00") also required changing `parseMoneyToCents`, which only accepted `^\d*(\.\d{0,2})?$`. Without the parser change, every money form would have rejected its own committed value. The mutation check (the old parser restored) broke at least six tests across the debt, payment and money-input suites.
+- **Copy rules that emerged:**
+  - Amounts inside sentences use `formatCentsShort`: plan titles, impact text, toasts, sheet headings, validation messages and row subtitles ("$120/mo", "$5.50/mo"). Only amount columns and balances shown as figures keep cents (Requirement 28.8).
+  - Every color-coded state has an icon and visible text (Requirement 30.4). This ruled out an icon-only "Ghost" marker: ghost transactions now end their subtitle with "Ghost" ("Nov 19 · Ghost").
+- **Task scheduling.** Kiro's task scheduler runs tasks in dependency waves. The Transactions subtasks waited in waves with unrelated tasks until they were dispatched manually.
+- **Final state:**
+  - 1111 tests in 117 files, all passing.
+  - axe on 7 screens (Landing, Dashboard, Exorcism, Subscriptions, Debts, Transactions, Settings) in 4 states: empty real crypt, populated real crypt, demo level 4, and loading. `color-contrast` is skipped in jsdom; contrast is covered by `contrast.test.ts`.
+  - A keyboard test suite.
+  - Typecheck, lint and build pass.
+- **What it changed:** using the deployed app after each screen caught product and accessibility issues that tests and axe cannot see. When a fix touched a closed spec (the engine, the design-system primitives), it went into the data layer or an additive primitive change, and the spec was updated first. Related: [data layer to Dashboard](#2026-11-19--spec-3-app-screens-data-layer-to-dashboard--what-the-tests-caught), [requirements review](#2026-11-19--spec-3-app-screens-what-the-requirements-review-caught).
