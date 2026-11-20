@@ -432,12 +432,12 @@ Conventions that apply to every task:
     - Create `tests/ui/transactions.test.tsx`: window and order, Ghost chip only below the threshold, summary Card and Poltergeist text, empty state, add expense flow with "Ghost added: $X" toast and updated list, invalid expense keeps the sheet open and writes nothing
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.6, 26.7, 26.8, 31.8_
 
-- [ ] 15. Group 13: Settings
-  - [ ] 15.1 Implement the Settings screen
+- [x] 15. Group 13: Settings
+  - [x] 15.1 Implement the Settings screen
     - Create `src/components/screens/SettingsScreen.tsx` and `src/app/(app)/settings/page.tsx`: money Input "Monthly income" with "Save income" (toast "Income saved", error below $1.00), "Crypt" SegmentedControl (Demo crypt, My crypt) that opens the onboarding sheet when no Real_Crypt Profile exists, `DemoControls` while in demo mode, "Clear all data" with a confirmation sheet that calls `clearAll` and returns to Landing, disabled with the hint "Switch to your own crypt to use this." while the Demo_Crypt is active, no sound toggle
     - _Requirements: 9.2, 27.1, 27.2, 27.3, 27.4, 27.5, 27.7, 27.8, 27.9, 30.1_
 
-  - [ ] 15.2 Write Settings screen tests
+  - [x] 15.2 Write Settings screen tests
     - Create `tests/ui/settings.test.tsx`: income save toast and invalid income error, crypt switch updates the mode store, onboarding opens when switching to "My crypt" without a Profile, clear all data confirmation empties only the real crypt and returns to Landing, clear control disabled with the hint in demo mode, Demo controls shown only in demo mode, no sound toggle
     - _Requirements: 9.2, 27.1, 27.2, 27.3, 27.4, 27.5, 27.7, 27.8, 27.9, 31.8_
 
