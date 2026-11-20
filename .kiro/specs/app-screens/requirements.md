@@ -453,14 +453,14 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 #### Acceptance Criteria
 
-1. THE Subscriptions Screen SHALL list every active Subscription as a ListRow with its name, a subtitle that states the cadence and the usage ("Monthly · Rarely used"), and its monthly cost as the amount, sorted by monthly cost descending.
+1. THE Subscriptions Screen SHALL list every active Subscription as a ListRow with its name, a subtitle that states the cadence ("Monthly"; the usage is shown once, in the usage Chip), and its monthly cost as the amount, sorted by monthly cost descending.
 2. THE Subscriptions Screen SHALL show the usage as text and a Chip, and SHALL NOT rely on color alone.
 3. THE Subscriptions Screen SHALL show a primary "Add subscription" Button that opens a BottomSheet with Inputs for name and amount, a SegmentedControl for cadence and a SegmentedControl for usage.
-4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details, a SegmentedControl to change the usage and a primary "Cancel subscription" Button (canceling a zombie is the good action; the `danger` variant is only for destructive data actions such as deleting a row).
+4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details (the monthly cost "$60/mo", plus a cadence line with the original amount only when the cadence is not monthly, for example "Yearly · $120 per year"), a SegmentedControl to change the usage and a primary "Cancel subscription" Button (canceling a zombie is the good action; the `danger` variant is only for destructive data actions such as deleting a row).
 5. WHEN the user activates "Cancel subscription", or activates the Do_It_Button of a `cancel_subscription` Plan_Action, THE App SHALL ask for confirmation in a BottomSheet that states "Cancel Wraithcast — saves $120/mo" with a secondary "Keep it" Button and a primary "Cancel subscription" Button.
 6. WHEN the user confirms, THE Subscriptions Screen SHALL call `cancelSubscription` and SHALL show a success toast "+$120/mo saved" with the exact monthly cost.
 7. THE Subscriptions Screen SHALL show a "Graveyard" Card that lists every inactive Subscription as a ListRow with its name, "R.I.P. $X/mo" and the cancellation date, and WHEN the list is empty THE Card SHALL show "No tombstones yet. Suspiciously quiet."
-8. WHEN the user selects a graveyard row, THE Subscriptions Screen SHALL offer a "Bring it back" Button that calls `reactivateSubscription` and SHALL show a toast that states the monthly cost returning.
+8. WHEN the user selects a graveyard row, THE Subscriptions Screen SHALL offer a secondary "Bring it back" Button (reviving a zombie is allowed but not encouraged, so it is not a primary Button) that calls `reactivateSubscription` and SHALL show a toast that states the monthly cost returning.
 9. WHEN there are no active Subscriptions, THE Subscriptions Screen SHALL show the empty state "No zombies in the basement. Suspiciously quiet."
 10. THE Subscriptions Screen SHALL show the total monthly cost of active Subscriptions in a summary Card.
 11. IF the Add subscription form has an empty name, a missing amount or an amount of 0, THEN THE form SHALL show an error on the field and SHALL create no row.

@@ -399,7 +399,7 @@ Conventions that apply to every task:
     - _Requirements: 23.1, 24.1_
 
   - [x] 12.2 Implement the Subscriptions screen
-    - Create `src/components/screens/SubscriptionsScreen.tsx` and `src/app/(app)/subscriptions/page.tsx`: active rows ("Monthly · Rarely used") sorted by monthly cost with a usage Chip (icon and text), summary Card with total monthly cost, primary "Add subscription" sheet (name, amount, cadence and usage SegmentedControls, field errors for empty name and amount 0), details sheet with usage change and danger "Cancel subscription" that opens `CancelSubscriptionSheet`, Graveyard Card with "R.I.P. $X/mo" and cancellation date, "Bring it back" calling `reactivateSubscription`, empty states "No zombies in the basement. Suspiciously quiet." and "No tombstones yet. Suspiciously quiet."
+    - Create `src/components/screens/SubscriptionsScreen.tsx` and `src/app/(app)/subscriptions/page.tsx`: active rows (subtitle "Monthly", the cadence only) sorted by monthly cost with a usage Chip (icon and text), summary Card with total monthly cost, primary "Add subscription" sheet (name, amount, cadence and usage SegmentedControls, field errors for empty name and amount 0), details sheet with usage change and danger "Cancel subscription" that opens `CancelSubscriptionSheet`, Graveyard Card with "R.I.P. $X/mo" and cancellation date, "Bring it back" calling `reactivateSubscription`, empty states "No zombies in the basement. Suspiciously quiet." and "No tombstones yet. Suspiciously quiet."
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 28.6, 30.1, 30.4_
 
   - [x] 12.3 Write Subscriptions screen tests

@@ -55,7 +55,7 @@ async function renderScreen(seed: RealSeed = {}) {
 afterEach(() => cleanup());
 
 describe("Subscriptions screen lists", () => {
-  it("lists active subscriptions sorted by monthly cost with cadence and usage subtitles", async () => {
+  it("lists active subscriptions sorted by monthly cost with a cadence subtitle and the usage in a chip", async () => {
     await renderScreen({ subscriptions: [CRYPTFLIX, GAZETTE, WRAITHCAST] });
     const zombies = screen.getByRole("heading", { name: "Zombies" }).closest("section, div") as HTMLElement;
     const names = within(zombies)
@@ -66,9 +66,13 @@ describe("Subscriptions screen lists", () => {
     );
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    expect(screen.getByText("Monthly · Never used")).toBeTruthy();
-    expect(screen.getByText("Monthly · Rarely used")).toBeTruthy();
-    expect(screen.getByText("Yearly · Often used")).toBeTruthy();
+    // The usage appears once, in the Chip; the subtitle is only the cadence.
+    expect(within(zombies).getAllByText("Monthly")).toHaveLength(2);
+    expect(within(zombies).getByText("Yearly")).toBeTruthy();
+    expect(within(zombies).queryByText(/ · (Never|Rarely|Often) used/)).toBeNull();
+    for (const usage of ["Never used", "Rarely used", "Often used"]) {
+      expect(within(zombies).getAllByText(usage)).toHaveLength(1);
+    }
   });
 
   it("shows the total monthly cost of active subscriptions only", async () => {
@@ -102,7 +106,7 @@ describe("Subscriptions screen add flow", () => {
     await user.click(within(dialog).getByRole("button", { name: "Save subscription" }));
     expect(await screen.findByText("Zombie added: Spooky Music, $9.99/mo")).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
-    expect(await screen.findByText("Monthly · Often used")).toBeTruthy();
+    expect(await screen.findByText("Often used")).toBeTruthy();
     const rows = await ctx.realDb.subscriptions.toArray();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ name: "Spooky Music", amountCents: 999, active: true });
@@ -173,6 +177,36 @@ describe("Subscriptions screen cancel and graveyard", () => {
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect((await ctx.realDb.subscriptions.get(OLD.id))?.active).toBe(true);
     expect(await screen.findByText("No tombstones yet. Suspiciously quiet.")).toBeTruthy();
+  });
+});
+
+describe("Subscriptions screen details and graveyard sheets", () => {
+  it("shows only the per-month figure for a monthly subscription", async () => {
+    const user = userEvent.setup();
+    await renderScreen({ subscriptions: [WRAITHCAST] });
+    await user.click(screen.getByRole("button", { name: /^Wraithcast, Never used/ }));
+    const details = await screen.findByRole(DIALOG_ROLE, { name: "Wraithcast" });
+    expect(within(details).getByText("$120/mo")).toBeTruthy();
+    expect(within(details).queryByText(/per month/)).toBeNull();
+  });
+
+  it("adds the cadence line with the original amount for a non-monthly subscription", async () => {
+    const user = userEvent.setup();
+    await renderScreen({ subscriptions: [CRYPTFLIX] });
+    await user.click(screen.getByRole("button", { name: /^Cryptflix, Often used/ }));
+    const details = await screen.findByRole(DIALOG_ROLE, { name: "Cryptflix" });
+    expect(within(details).getByText("Yearly · $120 per year")).toBeTruthy();
+    expect(within(details).getByText("$10/mo")).toBeTruthy();
+  });
+
+  it("offers Bring it back as a secondary button", async () => {
+    const user = userEvent.setup();
+    await renderScreen({ subscriptions: [OLD] });
+    await user.click(screen.getByText("Bone Daily"));
+    const dialog = await screen.findByRole(DIALOG_ROLE, { name: "Bone Daily" });
+    const button = within(dialog).getByRole("button", { name: "Bring it back" });
+    expect(button.getAttribute("data-variant")).toBe("secondary");
+    expect(dialog.querySelector('button[data-variant="primary"]')).toBeNull();
   });
 });
 

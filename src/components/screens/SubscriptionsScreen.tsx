@@ -51,6 +51,11 @@ const CADENCE_LABELS: Record<Cadence, string> = {
   monthly: "Monthly",
   yearly: "Yearly",
 };
+const CADENCE_PERIODS: Record<Cadence, string> = {
+  weekly: "week",
+  monthly: "month",
+  yearly: "year",
+};
 const USAGE_LABELS: Record<Usage, string> = {
   often: "Often used",
   rarely: "Rarely used",
@@ -236,10 +241,12 @@ function DetailsSheet({ row, onClose, onCancel }: DetailsSheetProps) {
       {row ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-body text-ink-secondary">
-              {CADENCE_LABELS[row.cadence]} · {formatCentsShort(row.amountCents)} per{" "}
-              {row.cadence === "weekly" ? "week" : row.cadence === "yearly" ? "year" : "month"}
-            </p>
+            {/* Monthly amounts equal the per-month figure below, so the line only adds information otherwise. */}
+            {row.cadence === "monthly" ? null : (
+              <p className="text-body text-ink-secondary">
+                {CADENCE_LABELS[row.cadence]} · {formatCentsShort(row.amountCents)} per {CADENCE_PERIODS[row.cadence]}
+              </p>
+            )}
             <p className="font-display text-title text-ink tabular-nums">
               {formatCentsShort(getMonthlyCents(row))}
               {PER_MONTH_SUFFIX}
@@ -312,7 +319,8 @@ function GraveyardSheet({ row, onClose, onBroughtBack }: GraveyardSheetProps) {
               {REACTIVATE_ERROR}
             </p>
           ) : null}
-          <Button type="button" variant="primary" size="lg" loading={submitting} onClick={handleBringBack}>
+          {/* Reviving a zombie is allowed but not encouraged, so it is not the primary pill. */}
+          <Button type="button" variant="secondary" size="lg" loading={submitting} onClick={handleBringBack}>
             Bring it back
           </Button>
         </div>
@@ -399,7 +407,7 @@ export function SubscriptionsScreen() {
                   icon={Repeat}
                   tone="neutral"
                   title={row.name}
-                  subtitle={`${CADENCE_LABELS[row.cadence]}${SEPARATOR}${USAGE_LABELS[row.usage]}`}
+                  subtitle={CADENCE_LABELS[row.cadence]}
                   amount={formatCents(getMonthlyCents(row))}
                   aria-label={`${row.name}, ${USAGE_LABELS[row.usage]}, ${formatCentsShort(getMonthlyCents(row))} per month`}
                   onClick={() => setDetailsId(row.id)}
