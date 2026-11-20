@@ -41,7 +41,7 @@ All creature colors map to design-system accent tokens. No new hex values are in
 
 Each level affects the SVG house layers: walls, windows, roof, garden, and ambient lighting. Window light intensity interpolates continuously with the light score within a level, so every debt payment produces a perceptible brightening even without a level change.
 
-The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level 5), with intermediate values mapped linearly to the light score within each band. The `LightScoreBar` in the chrome always shows the numeric score alongside the visual change.
+The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level 5), with intermediate values mapped linearly to the light score within each band. The percentages in the level list below are **nominal** (they describe the intended mood of each level); the real candlelight opacity is decided by the window opacity curve in `src/lib/scene/config.ts` (see the house-scene design), which keeps the curve non-decreasing within and across levels and makes a payment visible. The `LightScoreBar` in the chrome always shows the numeric score alongside the visual change.
 
 ### Level 1 — Pristine
 - Walls: clean, warm cream (`#F5EFC8` tint).
@@ -53,7 +53,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 
 ### Level 2 — Uneasy
 - Walls: slightly yellowed, one hairline crack on the left facade.
-- Windows: `--accent-candle` at ~70% brightness, slow flicker (4s cycle).
+- Windows: `--accent-candle` at a nominal ~70% brightness, slow flicker (4s cycle).
 - Roof: a few shingles missing.
 - Garden: grass slightly brown at edges, lantern dimmer.
 - Atmosphere: faint fog at ground level.
@@ -61,7 +61,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 
 ### Level 3 — Haunted
 - Walls: visible cracks on two sides, dark staining near the foundation.
-- Windows: `--accent-candle` at ~40% brightness (amber tone), one window boarded up.
+- Windows: `--accent-candle` at a nominal ~40% brightness (amber tone), one window boarded up.
 - Roof: sagging in one corner, moss growing.
 - Garden: mostly dead grass, lantern unlit (silhouette only).
 - Atmosphere: fog thicker, slow-moving shadow passes behind a window.
@@ -69,7 +69,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 
 ### Level 4 — Crumbling
 - Walls: large cracks, one section of plaster missing revealing dark interior.
-- Windows: `--accent-candle` at ~15% brightness, two boarded up, one broken.
+- Windows: `--accent-candle` at a nominal ~15% brightness, two boarded up, one broken.
 - Roof: partial collapse on the right wing.
 - Garden: bare earth, dead tree, broken fence.
 - Atmosphere: heavy fog, bats circling overhead.
@@ -188,6 +188,7 @@ The scene is animated exclusively with GSAP (see `design-system.md` → Implemen
 
 Scene accessibility requirements that layer on top of the chrome rules in `design-system.md`:
 
+- **Deferred:** creatures as buttons, hover tooltips and the hover behavior described above are not built in this version. Creatures are non-interactive, the scene is one `role="img"`, and the financial detail lives in the chrome lists. The next rule applies once creatures become interactive.
 - All interactive creatures (ghosts, zombies, Poltergeist) are `<button>` elements or carry `role="button"` with an `aria-label` that names the financial item and its amount.
 - The house decay level is announced via a visually-hidden `<span aria-live="polite">` updated on every level change (e.g., "House is now Crumbling — light score 28").
 - All GSAP animation containers carry `aria-hidden="true"`; the financial data they represent is in the chrome DOM independently.

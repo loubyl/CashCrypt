@@ -162,10 +162,11 @@ The chrome stays calm at rest. The Halloween comes out as **moments**: short, pl
 | Trigger | Tool | Sequence | Duration |
 |---|---|---|---|
 | **Cancel subscription** (zombie) | Cartoon shovel | Shovel swoops in on an arc → "bonk" → zombie wobbles, sinks into the ground → a small tombstone rises with the subscription name and "R.I.P. $22.99/mo" → tombstone stays in the basement graveyard as a trophy | 1400ms |
-| **Log a debt payment** | Candle | The "Save payment" pill ignites: a small flame flickers on its left edge for 300ms → a light orb flies from the button to the house along a curved path → one crack seals and a window warms up → light score counts up | 1200ms |
+| **Log a debt payment** (only when it includes extra principal above the minimum) | Candle | The "Save payment" pill ignites: a small flame flickers on its left edge for 300ms → a light orb flies from the button to the house along a curved path → one crack seals and a window warms up → light score counts up | 1200ms |
 | **Complete an exorcism action** | Holy-water sprinkle | Round checkbox fills with candle color, three droplets burst out → the related creature in the scene reacts (ghost fades, zombie sinks) | 700ms |
 | **Ghosts captured** (small-expense action done) | Spirit jar | Ghosts in that category spiral into a glass jar with a cork that pops shut → jar label shows "−$41.51/mo" | 1100ms |
-| **Poltergeist exorcised** (small expenses back under threshold) | Sigil circle | A glowing circle draws itself under the monster (stroke draw) → monster shakes → splits into ghosts that fly outward and fade → brief warm flash on the scene | 1600ms |
+| **Poltergeist bound** (the `reduce_small_expenses` action is ticked) | Sigil circle | A glowing circle draws itself under the monster (stroke draw) → monster shakes once → settles sealed and dimmed with a brief warm flash. It stays bound while the action is done this week | 1200ms |
+| **Poltergeist exorcised** (small expenses back under threshold) | None for now | Data-driven fade: the Poltergeist fades out when the engine stops reporting it. A dispel moment (circle, shake, split into ghosts that fly outward and fade, warm flash, 1600ms) may come later | fade only |
 | **Weekly plan completed** | Three candles | Three candles light one by one above the plan card → "Exorcism complete. The lights flicker back on." | 1200ms |
 | **Decay level improves** | Dawn | Scene background warms by one step, fog thins, a bird or bat flies away | 1600ms |
 | **Decay level worsens** | Creak | A single crack draws across the wall, a shutter swings once. No sound by default | 1000ms |

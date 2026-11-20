@@ -64,7 +64,7 @@
 - Never animate the same SVG element with both libraries. If Framer Motion wraps a container, GSAP does not touch elements inside it, and vice versa.
 
 ### GSAP license
-GSAP is used under its standard **no-charge license** (Club GreenSock is not required for this project's use case). The `gsap` and `@gsap/react` packages from npm cover all needed plugins at no cost. If a Club plugin (MorphSVGPlugin, DrawSVGPlugin) is used, the license terms must be reviewed before shipping.
+GSAP and all of its former Club plugins (DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin and others) ship in the public `gsap` npm package and are free under GSAP's standard license. That license only restricts visual animation builders that compete with Webflow, which CashCrypt is not, so no Club review is needed. Import plugins from the package, for example `gsap/DrawSVGPlugin`. `@gsap/react` provides `useGSAP()`. MorphSVGPlugin is deferred for time, not for license.
 
 ### GSAP scoping
 - All GSAP code lives in `src/components/house/` and `src/components/moments/`.

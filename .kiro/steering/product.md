@@ -27,6 +27,7 @@ Financial health has a direct, visual consequence: a living, breathing haunted h
 - Animated SVG house whose decay level (1–5) is derived from the **light score** (0–100) computed by the haunting engine.
 - Each decay level has distinct visual states (see `visual-language.md`). Window light intensity interpolates continuously with the light score within a level, so every payment produces a visible change.
 - Clicking any creature opens a detail panel for that financial item.
+  - **Deferred:** creatures are non-interactive in this version. The scene is one `role="img"` and the detail of each financial item lives in the chrome lists.
 
 ### Debts
 - Debts are a first-class entity with four fields: name, current balance, APR, and minimum monthly payment.
