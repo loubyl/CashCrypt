@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { setReducedMotion } from "./helpers/motion";
 
-const VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger"];
+const VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger", "danger-ghost"];
 const SIZES: ButtonSize[] = ["sm", "md", "lg"];
 const SUCCESS_REGION_SELECTOR = '[aria-live="polite"]';
 

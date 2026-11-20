@@ -441,7 +441,7 @@ Conventions that apply to every task:
     - Create `tests/ui/settings.test.tsx`: income save toast and invalid income error, crypt switch updates the mode store, onboarding opens when switching to "My crypt" without a Profile, clear all data confirmation empties only the real crypt and returns to Landing, clear control disabled with the hint in demo mode, Demo controls shown only in demo mode, no sound toggle
     - _Requirements: 9.2, 27.1, 27.2, 27.3, 27.4, 27.5, 27.7, 27.8, 27.9, 31.8_
 
-- [x] 16. Group 14: Delete debts and subscriptions
+- [x] 16. Group 14: Delete debts, subscriptions and transactions
   - [x] 16.1 Add the delete mutations and actions
     - In `src/lib/db/mutations.ts` add `deleteDebt(db, id)` (one `rw` transaction over `debts`) and `deleteSubscription(db, id)` (one `rw` transaction over `subscriptions` and `events`): `DbNotFoundError` for a missing id with nothing written, then remove the row; for an active Subscription also delete the Event with `refKey` `cancelRefKey(id)` if it exists (the cancellation was undone); a graveyard Subscription keeps its Event; Weekly_Plans and every other Event are never touched
     - Unit tests in `tests/db/mutations.test.ts`: on the level-4 demo, cancel Dirgebox → bring it back → delete it leaves the momentum equal to the value before the cancel and leaves no `subscription_canceled` Event for it; deleting a graveyard Subscription keeps its Event and its +momentum; deleting a Debt keeps its `debt_payment` Events
@@ -465,6 +465,13 @@ Conventions that apply to every task:
     - Create `tests/ui/deleteRows.test.tsx`: the danger button and confirmation text for a debt (owing and paid off), an active subscription and a graveyard subscription; "Keep it" writes nothing; confirm removes only the row and keeps the Events (an active subscription's undone cancellation Event is the one exception), toasts, and focuses the list heading (never `<body>`); a plan action whose target was deleted shows no Do it and can still be ticked
     - Mutation check: temporarily remove the heading focus after a delete and confirm the focus assertion fails
     - _Requirements: 9.10, 14.6, 22.9, 23.12, 24.10, 30.5, 31.8_
+  - [x] 16.6 Delete transactions
+    - In `src/lib/db/mutations.ts` add `deleteTransaction(db, id)`: one `rw` transaction over `transactions`, `DbNotFoundError` for a missing id with nothing written, then remove the row; add it to `useCryptActions`
+    - Extend Property 37 in `tests/db/properties/p37-delete-row.test.ts` with transactions (with and without other rows, events and a plan)
+    - `TransactionsScreen`: rows become buttons that open an expense sheet (amount, category and date, ghost note) with a `danger-ghost` "Delete expense"; `DeleteConfirmSheet`; toast "Expense deleted"; focus the "Last 30 days" heading
+    - Tests in `tests/ui/transactions.test.tsx`: the sheet, the confirmation text and variants, Keep it writes nothing, confirm removes only that row, toasts and focuses the heading
+    - Mutation checks: `deleteTransaction` clearing every row fails Property 37; removing the heading focus fails the UI test
+    - _Requirements: 5.5, 9.12, 9.13, 26.9, 30.5_
 - [x] 17. Checkpoint - All screens
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass, ask the user if questions arise.
 

@@ -54,14 +54,28 @@ describe("Transactions screen list", () => {
   it("shows a category and date subtitle and the outflow amount", async () => {
     await renderScreen({ transactions: [NEWEST] });
     const row = rowOf("Midnight latte");
-    expect(within(row).getByText("Coffee · Jun 15")).toBeTruthy();
+    expect(within(row).getByText("Coffee · Jun 15 · Ghost")).toBeTruthy();
     expect(within(row).getByText(/\$4\.50/)).toBeTruthy();
   });
 
-  it("shows the Ghost chip only on rows below the small-expense threshold", async () => {
+  it("marks small expenses as ghosts in the subtitle and the accessible name, without a Ghost chip", async () => {
     await renderScreen({ transactions: [NEWEST, MIDDLE] });
-    expect(within(rowOf("Midnight latte")).getByText(GHOST_CHIP)).toBeTruthy();
-    expect(within(rowOf("Crypt lunch")).queryByText(GHOST_CHIP)).toBeNull();
+    // "Ghost" is visible text in the subtitle; there is no separate chip.
+    expect(screen.queryByText(GHOST_CHIP)).toBeNull();
+    expect(within(rowOf("Midnight latte")).getByText("Coffee · Jun 15 · Ghost")).toBeTruthy();
+    expect(within(rowOf("Crypt lunch")).getByText("Coffee · Jun 10")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Midnight latte, .*, ghost$/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Crypt lunch, / }).getAttribute("aria-label")).not.toMatch(/ghost/);
+  });
+
+  it("shows only the date, plus Ghost for a small expense, when the description equals the category", async () => {
+    await renderScreen({
+      transactions: [tx("t-coffee", "Coffee", 450, "2025-06-14"), tx("t-big", "Coffee", 2_500, "2025-06-13")],
+    });
+    const ghost = screen.getByRole("button", { name: /^Coffee, Coffee, Jun 14/ });
+    expect(within(ghost).getByText("Jun 14 · Ghost")).toBeTruthy();
+    const regular = screen.getByRole("button", { name: /^Coffee, Coffee, Jun 13/ });
+    expect(within(regular).getByText("Jun 13")).toBeTruthy();
   });
 
   it("shows the empty state when no transaction is in the window", async () => {
@@ -90,6 +104,41 @@ describe("Transactions screen summary", () => {
   });
 });
 
+describe("Transactions screen delete", () => {
+  it("opens the expense sheet from a row and deletes the expense after confirmation", async () => {
+    const user = userEvent.setup();
+    const ctx = await renderScreen({ transactions: [NEWEST, MIDDLE] });
+    await user.click(screen.getByRole("button", { name: /^Crypt lunch, / }));
+    const sheet = await screen.findByRole(DIALOG_ROLE, { name: "Crypt lunch" });
+    expect(within(sheet).getByText("$25")).toBeTruthy();
+    expect(within(sheet).getByText("Coffee · Jun 10")).toBeTruthy();
+    const deleteButton = within(sheet).getByRole("button", { name: "Delete expense" });
+    expect(deleteButton.getAttribute("data-variant")).toBe("danger-ghost");
+    await user.click(deleteButton);
+    const confirm = await screen.findByRole(DIALOG_ROLE, { name: "Delete Crypt lunch?" });
+    expect(within(confirm).getByText("This can't be undone.")).toBeTruthy();
+    expect(within(confirm).getByRole("button", { name: "Delete expense" }).getAttribute("data-variant")).toBe("danger");
+    await user.click(within(confirm).getByRole("button", { name: "Delete expense" }));
+    expect(await screen.findByText("Expense deleted")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Last 30 days" })));
+    expect(screen.queryByText("Crypt lunch")).toBeNull();
+    expect((await ctx.realDb.transactions.toArray()).map((t) => t.id)).toEqual([NEWEST.id]);
+  });
+
+  it("writes nothing when the delete is kept", async () => {
+    const user = userEvent.setup();
+    const ctx = await renderScreen({ transactions: [NEWEST] });
+    await user.click(screen.getByRole("button", { name: /^Midnight latte, / }));
+    const sheet = await screen.findByRole(DIALOG_ROLE, { name: "Midnight latte" });
+    await user.click(within(sheet).getByRole("button", { name: "Delete expense" }));
+    const confirm = await screen.findByRole(DIALOG_ROLE, { name: "Delete Midnight latte?" });
+    await user.click(within(confirm).getByRole("button", { name: "Keep it" }));
+    await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
+    expect(await ctx.realDb.transactions.count()).toBe(1);
+  });
+});
+
 describe("Transactions screen add flow", () => {
   it("adds a small expense, closes the sheet, toasts Ghost added and lists the row", async () => {
     const user = userEvent.setup();
@@ -102,8 +151,8 @@ describe("Transactions screen add flow", () => {
     await user.click(within(dialog).getByRole("button", { name: "Save expense" }));
     expect(await screen.findByText("Ghost added: $6.25")).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
-    const row = await waitFor(() => rowOf("Haunted espresso"));
-    expect(within(row).getByText(GHOST_CHIP)).toBeTruthy();
+    await waitFor(() => rowOf("Haunted espresso"));
+    expect(screen.getByRole("button", { name: /^Haunted espresso, .*, ghost$/ })).toBeTruthy();
     expect(screen.queryByText(EMPTY_TEXT)).toBeNull();
     const rows = await ctx.realDb.transactions.toArray();
     expect(rows).toHaveLength(1);

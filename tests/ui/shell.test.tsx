@@ -1,5 +1,6 @@
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { AppShell } from "@/components/shell/AppShell";
 import { renderWithCrypt, resetNavigationMock, navigationSpies } from "./helpers/crypt";
 import { resetViewport } from "./helpers/viewport";
@@ -132,6 +133,32 @@ describe("navigation shell", () => {
   it("shows the Demo mode chip in the Sidebar from 1024px", async () => {
     await renderShell({ mode: "demo", width: DESKTOP_WIDTH, pathname: "/" });
     expect(await screen.findByText(/^Demo mode/)).toBeTruthy();
+  });
+
+  it.each([MOBILE_WIDTH, DESKTOP_WIDTH])(
+    "puts a Skip to content link first, visible only on focus, that moves focus to main at %ipx",
+    async (width) => {
+      const user = userEvent.setup();
+      await renderShell({ mode: "demo", width, pathname: "/" });
+      await screen.findByRole("navigation", { name: "Main" });
+      const skip = screen.getByRole("link", { name: "Skip to content" });
+      expect(skip.className).toContain("sr-only");
+      expect(skip.className).toContain("focus:not-sr-only");
+      await user.tab();
+      expect(document.activeElement).toBe(skip);
+      await user.keyboard("{Enter}");
+      const main = screen.getByRole("main");
+      expect(document.activeElement).toBe(main);
+      expect(main.getAttribute("tabindex")).toBe("-1");
+    },
+  );
+
+  it("puts the Skip to content link first on the Landing too, without the navigation", async () => {
+    const user = userEvent.setup();
+    await renderShell({ pathname: "/" });
+    await screen.findByRole("heading", { name: "Page content" });
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole("link", { name: "Skip to content" }));
   });
 
   it("reserves bottom padding for the Tab_Bar below 1024px", async () => {

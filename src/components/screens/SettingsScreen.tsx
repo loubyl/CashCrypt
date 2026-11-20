@@ -33,9 +33,11 @@ const INCOME_EMPTY_ERROR = "Enter your monthly income.";
 const GENERIC_ERROR = "Something went wrong. Try again.";
 const DEMO_ERROR = "The demo crypt could not be opened. Check that your browser allows local storage.";
 const CLEAR_HINT = "Switch to your own crypt to use this.";
+// The Card title already says "Crypt"; the control's own name says what it sets.
+const CRYPT_CONTROL_LABEL = "Active crypt";
 const CLEAR_TITLE = "Clear all data?";
 const CLEAR_DESCRIPTION =
-  "This deletes your income, debts, subscriptions, transactions and weekly plans from this browser. It cannot be undone.";
+  "This deletes your income, debts, subscriptions, transactions and weekly plans from this browser. This can't be undone.";
 
 type IncomeFormProps = { initialCents: number };
 
@@ -155,7 +157,7 @@ export function SettingsScreen() {
       </Card>
       <Card title="Crypt">
         <p id={cryptLabelId} className="sr-only">
-          Crypt
+          {CRYPT_CONTROL_LABEL}
         </p>
         <SegmentedControl
           aria-labelledby={cryptLabelId}

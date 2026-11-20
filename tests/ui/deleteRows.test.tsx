@@ -120,8 +120,15 @@ async function openConfirmation(
 ): Promise<HTMLElement> {
   await user.click(screen.getByRole("button", { name: rowName }));
   const sheet = await screen.findByRole(DIALOG_ROLE, { name: sheetName });
-  await user.click(within(sheet).getByRole("button", { name: deleteLabel }));
-  return screen.findByRole(DIALOG_ROLE, { name: `Delete ${sheetName}?` });
+  // In the detail sheet the delete action is text-only (danger-ghost), so it never outweighs
+  // the main action; only the confirmation uses the filled danger button.
+  const deleteButton = within(sheet).getByRole("button", { name: deleteLabel });
+  expect(deleteButton.getAttribute("data-variant")).toBe("danger-ghost");
+  expect(sheet.querySelector('button[data-variant="danger"]')).toBeNull();
+  await user.click(deleteButton);
+  const confirm = await screen.findByRole(DIALOG_ROLE, { name: `Delete ${sheetName}?` });
+  expect(within(confirm).getByRole("button", { name: deleteLabel }).getAttribute("data-variant")).toBe("danger");
+  return confirm;
 }
 
 async function expectHeadingFocused(name: string): Promise<void> {

@@ -162,6 +162,21 @@ describe("Settings sections", () => {
     expect(screen.queryByText(DEMO_CONTROLS_TITLE)).toBeNull();
   });
 
+  it("names the crypt switch Active crypt under the Crypt card title", async () => {
+    await renderReal();
+    expect(screen.getByRole("heading", { name: "Crypt" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "Active crypt" })).toBeTruthy();
+  });
+
+  it("says This can't be undone. in the clear-all confirmation", async () => {
+    const user = userEvent.setup();
+    await renderReal();
+    await user.click(screen.getByRole("button", { name: CLEAR_LABEL }));
+    const dialog = await screen.findByRole("dialog", { name: "Clear all data?" });
+    expect(within(dialog).getByText(/This can't be undone\.$/)).toBeTruthy();
+    expect(within(dialog).queryByText(/cannot be undone/)).toBeNull();
+  });
+
   it("has no sound toggle", async () => {
     await renderReal();
     expect(screen.queryByText(/sound/i)).toBeNull();

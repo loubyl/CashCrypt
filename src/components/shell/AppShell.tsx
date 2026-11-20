@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Skeleton } from "@/components/common/Skeleton";
 import { StorageBlockedCard } from "@/components/common/StorageBlockedCard";
 import { DemoChip } from "@/components/shell/DemoChip";
+import { SkipLink } from "@/components/shell/SkipLink";
 import { NavLink, SETTINGS_DESTINATION } from "@/components/shell/NavLink";
 import { Sidebar } from "@/components/shell/Sidebar";
 import { TabBar } from "@/components/shell/TabBar";
@@ -72,15 +73,38 @@ export function AppShell({ children }: AppShellProps) {
     if (redirecting) router.replace(ROOT_PATH);
   }, [redirecting, router]);
 
-  if (status === "loading" || redirecting) return <LoadingScreen />;
-  if (status === "unavailable") return <BlockedScreen />;
-  if (status === "none") return <>{children}</>;
+  // The skip link comes first in every branch, so it is the first focusable element.
+  if (status === "loading" || redirecting) {
+    return (
+      <>
+        <SkipLink />
+        <LoadingScreen />
+      </>
+    );
+  }
+  if (status === "unavailable") {
+    return (
+      <>
+        <SkipLink />
+        <BlockedScreen />
+      </>
+    );
+  }
+  if (status === "none") {
+    return (
+      <>
+        <SkipLink />
+        {children}
+      </>
+    );
+  }
 
   const content = <div className={CONTENT_CLASSES}>{children}</div>;
 
   if (isDesktop) {
     return (
       <div className="flex min-h-screen flex-1">
+        <SkipLink />
         <Sidebar />
         <div className="min-w-0 flex-1">{content}</div>
       </div>
@@ -89,6 +113,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen flex-1 flex-col">
+      <SkipLink />
       <header className="mx-auto flex w-full max-w-content items-center justify-between gap-3 px-page pt-3">
         <div className="flex items-center gap-3">
           <p className="font-wordmark text-title font-medium text-ink">CashCrypt</p>

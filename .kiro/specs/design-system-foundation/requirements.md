@@ -130,8 +130,8 @@ Tailwind CSS v4 is configured in CSS with `@theme` and has no `tailwind.config.t
 
 #### Acceptance Criteria
 
-1. THE Button SHALL support the variants `primary`, `secondary`, `ghost`, and `danger`, with `primary` as the default.
-2. THE Button SHALL render `primary` as `--text-primary` background with `--surface-void` text, `secondary` as `--surface-raised` background with `--text-primary` text, `ghost` as transparent background with `--accent-candle` text, and `danger` as `--accent-blood` background with `--surface-void` text.
+1. THE Button SHALL support the variants `primary`, `secondary`, `ghost`, `danger` and `danger-ghost` (added by the app-screens spec), with `primary` as the default.
+2. THE Button SHALL render `primary` as `--text-primary` background with `--surface-void` text, `secondary` as `--surface-raised` background with `--text-primary` text, `ghost` as transparent background with `--accent-candle` text, `danger` as `--accent-blood` background with `--surface-void` text, and `danger-ghost` as transparent background with `--accent-blood` text.
 3. THE Button SHALL support the sizes `sm`, `md`, and `lg` with heights of 36px, 44px, and 52px respectively, with `md` as the default, and a pill radius.
 4. WHERE the Button size is `sm`, THE Button SHALL extend its hit area to a Touch_Target of at least 44px in height without changing its visual height.
 5. WHEN the Button is pressed and Reduced_Motion is not active, THE Button SHALL scale to 0.97 over 120ms.

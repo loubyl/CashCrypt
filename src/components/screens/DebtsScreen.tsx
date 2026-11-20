@@ -282,9 +282,12 @@ function RowSheet({ row, onClose, onLogPayment, onDelete }: RowSheetProps) {
               return null;
             }}
           />
-          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
-            {DELETE_LABEL}
-          </Button>
+          {/* Destructive but secondary to the sheet's main action: text-only, set apart below it. */}
+          <div className="mt-2 flex justify-center">
+            <Button type="button" variant="danger-ghost" onClick={onDelete}>
+              {DELETE_LABEL}
+            </Button>
+          </div>
         </div>
       ) : null}
     </BottomSheet>

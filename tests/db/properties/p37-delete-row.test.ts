@@ -3,7 +3,12 @@ import fc from "fast-check";
 import { indexedDB, IDBKeyRange } from "fake-indexeddb";
 import { openCrypt } from "@/lib/db/crypt";
 import { DbNotFoundError } from "@/lib/db/errors";
-import { completePlanAction, deleteDebt, deleteSubscription } from "@/lib/db/mutations";
+import {
+  completePlanAction,
+  deleteDebt,
+  deleteSubscription,
+  deleteTransaction,
+} from "@/lib/db/mutations";
 import { readAllRows } from "@/lib/db/queries";
 import { PROFILE_ID } from "@/lib/db/schema";
 import { toFinancialSnapshot } from "@/lib/db/snapshotAdapter";
@@ -15,6 +20,7 @@ import type {
   EventRow,
   StoredPlanAction,
   SubscriptionRow,
+  TransactionRow,
   WeeklyPlanRow,
 } from "@/types/finance";
 
@@ -205,6 +211,63 @@ describe("deleting a row", () => {
             await completePlanAction(db, WEEK_KEY, action.id, { now: NOW, newId: () => "ev-new" });
             expect((await db.events.toArray()).length).toBe(eventsBefore + 1);
           }
+        } finally {
+          db.close();
+          await db.delete();
+        }
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
+  // Feature: app-screens, Property 37: Deleting a row removes only that row
+  // **Validates: Requirements 9.12, 9.13**
+  it("removes only that transaction, or rejects an unknown id and changes nothing", async () => {
+    const txScenarioArb = fc.record({
+      amounts: fc.array(fc.integer({ min: 1, max: 100_000 }), { minLength: 1, maxLength: MAX_ROWS }),
+      targetPick: fc.nat({ max: MAX_ROWS - 1 }),
+      unknown: fc.boolean(),
+      withScenarioRows: fc.boolean(),
+    });
+    await fc.assert(
+      fc.asyncProperty(txScenarioArb, async ({ amounts, targetPick, unknown, withScenarioRows }) => {
+        const db = openCrypt(`test-${(counter += 1)}`, { indexedDB, IDBKeyRange });
+        try {
+          await db.open();
+          const transactions: TransactionRow[] = amounts.map((amountCents, i) => ({
+            id: `tx-${i}`,
+            amountCents,
+            description: `Expense ${i}`,
+            category: "Coffee",
+            date: NOW,
+          }));
+          await db.profile.put({ id: PROFILE_ID, monthlyIncomeCents: INCOME_CENTS });
+          await db.transactions.bulkPut(transactions);
+          if (withScenarioRows) {
+            const rows = buildRows({
+              subs: [{ active: false, hasCancelEvent: true }],
+              debtsPaidOff: [false],
+              extraEvents: 1,
+              withCompletionEvent: true,
+              targetPick: 0,
+              targetKind: "debt",
+            });
+            await db.debts.bulkPut(rows.debts);
+            await db.subscriptions.bulkPut(rows.subscriptions);
+            await db.events.bulkPut(rows.events);
+            await db.weeklyPlans.put(rows.plan);
+          }
+          const before = await readAllRows(db);
+          const id = unknown ? UNKNOWN_ID : transactions[targetPick % transactions.length].id;
+          if (unknown) {
+            await expect(deleteTransaction(db, id)).rejects.toBeInstanceOf(DbNotFoundError);
+            expect(await readAllRows(db)).toEqual(before);
+            return;
+          }
+          await deleteTransaction(db, id);
+          const after = await readAllRows(db);
+          expect(byId(after.transactions)).toEqual(byId(before.transactions.filter((t) => t.id !== id)));
+          expect({ ...after, transactions: [] }).toEqual({ ...before, transactions: [] });
         } finally {
           db.close();
           await db.delete();

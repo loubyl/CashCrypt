@@ -145,7 +145,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 2. IF any step of a Mutation throws, THEN THE Data_Layer SHALL leave every table unchanged and SHALL surface the error to the caller.
 3. IF a Mutation receives an amount that is not a finite integer of Cents greater than 0, or that exceeds the maximum money value, THEN THE Mutation SHALL reject with a validation error and SHALL write nothing.
 4. IF a Mutation references a row id that does not exist, THEN THE Mutation SHALL reject with a not-found error and SHALL write nothing.
-5. THE Data_Layer SHALL provide Mutations to set monthly income, add, edit and delete a Debt, add, edit and delete a Subscription, add a Transaction, log a payment, cancel a Subscription, reactivate a Subscription and complete or uncomplete a Plan_Action.
+5. THE Data_Layer SHALL provide Mutations to set monthly income, add, edit and delete a Debt, add, edit and delete a Subscription, add and delete a Transaction, log a payment, cancel a Subscription, reactivate a Subscription and complete or uncomplete a Plan_Action.
 6. WHEN a Mutation adds a row, THE Data_Layer SHALL create its id with a generator injected through the Mutation options, so that tests produce stable ids.
 7. IF a name field is empty after trimming whitespace or longer than 60 characters, THEN THE Mutation SHALL reject with a validation error.
 8. IF a Debt APR is not a finite number from 0 to 1 inclusive, THEN THE Mutation SHALL reject with a validation error.
@@ -218,6 +218,8 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 9. WHEN `deleteSubscription(subscriptionId)` succeeds, THE Data_Layer SHALL remove that Subscription row, in one Dexie transaction, whether it is active or in the Graveyard. WHEN the Subscription is active, THE Data_Layer SHALL also delete its `subscription_canceled` Event (reference key `cancel:<subscriptionId>`), if one exists, in the same transaction: that cancellation was already undone by a reactivation, so it must not count for momentum again once no active row hides it (Requirement 4.4). WHEN the Subscription is in the Graveyard, its `subscription_canceled` Event SHALL stay.
 10. WHEN a Debt or a Subscription is deleted, THE Data_Layer SHALL keep every Event (payments and cancellations that still stand really happened, so their momentum stays), except the undone cancellation Event of criterion 9, and SHALL leave every Weekly_Plan and every other row unchanged. FOR ALL sequences cancel → bring back → delete on one Subscription, the momentum after the delete SHALL equal the momentum before the cancel.
 11. IF `deleteDebt` or `deleteSubscription` is called with an id that does not exist, THEN THE Data_Layer SHALL reject it with a not-found error and SHALL write nothing.
+12. WHEN `deleteTransaction(transactionId)` succeeds, THE Data_Layer SHALL remove that Transaction row only, in one Dexie transaction, and SHALL leave every Event, every Weekly_Plan and every other row unchanged; Ghosts and the Poltergeist then follow from the remaining Transactions.
+13. IF `deleteTransaction` is called with an id that does not exist, THEN THE Data_Layer SHALL reject it with a not-found error and SHALL write nothing.
 
 ### Requirement 10: Hooks
 
@@ -392,6 +394,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 6. WHILE no Active_Crypt exists, THE App SHALL render the Landing page at `/` without the Navigation_Shell, and every other route SHALL redirect to `/`.
 7. THE Navigation_Shell SHALL use a main column of at most 560px on screens narrower than 1024px and a two-column card grid from 1024px, in line with `design-system.md`.
 8. THE Navigation_Shell SHALL add bottom padding so that no Tab_Bar overlaps the last item of a Screen.
+9. THE App SHALL render a "Skip to content" link as the first focusable element of every app Screen, including the Landing and the loading screen. The link SHALL be visually hidden until it receives focus, SHALL have a 44px touch target and the `--focus-ring` focus ring, and WHEN activated SHALL move focus to the Screen's `<main>` (made focusable with `tabindex="-1"`).
 
 ### Requirement 20: Landing and onboarding
 
@@ -468,7 +471,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 9. WHEN there are no active Subscriptions, THE Subscriptions Screen SHALL show the empty state "No zombies in the basement. Suspiciously quiet."
 10. THE Subscriptions Screen SHALL show the total monthly cost of active Subscriptions in a summary Card.
 11. IF the Add subscription form has an empty name, a missing amount or an amount of 0, THEN THE form SHALL show an error on the field and SHALL create no row.
-12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a danger "Delete subscription" Button. WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
+12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a text-only destructive "Delete subscription" Button (the `danger-ghost` variant, set apart below the main action, so it never outweighs it). WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
 
 ### Requirement 24: Debts screen
 
@@ -485,7 +488,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 7. WHEN there are no Debts, THE Debts Screen SHALL show the empty state "No debts. The walls are holding."
 8. IF the Add debt form has an empty name, a negative or missing balance, an APR outside 0 to 100 percent, or a missing minimum payment, THEN THE form SHALL show an error on each invalid field and SHALL create no row.
 9. WHEN an edit changes a Debt balance, THE Debts Screen SHALL create no Event, since only the Log payment action records progress.
-10. THE Debt BottomSheet SHALL show a danger "Delete debt" Button, also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
+10. THE Debt BottomSheet SHALL show a text-only destructive "Delete debt" Button (the `danger-ghost` variant, set apart below "Save changes"), also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
 
 ### Requirement 25: Log payment sheet
 
@@ -509,14 +512,15 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 #### Acceptance Criteria
 
-1. THE Transactions Screen SHALL list the Transactions of the 30-day window ending on the current "now", newest first, each as a ListRow with its description, a subtitle with the category and the date, and its amount shown as an outflow.
-2. THE Transactions Screen SHALL mark every Transaction that qualifies as a Ghost (amount above 0 and below `SMALL_EXPENSE_THRESHOLD_CENTS`) with a "Ghost" Chip that has an icon and text.
+1. THE Transactions Screen SHALL list the Transactions of the 30-day window ending on the current "now", newest first, each as a ListRow with its description, a subtitle with the category and the date ("Food · Nov 19"), or only the date ("Nov 19") when the description equals the category, followed by " · Ghost" for a Ghost ("Nov 19 · Ghost", "Food · Nov 19 · Ghost"), and its amount shown as an outflow.
+2. THE Transactions Screen SHALL mark every Transaction that qualifies as a Ghost (amount above 0 and below `SMALL_EXPENSE_THRESHOLD_CENTS`) with the ghost icon in the row avatar, the text "Ghost" at the end of its subtitle (criterion 1) and the word "ghost" in the row's accessible name, without a separate "Ghost" Chip.
 3. THE Transactions Screen SHALL show a summary Card with the total of small expenses in the window, the Poltergeist threshold (`POLTERGEIST_RATIO` times monthly income) and, WHILE the Poltergeist is active, the text "The Poltergeist is awake."
 4. THE Transactions Screen SHALL show a primary "Add expense" Button that opens the Add expense BottomSheet.
 5. THE Add expense BottomSheet SHALL contain a money Input labelled "Amount", a text Input labelled "What was it?" and a SegmentedControl for the category with the options "Coffee", "Food", "Transport" and "Other", and SHALL date the Transaction with the current "now".
 6. WHEN the user submits a valid expense, THE sheet SHALL call `addTransaction`, close, and show a toast that states the amount, and WHERE the amount is below the small-expense threshold THE toast SHALL read "Ghost added: $X".
 7. IF the amount is empty or 0, or the description is empty, THEN THE sheet SHALL stay open, SHALL show an error on each invalid field and SHALL write nothing.
 8. WHEN no Transaction exists in the window, THE Transactions Screen SHALL show the empty state "No ghosts this month. The house is quiet."
+9. WHEN the user selects a Transaction row, THE Transactions Screen SHALL open a BottomSheet with the expense details (amount, category and date, and a ghost note for a Ghost) and a text-only destructive "Delete expense" Button. WHEN the user activates it, THE Screen SHALL ask for confirmation in the same confirmation BottomSheet as debts and subscriptions ("Delete <description>? This can't be undone.", secondary "Keep it", danger "Delete expense"), and WHEN the user confirms THE Screen SHALL call `deleteTransaction`, SHALL show the toast "Expense deleted" and SHALL move focus to the "Last 30 days" heading.
 
 ### Requirement 27: Settings screen
 
@@ -525,12 +529,12 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 #### Acceptance Criteria
 
 1. THE Settings Screen SHALL show a money Input labelled "Monthly income" with the current value and a "Save income" Button, and WHEN saved THE Screen SHALL call `setMonthlyIncome` and show the toast "Income saved".
-2. THE Settings Screen SHALL show a SegmentedControl "Crypt" with the options "Demo crypt" and "My crypt" that sets the Mode_Store.
+2. THE Settings Screen SHALL show a Card titled "Crypt" with a SegmentedControl named "Active crypt" (the name may be visually hidden) with the options "Demo crypt" and "My crypt" that sets the Mode_Store.
 3. WHEN the user selects "My crypt" and no Real_Crypt Profile exists, THE Settings Screen SHALL open the onboarding sheet of Requirement 20.
 4. THE Settings Screen SHALL provide a "Clear all data" control that acts on the Real_Crypt only.
 5. WHILE the Demo_Crypt is active, THE Settings Screen SHALL disable "Clear all data" and, WHERE export and import is implemented, "Export data" and "Import data", and SHALL show the hint "Switch to your own crypt to use this."
 6. WHERE export and import is implemented (Requirement 33), THE Settings Screen SHALL provide "Export data" and "Import data" controls that act on the Real_Crypt only, placed above "Clear all data".
-7. WHEN the user activates "Clear all data", THE Settings Screen SHALL ask for confirmation in a BottomSheet, and WHEN confirmed THE Data_Layer SHALL delete every Real_Crypt row in one Dexie transaction and THE App SHALL return to Landing.
+7. WHEN the user activates "Clear all data", THE Settings Screen SHALL ask for confirmation in a BottomSheet that says what is deleted and ends with "This can't be undone.", like the delete confirmations, and WHEN confirmed THE Data_Layer SHALL delete every Real_Crypt row in one Dexie transaction and THE App SHALL return to Landing.
 8. THE Settings Screen SHALL show the Demo controls Card of Requirement 18 while the Demo_Crypt is active.
 9. THE Settings Screen SHALL show no sound toggle in this version.
 

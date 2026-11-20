@@ -207,7 +207,7 @@ The chrome stays calm at rest. The Halloween comes out as **moments**: short, pl
 
 All primitives live in `src/components/ui/`. Each has visible focus, pressed and disabled states.
 
-- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood fill with `text-on-accent`, only for destructive data actions (deleting a row). Canceling a subscription is the good action in CashCrypt, so it uses `primary`. Heights 36 / 44 / 52. Min touch target 44px.
+- **Button** (pill): `primary` white/black, `secondary` raised surface/white text, `ghost` text only in candle, `danger` blood fill with `text-on-accent`, only for destructive data actions (deleting a row), `danger-ghost` text only in blood for a destructive action that sits next to the main action of a detail sheet ("Delete debt"), set apart below it; its confirmation sheet uses `danger`. Canceling a subscription is the good action in CashCrypt, so it uses `primary`. Heights 36 / 44 / 52. Min touch target 44px.
 - **QuickAction**: 52px circle on raised surface with a 22px icon, label underneath (13/500). Row of 4 under the hero: Log payment, Add expense, Import CSV, Exorcise.
 - **BalanceHero**: label (secondary), `hero` number, delta chip underneath (ecto "−$640 this month" with ↓ icon, or blood with ↑).
 - **Card**: card surface, radius 24, padding 20, no border. Optional header: `title` + ghost "See all" link.

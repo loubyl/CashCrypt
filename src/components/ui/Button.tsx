@@ -21,7 +21,7 @@ const ICON_SIZE_PX = 20;
 const ICON_STROKE_WIDTH = 2;
 const DEFAULT_SUCCESS_ANNOUNCEMENT = "Done";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "danger-ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
@@ -29,6 +29,9 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   secondary: "bg-surface-raised text-ink",
   ghost: "bg-transparent text-candle",
   danger: "bg-blood text-on-accent",
+  // Text-only destructive action (blood on the card surface, 6.6:1). Used where a destructive
+  // action sits next to the main one and must not outweigh it; its confirmation uses `danger`.
+  "danger-ghost": "bg-transparent text-blood",
 };
 
 // `sm` is 36px tall; its pseudo-element adds 4px above and below for a 44px hit area.

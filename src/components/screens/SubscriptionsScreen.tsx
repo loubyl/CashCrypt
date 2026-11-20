@@ -275,9 +275,12 @@ function DetailsSheet({ row, onClose, onCancel, onDelete }: DetailsSheetProps) {
           <Button type="button" variant="primary" size="lg" onClick={onCancel}>
             Cancel subscription
           </Button>
-          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
-            {DELETE_LABEL}
-          </Button>
+          {/* Destructive but secondary to the sheet's main action: text-only, set apart below it. */}
+          <div className="mt-2 flex justify-center">
+            <Button type="button" variant="danger-ghost" onClick={onDelete}>
+              {DELETE_LABEL}
+            </Button>
+          </div>
         </div>
       ) : null}
     </BottomSheet>
@@ -335,9 +338,12 @@ function GraveyardSheet({ row, onClose, onBroughtBack, onDelete }: GraveyardShee
           <Button type="button" variant="secondary" size="lg" loading={submitting} onClick={handleBringBack}>
             Bring it back
           </Button>
-          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
-            {DELETE_LABEL}
-          </Button>
+          {/* Destructive but secondary to the sheet's main action: text-only, set apart below it. */}
+          <div className="mt-2 flex justify-center">
+            <Button type="button" variant="danger-ghost" onClick={onDelete}>
+              {DELETE_LABEL}
+            </Button>
+          </div>
         </div>
       ) : null}
     </BottomSheet>

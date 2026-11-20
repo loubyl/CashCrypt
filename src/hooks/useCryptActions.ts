@@ -11,6 +11,7 @@ import {
   clearAllData,
   deleteDebt,
   deleteSubscription,
+  deleteTransaction,
   editDebt,
   editSubscription,
   logPayment,
@@ -57,6 +58,7 @@ export type CryptActions = {
   reactivateSubscription: (id: string) => Promise<MutationResult<SubscriptionRow>>;
   deleteDebt: (id: string) => Promise<MutationResult<void>>;
   deleteSubscription: (id: string) => Promise<MutationResult<void>>;
+  deleteTransaction: (id: string) => Promise<MutationResult<void>>;
   clearAll: () => Promise<MutationResult<void>>;
 };
 
@@ -107,6 +109,7 @@ function bindActions(db: CryptDb, now: LocalDate | null): CryptActions {
       withNow((today) => reactivateSubscription(db, id, { now: today })),
     deleteDebt: (id) => run(() => deleteDebt(db, id)),
     deleteSubscription: (id) => run(() => deleteSubscription(db, id)),
+    deleteTransaction: (id) => run(() => deleteTransaction(db, id)),
     clearAll: () => run(() => clearAllData(db)),
   };
 }
@@ -124,6 +127,7 @@ function createNotReadyActions(): CryptActions {
     reactivateSubscription: notReady,
     deleteDebt: notReady,
     deleteSubscription: notReady,
+    deleteTransaction: notReady,
     clearAll: notReady,
   };
 }

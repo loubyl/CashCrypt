@@ -177,6 +177,18 @@ export async function addTransaction(
   return row;
 }
 
+/**
+ * Removes a Transaction row, for example an expense entered by mistake. Transactions have no
+ * Event, so nothing else changes; ghosts and the Poltergeist follow from the remaining rows.
+ */
+export async function deleteTransaction(db: CryptDb, id: string): Promise<void> {
+  await db.transaction("rw", [db.transactions], async () => {
+    const existing = await db.transactions.get(id);
+    if (!existing) throw new DbNotFoundError(id);
+    await db.transactions.delete(id);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Payments, cancellations and plan actions
 // ---------------------------------------------------------------------------

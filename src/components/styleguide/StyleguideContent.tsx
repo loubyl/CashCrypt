@@ -215,7 +215,7 @@ function TokensSection() {
   );
 }
 
-const BUTTON_VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger"];
+const BUTTON_VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger", "danger-ghost"];
 const BUTTON_SIZES: ButtonSize[] = ["sm", "md", "lg"];
 
 function ButtonLabel({ children }: { children: ReactNode }) {

@@ -4,6 +4,7 @@ import { MIN_INCOME_CENTS, POLTERGEIST_RATIO } from "@/lib/haunting/config";
 import { isInWindow } from "@/lib/haunting/dates";
 import { isSmallExpense } from "@/lib/haunting/ghosts";
 import type { DebtRow, LocalDate, SubscriptionRow, TransactionRow } from "@/types/finance";
+import { formatMonthDay } from "./calendar";
 
 const EMPTY_TOTAL = 0;
 const NO_ROWS = 0;
@@ -107,4 +108,21 @@ export function getSmallExpenseSummary(
     thresholdCents: Math.round(exactThreshold),
     awake: incomeUsable && small.length > NO_ROWS && totalCents > exactThreshold,
   };
+}
+
+const SUBTITLE_SEPARATOR = " · ";
+const GHOST_LABEL = "Ghost";
+
+/**
+ * Row subtitle: "Food · Nov 19", or just "Nov 19" when the description is the category, with
+ * " · Ghost" appended for a small expense ("Nov 19 · Ghost"), so the ghost status is visible
+ * text and not only the icon's shape and color.
+ */
+export function getTransactionSubtitle(
+  row: Pick<TransactionListRow, "description" | "category" | "date" | "isGhost">,
+): string {
+  const date = formatMonthDay(row.date);
+  const parts = row.description.trim() === row.category.trim() ? [date] : [row.category, date];
+  if (row.isGhost) parts.push(GHOST_LABEL);
+  return parts.join(SUBTITLE_SEPARATOR);
 }
