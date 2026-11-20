@@ -50,7 +50,9 @@ export function toFinancialSnapshot(
     debtId: d.id,
     name: d.name,
     balance: centsToDollars(d.balanceCents),
-    minimumMonthlyPayment: centsToDollars(d.minimumPaymentCents),
+    // A paid-off debt has nothing left to pay each month, so its stored minimum does not count
+    // toward factor A. The stored row keeps its minimum (Requirement 4.3).
+    minimumMonthlyPayment: centsToDollars(d.balanceCents === 0 ? 0 : d.minimumPaymentCents),
     apr: d.apr,
   }));
   const subscriptions: InputSubscription[] = rows.subscriptions.map((s) => ({

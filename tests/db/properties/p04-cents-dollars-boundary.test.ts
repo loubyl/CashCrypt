@@ -66,8 +66,9 @@ describe("Property 4: Cents survive the dollars boundary", () => {
         );
         rows.debts.forEach((d, i) => {
           expect(toCents(snapshot.debts[i].balance)).toBe(d.balanceCents);
+          // A paid-off debt passes a minimum of 0 (Property 36); every other minimum round-trips.
           expect(toCents(snapshot.debts[i].minimumMonthlyPayment)).toBe(
-            d.minimumPaymentCents,
+            d.balanceCents === 0 ? 0 : d.minimumPaymentCents,
           );
         });
         rows.subscriptions.forEach((s, i) => {

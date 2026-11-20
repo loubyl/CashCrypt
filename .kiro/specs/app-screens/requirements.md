@@ -127,7 +127,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 1. THE Snapshot_Adapter SHALL accept the Profile, the debts, the subscriptions, the transactions, the events and a Local_Date, and SHALL return a `FinancialSnapshot` whose `now` equals the Local_Date.
 2. THE Snapshot_Adapter SHALL convert every Cents value to decimal dollars by dividing by 100, so that the engine's `Math.round(x * 100)` recovers the original Cents exactly.
-3. THE Snapshot_Adapter SHALL include inactive Subscriptions and Debts with a balance of 0 in the snapshot, with `active` and `balance` unchanged.
+3. THE Snapshot_Adapter SHALL include inactive Subscriptions and Debts with a balance of 0 in the snapshot, with `active` and `balance` unchanged. For a Debt with a balance of 0 it SHALL pass `minimumMonthlyPayment` as 0, because a paid-off debt has nothing left to pay each month and must not count toward factor A; the stored Debt keeps its minimum.
 4. THE Snapshot_Adapter SHALL pass events through as engine `FinancialEvent` objects with `type`, `date`, `amountCents` and `extraPrincipalCents` unchanged, except that it SHALL omit every `subscription_canceled` Event whose Subscription (reference key `cancel:<subscriptionId>`) is currently active: cancellation momentum only counts while the Subscription stays canceled. The stored Event is kept, so canceling again restores it with its original date (Requirement 7.5).
 5. THE Snapshot_Adapter SHALL preserve the count and order of debts, subscriptions and transactions, and the order of the events it passes through; the event count is the stored count minus the `subscription_canceled` Events omitted by criterion 4.
 6. THE Snapshot_Adapter SHALL return a new object and SHALL leave its inputs unmodified.
@@ -145,7 +145,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 2. IF any step of a Mutation throws, THEN THE Data_Layer SHALL leave every table unchanged and SHALL surface the error to the caller.
 3. IF a Mutation receives an amount that is not a finite integer of Cents greater than 0, or that exceeds the maximum money value, THEN THE Mutation SHALL reject with a validation error and SHALL write nothing.
 4. IF a Mutation references a row id that does not exist, THEN THE Mutation SHALL reject with a not-found error and SHALL write nothing.
-5. THE Data_Layer SHALL provide Mutations to set monthly income, add and edit a Debt, add and edit a Subscription, add a Transaction, log a payment, cancel a Subscription, reactivate a Subscription and complete or uncomplete a Plan_Action.
+5. THE Data_Layer SHALL provide Mutations to set monthly income, add, edit and delete a Debt, add, edit and delete a Subscription, add a Transaction, log a payment, cancel a Subscription, reactivate a Subscription and complete or uncomplete a Plan_Action.
 6. WHEN a Mutation adds a row, THE Data_Layer SHALL create its id with a generator injected through the Mutation options, so that tests produce stable ids.
 7. IF a name field is empty after trimming whitespace or longer than 60 characters, THEN THE Mutation SHALL reject with a validation error.
 8. IF a Debt APR is not a finite number from 0 to 1 inclusive, THEN THE Mutation SHALL reject with a validation error.
@@ -214,6 +214,10 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 5. WHEN `addTransaction` succeeds, THE Data_Layer SHALL store amount, description, category and a date that is not later than `now`, and SHALL create no Event.
 6. IF a Transaction date is later than `now`, THEN THE Data_Layer SHALL reject it with a validation error.
 7. THE Data_Layer SHALL provide queries for transactions in the 30-day window ending on a given Local_Date, sorted by date descending then by id, using the same window boundaries as `isInWindow`.
+8. WHEN `deleteDebt(debtId)` succeeds, THE Data_Layer SHALL remove that Debt row only, in one Dexie transaction, whatever its balance.
+9. WHEN `deleteSubscription(subscriptionId)` succeeds, THE Data_Layer SHALL remove that Subscription row only, in one Dexie transaction, whether it is active or in the Graveyard.
+10. WHEN a Debt or a Subscription is deleted, THE Data_Layer SHALL keep every Event (payments and cancellations really happened, so their momentum stays) and every Weekly_Plan unchanged, and SHALL leave every other row unchanged.
+11. IF `deleteDebt` or `deleteSubscription` is called with an id that does not exist, THEN THE Data_Layer SHALL reject it with a not-found error and SHALL write nothing.
 
 ### Requirement 10: Hooks
 
@@ -296,7 +300,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 3. WHEN the user completes or unchecks a Plan_Action, THE Plan_Service SHALL change only that action's `done` state and completion date; the action list and its order SHALL stay the same.
 4. WHEN two plan reads happen concurrently for the same Plan_Week, THE Plan_Service SHALL store exactly one Weekly_Plan, relying on the unique week-key index.
 5. WHEN the current Plan_Week changes (because the Local_Date or the Demo_Now crosses a Monday), THE Plan_Service SHALL generate a new Weekly_Plan on the next read and SHALL keep earlier Weekly_Plans stored.
-6. WHEN a stored Plan_Action's target no longer qualifies (the Subscription is canceled or the Debt is paid off), THE Exorcism Screen and the Dashboard plan card SHALL keep the action in the list, SHALL keep its checkbox usable and SHALL show no Do_It_Button for it. A target that was handled through `cancelSubscription` or `logPayment` in the same Plan_Week already shows the action as done through Auto_Completion.
+6. WHEN a stored Plan_Action's target no longer qualifies (the Subscription is canceled or deleted, or the Debt is paid off or deleted), THE Exorcism Screen and the Dashboard plan card SHALL keep the action in the list, SHALL keep its checkbox usable and SHALL show no Do_It_Button for it. A target that was handled through `cancelSubscription` or `logPayment` in the same Plan_Week already shows the action as done through Auto_Completion.
 7. THE App SHALL leave Plan_Actions without a regenerate control in this version.
 
 ### Requirement 15: Planner property tests
@@ -440,7 +444,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 6. WHILE a Mutation is running for a row, THE ExorcismActionRow SHALL be disabled.
 7. IF a Mutation fails, THEN THE Exorcism Screen SHALL leave the row state unchanged and SHALL show an error toast with the message "Could not save that action. Try again."
 8. WHILE at least one action is not done, THE Exorcism Screen SHALL show a short explanation under the list: "Tap Do it to make the change here, or tick an action you did somewhere else." WHEN all three actions are done, THE explanation SHALL be hidden.
-9. WHILE a `cancel_subscription` or `extra_payment` Plan_Action is not done and its target still qualifies (the Subscription is active, or the Debt balance is above 0), THE ExorcismActionRow area SHALL show a secondary "Do it" Button with the accessible name "Do it: <action title>", on the Exorcism Screen and on the Dashboard plan card.
+9. WHILE a `cancel_subscription` or `extra_payment` Plan_Action is not done and its target still qualifies (the Subscription exists and is active, or the Debt exists and its balance is above 0; `getDoItTarget` returns null for a deleted target), THE ExorcismActionRow area SHALL show a secondary "Do it" Button with the accessible name "Do it: <action title>", on the Exorcism Screen and on the Dashboard plan card.
 10. WHEN the user activates the Do_It_Button of a `cancel_subscription` action, THE Screen SHALL open the cancel confirmation BottomSheet of Requirement 23 criterion 5 for that Subscription, and WHEN the user activates the Do_It_Button of an `extra_payment` action, THE Screen SHALL open the Log payment BottomSheet of Requirement 25 for that Debt, pre-filled with the Debt's minimum monthly payment plus the action's `suggestedAmountCents`, limited to the Debt balance.
 11. WHEN the sheet opened by a Do_It_Button completes its Mutation, THE Screen SHALL show the toast of that Mutation, SHALL show the Plan_Action as done through Auto_Completion without a page reload, and SHALL NOT show a second toast for the completion.
 12. THE Exorcism Screen SHALL keep the checkbox of every Plan_Action usable, including those with a Do_It_Button, so that the user can tick actions done outside the App.
@@ -464,6 +468,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 9. WHEN there are no active Subscriptions, THE Subscriptions Screen SHALL show the empty state "No zombies in the basement. Suspiciously quiet."
 10. THE Subscriptions Screen SHALL show the total monthly cost of active Subscriptions in a summary Card.
 11. IF the Add subscription form has an empty name, a missing amount or an amount of 0, THEN THE form SHALL show an error on the field and SHALL create no row.
+12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a danger "Delete subscription" Button. WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet that states "Delete <name>? This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
 
 ### Requirement 24: Debts screen
 
@@ -480,6 +485,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 7. WHEN there are no Debts, THE Debts Screen SHALL show the empty state "No debts. The walls are holding."
 8. IF the Add debt form has an empty name, a negative or missing balance, an APR outside 0 to 100 percent, or a missing minimum payment, THEN THE form SHALL show an error on each invalid field and SHALL create no row.
 9. WHEN an edit changes a Debt balance, THE Debts Screen SHALL create no Event, since only the Log payment action records progress.
+10. THE Debt BottomSheet SHALL show a danger "Delete debt" Button, also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet that states "Delete <name>? This can't be undone." (for example "Delete Car loan? This can't be undone.") with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
 
 ### Requirement 25: Log payment sheet
 
@@ -570,7 +576,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 2. THE Screens SHALL give every interactive element an accessible name through a visible label, `aria-label` or `aria-labelledby`.
 3. THE Screens SHALL announce results of Mutations through the Toast live regions, and SHALL announce a scenario change and a decay level change through `aria-live="polite"`.
 4. THE Screens SHALL show every status that uses color (usage, Ghost, Paid off, Demo mode, Poltergeist, done) with an icon and text.
-5. WHEN a BottomSheet closes, THE Screens SHALL return focus to the control that opened it. WHEN that control no longer exists because its row moved to another list (a Subscription canceled into the Graveyard, or brought back to Zombies), THE Screen SHALL focus the moved row in its new list, and focus SHALL never be left on `<body>`.
+5. WHEN a BottomSheet closes, THE Screens SHALL return focus to the control that opened it. WHEN that control no longer exists because its row moved to another list (a Subscription canceled into the Graveyard, or brought back to Zombies), THE Screen SHALL focus the moved row in its new list, and focus SHALL never be left on `<body>`. WHEN the row was deleted, THE Screen SHALL focus the heading of the list it was in.
 6. THE Screens SHALL be fully operable with the keyboard alone, including the Tab_Bar, the Sidebar, every sheet and every form.
 7. WHEN the Axe_Check runs on a Screen in each of the states "empty real crypt", "populated real crypt", "demo level 4" and "loading", THE Test_Suite SHALL report zero violations.
 

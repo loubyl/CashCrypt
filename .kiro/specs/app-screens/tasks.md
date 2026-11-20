@@ -441,75 +441,98 @@ Conventions that apply to every task:
     - Create `tests/ui/settings.test.tsx`: income save toast and invalid income error, crypt switch updates the mode store, onboarding opens when switching to "My crypt" without a Profile, clear all data confirmation empties only the real crypt and returns to Landing, clear control disabled with the hint in demo mode, Demo controls shown only in demo mode, no sound toggle
     - _Requirements: 9.2, 27.1, 27.2, 27.3, 27.4, 27.5, 27.7, 27.8, 27.9, 31.8_
 
-- [ ] 16. Checkpoint - All screens
+- [ ] 16. Group 14: Delete debts and subscriptions
+  - [ ] 16.1 Add the delete mutations and actions
+    - In `src/lib/db/mutations.ts` add `deleteDebt(db, id)` and `deleteSubscription(db, id)`: one `rw` transaction over that table only, `DbNotFoundError` for a missing id with nothing written, then remove the row; Events and Weekly_Plans are never touched
+    - Add `deleteDebt` and `deleteSubscription` to `useCryptActions` (result-returning, `not-found` mapped like the other mutations)
+    - Confirm `getDoItTarget` returns `null` when the target row is missing (it already does; add the case to its docs) and that `completePlanAction` on such an action still succeeds
+    - _Requirements: 5.5, 9.8, 9.9, 9.10, 9.11, 14.6, 22.9_
+  - [ ] 16.2 Write property test for deleting a row
+    - **Property 37: Deleting a row removes only that row**
+    - **Validates: Requirements 9.8, 9.9, 9.10, 9.11, 14.6, 22.9**
+    - Generate crypts with active and inactive subscriptions, paid-off and owing debts, events of every type and a plan whose actions target the rows; delete one existing row, or an unknown id
+    - Mutation check: temporarily make `deleteSubscription` also delete the subscription's `subscription_canceled` Event and confirm the property fails with a counterexample
+  - [ ] 16.3 Add the confirmation sheet and the Card heading focus target
+    - Create `src/components/sheets/DeleteConfirmSheet.tsx`: "Delete <name>? This can't be undone.", secondary "Keep it", danger confirm with the given label, error toast and the sheet kept open on failure
+    - In `src/components/ui/Card.tsx` add optional `headingId`: the title heading gets the id and `tabIndex={-1}`; nothing changes without it; extend `tests/ui/Card.test.tsx`
+    - _Requirements: 23.12, 24.10, 30.5_
+  - [ ] 16.4 Add Delete to the Debts and Subscriptions screens
+    - `DebtsScreen`: danger "Delete debt" in the Debt sheet, also at balance 0; on success toast "Debt deleted" and focus the "Your debts" heading
+    - `SubscriptionsScreen`: danger "Delete subscription" in the details sheet and the graveyard sheet; on success toast "Subscription deleted" and focus the "Zombies" or "Graveyard" heading, whichever list held the row
+    - _Requirements: 23.12, 24.10, 28.5, 30.5_
+  - [ ] 16.5 Write delete UI tests
+    - Create `tests/ui/deleteRows.test.tsx`: the danger button and confirmation text for a debt (owing and paid off), an active subscription and a graveyard subscription; "Keep it" writes nothing; confirm removes only the row, keeps the Events, toasts, and focuses the list heading (never `<body>`); a plan action whose target was deleted shows no Do it and can still be ticked
+    - Mutation check: temporarily remove the heading focus after a delete and confirm the focus assertion fails
+    - _Requirements: 9.10, 14.6, 22.9, 23.12, 24.10, 30.5, 31.8_
+- [ ] 17. Checkpoint - All screens
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass, ask the user if questions arise.
 
-- [ ] 17. Group 14: Final axe and keyboard pass, steering and README updates
-  - [ ] 17.1 Write the axe test for every screen
+- [ ] 18. Group 15: Final axe and keyboard pass, steering and README updates
+  - [ ] 18.1 Write the axe test for every screen
     - Create `tests/ui/screens.axe.test.tsx` using `expectNoAxeViolations` for Landing, Dashboard, Exorcism, Subscriptions, Debts, Transactions and Settings in the states "empty real crypt", "populated real crypt", "demo level 4" and "loading"; fix any violation found in the screens
     - _Requirements: 30.1, 30.2, 30.7_
 
-  - [ ] 17.2 Write the keyboard operability test
+  - [ ] 18.2 Write the keyboard operability test
     - Create `tests/ui/keyboard.test.tsx` with `user-event`: Tab reaches every Tab_Bar and Sidebar link, every sheet traps focus, Escape closes it and focus returns to the opener, forms submit with Enter, the Do it button and checkbox are reachable and operable; fix any gap found
     - _Requirements: 19.4, 30.5, 30.6_
 
-  - [ ] 17.3 Update `structure.md`
+  - [ ] 18.3 Update `structure.md`
     - In `.kiro/steering/structure.md` add `src/components/{shell,common,landing,dashboard,sheets,settings,screens,demo}/`, `src/lib/validation/`, `src/lib/utils/{calendar,cents,planView,scoreView,listViews}.ts`, `src/hooks/useCrypt.tsx` and the other hooks, `src/app/(app)/`, `tests/db/`, `tests/demo/`, `tests/validation/`, and the `tests/<area>/properties/` convention; update the "Built so far" sentence
     - _Requirements: 29.9_
 
-  - [ ] 17.4 Update the README
+  - [ ] 18.4 Update the README
     - In `README.md` describe the working app: demo flow ("Enter the demo crypt", Skip to next week), local-first storage in two Dexie databases, the weekly plan with Do it, scripts, and a note that the house scene and sound are not built yet
     - _Requirements: 29.9_
 
-  - [ ] 17.5 Run the full verification
+  - [ ] 18.5 Run the full verification
     - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; confirm the design-system scans (className layout-only, hex literals, tokens) and `/styleguide` tests still pass and that every property test in `tests/**/properties/` carries its `// Feature: app-screens, Property N` tag; fix failures
     - _Requirements: 29.2, 29.3, 29.9, 29.10, 31.12_
 
-- [ ] 18. Group 15: CSV import (optional)
-  - [ ]* 18.1 Implement CSV parsing and serialization
+- [ ] 19. Group 16: CSV import (optional)
+  - [ ]* 19.1 Implement CSV parsing and serialization
     - Create `src/lib/db/csv.ts` with pure `parseTransactionsCsv(text)` (header `date,description,category,amount`, dollars with two decimals, quoted fields with doubled quotes, `{ ok: true; rows } | { ok: false; errors: { line; message }[] }`) and `serializeTransactionsCsv(transactions)`
     - _Requirements: 32.1, 32.2_
 
-  - [ ]* 18.2 Write property test for the CSV round trip
+  - [ ]* 19.2 Write property test for the CSV round trip
     - **Property 33: CSV round trip**
     - **Validates: Requirements 32.1, 32.2, 32.3, 32.5**
 
-  - [ ]* 18.3 Implement the CSV import mutation
+  - [ ]* 19.3 Implement the CSV import mutation
     - In `src/lib/db/csv.ts` add `importTransactions(db, rows, ctx)` storing all rows in one Dexie transaction with no Event, and expose `importCsv` from `useCryptActions`; add tests in `tests/db/csv.test.ts` including no write on any invalid row
     - _Requirements: 32.5, 32.6_
 
-  - [ ]* 18.4 Implement the CSV import sheet and enable the QuickAction
+  - [ ]* 19.4 Implement the CSV import sheet and enable the QuickAction
     - Create `src/components/sheets/CsvImportSheet.tsx` (hidden native file input, preview of the first rows in JetBrains Mono, primary "Import N transactions", line-numbered errors, nothing imported on error) and enable the "Import CSV" QuickAction in `Dashboard.tsx`
     - _Requirements: 32.4, 32.5, 32.7_
 
-  - [ ]* 18.5 Write CSV import UI tests
+  - [ ]* 19.5 Write CSV import UI tests
     - Create `tests/ui/csvImport.test.tsx`: valid file previews and imports with a toast, invalid row shows its line number and imports nothing, QuickAction enabled
     - _Requirements: 32.4, 32.5, 32.7_
 
-- [ ] 19. Group 16: Export and import (optional)
-  - [ ]* 19.1 Implement export serialization and validation
+- [ ] 20. Group 17: Export and import (optional)
+  - [ ]* 20.1 Implement export serialization and validation
     - Create `src/lib/db/exportImport.ts` with pure `serializeExport(rows)` (`app: "cashcrypt"`, `version: 1`, `exportedAt`, all tables) and `parseExport(text)` validating the envelope, every row's fields, integer non-negative cents, real dates and unique ids per table, returning the first problem as a message
     - _Requirements: 33.1, 33.2, 33.5_
 
-  - [ ]* 19.2 Write property test for export round trip and safe import
+  - [ ]* 20.2 Write property test for export round trip and safe import
     - **Property 34: Export round trip and safe import**
     - **Validates: Requirements 33.1, 33.2, 33.3, 33.5, 33.6**
 
-  - [ ]* 19.3 Implement export reading and replace-all import
+  - [ ]* 20.3 Implement export reading and replace-all import
     - In `src/lib/db/exportImport.ts` add `exportRows(db)` and `replaceAllRows(db, rows)` (one Dexie transaction, previous data kept when it fails), expose `exportData` and `importData` from `useCryptActions`; add `tests/db/exportImport.test.ts` for the file name `cashcrypt-export-YYYY-MM-DD.json` and rollback on failure
     - _Requirements: 33.4, 33.6, 33.8_
 
-  - [ ]* 19.4 Implement the Settings export and import controls
+  - [ ]* 20.4 Implement the Settings export and import controls
     - In `SettingsScreen.tsx` add "Export data" (downloads the file) and "Import data" (visually hidden native file input triggered by the button, confirmation sheet, error naming the first problem, success toast with the imported counts) above "Clear all data", disabled with the hint in demo mode
     - _Requirements: 27.5, 27.6, 33.4, 33.5, 33.7, 33.8, 33.9_
 
-  - [ ]* 19.5 Write export and import UI tests
+  - [ ]* 20.5 Write export and import UI tests
     - Create `tests/ui/exportImport.test.tsx`: export produces the named file, valid import replaces data after confirmation and shows counts, invalid file shows the first problem and writes nothing, controls disabled in demo mode
     - _Requirements: 27.5, 27.6, 33.4, 33.5, 33.7, 33.8_
 
 ## Notes
 
-- Tasks marked with `*` (groups 15 and 16) are optional and can be skipped without affecting the required app. All other test tasks are required because `conventions.md` makes unit and property tests part of the work.
+- Tasks marked with `*` (groups 16 and 17) are optional and can be skipped without affecting the required app. All other test tasks are required because `conventions.md` makes unit and property tests part of the work.
 - The three Do it sheets (`LogPaymentSheet`, `CancelSubscriptionSheet`, `AddExpenseSheet`) and `ExorcismPlan` are built in group 8 because the Dashboard plan card and quick actions need them; groups 9 to 12 reuse them.
 - Property test files live in `tests/<area>/properties/` so parallel tasks never write the same file.
 - Each task references specific requirements for traceability; checkpoints give incremental validation.
@@ -537,14 +560,14 @@ Conventions that apply to every task:
     { "id": 14, "tasks": ["9.12"] },
     { "id": 15, "tasks": ["9.13"] },
     { "id": 16, "tasks": ["11.1", "12.1"] },
-    { "id": 17, "tasks": ["11.2", "12.2", "13.1", "14.1", "15.1"] },
-    { "id": 18, "tasks": ["12.3", "13.2", "14.2", "14.3", "15.2"] },
-    { "id": 19, "tasks": ["14.4"] },
-    { "id": 20, "tasks": ["17.1", "17.2", "17.3", "17.4"] },
-    { "id": 21, "tasks": ["17.5", "18.1", "19.1"] },
-    { "id": 22, "tasks": ["18.2", "18.3", "19.2", "19.3"] },
-    { "id": 23, "tasks": ["18.4", "19.4"] },
-    { "id": 24, "tasks": ["18.5", "19.5"] }
+    { "id": 17, "tasks": ["11.2", "12.2", "13.1", "14.1", "15.1", "16.1"] },
+    { "id": 18, "tasks": ["12.3", "13.2", "14.2", "14.3", "15.2", "16.2", "16.3"] },
+    { "id": 19, "tasks": ["14.4", "16.4"] },
+    { "id": 20, "tasks": ["16.5", "18.1", "18.2", "18.3", "18.4"] },
+    { "id": 21, "tasks": ["18.5", "19.1", "20.1"] },
+    { "id": 22, "tasks": ["19.2", "19.3", "20.2", "20.3"] },
+    { "id": 23, "tasks": ["19.4", "20.4"] },
+    { "id": 24, "tasks": ["19.5", "20.5"] }
   ]
 }
 ```

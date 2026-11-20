@@ -171,6 +171,7 @@ sequenceDiagram
 | `src/lib/haunting/index.ts` | Also export `normalizeSubscription`, `dollarsToCents` and the `SubscriptionInCents` type. No computed output changes; no numeric literal is added. | Requirement 7.2 (cancellation event amount uses the engine's cadence normalization) and the planner's money conversion. `tests/haunting/staticChecks.test.ts` must keep passing. |
 | `src/components/ui/ExorcismActionRow.tsx` | `impactText` becomes optional. When omitted, the impact span is not rendered. The title may wrap to two lines (`line-clamp-2`, row `min-h-16` with `py-2`) so the saving in it stays visible; the subtitle stays one line (`truncate`). Tests in `tests/ui/ExorcismActionRow.test.tsx`. | D8; titles like "Cancel Wraithcast — saves $120/mo" were cut before the amount |
 | `src/components/ui/LightScoreBar.tsx` | Optional `caption?: string \| null` replaces the score number above the track: a string renders as a caption, `null` renders nothing, omitted keeps the number. `aria-valuetext` always states the score. | The Dashboard shows the score in its BalanceHero, so the bar shows the next-level distance (Requirement 21.4) |
+| `src/components/ui/Card.tsx` | Optional `headingId?: string`: the title heading gets that id and `tabIndex={-1}`, so a screen can move focus to it after the row that held focus is deleted. Without it, the heading renders as before. | Requirements 23.12, 24.10, 30.5 |
 | `src/app/page.tsx` → `src/app/(app)/page.tsx`, `src/app/layout.tsx` | Move and wrap with `CryptProvider`. | Routing |
 | `.kiro/steering/structure.md` | Add `src/components/{shell,common,landing,dashboard,sheets,settings,screens}/`, `src/lib/validation/`, `src/hooks/useCrypt.tsx`, `tests/db/`, `tests/demo/`. | Keep the steering layout true. |
 | `package.json` | Add `dexie`, `dexie-react-hooks` (dependencies) and `fake-indexeddb` (devDependency). Versions: Dexie 4 line, current `dexie-react-hooks` and `fake-indexeddb` majors at install time. | Requirement 1.1 |
@@ -253,6 +254,8 @@ export function cancelSubscription(db: CryptDb, id: string, ctx: MutationContext
 export function reactivateSubscription(db: CryptDb, id: string, ctx: MutationContext): Promise<SubscriptionRow>; // uncompletes this week's matching cancel action
 export function completePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string, ctx: MutationContext): Promise<void>;
 export function uncompletePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string): Promise<void>;
+export function deleteDebt(db: CryptDb, id: string): Promise<void>;          // removes the row only; Events and plans stay
+export function deleteSubscription(db: CryptDb, id: string): Promise<void>;  // active or graveyard; Events and plans stay
 export function clearAllData(db: CryptDb): Promise<void>; // real db only
 
 export type LogPaymentOutcome = { debt: DebtRow; extraPrincipalCents: number; completedActionId: string | null };
@@ -269,6 +272,7 @@ Common shape of each mutation: validate with `src/lib/validation` first (no tran
 - **`uncompletePlanAction`**: sets `done: false`, removes `completedOn` from the action and keeps the event.
 - **`reactivateSubscription(db, id, ctx)`**: one `rw` transaction over `subscriptions` and `weeklyPlans`: set `active: true` and remove `canceledOn`; then, if the plan of `getPlanWeekStart(ctx.now)` has a done `cancel_subscription` action with `targetId === id`, run the same reset as `uncompletePlanAction` (the completion Event stays). Creates no Event and touches no other week's plan.
 - **`autoCompletePlanAction(db, kind, targetId, ctx)`** (internal, same transaction): takes the caller's `MutationContext`, not just `now`, because the completion Event needs `ctx.newId`. `plan = weeklyPlans.get(getPlanWeekStart(ctx.now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
+- **`deleteDebt(db, id)` / `deleteSubscription(db, id)`**: one `rw` transaction over that table only: `get` (not-found if missing, nothing written), then `delete(id)`. No other table is touched: Events stay because the payments and cancellations really happened, so their momentum stays too; Weekly_Plans are frozen and stay. A deleted Subscription has no row, so the snapshot adapter's active-cancel filter (Requirement 4.4) no longer applies and its `subscription_canceled` Event keeps counting while in the window. A Plan_Action that targets a deleted row stays in its plan; `getDoItTarget` finds no row and returns `null`, so it shows no Do it, and ticking it still works because completion only reads the plan.
 - **`clearAllData`**: `assertRealDb(db)`, then `db.transaction("rw", allTables, () => Promise.all(tables.map(t => t.clear())))`.
 
 ### `src/lib/exorcism/` (Planner, pure)
@@ -345,7 +349,7 @@ Small pure functions keep screens thin and give the property tests something to 
 | `useCryptData()` | `{ status: "loading" \| "ready"; rows: CryptRows \| null }` | One `useLiveQuery` over every table: `{ profile, debts, subscriptions, transactions, events, plans }`. `useLiveQuery` keeps its previous result while it resubscribes after `db` changes, so the query returns `{ db, rows }` and the hook reports `loading` until the result's `db` is the current one; rows of the previous crypt are never shown after a switch. |
 | `useHouseState()` | `{ status; houseState: HouseState \| null; snapshot: FinancialSnapshot \| null; rows; now }` | `useMemo` over `toFinancialSnapshot` and `computeHouseState`. Only source of a House_State for screens. |
 | `useExorcismPlan()` | `{ status; plan: StoredWeeklyPlan \| null; weekKey; toggleAction(actionId, next): Promise<MutationResult<void>> }` | Calls `ensureWeeklyPlan` from an effect when no plan exists for the week, never during render. The live query returns `{ db, weekKey, plan }`; a result from another database or week counts as loading, so a stale plan is never shown and never stops the effect. |
-| `useCryptActions()` | Bound, result-returning actions: `setIncome`, `addDebt`, `editDebt`, `addSubscription`, `editSubscription`, `addTransaction`, `logPayment`, `cancelSubscription`, `reactivateSubscription`, `clearAll`, plus optional `importCsv`, `exportData`, `importData` | Each wraps the mutation with the current `db` and `now`, and maps thrown errors to `MutationResult`. |
+| `useCryptActions()` | Bound, result-returning actions: `setIncome`, `addDebt`, `editDebt`, `addSubscription`, `editSubscription`, `addTransaction`, `logPayment`, `cancelSubscription`, `reactivateSubscription`, `deleteDebt`, `deleteSubscription`, `clearAll`, plus optional `importCsv`, `exportData`, `importData` | Each wraps the mutation with the current `db` and `now`, and maps thrown errors to `MutationResult`. |
 | `useCreateCrypt()` (in `useCryptActions.ts`) | `(incomeCents: number) => Promise<MutationResult<void>>` | Onboarding. Calls `openRealDb()`, writes the Profile with `setMonthlyIncome`, and only then calls `setMode("real")`, so the Dashboard never renders before the Profile exists. On any failure the mode stays unchanged and the error is returned. Works before any crypt is active. |
 | `useDemo()` | `{ scenarioId; demoNow; loadScenario(id); reset(); skipWeek(); enterDemo(): Promise<void> }` | `enterDemo` sets the mode, seeds `level-4` if the Demo_Crypt has no Profile, then the caller navigates to `/`. |
 
@@ -402,13 +406,14 @@ All files are Client Components unless noted. Folders follow `structure.md` and 
 | `exorcism/ExorcismPlan` | `ExorcismPlanAction`, `LogPaymentSheet`, `CancelSubscriptionSheet`, skeleton | `variant="card"` (Dashboard) or `"page"`. Owns the Do it sheets so both screens behave the same. After a Do it sheet closes and the Do it button is gone, focus moves to that row's checkbox. |
 | `exorcism/ExorcismPlanAction` | `ExorcismActionRow`, secondary `Button` | Row id `plan-<weekKey>-<actionId>`. Subtitle from `getPlanActionSubtitle` (`planView.ts`): the instruction while pending, "Done Nov 19" (`formatMonthDay(completedOn)`) once done, on both screens. Do it button name `Do it: <title>`, placed under the row. `disabled` while its mutation runs. |
 | `screens/ExorcismScreen` | `PageHeader`, `ExorcismPlan`, progress and "Money freed" text, completion Card | Uses `summarizePlan` and `useHouseState`. The explanation under the list is hidden once all actions are done. When all are done, a Card with the `Flame` icon in `text-candle` (Lucide has no candle icon) shows the completion message and `formatWeekResult(plan.startLightScore, lightScore, decayLevel)` ("Light score 32 → 43 · Level 3 — Haunted"). A `role="status"` `aria-live="polite"` wrapper is always rendered, so the Card is announced when it appears. |
-| `screens/SubscriptionsScreen` | `ListRow`, `Chip`, `Card`, `SegmentedControl`, `Input`, `BottomSheet`, `Button` | Add sheet, details sheet, `CancelSubscriptionSheet`, Graveyard Card with a secondary "Bring it back". Active row subtitle is the cadence only ("Monthly"); the usage is the Chip. The details sheet shows "$60/mo" and, only for weekly or yearly, "Yearly · $120 per year". Rows have ids `zombies-row-<id>` and `graveyard-row-<id>`. After a cancel (from `onCanceled`) or a "Bring it back", the opener row has moved to the other list, so once every sheet is closed and the live query shows the moved row, the screen focuses it (one tick after the sheet's own focus restore). |
-| `screens/DebtsScreen` | `ListRow`, `Chip`, `Card`, `Input`, `BottomSheet`, `Button` | Add/Edit debt form (APR as percent via `aprPercentToFraction`), "Log payment" opens `LogPaymentSheet`. |
+| `screens/SubscriptionsScreen` | `ListRow`, `Chip`, `Card`, `SegmentedControl`, `Input`, `BottomSheet`, `Button` | Add sheet, details sheet, `CancelSubscriptionSheet`, Graveyard Card with a secondary "Bring it back". Active row subtitle is the cadence only ("Monthly"); the usage is the Chip. The details sheet shows "$60/mo" and, only for weekly or yearly, "Yearly · $120 per year". Rows have ids `zombies-row-<id>` and `graveyard-row-<id>`. After a cancel (from `onCanceled`) or a "Bring it back", the opener row has moved to the other list, so once every sheet is closed and the live query shows the moved row, the screen focuses it (one tick after the sheet's own focus restore). The details and graveyard sheets have a danger "Delete subscription" Button that opens `DeleteConfirmSheet`; after `deleteSubscription` succeeds it toasts "Subscription deleted" and focuses the heading of the list the row was in ("Zombies" or "Graveyard"). |
+| `screens/DebtsScreen` | `ListRow`, `Chip`, `Card`, `Input`, `BottomSheet`, `Button` | Add/Edit debt form (APR as percent via `aprPercentToFraction`), "Log payment" opens `LogPaymentSheet`. The Debt sheet has a danger "Delete debt" Button (also at balance 0) that opens `DeleteConfirmSheet`; after `deleteDebt` succeeds it toasts "Debt deleted" and focuses the "Your debts" Card heading (`headingId`). |
 | `screens/TransactionsScreen` | `ListRow`, `Chip` ("Ghost" with icon), `Card`, `AddExpenseSheet` | Summary Card, empty state. |
 | `screens/SettingsScreen` | `Input`, `Button`, `SegmentedControl`, `BottomSheet`, `DemoControls` | Income, Crypt switcher, optional export/import, Clear all data (real only). |
 | `demo/DemoControls` | `Card`, `SegmentedControl` (Level 1–5), `Button` ×2, polite live region | Rendered only while the Demo_Crypt is active. |
 | `sheets/LogPaymentSheet` | `BottomSheet`, `ListRow` picker, money `Input`, primary `Button` | Props: `debts`, `initialDebtId?`, `prefillCents?`. Skips the picker when a debt is given. The facts line is one sentence with `formatCentsShort` ("Balance $18,000. Minimum $400/mo."). |
 | `sheets/CancelSubscriptionSheet` | `BottomSheet`, secondary "Keep it" and primary "Cancel subscription" buttons (canceling is the good action; `danger` is only for deleting data) | States "Cancel Wraithcast — saves $120/mo" (`formatCentsShort`). |
+| `sheets/DeleteConfirmSheet` | `BottomSheet`, secondary "Keep it" and danger confirm buttons | Props: `open`, `onClose`, `name`, `confirmLabel` ("Delete debt" or "Delete subscription"), `onConfirm(): Promise<MutationResult<void>>`. States "Delete <name>? This can't be undone.". On failure keeps the sheet open with an error toast. Uses `danger` because deleting a row is a destructive data action. |
 | `sheets/AddExpenseSheet` | `BottomSheet`, money `Input`, text `Input`, category `SegmentedControl` | Dates with `now`; toast "Ghost added: $X" below the threshold. |
 
 Each Screen renders exactly one `h1` and sits inside the shell's `<main>`. Landing renders its own `<main>` because it has no shell. Each Screen keeps at most one primary Button and at most one `hero`-scale number. Mutation toasts use `success` for savings and payments and `danger` for failures.
@@ -496,7 +501,7 @@ db.version(1).stores({
 
 ### Snapshot adapter
 
-`toFinancialSnapshot(rows, now)` maps rows to the engine input without mutation: `monthlyIncome = (profile?.monthlyIncomeCents ?? 0) / 100`; each debt to `{ debtId, name, balance: cents / 100, minimumMonthlyPayment: cents / 100, apr }`; each subscription to `{ subscriptionId, name, amount: cents / 100, cadence, usage, active }` (inactive included); each transaction to `{ transactionId, amount: cents / 100, description, category, date }`; events pass through as `{ type, date, amountCents, extraPrincipalCents }`, in order, except `subscription_canceled` Events whose `refKey` is `cancelRefKey(id)` of a currently active subscription, which are omitted (cancellation momentum counts only while the subscription stays canceled; `src/lib/db/refKeys.ts` builds the key for both the adapter and the mutations); `now` is copied. Dividing an integer up to `MAX_MONEY_CENTS` by 100 and applying the engine's `Math.round(x * 100)` recovers the same integer, which Property 4 checks.
+`toFinancialSnapshot(rows, now)` maps rows to the engine input without mutation: `monthlyIncome = (profile?.monthlyIncomeCents ?? 0) / 100`; each debt to `{ debtId, name, balance: cents / 100, minimumMonthlyPayment: cents / 100, apr }`, with `minimumMonthlyPayment` 0 when the balance is 0 (a paid-off debt adds nothing to factor A; the stored row keeps its minimum, so the engine and the data are unchanged); each subscription to `{ subscriptionId, name, amount: cents / 100, cadence, usage, active }` (inactive included); each transaction to `{ transactionId, amount: cents / 100, description, category, date }`; events pass through as `{ type, date, amountCents, extraPrincipalCents }`, in order, except `subscription_canceled` Events whose `refKey` is `cancelRefKey(id)` of a currently active subscription, which are omitted (cancellation momentum counts only while the subscription stays canceled; `src/lib/db/refKeys.ts` builds the key for both the adapter and the mutations); `now` is copied. Dividing an integer up to `MAX_MONEY_CENTS` by 100 and applying the engine's `Math.round(x * 100)` recovers the same integer, which Property 4 checks.
 
 ### Stored plan and week model
 
@@ -538,7 +543,7 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 ### Property 4: Cents survive the dollars boundary
 
-*For any* Crypt rows with every money value an integer in `[0, MAX_MONEY_CENTS]`, `Math.round(adapted.amount * 100)` equals the stored Cents for each debt balance, minimum payment, subscription amount, transaction amount and the monthly income.
+*For any* Crypt rows with every money value an integer in `[0, MAX_MONEY_CENTS]`, `Math.round(adapted.amount * 100)` equals the stored Cents for each debt balance, minimum payment (0 for a Debt with a balance of 0, Property 36), subscription amount, transaction amount and the monthly income.
 
 **Validates: Requirements 4.2, 4.7**
 
@@ -658,7 +663,7 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 ### Property 24: Do it is offered only where it can work, with a safe pre-fill
 
-*For any* Plan_Action and Crypt rows, `getDoItTarget` returns `null` for `fallback` and `reduce_small_expenses` actions, for done actions, and for targets that no longer qualify (inactive subscription, Debt balance 0); it returns a target otherwise. For `extra_payment` the pre-fill equals `min(minimumPayment + suggestedAmountCents, balance)`, is at least 1 Cent and at most the balance, and `getExtraAboveMinimum(amount, minimum)` equals `max(0, amount − minimum)`.
+*For any* Plan_Action and Crypt rows, `getDoItTarget` returns `null` for `fallback` and `reduce_small_expenses` actions, for done actions, and for targets that no longer qualify (inactive subscription, Debt balance 0) or no longer exist (a deleted row); it returns a target otherwise. For `extra_payment` the pre-fill equals `min(minimumPayment + suggestedAmountCents, balance)`, is at least 1 Cent and at most the balance, and `getExtraAboveMinimum(amount, minimum)` equals `max(0, amount − minimum)`.
 
 **Validates: Requirements 13.8, 14.6, 22.9, 22.10, 25.3, 25.4, 25.8, 25.9**
 
@@ -728,6 +733,18 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 **Validates: Requirements 4.4, 4.5, 7.6**
 
+### Property 36: Paid-off debts add no minimum payment
+
+*For any* Crypt rows, every Debt with a balance of 0 has `minimumMonthlyPayment` 0 in `toFinancialSnapshot(rows, now)`, every other Debt keeps its minimum (round trip through cents), so the snapshot's minimum payments sum to the stored minimums of the Debts that still have a balance; the input rows are unchanged.
+
+**Validates: Requirement 4.3**
+
+### Property 37: Deleting a row removes only that row
+
+*For any* Crypt and any existing Debt or Subscription (active or inactive), `deleteDebt` / `deleteSubscription` removes exactly that row, and every other row in every table (including all Events and Weekly_Plans) is unchanged; for an id that does not exist it rejects with `DbNotFoundError` and every table is unchanged. Afterwards, `getDoItTarget` returns `null` for every Plan_Action that targeted the deleted row, and `completePlanAction` on such an action still succeeds.
+
+**Validates: Requirements 9.8, 9.9, 9.10, 9.11, 14.6, 22.9**
+
 ### Criteria not covered by a property
 
 Structural and UI criteria (Requirements 1, 2, 10, 15.9 to 15.13 in part, 17.3, 17.7 to 17.12, 18.1 to 18.5, 19 to 22 except as listed, 23 to 27 except as listed, 28 to 30, 31) are verified by smoke tests, source scans, example-based unit tests and component tests, listed in the Testing Strategy.
@@ -777,6 +794,9 @@ Pure cores (calendar, cents helpers, validators, adapter, planner, view helpers,
 | `tests/utils/calendar.test.ts`, `tests/utils/cents.test.ts` | node | Properties 1 to 3 and 27; leap years, year boundaries, `getLocalDate` local fields |
 | `tests/validation/inputs.test.ts` | node | Validator messages and limits (supports Property 6) |
 | `tests/db/snapshotAdapter.test.ts` | node | Properties 4 and 5 |
+| `tests/db/properties/p37-delete-row.test.ts` | node | Property 37 |
+| `tests/ui/deleteRows.test.tsx` | ui | Delete debt (also paid off) and delete subscription (active and graveyard): danger button, confirmation text, Keep it writes nothing, confirm toasts, row gone, focus on the list heading; a plan action whose target was deleted shows no Do it and can still be ticked |
+| `tests/db/properties/p36-paid-off-minimums.test.ts`, `tests/demo/paidOffMinimum.test.ts` | node | Property 36; level-4 Student loan paid off: factor A drops from 610/3000 to 550/3000 while the stored $60 minimum stays |
 | `tests/db/properties/p35-canceled-events-follow-subscriptions.test.ts`, `tests/demo/cancelMomentum.test.ts` | node | Property 35; level-4 Dirgebox: cancel +2 momentum, bring back 0, cancel again +2 with the original event date and a single event |
 | `tests/db/schema.test.ts` | node | Tables, indexes, duplicate `weekKey` and `refKey` rejected, `debt_payment` rows without `refKey` allowed |
 | `tests/db/mutations.test.ts` | node | Exact rows after each mutation and each rejection, injected id generator, Properties 6 to 11 |
