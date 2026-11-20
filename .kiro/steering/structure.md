@@ -2,7 +2,9 @@
 
 ## Directory Layout
 
-The tree below is the target layout. Built so far: `src/app/` (layout, placeholder home, `/styleguide`, `globals.css`), `src/components/styleguide/`, the 13 primitive files and `motionTokens.ts` in `src/components/ui/`, `src/lib/haunting/`, `src/lib/utils/`, and the tests in `tests/haunting/`, `tests/design-system/`, `tests/ui/` and `tests/utils/`. Everything else (the other routes, `house/`, `moments/`, the feature component folders, `src/lib/db/`, `src/lib/exorcism/`, `src/lib/moments/`, `src/lib/demo/`, `src/hooks/`, `src/types/`, `tests/exorcism/`) is planned for later specs and does not exist yet.
+The tree below is the target layout. Built so far: `src/app/` (root layout, `globals.css`, `/styleguide`, and the `(app)` route group with `/`, `/transactions`, `/subscriptions`, `/debts`, `/exorcism` and `/settings`), `src/components/{ui,styleguide,shell,common,landing,dashboard,sheets,screens,demo,exorcism}/`, `src/hooks/`, `src/types/`, `src/lib/{haunting,exorcism,db,demo,validation,utils}/`, and the tests in `tests/{haunting,exorcism,db,demo,validation,design-system,ui,utils}/`. Not built yet: `src/components/house/`, `src/components/moments/`, `src/components/{transactions,subscriptions,debts}/` feature folders, `src/components/settings/`, `src/lib/moments/`, and CSV import. The house scene is a `ScenePlaceholder` for now; the settings screen lives in `src/components/screens/SettingsScreen.tsx`.
+
+Test convention: property-based tests live in `tests/<area>/properties/pNN-<slug>.test.ts`, one file per numbered design property, tagged `// Feature: <spec>, Property N: <text>` (for example `tests/db/properties/p07-log-payment.test.ts`). Example-based tests stay beside them in `tests/<area>/`.
 
 ```
 CashCrypt/
@@ -18,18 +20,20 @@ CashCrypt/
 ├── public/                     # Static assets (images, icons, etc.)
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── layout.tsx          # Root layout (fonts, global styles, ToastRegion; Dexie provider planned)
-│   │   ├── page.tsx            # Home — house dashboard
-│   │   ├── transactions/
-│   │   │   └── page.tsx        # Transaction list + manual entry + CSV import
-│   │   ├── subscriptions/
-│   │   │   └── page.tsx        # Subscription (zombie) manager
-│   │   ├── debts/
-│   │   │   └── page.tsx        # Debt manager — list, add debt, log payment
-│   │   ├── exorcism/
-│   │   │   └── page.tsx        # Weekly exorcism plan
-│   │   ├── settings/
-│   │   │   └── page.tsx        # Settings — sound toggle, data export / import, clear data
+│   │   ├── layout.tsx          # Root layout (fonts, global styles, CryptProvider, ToastRegion)
+│   │   ├── (app)/              # Route group for the app screens; URLs have no "(app)" segment
+│   │   │   ├── layout.tsx      # Wraps every screen in AppShell
+│   │   │   ├── page.tsx        # Home: Landing or Dashboard (renders HomeScreen)
+│   │   │   ├── transactions/
+│   │   │   │   └── page.tsx    # Transaction list + manual entry (CSV import planned)
+│   │   │   ├── subscriptions/
+│   │   │   │   └── page.tsx    # Subscription (zombie) manager
+│   │   │   ├── debts/
+│   │   │   │   └── page.tsx    # Debt manager — list, add debt, log payment
+│   │   │   ├── exorcism/
+│   │   │   │   └── page.tsx    # Weekly exorcism plan
+│   │   │   └── settings/
+│   │   │       └── page.tsx    # Settings — data export / import, clear data
 │   │   ├── styleguide/
 │   │   │   └── page.tsx        # /styleguide route; renders StyleguideContent
 │   │   └── globals.css         # Tailwind v4 entry, :root tokens, @theme inline aliases, base layer
@@ -51,19 +55,42 @@ CashCrypt/
 │   │   │   ├── SigilMoment.tsx         # Poltergeist exorcised → sigil circle draw
 │   │   │   ├── SpiritJarMoment.tsx     # Ghosts captured → spiral into jar
 │   │   │   └── ThreeCandlesMoment.tsx  # Weekly plan completed → three candles light
+│   │   ├── shell/              # App chrome around every screen
+│   │   │   ├── AppShell.tsx    # Layout: Sidebar ≥1024px, TabBar below, main landmark
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── TabBar.tsx
+│   │   │   ├── NavLink.tsx
+│   │   │   ├── SkipLink.tsx
+│   │   │   └── DemoChip.tsx    # "Demo mode" marker with the demo date
+│   │   ├── common/             # Shared screen pieces
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── PageHeader.tsx
+│   │   │   ├── Skeleton.tsx
+│   │   │   └── StorageBlockedCard.tsx
+│   │   ├── landing/
+│   │   │   └── Landing.tsx     # Home with no Active_Crypt
+│   │   ├── dashboard/
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── PoltergeistBanner.tsx
+│   │   │   └── ScenePlaceholder.tsx    # Stands in for HouseScene until it is built
+│   │   ├── sheets/             # BottomSheet-based forms and confirmations
+│   │   │   ├── OnboardingSheet.tsx
+│   │   │   ├── LogPaymentSheet.tsx
+│   │   │   ├── AddExpenseSheet.tsx
+│   │   │   ├── CancelSubscriptionSheet.tsx
+│   │   │   └── DeleteConfirmSheet.tsx
+│   │   ├── screens/            # One Client Component per route, rendered by the page files
+│   │   │   ├── HomeScreen.tsx
+│   │   │   ├── TransactionsScreen.tsx
+│   │   │   ├── SubscriptionsScreen.tsx
+│   │   │   ├── DebtsScreen.tsx
+│   │   │   ├── ExorcismScreen.tsx
+│   │   │   └── SettingsScreen.tsx
+│   │   ├── demo/
+│   │   │   └── DemoControls.tsx  # Jumps to any of the 5 demo decay levels, reset, skip a week
 │   │   ├── exorcism/
 │   │   │   ├── ExorcismPlan.tsx
 │   │   │   └── ExorcismPlanAction.tsx   # Wraps ExorcismActionRow with plan-level logic
-│   │   ├── transactions/
-│   │   │   ├── TransactionForm.tsx
-│   │   │   └── CsvImport.tsx
-│   │   ├── subscriptions/
-│   │   │   └── SubscriptionCard.tsx
-│   │   ├── debts/
-│   │   │   ├── DebtCard.tsx        # Displays one debt; includes "Log a Payment" action
-│   │   │   └── DebtForm.tsx        # Add / edit a debt (name, balance, APR, min payment)
-│   │   ├── demo/
-│   │   │   └── DemoScenarioSwitcher.tsx  # Jumps to any of the 5 demo decay levels
 │   │   └── ui/                 # Generic, reusable primitives (Crypt UI design system)
 │   │       ├── Button.tsx
 │   │       ├── QuickAction.tsx             # 52px circle quick-action with label
@@ -81,9 +108,16 @@ CashCrypt/
 │   │       └── motionTokens.ts             # Framer Motion duration/distance constants (mirror the CSS tokens)
 │   │
 │   ├── lib/
-│   │   ├── db/                 # Dexie schema and migrations
-│   │   │   ├── schema.ts       # Table definitions and types
-│   │   │   └── db.ts           # Dexie instance (singleton)
+│   │   ├── db/                 # Dexie data layer (the only importer of dexie)
+│   │   │   ├── schema.ts       # Table definitions and versions
+│   │   │   ├── crypt.ts        # Opening helpers for the crypt database (injectable in tests)
+│   │   │   ├── modeStore.ts    # Which Crypt is active ("demo" or "real"); no financial data
+│   │   │   ├── mutations.ts    # One function per user action, one Dexie transaction each
+│   │   │   ├── queries.ts      # Read-only queries
+│   │   │   ├── plans.ts        # Weekly plan service
+│   │   │   ├── refKeys.ts      # Reference keys of idempotent events
+│   │   │   ├── snapshotAdapter.ts  # Stored rows (cents) → FinancialSnapshot
+│   │   │   └── errors.ts       # Typed data-layer errors
 │   │   ├── haunting/           # Pure haunting engine
 │   │   │   ├── index.ts        # Public API: computeHouseState(), cents boundary, re-exports
 │   │   │   ├── config.ts       # All weights, momentum coefficients, thresholds, bands + validateConfig()
@@ -97,12 +131,22 @@ CashCrypt/
 │   │   │   └── types.ts        # FinancialSnapshot, FinancialEvent, HouseState, Zombie, Ghost, Poltergeist
 │   │   ├── exorcism/           # Pure exorcism planner
 │   │   │   ├── index.ts        # Public API: generateExorcismPlan()
+│   │   │   ├── config.ts       # Every number and key used by the planner
 │   │   │   └── types.ts        # ExorcismAction type
-│   │   ├── moments/
+│   │   ├── moments/            # Planned
 │   │   │   └── queue.ts        # Plays moments one at a time; supports skip (Promise-based queue)
 │   │   ├── demo/
-│   │   │   └── seed.ts         # Five named demo scenarios (one per decay level)
+│   │   │   ├── seed.ts         # Five named demo scenarios (one per decay level)
+│   │   │   └── service.ts      # Load a scenario, skip a week, reset (Demo_Crypt only)
+│   │   ├── validation/         # Pure input validators (never throw; no React, Dexie or Next)
+│   │   │   ├── inputs.ts       # Validators returning a ValidationResult
+│   │   │   └── limits.ts       # Shared input limits
 │   │   └── utils/              # Pure UI helpers (framework-agnostic)
+│   │       ├── calendar.ts         # Calendar-date arithmetic and plan week start
+│   │       ├── cents.ts            # Cents/dollars conversion and money text
+│   │       ├── planView.ts         # Plan presentation: Do it targets, summary
+│   │       ├── scoreView.ts        # Light score view data and weekly delta
+│   │       ├── listViews.ts        # Row view models for transactions, subscriptions and debts
 │   │       ├── money.ts            # Money input sanitising, blur formatting, currency parts
 │   │       ├── score.ts            # Score clamping, fill percent, score text and breakdown
 │   │       ├── delta.ts            # Delta chip presentation (sign, icon, tone)
@@ -111,9 +155,13 @@ CashCrypt/
 │   │       └── toastReducer.ts     # Toast queue reducer and live-region choice
 │   │
 │   ├── hooks/                  # Custom React hooks
-│   │   ├── useHouseState.ts    # Subscribes to Dexie, returns live HouseState
-│   │   ├── useExorcismPlan.ts
-│   │   └── useDemo.ts          # Loads / clears demo seed data, exposes scenario switcher
+│   │   ├── useCrypt.tsx        # CryptProvider + useCrypt(): active crypt, status, mode switching
+│   │   ├── useCryptData.ts     # Live query over every table of the Active_Crypt
+│   │   ├── useCryptActions.ts  # User actions (log payment, cancel, delete, ...) over db mutations
+│   │   ├── useNow.ts           # Today's date (local date, or the demo date in the Demo_Crypt)
+│   │   ├── useHouseState.ts    # Returns live HouseState
+│   │   ├── useExorcismPlan.ts  # Current weekly plan
+│   │   └── useDemo.ts          # Loads / resets demo data, skips a week
 │   │
 │   └── types/                  # Shared domain types not tied to a single module
 │       └── finance.ts          # Transaction, Subscription, Income, Debt, DebtPayment
@@ -131,7 +179,16 @@ CashCrypt/
 │   │   ├── robustness.test.ts      # extreme inputs, zero income, empty arrays
 │   │   └── staticChecks.test.ts    # source scan: banned APIs/imports, no numeric literals outside config.ts and dates.ts
 │   ├── exorcism/
-│   │   └── planner.test.ts
+│   │   ├── planner.test.ts
+│   │   ├── staticChecks.test.ts
+│   │   └── properties/         # p15–p22, one file per property
+│   ├── db/                     # Data layer tests (fake-indexeddb)
+│   │   ├── schema.test.ts, mutations.test.ts, queries.test.ts, plans.test.ts, autoCompletion.test.ts, snapshotAdapter.test.ts, moduleBoundaries.test.ts
+│   │   └── properties/         # p04–p14, p23, p32, p35–p37
+│   ├── demo/                   # Seed, service, calibration and brand-scan tests
+│   │   └── properties/         # p29–p31
+│   ├── validation/
+│   │   └── inputs.test.ts
 │   ├── design-system/          # Token, contrast, focus-ring and source-scan tests (node)
 │   │   ├── contrast.test.ts
 │   │   ├── focusRing.test.ts
@@ -140,9 +197,10 @@ CashCrypt/
 │   │   └── helpers/contrast.ts
 │   ├── ui/                     # Component and page tests (jsdom project)
 │   │   ├── setup.ts            # Vitest setup file: jest-dom, cleanup, matchMedia stub, reduced-motion mock
-│   │   ├── helpers/            # axe.ts, motion.ts, viewport.ts
-│   │   └── *.test.ts(x)        # One file per primitive, plus styleguide and home page tests
+│   │   ├── helpers/            # axe.ts, crypt.tsx, motion.ts, viewport.ts
+│   │   └── *.test.ts(x)        # One file per primitive, plus styleguide, screen, sheet and hook tests
 │   └── utils/                  # Unit tests for src/lib/utils/ (one file per helper)
+│       └── properties/         # p01–p03, p24–p28
 │
 ├── .gitignore
 ├── LICENSE

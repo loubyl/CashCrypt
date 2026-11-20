@@ -475,24 +475,24 @@ Conventions that apply to every task:
 - [x] 17. Checkpoint - All screens
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass, ask the user if questions arise.
 
-- [ ] 18. Group 15: Final axe and keyboard pass, steering and README updates
-  - [ ] 18.1 Write the axe test for every screen
+- [x] 18. Group 15: Final axe and keyboard pass, steering and README updates
+  - [x] 18.1 Write the axe test for every screen
     - Create `tests/ui/screens.axe.test.tsx` using `expectNoAxeViolations` for Landing, Dashboard, Exorcism, Subscriptions, Debts, Transactions and Settings in the states "empty real crypt", "populated real crypt", "demo level 4" and "loading"; fix any violation found in the screens
     - _Requirements: 30.1, 30.2, 30.7_
 
-  - [ ] 18.2 Write the keyboard operability test
+  - [x] 18.2 Write the keyboard operability test
     - Create `tests/ui/keyboard.test.tsx` with `user-event`: Tab reaches every Tab_Bar and Sidebar link, every sheet traps focus, Escape closes it and focus returns to the opener, forms submit with Enter, the Do it button and checkbox are reachable and operable; fix any gap found
     - _Requirements: 19.4, 30.5, 30.6_
 
-  - [ ] 18.3 Update `structure.md`
+  - [x] 18.3 Update `structure.md`
     - In `.kiro/steering/structure.md` add `src/components/{shell,common,landing,dashboard,sheets,settings,screens,demo}/`, `src/lib/validation/`, `src/lib/utils/{calendar,cents,planView,scoreView,listViews}.ts`, `src/hooks/useCrypt.tsx` and the other hooks, `src/app/(app)/`, `tests/db/`, `tests/demo/`, `tests/validation/`, and the `tests/<area>/properties/` convention; update the "Built so far" sentence
     - _Requirements: 29.9_
 
-  - [ ] 18.4 Update the README
+  - [x] 18.4 Update the README
     - In `README.md` describe the working app: demo flow ("Enter the demo crypt", Skip to next week), local-first storage in two Dexie databases, the weekly plan with Do it, scripts, and a note that the house scene and sound are not built yet
     - _Requirements: 29.9_
 
-  - [ ] 18.5 Run the full verification
+  - [x] 18.5 Run the full verification
     - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; confirm the design-system scans (className layout-only, hex literals, tokens) and `/styleguide` tests still pass and that every property test in `tests/**/properties/` carries its `// Feature: app-screens, Property N` tag; fix failures
     - _Requirements: 29.2, 29.3, 29.9, 29.10, 31.12_
 
