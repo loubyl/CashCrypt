@@ -250,7 +250,7 @@ export function editSubscription(db: CryptDb, id: string, input: SubscriptionInp
 export function addTransaction(db: CryptDb, input: TransactionInput, ctx: MutationContext): Promise<TransactionRow>;
 export function logPayment(db: CryptDb, debtId: string, amountCents: number, ctx: MutationContext): Promise<LogPaymentOutcome>;
 export function cancelSubscription(db: CryptDb, id: string, ctx: MutationContext): Promise<CancelOutcome>;
-export function reactivateSubscription(db: CryptDb, id: string): Promise<SubscriptionRow>;
+export function reactivateSubscription(db: CryptDb, id: string, ctx: MutationContext): Promise<SubscriptionRow>; // uncompletes this week's matching cancel action
 export function completePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string, ctx: MutationContext): Promise<void>;
 export function uncompletePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string): Promise<void>;
 export function clearAllData(db: CryptDb): Promise<void>; // real db only
@@ -267,6 +267,7 @@ Common shape of each mutation: validate with `src/lib/validation` first (no tran
 - **`cancelSubscription`**: `subscriptions.get`; if `!active` return `{ changed: false }` without writing; `monthly = normalizeSubscription({...}).monthlyCostCents`; `update({ active: false, canceledOn: now })`; `events.add` with `refKey: "cancel:" + id` only when no event with that key exists (checked with `events.where("refKey").equals(key).first()`, backed by the unique index); then `autoCompletePlanAction(db, "cancel_subscription", id, ctx)`.
 - **`completePlanAction`**: read the plan row for `weekKey`, find the action (not-found otherwise); set `done: true` and `completedOn: now` unless already done; `events.add({ type: "exorcism_action_completed", date: now, refKey: "plan:" + weekKey + ":" + actionId })` only when no such event exists. Changes no debt, subscription or transaction row (Requirement 8.5).
 - **`uncompletePlanAction`**: sets `done: false`, removes `completedOn` from the action and keeps the event.
+- **`reactivateSubscription(db, id, ctx)`**: one `rw` transaction over `subscriptions` and `weeklyPlans`: set `active: true` and remove `canceledOn`; then, if the plan of `getPlanWeekStart(ctx.now)` has a done `cancel_subscription` action with `targetId === id`, run the same reset as `uncompletePlanAction` (the completion Event stays). Creates no Event and touches no other week's plan.
 - **`autoCompletePlanAction(db, kind, targetId, ctx)`** (internal, same transaction): takes the caller's `MutationContext`, not just `now`, because the completion Event needs `ctx.newId`. `plan = weeklyPlans.get(getPlanWeekStart(ctx.now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
 - **`clearAllData`**: `assertRealDb(db)`, then `db.transaction("rw", allTables, () => Promise.all(tables.map(t => t.clear())))`.
 
@@ -495,7 +496,7 @@ db.version(1).stores({
 
 ### Snapshot adapter
 
-`toFinancialSnapshot(rows, now)` maps rows to the engine input without mutation: `monthlyIncome = (profile?.monthlyIncomeCents ?? 0) / 100`; each debt to `{ debtId, name, balance: cents / 100, minimumMonthlyPayment: cents / 100, apr }`; each subscription to `{ subscriptionId, name, amount: cents / 100, cadence, usage, active }` (inactive included); each transaction to `{ transactionId, amount: cents / 100, description, category, date }`; events pass through as `{ type, date, amountCents, extraPrincipalCents }`; `now` is copied. Dividing an integer up to `MAX_MONEY_CENTS` by 100 and applying the engine's `Math.round(x * 100)` recovers the same integer, which Property 4 checks.
+`toFinancialSnapshot(rows, now)` maps rows to the engine input without mutation: `monthlyIncome = (profile?.monthlyIncomeCents ?? 0) / 100`; each debt to `{ debtId, name, balance: cents / 100, minimumMonthlyPayment: cents / 100, apr }`; each subscription to `{ subscriptionId, name, amount: cents / 100, cadence, usage, active }` (inactive included); each transaction to `{ transactionId, amount: cents / 100, description, category, date }`; events pass through as `{ type, date, amountCents, extraPrincipalCents }`, in order, except `subscription_canceled` Events whose `refKey` is `cancelRefKey(id)` of a currently active subscription, which are omitted (cancellation momentum counts only while the subscription stays canceled; `src/lib/db/refKeys.ts` builds the key for both the adapter and the mutations); `now` is copied. Dividing an integer up to `MAX_MONEY_CENTS` by 100 and applying the engine's `Math.round(x * 100)` recovers the same integer, which Property 4 checks.
 
 ### Stored plan and week model
 
@@ -543,7 +544,7 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 ### Property 5: The snapshot adapter preserves structure and purity
 
-*For any* Crypt rows (including an absent Profile, inactive subscriptions and debts with balance 0) and any Local_Date `now`, `toFinancialSnapshot(rows, now)` has `snapshot.now === now`, the same number of debts, subscriptions, transactions and events in the same order, keeps inactive subscriptions with `active: false` and zero-balance debts with `balance: 0`, passes each event's `type`, `date`, `amountCents` and `extraPrincipalCents` through unchanged, uses income 0 when the Profile is absent, returns a new object, and leaves a deep clone of the input equal to the input.
+*For any* Crypt rows (including an absent Profile, inactive subscriptions and debts with balance 0) and any Local_Date `now`, `toFinancialSnapshot(rows, now)` has `snapshot.now === now`, the same number of debts, subscriptions and transactions in the same order, the events in the same order (minus the cancellation events of Property 35), keeps inactive subscriptions with `active: false` and zero-balance debts with `balance: 0`, passes each event's `type`, `date`, `amountCents` and `extraPrincipalCents` through unchanged, uses income 0 when the Profile is absent, returns a new object, and leaves a deep clone of the input equal to the input.
 
 **Validates: Requirements 4.1, 4.3, 4.4, 4.5, 4.6, 4.8**
 
@@ -721,6 +722,12 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 **Validates: Requirements 33.1, 33.2, 33.3, 33.5, 33.6**
 
+### Property 35: Cancellation momentum follows the subscription's state
+
+*For any* Crypt rows, the `subscription_canceled` events in `toFinancialSnapshot(rows, now)` are exactly the stored ones whose subscription (`refKey` `cancel:<id>`) is not currently active (inactive or missing), every other event is passed through, and the order is preserved.
+
+**Validates: Requirements 4.4, 4.5, 7.6**
+
 ### Criteria not covered by a property
 
 Structural and UI criteria (Requirements 1, 2, 10, 15.9 to 15.13 in part, 17.3, 17.7 to 17.12, 18.1 to 18.5, 19 to 22 except as listed, 23 to 27 except as listed, 28 to 30, 31) are verified by smoke tests, source scans, example-based unit tests and component tests, listed in the Testing Strategy.
@@ -770,6 +777,7 @@ Pure cores (calendar, cents helpers, validators, adapter, planner, view helpers,
 | `tests/utils/calendar.test.ts`, `tests/utils/cents.test.ts` | node | Properties 1 to 3 and 27; leap years, year boundaries, `getLocalDate` local fields |
 | `tests/validation/inputs.test.ts` | node | Validator messages and limits (supports Property 6) |
 | `tests/db/snapshotAdapter.test.ts` | node | Properties 4 and 5 |
+| `tests/db/properties/p35-canceled-events-follow-subscriptions.test.ts`, `tests/demo/cancelMomentum.test.ts` | node | Property 35; level-4 Dirgebox: cancel +2 momentum, bring back 0, cancel again +2 with the original event date and a single event |
 | `tests/db/schema.test.ts` | node | Tables, indexes, duplicate `weekKey` and `refKey` rejected, `debt_payment` rows without `refKey` allowed |
 | `tests/db/mutations.test.ts` | node | Exact rows after each mutation and each rejection, injected id generator, Properties 6 to 11 |
 | `tests/db/autoCompletion.test.ts` | node | Requirement 31.7 cases: cancel, payment with extra, extra 0, ticked first, no plan, other-week plan, forced-failure rollback; Properties 12 and 13 |

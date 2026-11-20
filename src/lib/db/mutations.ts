@@ -2,6 +2,7 @@
 // invalid input) and then writes inside exactly one Dexie "rw" transaction.
 import { assertRealDb } from "@/lib/db/crypt";
 import { DbNotFoundError, DbValidationError } from "@/lib/db/errors";
+import { cancelRefKey } from "@/lib/db/refKeys";
 import { PROFILE_ID, type CryptDb, type ProfileRecord } from "@/lib/db/schema";
 import type { ExorcismActionKind } from "@/lib/exorcism/types";
 import { normalizeSubscription } from "@/lib/haunting";
@@ -162,7 +163,6 @@ export type CancelOutcome =
   | { changed: false }
   | { changed: true; monthlySavedCents: number; completedActionId: string | null };
 
-const CANCEL_REF_PREFIX = "cancel:";
 const PLAN_REF_PREFIX = "plan:";
 
 function planRefKey(weekKey: LocalDate, actionId: string): string {
@@ -277,7 +277,7 @@ export async function cancelSubscription(
 
     await db.subscriptions.put({ ...existing, active: false, canceledOn: ctx.now });
 
-    const refKey = `${CANCEL_REF_PREFIX}${id}`;
+    const refKey = cancelRefKey(id);
     const previous = await db.events.where("refKey").equals(refKey).first();
     if (!previous) {
       await db.events.add({
@@ -294,16 +294,42 @@ export async function cancelSubscription(
   });
 }
 
+/**
+ * Shared uncomplete body: sets `done` to false and clears `completedOn`. The completion Event
+ * stays (Requirement 8.3). Must run inside a transaction that includes `weeklyPlans`.
+ */
+async function resetStoredAction(db: CryptDb, plan: WeeklyPlanRow, actionId: string): Promise<void> {
+  const actions = plan.actions.map((action) => {
+    if (action.id !== actionId) return action;
+    const { completedOn: _cleared, ...rest } = action;
+    void _cleared;
+    return { ...rest, done: false };
+  });
+  await db.weeklyPlans.put({ ...plan, actions });
+}
+
+/**
+ * Makes a Subscription active again and creates no Event (Requirement 7.6). Its cancellation
+ * no longer counts for momentum (the snapshot adapter drops it while the Subscription is active),
+ * so the current week's matching cancel action is uncompleted in the same transaction and offers
+ * "Do it" again. Its completion Event stays (Requirement 8.3).
+ */
 export async function reactivateSubscription(
   db: CryptDb,
   id: string,
+  ctx: MutationContext,
 ): Promise<SubscriptionRow> {
-  return db.transaction("rw", [db.subscriptions], async () => {
+  return db.transaction("rw", [db.subscriptions, db.weeklyPlans], async () => {
     const existing = await db.subscriptions.get(id);
     if (!existing) throw new DbNotFoundError(id);
     const row: SubscriptionRow = { ...existing, active: true, canceledOn: undefined };
     delete row.canceledOn;
     await db.subscriptions.put(row);
+    const plan = await db.weeklyPlans.get(getPlanWeekStart(ctx.now));
+    const action = plan?.actions.find(
+      (candidate) => candidate.kind === "cancel_subscription" && candidate.targetId === id,
+    );
+    if (plan && action?.done) await resetStoredAction(db, plan, action.id);
     return row;
   });
 }
@@ -332,14 +358,7 @@ export async function uncompletePlanAction(
     if (!plan.actions.some((action) => action.id === actionId)) {
       throw new DbNotFoundError(actionId);
     }
-    // The completion Event stays (Requirement 8.3); only the action's state is reset.
-    const actions = plan.actions.map((action) => {
-      if (action.id !== actionId) return action;
-      const { completedOn: _cleared, ...rest } = action;
-      void _cleared;
-      return { ...rest, done: false };
-    });
-    await db.weeklyPlans.put({ ...plan, actions });
+    await resetStoredAction(db, plan, actionId);
   });
 }
 

@@ -158,7 +158,7 @@ const invalidCaseArb: fc.Arbitrary<InvalidCase> = fc.oneof(
     .tuple(unknownIdArb, fc.integer({ min: 1, max: OPEN_BALANCE }))
     .map(([id, c]) => n("logPayment unknown id", (db) => logPayment(db, id, c, CTX))),
   unknownIdArb.map((id) => n("cancelSubscription unknown id", (db) => cancelSubscription(db, id, CTX))),
-  unknownIdArb.map((id) => n("reactivateSubscription unknown id", (db) => reactivateSubscription(db, id))),
+  unknownIdArb.map((id) => n("reactivateSubscription unknown id", (db) => reactivateSubscription(db, id, CTX))),
   fc.uuid().map((id) =>
     n("completePlanAction missing plan", (db) =>
       completePlanAction(db, MISSING_WEEK_KEY, id, CTX),

@@ -109,7 +109,7 @@ Conventions that apply to every task:
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 27.7_
 
   - [x] 2.3 Implement payment, cancellation and plan-action mutations with auto-completion
-    - In `src/lib/db/mutations.ts` add `logPayment`, `cancelSubscription`, `reactivateSubscription`, `completePlanAction`, `uncompletePlanAction` and the internal `autoCompletePlanAction(db, kind, targetId, now)`
+    - In `src/lib/db/mutations.ts` add `logPayment`, `cancelSubscription`, `reactivateSubscription(db, id, ctx)` (also uncompletes the current week's matching cancel action, keeping its completion Event), `completePlanAction`, `uncompletePlanAction` and the internal `autoCompletePlanAction(db, kind, targetId, ctx)`
     - `logPayment`: reduce balance, one `debt_payment` Event with `extraPrincipalCents = max(0, amount - minimum)`, auto-complete the `extra_payment` action only when extra principal is above 0
     - `cancelSubscription`: inactive is a no-op returning `{ changed: false }`; otherwise set `active: false` and `canceledOn`, add one `subscription_canceled` Event with `refKey` `cancel:<id>` and the engine's normalized monthly cost, only when no Event has that key; then auto-complete the `cancel_subscription` action
     - Completion uses `refKey` `plan:<weekKey>:<actionId>`, creates at most one Event, keeps `completedOn` when already done; auto-completion reads `getPlanWeekStart(now)`, never generates a plan, and any throw aborts the whole transaction; the transaction table list includes `weeklyPlans`

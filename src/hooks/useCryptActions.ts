@@ -99,7 +99,8 @@ function bindActions(db: CryptDb, now: LocalDate | null): CryptActions {
       withNow((today) => logPayment(db, debtId, amountCents, { now: today })),
     cancelSubscription: (id) =>
       withNow((today) => cancelSubscription(db, id, { now: today })),
-    reactivateSubscription: (id) => run(() => reactivateSubscription(db, id)),
+    reactivateSubscription: (id) =>
+      withNow((today) => reactivateSubscription(db, id, { now: today })),
     clearAll: () => run(() => clearAllData(db)),
   };
 }

@@ -64,7 +64,7 @@ describe("cancel and reactivate sequences", () => {
                 everCanceled = true;
               }
             } else {
-              await reactivateSubscription(db, "sub-1");
+              await reactivateSubscription(db, "sub-1", ctx);
               const row = await db.subscriptions.get("sub-1");
               expect(row!.active).toBe(true);
               expect(row!.canceledOn).toBeUndefined();

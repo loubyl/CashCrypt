@@ -1,6 +1,7 @@
 // Pure adapter from stored rows (integer cents) to the engine's FinancialSnapshot
 // (decimal dollars at the input boundary). No React, Dexie or Next imports.
 import type { CryptRows, EventRow, LocalDate } from "@/types/finance";
+import { cancelRefKey } from "./refKeys";
 import type {
   FinancialEvent,
   FinancialSnapshot,
@@ -29,11 +30,22 @@ function toEvent(row: EventRow): FinancialEvent {
   return event;
 }
 
+/**
+ * Cancellation momentum only counts while the Subscription stays canceled: a
+ * `subscription_canceled` Event whose Subscription is active again is dropped.
+ */
+function countsForMomentum(row: EventRow, activeCancelKeys: ReadonlySet<string>): boolean {
+  return !(row.type === "subscription_canceled" && row.refKey !== undefined && activeCancelKeys.has(row.refKey));
+}
+
 /** Builds a new FinancialSnapshot from stored rows. Never mutates `rows`. */
 export function toFinancialSnapshot(
   rows: CryptRows,
   now: LocalDate,
 ): FinancialSnapshot {
+  const activeCancelKeys = new Set(
+    rows.subscriptions.filter((s) => s.active).map((s) => cancelRefKey(s.id)),
+  );
   const debts: InputDebt[] = rows.debts.map((d) => ({
     debtId: d.id,
     name: d.name,
@@ -62,7 +74,7 @@ export function toFinancialSnapshot(
     debts,
     subscriptions,
     transactions,
-    events: rows.events.map(toEvent),
+    events: rows.events.filter((row) => countsForMomentum(row, activeCancelKeys)).map(toEvent),
     now,
   };
 }

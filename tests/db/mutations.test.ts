@@ -18,6 +18,7 @@ import {
   type MutationContext,
 } from "@/lib/db/mutations";
 import { PROFILE_ID, type CryptDb } from "@/lib/db/schema";
+import { getDoItTarget } from "@/lib/utils/planView";
 import type {
   DebtInput,
   StoredPlanAction,
@@ -269,7 +270,7 @@ describe("addSubscription, editSubscription and reactivateSubscription", () => {
       active: false,
       canceledOn: "2025-01-02",
     });
-    const row = await reactivateSubscription(db, "s1");
+    const row = await reactivateSubscription(db, "s1", ctx());
     expect(row).toEqual({ id: "s1", ...SUB_INPUT, active: true });
     expect("canceledOn" in row).toBe(false);
     expect(await db.events.count()).toBe(0);
@@ -277,7 +278,7 @@ describe("addSubscription, editSubscription and reactivateSubscription", () => {
 
   it("rejects reactivating a missing subscription", async () => {
     const db = freshDb();
-    await expect(reactivateSubscription(db, "missing")).rejects.toBeInstanceOf(DbNotFoundError);
+    await expect(reactivateSubscription(db, "missing", ctx())).rejects.toBeInstanceOf(DbNotFoundError);
   });
 });
 
@@ -450,12 +451,42 @@ describe("cancelSubscription", () => {
     const db = freshDb();
     await seedSub(db);
     await cancelSubscription(db, "s1", ctx());
-    await reactivateSubscription(db, "s1");
+    await reactivateSubscription(db, "s1", ctx());
     const outcome = await cancelSubscription(db, "s1", { now: "2025-01-09", newId: ids() });
     expect(outcome).toMatchObject({ changed: true });
     expect(await db.events.where("type").equals("subscription_canceled").count()).toBe(1);
     const sub = await db.subscriptions.get("s1");
     expect(sub).toMatchObject({ active: false, canceledOn: "2025-01-09" });
+  });
+
+  it("uncompletes the current week's cancel action so Do it is offered again, and keeps its completion event", async () => {
+    const db = freshDb();
+    await seedSub(db);
+    const other = planAction({ id: "a-other", kind: "fallback", done: true, completedOn: NOW });
+    await seedPlan(db, [planAction({ id: "a-cancel", kind: "cancel_subscription", targetId: "s1" }), other]);
+    await cancelSubscription(db, "s1", ctx());
+    expect((await db.weeklyPlans.get(WEEK_KEY))?.actions[0]).toMatchObject({ done: true, completedOn: NOW });
+
+    await reactivateSubscription(db, "s1", ctx());
+    const plan = await db.weeklyPlans.get(WEEK_KEY);
+    expect(plan?.actions[0]).toMatchObject({ id: "a-cancel", done: false });
+    expect(plan?.actions[0] && "completedOn" in plan.actions[0]).toBe(false);
+    expect(plan?.actions[1]).toEqual(other);
+    // Requirement 8.3: the completion Event stays.
+    expect(await db.events.where("refKey").equals(`plan:${WEEK_KEY}:a-cancel`).count()).toBe(1);
+    const rows = { subscriptions: await db.subscriptions.toArray(), debts: [] };
+    expect(getDoItTarget(plan!.actions[0], rows)).toEqual({ kind: "cancel", subscriptionId: "s1" });
+  });
+
+  it("leaves plans of other weeks, and a missing plan, untouched on reactivation", async () => {
+    const db = freshDb();
+    await seedSub(db);
+    await seedPlan(db, [planAction({ id: "a-cancel", kind: "cancel_subscription", targetId: "s1" })]);
+    await cancelSubscription(db, "s1", ctx());
+    const before = await db.weeklyPlans.toArray();
+    // A week later there is no plan for the current week.
+    await reactivateSubscription(db, "s1", { now: "2025-01-15" });
+    expect(await db.weeklyPlans.toArray()).toEqual(before);
   });
 
   it("completes the matching cancel_subscription plan action with one event", async () => {
