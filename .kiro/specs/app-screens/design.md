@@ -195,14 +195,14 @@ Implementation: validate with a strict regex plus a real-calendar check, convert
 export function formatCents(cents: number): string;          // 12000 → "$120.00" (en-US grouping, integer math)
 export function formatCentsPerMonth(cents: number): string;  // "$120.00/mo"
 export function formatCentsShort(cents: number): string;     // money in sentences: 12000 → "$120", 550 → "$5.50", 150000 → "$1,500"
-export function parseMoneyToCents(text: string): number | null; // "300.00" → 30000; "" or invalid → null; no float math
-export function centsToMoneyText(cents: number): string;     // 30000 → "300.00" (for Input prefill)
+export function parseMoneyToCents(text: string): number | null; // "300.00" or "2,500.00" → cents; "" or invalid → null; no float math
+export function centsToMoneyText(cents: number): string;     // 250000 → "2,500.00" (for Input prefill, same form as the blur commit)
 export function aprPercentToFraction(percent: number): number;  // 22 → 0.22
 export function aprFractionToPercent(fraction: number): number; // 0.22 → 22 (rounded to 2 decimals)
 ```
 **Money text rule (Requirement 28.8).** Amounts inside sentences use `formatCentsShort`: Plan_Action titles, the ExorcismActionRow `impactText` (`formatCentsShort(monthlyAmountCents)`, rendered as "+$120/mo"), toasts ("+$120/mo saved", "+$120/mo freed"), sheet headings ("Cancel Wraithcast — saves $120/mo") validation messages ("The balance is $1,800.") and list row titles and subtitles ("Minimum $400/mo"). Only the amount column of list rows and balances shown as figures keep `formatCents` with cents ("$18,000.00" as a debt row amount, "$12.00" in a transaction row). `formatCentsPerMonth` stays for per-month amounts in list columns.
 
-`parseMoneyToCents` takes the committed text from `commitMoneyInput` (`^\d*(\.\d{0,2})?$`) and builds cents from the integer and fraction digit strings, so there is no floating-point rounding.
+`parseMoneyToCents` takes the committed text from `commitMoneyInput` (plain digits or well-formed en-US groups such as "2,500.00": `^(\d{1,3}(,\d{3})+|\d*)(\.\d{0,2})?$`; malformed groups like "1,00" are rejected) and builds cents from the integer and fraction digit strings, so there is no floating-point rounding.
 
 ### `src/lib/validation/` (pure, no imports from db)
 

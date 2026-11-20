@@ -189,6 +189,24 @@ describe("LogPaymentSheet", () => {
     expect(await ctx.realDb.events.count()).toBe(0);
   });
 
+  it("hides the above-minimum hint while the amount has an error, and shows it again after a fix", async () => {
+    const user = userEvent.setup();
+    await renderWithCrypt(<PaymentHost />, realSeed({ debts: [CARD] }));
+    await openSheet(user);
+    const input = await screen.findByLabelText(PAYMENT_LABEL);
+    await user.clear(input);
+    await user.type(input, "2500");
+    expect(screen.getByText("$2,450 goes above your minimum")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: SAVE_PAYMENT_LABEL }));
+    expect(
+      await screen.findByText("The payment cannot be more than the balance. The balance is $2,000."),
+    ).toBeTruthy();
+    expect(screen.queryByText(/goes above your minimum/)).toBeNull();
+    await user.clear(input);
+    await user.type(input, "100");
+    expect(screen.getByText("$50 goes above your minimum")).toBeTruthy();
+  });
+
   it("returns focus to the opener on Escape", async () => {
     const user = userEvent.setup();
     await renderWithCrypt(<PaymentHost />, realSeed({ debts: [CARD] }));

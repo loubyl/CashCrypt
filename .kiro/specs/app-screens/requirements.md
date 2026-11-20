@@ -453,7 +453,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 
 #### Acceptance Criteria
 
-1. THE Subscriptions Screen SHALL list every active Subscription as a ListRow with its name, a subtitle that states the cadence ("Monthly"; the usage is shown once, in the usage Chip), and its monthly cost as the amount, sorted by monthly cost descending.
+1. THE Subscriptions Screen SHALL list every active Subscription as a ListRow with its name, a subtitle that states the cadence ("Monthly"; the usage is shown once, in the usage Chip, which sits inside the row so the row's focus ring encloses it), and its monthly cost as the amount, sorted by monthly cost descending.
 2. THE Subscriptions Screen SHALL show the usage as text and a Chip, and SHALL NOT rely on color alone.
 3. THE Subscriptions Screen SHALL show a primary "Add subscription" Button that opens a BottomSheet with Inputs for name and amount, a SegmentedControl for cadence and a SegmentedControl for usage.
 4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details (the monthly cost "$60/mo", plus a cadence line with the original amount only when the cadence is not monthly, for example "Yearly · $120 per year"), a SegmentedControl to change the usage and a primary "Cancel subscription" Button (canceling a zombie is the good action; the `danger` variant is only for destructive data actions such as deleting a row).
@@ -476,7 +476,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 3. THE Debts Screen SHALL show a primary "Add debt" Button that opens a BottomSheet with Inputs for name, current balance, APR (entered as a percentage) and minimum monthly payment.
 4. THE Debts Screen SHALL store the entered APR percentage as a fraction from 0 to 1 and SHALL show it back as a percentage.
 5. WHEN the user selects a Debt row, THE Debts Screen SHALL open a BottomSheet with an "Edit debt" form and a "Log payment" Button.
-6. THE Debts Screen SHALL render a Debt with a balance of 0 with a Chip "Paid off" and SHALL disable "Log payment" for it.
+6. THE Debts Screen SHALL render a Debt with a balance of 0 with the row subtitle "Paid off" instead of "APR X% · Minimum $Y/mo" (stated once, with no Chip in the row), SHALL show a "Paid off" Chip in its detail BottomSheet, and SHALL disable "Log payment" for it.
 7. WHEN there are no Debts, THE Debts Screen SHALL show the empty state "No debts. The walls are holding."
 8. IF the Add debt form has an empty name, a negative or missing balance, an APR outside 0 to 100 percent, or a missing minimum payment, THEN THE form SHALL show an error on each invalid field and SHALL create no row.
 9. WHEN an edit changes a Debt balance, THE Debts Screen SHALL create no Event, since only the Log payment action records progress.
@@ -490,7 +490,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 1. THE Log payment BottomSheet SHALL show the Debt name, the current balance and the minimum monthly payment as one sentence formatted per Requirement 28.8 ("Balance $18,000. Minimum $400/mo."), and a money Input labelled "Payment amount".
 2. WHEN more than one Debt has a balance above 0 and the sheet opens from the Dashboard, THE sheet SHALL first list those Debts as ListRows so that the user picks one.
 3. WHEN the user opens the sheet from a Debt, THE money Input SHALL be pre-filled with the minimum monthly payment, limited to the balance.
-4. THE Log payment BottomSheet SHALL show a primary "Save payment" Button, and WHEN the payment is larger than the minimum THE sheet SHALL show the text "$X goes above your minimum" with `$X` equal to the extra principal.
+4. THE Log payment BottomSheet SHALL show a primary "Save payment" Button, and WHEN the payment is larger than the minimum THE sheet SHALL show the text "$X goes above your minimum" with `$X` equal to the extra principal. WHILE the amount shows a validation error, THE sheet SHALL hide that text, so the green hint never appears next to an error.
 5. WHEN the user submits a valid amount, THE sheet SHALL call `logPayment`, close, and show a success toast "Payment saved. $X off your balance." with the exact amount.
 6. IF the amount is empty, is 0 or is above the Debt balance, THEN THE sheet SHALL stay open, SHALL show an error message on the Input that names the problem and SHALL write nothing.
 7. THE Log payment BottomSheet SHALL trap focus, close on Escape and return focus to the control that opened it, as the BottomSheet primitive provides.

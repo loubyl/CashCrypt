@@ -101,13 +101,13 @@ describe("Input money variant", () => {
     expect(input).toHaveValue("1,000");
   });
 
-  it("commits 1,000 typed key by key as 1000.00 on blur", async () => {
+  it("commits 1,000 typed key by key as 1,000.00 on blur", async () => {
     const user = userEvent.setup();
     render(<Input variant="money" label="Amount" />);
     const input = screen.getByRole("textbox", { name: "Amount" });
     await user.type(input, "1,000");
     await user.tab();
-    expect(input).toHaveValue("1000.00");
+    expect(input).toHaveValue("1,000.00");
   });
 
   it("commits 15,49 typed key by key as 15.49 on blur", async () => {
@@ -135,8 +135,8 @@ describe("Input money variant", () => {
     );
     await user.type(screen.getByRole("textbox", { name: "Amount" }), "1,000");
     await user.tab();
-    expect(changes.at(-1)).toBe("1000.00");
-    expect(blurred).toBe("1000.00");
+    expect(changes.at(-1)).toBe("1,000.00");
+    expect(blurred).toBe("1,000.00");
   });
 
   it("centers the currency prefix and the number together as one group", async () => {

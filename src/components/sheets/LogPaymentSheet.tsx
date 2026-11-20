@@ -96,7 +96,8 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
           setError(undefined);
         }}
       />
-      {extraCents > 0 ? (
+      {/* The green hint would contradict an error, so it only shows while the amount is valid. */}
+      {extraCents > 0 && error === undefined ? (
         <p className="text-body text-ecto">{formatCentsShort(extraCents)} goes above your minimum</p>
       ) : null}
       <Button type="submit" variant="primary" size="lg" loading={submitting}>

@@ -74,6 +74,13 @@ function formatDebtSubtitle(row: DebtRow): string {
   return `APR ${aprFractionToPercent(row.apr)}%${SEPARATOR}Minimum ${formatCentsShort(row.minimumPaymentCents)}${PER_MONTH_SUFFIX}`;
 }
 
+const PAID_OFF_LABEL = "Paid off";
+
+/** List row subtitle: "Paid off" once the balance is 0, otherwise the APR and minimum. */
+function formatDebtRowSubtitle(row: DebtRow): string {
+  return row.balanceCents === 0 ? PAID_OFF_LABEL : formatDebtSubtitle(row);
+}
+
 /** Parses the money text of a field. Returns the error text when it is empty or not money. */
 function readMoneyField(
   text: string,
@@ -322,18 +329,11 @@ export function DebtsScreen() {
                   icon={Landmark}
                   tone="blood"
                   title={row.name}
-                  subtitle={formatDebtSubtitle(row)}
+                  subtitle={formatDebtRowSubtitle(row)}
                   amount={formatCents(row.balanceCents)}
-                  aria-label={`${row.name}, balance ${formatCentsShort(row.balanceCents)}, ${formatDebtSubtitle(row)}`}
+                  aria-label={`${row.name}, balance ${formatCentsShort(row.balanceCents)}, ${formatDebtRowSubtitle(row)}`}
                   onClick={() => setRowId(row.id)}
                 />
-                {row.balanceCents === 0 ? (
-                  <div className="-mt-1 mb-2 pl-[52px]">
-                    <Chip tone="success" icon={CheckCircle2}>
-                      Paid off
-                    </Chip>
-                  </div>
-                ) : null}
               </li>
             ))}
           </ul>

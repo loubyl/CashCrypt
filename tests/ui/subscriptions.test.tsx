@@ -73,6 +73,9 @@ describe("Subscriptions screen lists", () => {
     for (const usage of ["Never used", "Rarely used", "Often used"]) {
       expect(within(zombies).getAllByText(usage)).toHaveLength(1);
     }
+    // The chip sits inside its row, so the row's focus ring encloses it.
+    const wraithRow = within(zombies).getByRole("button", { name: /^Wraithcast, Never used/ });
+    expect(within(wraithRow).getByText("Never used")).toBeTruthy();
   });
 
   it("shows the total monthly cost of active subscriptions only", async () => {

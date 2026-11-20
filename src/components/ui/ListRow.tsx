@@ -1,4 +1,10 @@
-import { forwardRef, type ComponentPropsWithoutRef, type MouseEvent, type Ref } from "react";
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type MouseEvent,
+  type ReactNode,
+  type Ref,
+} from "react";
 import type { LucideIcon } from "lucide-react";
 import type { LayoutClassName } from "./motionTokens";
 
@@ -34,7 +40,9 @@ const DIRECTION_SIGNS: Record<ListRowAmountDirection, string> = {
 const DIVIDER_CLASSES =
   "after:pointer-events-none after:absolute after:bottom-0 after:left-10 after:right-0 after:h-px after:bg-divider after:content-['']";
 
-const ROW_CLASSES = "relative flex h-16 w-full items-center gap-3 text-left font-sans";
+// At least 64px high. With a badge the row grows (padding instead of a fixed height), so the
+// badge stays inside the row and inside its focus ring.
+const ROW_CLASSES = "relative flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
 
 const INTERACTIVE_CLASSES =
   "rounded-md outline-none transition-colors active:bg-surface-raised " +
@@ -49,6 +57,8 @@ type ListRowContentProps = {
   subtitle?: string;
   /** Amount text without a sign, for example "$22.99". */
   amount?: string;
+  /** Optional status shown under the subtitle, inside the row (for example a Chip). */
+  badge?: ReactNode;
   /** Adds a `+` (in) or `−` (out) sign to the amount as text. */
   amountDirection?: ListRowAmountDirection;
   /** Draws a 1px divider at the bottom, inset by the avatar width. */
@@ -84,10 +94,10 @@ export type ListRowProps = StaticListRowProps | ButtonListRowProps | LinkListRow
 
 type RowBodyProps = Pick<
   ListRowContentProps,
-  "icon" | "tone" | "title" | "subtitle" | "amount" | "amountDirection"
+  "icon" | "tone" | "title" | "subtitle" | "badge" | "amount" | "amountDirection"
 >;
 
-function RowBody({ icon: Icon, tone = "neutral", title, subtitle, amount, amountDirection }: RowBodyProps) {
+function RowBody({ icon: Icon, tone = "neutral", title, subtitle, badge, amount, amountDirection }: RowBodyProps) {
   const sign = amountDirection ? DIRECTION_SIGNS[amountDirection] : "";
   const amountColor = amountDirection ? DIRECTION_CLASSES[amountDirection] : "text-ink";
 
@@ -101,6 +111,7 @@ function RowBody({ icon: Icon, tone = "neutral", title, subtitle, amount, amount
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-body-lg text-ink">{title}</span>
         {subtitle ? <span className="truncate text-caption text-ink-secondary">{subtitle}</span> : null}
+        {badge ? <span className="mt-1 flex">{badge}</span> : null}
       </span>
       {amount ? (
         <span className={`shrink-0 text-right text-body-lg tabular-nums ${amountColor}`}>
@@ -118,6 +129,7 @@ export const ListRow = forwardRef<HTMLElement, ListRowProps>(function ListRow(pr
     tone,
     title,
     subtitle,
+    badge,
     amount,
     amountDirection,
     divider = false,
@@ -131,6 +143,7 @@ export const ListRow = forwardRef<HTMLElement, ListRowProps>(function ListRow(pr
       tone={tone}
       title={title}
       subtitle={subtitle}
+      badge={badge}
       amount={amount}
       amountDirection={amountDirection}
     />

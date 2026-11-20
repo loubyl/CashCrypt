@@ -14,6 +14,16 @@ describe("ListRow", () => {
     expect(screen.getByText("Yesterday")).toBeInTheDocument();
   });
 
+  it("renders a badge inside the row, so the focus ring encloses it, and grows instead of a fixed height", () => {
+    render(
+      <ListRow icon={Ghost} title="Coffee" subtitle="Yesterday" badge={<span>Paid off</span>} onClick={() => {}} />,
+    );
+    const row = screen.getByRole("button");
+    expect(row.contains(screen.getByText("Paid off"))).toBe(true);
+    expect(row).toHaveClass("min-h-16", "py-2");
+    expect(row).not.toHaveClass("h-16");
+  });
+
   it("omits the subtitle when none is given", () => {
     const { container } = render(<ListRow icon={Ghost} title="Coffee" />);
     expect(container.textContent).toBe("Coffee");

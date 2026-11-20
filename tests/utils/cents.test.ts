@@ -69,8 +69,9 @@ describe("centsToMoneyText", () => {
     expect(centsToMoneyText(30000)).toBe("300.00");
   });
 
-  it("does not add grouping separators or a currency symbol", () => {
-    expect(centsToMoneyText(300000)).toBe("3000.00");
+  it("groups thousands like the committed Money_Input text, without a currency symbol", () => {
+    expect(centsToMoneyText(300000)).toBe("3,000.00");
+    expect(centsToMoneyText(1_800_000)).toBe("18,000.00");
   });
 
   it("pads small amounts", () => {
@@ -98,12 +99,22 @@ describe("parseMoneyToCents", () => {
     expect(parseMoneyToCents(".")).toBeNull();
   });
 
+  it("accepts the grouped text the Money_Input commits", () => {
+    expect(parseMoneyToCents("2,500.00")).toBe(250_000);
+    expect(parseMoneyToCents("1,000")).toBe(100_000);
+    expect(parseMoneyToCents("1,234,567.89")).toBe(123_456_789);
+  });
+
   it("returns null for invalid text", () => {
     expect(parseMoneyToCents("abc")).toBeNull();
     expect(parseMoneyToCents("1.234")).toBeNull();
     expect(parseMoneyToCents("-5")).toBeNull();
-    expect(parseMoneyToCents("1,000")).toBeNull();
     expect(parseMoneyToCents("$5")).toBeNull();
+    // Only well-formed en-US groups are accepted.
+    expect(parseMoneyToCents("1,00")).toBeNull();
+    expect(parseMoneyToCents("1,0000")).toBeNull();
+    expect(parseMoneyToCents(",100")).toBeNull();
+    expect(parseMoneyToCents("10,00.00")).toBeNull();
   });
 
   it("returns null when the result is not a safe integer", () => {

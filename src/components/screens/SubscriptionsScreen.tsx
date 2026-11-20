@@ -408,13 +408,11 @@ export function SubscriptionsScreen() {
                   tone="neutral"
                   title={row.name}
                   subtitle={CADENCE_LABELS[row.cadence]}
+                  badge={<UsageChip usage={row.usage} />}
                   amount={formatCents(getMonthlyCents(row))}
                   aria-label={`${row.name}, ${USAGE_LABELS[row.usage]}, ${formatCentsShort(getMonthlyCents(row))} per month`}
                   onClick={() => setDetailsId(row.id)}
                 />
-                <div className="-mt-1 mb-2 pl-[52px]">
-                  <UsageChip usage={row.usage} />
-                </div>
               </li>
             ))}
           </ul>

@@ -211,7 +211,7 @@ All primitives live in `src/components/ui/`. Each has visible focus, pressed and
 - **QuickAction**: 52px circle on raised surface with a 22px icon, label underneath (13/500). Row of 4 under the hero: Log payment, Add expense, Import CSV, Exorcise.
 - **BalanceHero**: label (secondary), `hero` number, delta chip underneath (ecto "−$640 this month" with ↓ icon, or blood with ↑).
 - **Card**: card surface, radius 24, padding 20, no border. Optional header: `title` + ghost "See all" link.
-- **ListRow**: 40px circle icon avatar (tinted accent background), title (body-lg) + subtitle (caption, secondary), amount right-aligned (body-lg, tabular; sign and color for in/out). Row height 64.
+- **ListRow**: 40px circle icon avatar (tinted accent background), title (body-lg) + subtitle (caption, secondary), amount right-aligned (body-lg, tabular; sign and color for in/out). Row height at least 64; an optional badge (a Chip) sits under the subtitle inside the row, which grows to hold it.
 - **Chip / Badge**: pill, 24px, tinted background, icon + text.
 - **SegmentedControl**: pill track on raised, selected segment white with black text.
 - **Input**: radius 16, 52px tall, card or raised fill + `--border-control` 1px, floating label. **Focus (exception to the offset ring):** one line, not two. On `:focus-visible` the field's border turns candle and a 2px candle outline sits on the border with no gap (offset -1px, covering the 1px border), so a single 2px candle line shows and the grey border never appears next to the ring. With an error the focused line stays blood, not candle. Other primitives keep the 2px ring with 2px offset. Money input: large Manrope number centered, currency prefix in secondary.

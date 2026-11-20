@@ -196,7 +196,7 @@ Tailwind CSS v4 is configured in CSS with `@theme` and has no `tailwind.config.t
 
 #### Acceptance Criteria
 
-1. THE ListRow SHALL render a 40px circular icon avatar with a Tinted_Background, a title in the `body-lg` scale, an optional subtitle in `caption` and `--text-secondary`, and an optional right-aligned amount in `body-lg` with `tabular-nums`, at a row height of 64px.
+1. THE ListRow SHALL render a 40px circular icon avatar with a Tinted_Background, a title in the `body-lg` scale, an optional subtitle in `caption` and `--text-secondary`, and an optional right-aligned amount in `body-lg` with `tabular-nums`, at a row height of at least 64px. An optional `badge` (for example a Chip) renders under the subtitle inside the row, and the row grows (vertical padding instead of a fixed height) so the badge stays inside the row and its focus ring.
 2. WHERE an amount direction of `in` or `out` is provided, THE ListRow SHALL render the amount with a `+` or `−` sign and the color `--accent-ecto` or `--text-primary` respectively, and the sign SHALL be present as text.
 3. WHERE the ListRow is interactive (it has an `onClick` or `href`), THE ListRow SHALL render a native `<button>` or `<a>` element, show the pressed surface `--surface-raised`, and show the Focus_Ring.
 4. WHERE the ListRow is not interactive, THE ListRow SHALL render a non-interactive element and SHALL NOT expose a button or link role.
@@ -249,7 +249,7 @@ Tailwind CSS v4 is configured in CSS with `@theme` and has no `tailwind.config.t
 10. WHERE the variant is `money`, THE Money_Input SHALL accept only digits, at most one decimal separator and thousands separators, with at most 2 fractional digits, and SHALL reject any other character. Both `.` and `,` are accepted as input: WHEN the value contains a `.`, commas SHALL be treated as thousands separators and removed; WHEN it contains no `.` and every comma is followed by exactly 3 digits (and then another comma or the end), commas SHALL be treated as thousands separators and removed (`"1,000"` → `"1000"`); OTHERWISE the first comma SHALL be treated as the decimal separator and later commas removed (`"15,49"` → `"15.49"`). The stored value always uses `.` as the decimal separator.
 11. WHERE the variant is `money`, THE Money_Input SHALL render the value with `tabular-nums`.
 12. FOR ALL strings typed into the Money_Input, THE Money_Input SHALL produce a value that matches the pattern of digits, an optional decimal separator, and at most 2 fractional digits (invariant property), and re-applying the sanitizer to its own output SHALL return the same string (idempotence property).
-13. WHEN the Money_Input loses focus with a non-empty value, THE Money_Input SHALL format the value to exactly 2 fractional digits.
+13. WHEN the Money_Input loses focus with a non-empty value, THE Money_Input SHALL format the value to exactly 2 fractional digits with en-US thousands separators and no leading zeros ("2500" → "2,500.00"), and committing that text again SHALL leave it unchanged.
 
 ### Requirement 14: BottomSheet
 

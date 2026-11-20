@@ -1,5 +1,7 @@
 // Pure helpers for the Money_Input. Framework-agnostic, total (never throw).
 
+import { groupThousands } from "./cents";
+
 const DECIMAL_SEPARATOR = ".";
 const COMMA = ",";
 /** Cents never have 3 digits, so a comma followed by exactly 3 digits groups thousands. */
@@ -12,6 +14,7 @@ const FIRST_DIGIT = "0";
 const LAST_DIGIT = "9";
 const ZERO_INTEGER_PART = "0";
 const ZERO_PAD = "0";
+const LEADING_ZEROS = /^0+(?=\d)/;
 
 function isDigit(char: string): boolean {
   return char >= FIRST_DIGIT && char <= LAST_DIGIT;
@@ -103,8 +106,8 @@ export function commitMoneyInput(raw: string): string {
 }
 
 /**
- * Formats a sanitized value to exactly 2 fractional digits.
- * Returns "" when the value holds no digit ("" or ".").
+ * Formats a sanitized value to exactly 2 fractional digits with en-US thousands groups
+ * ("2500" → "2,500.00"). Returns "" when the value holds no digit ("" or ".").
  */
 export function formatMoneyOnBlur(sanitized: string): string {
   const clean = sanitizeMoneyInput(sanitized);
@@ -112,9 +115,10 @@ export function formatMoneyOnBlur(sanitized: string): string {
   if (integerPart === "" && fractionPart === "") {
     return "";
   }
-  const integer = integerPart === "" ? ZERO_INTEGER_PART : integerPart;
+  // Leading zeros carry no value and would otherwise be grouped ("0005" → "0,005").
+  const integer = integerPart === "" ? ZERO_INTEGER_PART : integerPart.replace(LEADING_ZEROS, "");
   const fraction = fractionPart.padEnd(MAX_FRACTION_DIGITS, ZERO_PAD);
-  return `${integer}${DECIMAL_SEPARATOR}${fraction}`;
+  return `${groupThousands(integer)}${DECIMAL_SEPARATOR}${fraction}`;
 }
 
 const CURRENCY_SYMBOL = "$";

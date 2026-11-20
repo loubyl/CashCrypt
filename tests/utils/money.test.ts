@@ -1,5 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { parseMoneyToCents } from "@/lib/utils/cents";
 import {
   commitMoneyInput,
   filterMoneyKeystroke,
@@ -10,7 +11,9 @@ import {
 
 const NUM_RUNS = 200;
 const WELL_FORMED = /^\d*(\.\d{0,2})?$/;
-const WELL_FORMED_BLUR = /^\d+\.\d{2}$/;
+// Committed text: en-US groups without leading zeros, then exactly two decimals.
+const WELL_FORMED_BLUR = /^(0|[1-9]\d{0,2}(,\d{3})*)\.\d{2}$/;
+const ungroup = (text: string) => text.replaceAll(",", "");
 const CENTS_FACTOR = 100;
 const BIASED_CHARS = ["0", "1", "5", "9", ".", ",", "-", "e", " ", "\t", "a", "$"];
 
@@ -142,9 +145,9 @@ describe("Money_Input typing and commit", () => {
   });
 
   it.each([
-    ["1,000", "1000.00"],
+    ["1,000", "1,000.00"],
     ["15,49", "15.49"],
-    ["1,234,567", "1234567.00"],
+    ["1,234,567", "1,234,567.00"],
     ["$ 12.5", "12.50"],
   ])("commits %j typed key by key as %j", (typed, expected) => {
     expect(commitMoneyInput(typeThroughFilter(typed))).toBe(expected);
@@ -166,7 +169,7 @@ describe("formatMoneyOnBlur", () => {
         const result = formatMoneyOnBlur(sanitized);
         if (/\d/.test(sanitized)) {
           expect(result).toMatch(WELL_FORMED_BLUR);
-          expect(Math.round(Number(result) * CENTS_FACTOR)).toBe(
+          expect(Math.round(Number(ungroup(result)) * CENTS_FACTOR)).toBe(
             Math.round(Number(sanitized) * CENTS_FACTOR),
           );
         } else {
@@ -177,10 +180,32 @@ describe("formatMoneyOnBlur", () => {
     );
   });
 
+  it("re-committing a committed value changes nothing, and it parses back to the sanitized cents", () => {
+    // Feature: design-system-foundation, Property 3: Money blur formatting yields exactly two decimals and preserves the value
+    fc.assert(
+      fc.property(rawInput, (raw) => {
+        const committed = commitMoneyInput(raw);
+        expect(commitMoneyInput(committed)).toBe(committed);
+        const sanitized = sanitizeMoneyInput(raw);
+        const cents = parseMoneyToCents(committed);
+        if (/\d/.test(sanitized) && cents !== null) {
+          expect(cents).toBe(Math.round(Number(sanitized) * CENTS_FACTOR));
+        }
+        if (/\d/.test(sanitized) && Number(sanitized) * CENTS_FACTOR < Number.MAX_SAFE_INTEGER) {
+          expect(cents).not.toBeNull();
+        }
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
+
   it.each([
     ["", ""],
     [".", ""],
     [".5", "0.50"],
+    ["2500", "2,500.00"],
+    ["18000.5", "18,000.50"],
+    ["0005", "5.00"],
     ["5", "5.00"],
     ["5.", "5.00"],
     ["1.2", "1.20"],

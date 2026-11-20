@@ -205,10 +205,15 @@ describe("Debts screen log payment", () => {
 });
 
 describe("Debts screen paid-off debts", () => {
-  it("shows a Paid off chip in the list and disables Log payment at balance 0", async () => {
+  it("shows Paid off as the row subtitle, keeps the chip in the sheet, and disables Log payment at balance 0", async () => {
     const user = userEvent.setup();
     await renderScreen({ debts: [SCARLET, SETTLED] });
+    const row = screen.getByRole("button", { name: /^Old Candle Tab, balance/ });
+    // The subtitle states the status once; the APR and minimum no longer show for a paid-off debt.
+    expect(within(row).getByText(PAID_OFF_TEXT)).toBeTruthy();
     expect(screen.getAllByText(PAID_OFF_TEXT)).toHaveLength(1);
+    expect(screen.queryByText("APR 0% · Minimum $20/mo")).toBeNull();
+    expect(row.getAttribute("aria-label")).toBe("Old Candle Tab, balance $0, Paid off");
     await user.click(screen.getByRole("button", { name: /^Old Candle Tab, balance/ }));
     const dialog = await screen.findByRole(DIALOG_ROLE, { name: "Old Candle Tab" });
     expect(within(dialog).getByText(PAID_OFF_TEXT)).toBeTruthy();

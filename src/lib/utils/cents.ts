@@ -14,13 +14,15 @@ const RADIX = 10;
 const PERCENT_PER_UNIT = 100;
 /** Fractions are rounded to 2 percent decimals: fraction × 100 × 100. */
 const PERCENT_DECIMAL_SCALE = 100;
-const COMMITTED_MONEY_TEXT = /^(\d*)(?:\.(\d{0,2}))?$/;
+// Committed Money_Input text: plain digits or en-US groups ("2,500"), then an optional fraction.
+const COMMITTED_MONEY_TEXT = /^(\d{1,3}(?:,\d{3})+|\d*)(?:\.(\d{0,2}))?$/;
 
 function safeCents(cents: number): number {
   return Number.isFinite(cents) ? Math.round(cents) : 0;
 }
 
-function groupThousands(digits: string): string {
+/** "2500" → "2,500" (en-US grouping of a digit string). */
+export function groupThousands(digits: string): string {
   let result = "";
   for (let end = digits.length; end > 0; end -= GROUP_SIZE) {
     const start = Math.max(0, end - GROUP_SIZE);
@@ -65,16 +67,17 @@ export function formatCentsPerMonth(cents: number): string {
   return `${formatCents(cents)}${PER_MONTH_SUFFIX}`;
 }
 
-/** 30000 → "300.00" (plain text for Input prefill). */
+/** 250000 → "2,500.00": Input prefill text, in the same form the Money_Input commits on blur. */
 export function centsToMoneyText(cents: number): string {
   const { negative, integer, fraction } = splitCents(cents);
   const sign = negative ? NEGATIVE_PREFIX : "";
-  return `${sign}${integer}${DECIMAL_SEPARATOR}${fraction}`;
+  return `${sign}${groupThousands(integer)}${DECIMAL_SEPARATOR}${fraction}`;
 }
 
 /**
- * "300.00" → 30000. Returns null for "" or any text outside `^\d*(\.\d{0,2})?$`
- * (or text with no digit, like "."). Built from digit strings, no float math.
+ * "300.00" or "2,500.00" → cents. Returns null for "" or any text that is not plain digits or
+ * well-formed en-US groups followed by an optional fraction of up to 2 digits (or text with no
+ * digit, like "."). Built from digit strings, no float math.
  */
 export function parseMoneyToCents(text: string): number | null {
   if (typeof text !== "string") {
@@ -84,7 +87,7 @@ export function parseMoneyToCents(text: string): number | null {
   if (match === null) {
     return null;
   }
-  const integerDigits = match[1] ?? "";
+  const integerDigits = (match[1] ?? "").replaceAll(GROUP_SEPARATOR, "");
   const fractionDigits = match[2] ?? "";
   if (integerDigits === "" && fractionDigits === "") {
     return null;
