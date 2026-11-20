@@ -9,6 +9,8 @@ import {
   addTransaction,
   cancelSubscription,
   completePlanAction,
+  deleteDebt,
+  deleteSubscription,
   editDebt,
   editSubscription,
   logPayment,
@@ -17,7 +19,11 @@ import {
   uncompletePlanAction,
   type MutationContext,
 } from "@/lib/db/mutations";
-import { PROFILE_ID, type CryptDb } from "@/lib/db/schema";
+import { readAllRows } from "@/lib/db/queries";
+import { DEMO_DB_NAME, PROFILE_ID, type CryptDb } from "@/lib/db/schema";
+import { toFinancialSnapshot } from "@/lib/db/snapshotAdapter";
+import { loadScenario } from "@/lib/demo/service";
+import { computeHouseState } from "@/lib/haunting";
 import { getDoItTarget } from "@/lib/utils/planView";
 import type {
   DebtInput,
@@ -592,6 +598,100 @@ describe("completePlanAction and uncompletePlanAction", () => {
     vi.spyOn(db.events, "add").mockRejectedValueOnce(new Error("forced failure"));
     await expect(completePlanAction(db, WEEK_KEY, "a1", ctx())).rejects.toThrow();
     expect(await dump(db)).toEqual(before);
+  });
+});
+
+describe("deleteDebt and deleteSubscription", () => {
+  const DEMO_START = "2025-06-02";
+  const DECIMALS = 6;
+
+  async function demoDb(): Promise<CryptDb> {
+    const db = openCrypt(DEMO_DB_NAME, { indexedDB: new IDBFactory(), IDBKeyRange });
+    opened.push(db);
+    await db.open();
+    await loadScenario(db, "level-4", DEMO_START);
+    return db;
+  }
+
+  async function momentumOf(db: CryptDb): Promise<number> {
+    return computeHouseState(toFinancialSnapshot(await readAllRows(db), DEMO_START)).momentum;
+  }
+
+  it("leaves the momentum and no cancel event after cancel, bring back and delete on the level-4 demo", async () => {
+    const db = await demoDb();
+    const dirgebox = (await db.subscriptions.toArray()).find((s) => s.name === "Dirgebox");
+    if (!dirgebox) throw new Error("Dirgebox is missing from the level-4 seed.");
+    const before = await momentumOf(db);
+
+    await cancelSubscription(db, dirgebox.id, { now: DEMO_START });
+    await reactivateSubscription(db, dirgebox.id, { now: DEMO_START });
+    await deleteSubscription(db, dirgebox.id);
+
+    expect(await db.subscriptions.get(dirgebox.id)).toBeUndefined();
+    expect(await db.events.where("refKey").equals(`cancel:${dirgebox.id}`).count()).toBe(0);
+    expect(await momentumOf(db)).toBeCloseTo(before, DECIMALS);
+  });
+
+  it("keeps the event and the momentum when a graveyard subscription is deleted", async () => {
+    const db = await demoDb();
+    const dirgebox = (await db.subscriptions.toArray()).find((s) => s.name === "Dirgebox");
+    if (!dirgebox) throw new Error("Dirgebox is missing from the level-4 seed.");
+    await cancelSubscription(db, dirgebox.id, { now: DEMO_START });
+    const eventsBefore = await db.events.where("type").equals("subscription_canceled").toArray();
+    const momentumBefore = await momentumOf(db);
+
+    await deleteSubscription(db, dirgebox.id);
+
+    expect(await db.subscriptions.get(dirgebox.id)).toBeUndefined();
+    expect(await db.events.where("type").equals("subscription_canceled").toArray()).toEqual(eventsBefore);
+    expect(await momentumOf(db)).toBeCloseTo(momentumBefore, DECIMALS);
+  });
+
+  it("keeps debt_payment events and plans when a debt is deleted", async () => {
+    const db = freshDb();
+    await db.debts.add({ id: "d1", ...DEBT_INPUT });
+    await logPayment(db, "d1", 8_000, ctx());
+    await seedPlan(db, [planAction({ id: "a1", kind: "extra_payment", targetId: "d1" })]);
+    const eventsBefore = await db.events.toArray();
+    const plansBefore = await db.weeklyPlans.toArray();
+
+    await deleteDebt(db, "d1");
+
+    expect(await db.debts.get("d1")).toBeUndefined();
+    expect(await db.events.toArray()).toEqual(eventsBefore);
+    expect(await db.weeklyPlans.toArray()).toEqual(plansBefore);
+  });
+
+  it("rejects a missing id with DbNotFoundError and writes nothing", async () => {
+    const db = freshDb();
+    await db.debts.add({ id: "d1", ...DEBT_INPUT });
+    await db.subscriptions.add({ id: "s1", ...SUB_INPUT });
+    const before = await dump(db);
+    await expect(deleteDebt(db, "missing")).rejects.toBeInstanceOf(DbNotFoundError);
+    await expect(deleteSubscription(db, "missing")).rejects.toBeInstanceOf(DbNotFoundError);
+    expect(await dump(db)).toEqual(before);
+  });
+
+  it("returns no Do it target for a deleted row, and the action can still be completed", async () => {
+    const db = freshDb();
+    await db.debts.add({ id: "d1", ...DEBT_INPUT });
+    await db.subscriptions.add({ id: "s1", ...SUB_INPUT });
+    const plan = await seedPlan(db, [
+      planAction({ id: "a-pay", kind: "extra_payment", targetId: "d1" }),
+      planAction({ id: "a-cancel", kind: "cancel_subscription", targetId: "s1" }),
+    ]);
+    await deleteDebt(db, "d1");
+    await deleteSubscription(db, "s1");
+
+    const rows = { debts: await db.debts.toArray(), subscriptions: await db.subscriptions.toArray() };
+    const context = ctx();
+    for (const action of plan.actions) {
+      expect(getDoItTarget(action, rows)).toBeNull();
+      await expect(completePlanAction(db, WEEK_KEY, action.id, context)).resolves.toBeUndefined();
+    }
+    const stored = await db.weeklyPlans.get(WEEK_KEY);
+    expect(stored?.actions.every((action) => action.done)).toBe(true);
+    expect(await db.events.where("type").equals("exorcism_action_completed").count()).toBe(2);
   });
 });
 

@@ -441,31 +441,31 @@ Conventions that apply to every task:
     - Create `tests/ui/settings.test.tsx`: income save toast and invalid income error, crypt switch updates the mode store, onboarding opens when switching to "My crypt" without a Profile, clear all data confirmation empties only the real crypt and returns to Landing, clear control disabled with the hint in demo mode, Demo controls shown only in demo mode, no sound toggle
     - _Requirements: 9.2, 27.1, 27.2, 27.3, 27.4, 27.5, 27.7, 27.8, 27.9, 31.8_
 
-- [ ] 16. Group 14: Delete debts and subscriptions
-  - [ ] 16.1 Add the delete mutations and actions
+- [x] 16. Group 14: Delete debts and subscriptions
+  - [x] 16.1 Add the delete mutations and actions
     - In `src/lib/db/mutations.ts` add `deleteDebt(db, id)` (one `rw` transaction over `debts`) and `deleteSubscription(db, id)` (one `rw` transaction over `subscriptions` and `events`): `DbNotFoundError` for a missing id with nothing written, then remove the row; for an active Subscription also delete the Event with `refKey` `cancelRefKey(id)` if it exists (the cancellation was undone); a graveyard Subscription keeps its Event; Weekly_Plans and every other Event are never touched
     - Unit tests in `tests/db/mutations.test.ts`: on the level-4 demo, cancel Dirgebox → bring it back → delete it leaves the momentum equal to the value before the cancel and leaves no `subscription_canceled` Event for it; deleting a graveyard Subscription keeps its Event and its +momentum; deleting a Debt keeps its `debt_payment` Events
     - Add `deleteDebt` and `deleteSubscription` to `useCryptActions` (result-returning, `not-found` mapped like the other mutations)
     - Confirm `getDoItTarget` returns `null` when the target row is missing (it already does; add the case to its docs) and that `completePlanAction` on such an action still succeeds
     - _Requirements: 5.5, 9.8, 9.9, 9.10, 9.11, 14.6, 22.9_
-  - [ ] 16.2 Write property test for deleting a row
+  - [x] 16.2 Write property test for deleting a row
     - **Property 37: Deleting a row removes only that row**
     - **Validates: Requirements 9.8, 9.9, 9.10, 9.11, 14.6, 22.9**
     - Generate crypts with active and inactive subscriptions (including active ones that already have a `cancel:<id>` Event, the canceled-then-revived case), paid-off and owing debts, events of every type and a plan whose actions target the rows; delete one existing row, or an unknown id
     - Mutation checks: (1) temporarily make `deleteSubscription` also delete the cancel Event of a graveyard Subscription and confirm the property fails with a counterexample; (2) temporarily skip deleting the cancel Event of an active Subscription and confirm the property (momentum unchanged) and the cancel → bring back → delete unit test fail
-  - [ ] 16.3 Add the confirmation sheet and the Card heading focus target
-    - Create `src/components/sheets/DeleteConfirmSheet.tsx`: "Delete <name>? This can't be undone.", secondary "Keep it", danger confirm with the given label, error toast and the sheet kept open on failure
+  - [x] 16.3 Add the confirmation sheet and the Card heading focus target
+    - Create `src/components/sheets/DeleteConfirmSheet.tsx`: sheet title "Delete <name>?" (for example "Delete Car loan?"), body "This can't be undone.", secondary "Keep it", danger confirm with the given label, error toast and the sheet kept open on failure
     - In `src/components/ui/Card.tsx` add optional `headingId`: the title heading gets the id and `tabIndex={-1}`; nothing changes without it; extend `tests/ui/Card.test.tsx`
     - _Requirements: 23.12, 24.10, 30.5_
-  - [ ] 16.4 Add Delete to the Debts and Subscriptions screens
+  - [x] 16.4 Add Delete to the Debts and Subscriptions screens
     - `DebtsScreen`: danger "Delete debt" in the Debt sheet, also at balance 0; on success toast "Debt deleted" and focus the "Your debts" heading
     - `SubscriptionsScreen`: danger "Delete subscription" in the details sheet and the graveyard sheet; on success toast "Subscription deleted" and focus the "Zombies" or "Graveyard" heading, whichever list held the row
     - _Requirements: 23.12, 24.10, 28.5, 30.5_
-  - [ ] 16.5 Write delete UI tests
+  - [x] 16.5 Write delete UI tests
     - Create `tests/ui/deleteRows.test.tsx`: the danger button and confirmation text for a debt (owing and paid off), an active subscription and a graveyard subscription; "Keep it" writes nothing; confirm removes only the row and keeps the Events (an active subscription's undone cancellation Event is the one exception), toasts, and focuses the list heading (never `<body>`); a plan action whose target was deleted shows no Do it and can still be ticked
     - Mutation check: temporarily remove the heading focus after a delete and confirm the focus assertion fails
     - _Requirements: 9.10, 14.6, 22.9, 23.12, 24.10, 30.5, 31.8_
-- [ ] 17. Checkpoint - All screens
+- [x] 17. Checkpoint - All screens
   - Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`; ensure all pass, ask the user if questions arise.
 
 - [ ] 18. Group 15: Final axe and keyboard pass, steering and README updates

@@ -1362,6 +1362,85 @@
         "chatSessionId": "sess_fabce2c4-7139-4115-8127-ecc7e9bec053",
         "timestamp": 1795143981767
       }
+    ],
+    "16.1 Add the delete mutations and actions": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144075065
+      },
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144274249
+      }
+    ],
+    "16.2 Write property test for deleting a row": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144277857
+      },
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144412916
+      }
+    ],
+    "16.3 Add the confirmation sheet and the Card heading focus target": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144278336
+      },
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144413450
+      }
+    ],
+    "16.4 Add Delete to the Debts and Subscriptions screens": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144416375
+      },
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144558404
+      }
+    ],
+    "16.5 Write delete UI tests": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144558941
+      },
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144707782
+      }
+    ],
+    "16. Group 14: Delete debts and subscriptions": [
+      {
+        "executionId": "9a5efb39-fa8e-4813-8d77-4e8e0f374c54",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144707851
+      }
+    ],
+    "17. Checkpoint - All screens": [
+      {
+        "executionId": "d901334a-80d2-4f59-983a-24616c981e46",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795144843744
+      },
+      {
+        "executionId": "d901334a-80d2-4f59-983a-24616c981e46",
+        "chatSessionId": "sess_d1fca864-3a9d-44cd-9351-8abefd67a5dd",
+        "timestamp": 1795145252844
+      }
     ]
   }
 }

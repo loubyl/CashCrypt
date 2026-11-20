@@ -5,6 +5,7 @@ import { Flame, Hourglass, Plus, Skull, Ghost, Repeat, type LucideIcon } from "l
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
+import { DeleteConfirmSheet } from "@/components/sheets/DeleteConfirmSheet";
 import { CancelSubscriptionSheet } from "@/components/sheets/CancelSubscriptionSheet";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
@@ -39,6 +40,12 @@ const USAGE_ERROR = "Could not update the usage. Try again.";
 const REACTIVATE_ERROR = "Could not bring it back. Try again.";
 const DEFAULT_CADENCE: Cadence = "monthly";
 const FOCUS_DELAY_MS = 0;
+const DELETE_LABEL = "Delete subscription";
+const DELETED_MESSAGE = "Subscription deleted";
+const HEADING_IDS: Record<"zombies" | "graveyard", string> = {
+  zombies: "zombies-heading",
+  graveyard: "graveyard-heading",
+};
 type RowList = "zombies" | "graveyard";
 /** DOM id of a subscription's row in one of the two lists. */
 function getRowDomId(list: RowList, subscriptionId: string): string {
@@ -213,9 +220,10 @@ type DetailsSheetProps = {
   row: SubscriptionRow | null;
   onClose: () => void;
   onCancel: () => void;
+  onDelete: () => void;
 };
 
-function DetailsSheet({ row, onClose, onCancel }: DetailsSheetProps) {
+function DetailsSheet({ row, onClose, onCancel, onDelete }: DetailsSheetProps) {
   const { editSubscription } = useCryptActions();
   const toast = useToast();
   const [failed, setFailed] = useState(false);
@@ -267,6 +275,9 @@ function DetailsSheet({ row, onClose, onCancel }: DetailsSheetProps) {
           <Button type="button" variant="primary" size="lg" onClick={onCancel}>
             Cancel subscription
           </Button>
+          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
+            {DELETE_LABEL}
+          </Button>
         </div>
       ) : null}
     </BottomSheet>
@@ -278,9 +289,10 @@ type GraveyardSheetProps = {
   onClose: () => void;
   /** Called after the subscription is active again, before the sheet closes. */
   onBroughtBack: (subscriptionId: string) => void;
+  onDelete: () => void;
 };
 
-function GraveyardSheet({ row, onClose, onBroughtBack }: GraveyardSheetProps) {
+function GraveyardSheet({ row, onClose, onBroughtBack, onDelete }: GraveyardSheetProps) {
   const { reactivateSubscription } = useCryptActions();
   const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
@@ -323,6 +335,9 @@ function GraveyardSheet({ row, onClose, onBroughtBack }: GraveyardSheetProps) {
           <Button type="button" variant="secondary" size="lg" loading={submitting} onClick={handleBringBack}>
             Bring it back
           </Button>
+          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
+            {DELETE_LABEL}
+          </Button>
         </div>
       ) : null}
     </BottomSheet>
@@ -331,6 +346,8 @@ function GraveyardSheet({ row, onClose, onBroughtBack }: GraveyardSheetProps) {
 
 export function SubscriptionsScreen() {
   const data = useCryptData();
+  const { deleteSubscription } = useCryptActions();
+  const toast = useToast();
   const [addOpen, setAddOpen] = useState(false);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -338,7 +355,23 @@ export function SubscriptionsScreen() {
   // A canceled or revived row moves to the other list, so the element that opened the sheet is
   // gone and BottomSheet cannot return focus to it. Focus the row in its new list instead.
   const [moveFocus, setMoveFocus] = useState<{ list: RowList; id: string } | null>(null);
-  const sheetOpen = cancelId !== null || graveId !== null || detailsId !== null;
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    name: string;
+    list: RowList;
+  } | null>(null);
+  // After a delete the row is gone, so focus the heading of the list that held it.
+  const [focusList, setFocusList] = useState<RowList | null>(null);
+  const sheetOpen =
+    cancelId !== null || graveId !== null || detailsId !== null || deleteTarget !== null;
+  useEffect(() => {
+    if (focusList === null || sheetOpen) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById(HEADING_IDS[focusList])?.focus();
+      setFocusList(null);
+    }, FOCUS_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [focusList, sheetOpen]);
   useEffect(() => {
     if (moveFocus === null || sheetOpen) return;
     const domId = getRowDomId(moveFocus.list, moveFocus.id);
@@ -391,7 +424,7 @@ export function SubscriptionsScreen() {
           {active.length} active {active.length === 1 ? "subscription" : "subscriptions"}
         </p>
       </Card>
-      <Card title="Zombies">
+      <Card title="Zombies" headingId={HEADING_IDS.zombies}>
         {active.length === 0 ? (
           <EmptyState
             icon={Ghost}
@@ -418,7 +451,7 @@ export function SubscriptionsScreen() {
           </ul>
         )}
       </Card>
-      <Card title="Graveyard">
+      <Card title="Graveyard" headingId={HEADING_IDS.graveyard}>
         {graveyard.length === 0 ? (
           <EmptyState
             icon={Skull}
@@ -448,9 +481,12 @@ export function SubscriptionsScreen() {
         <AddSubscriptionForm onClose={() => setAddOpen(false)} />
       </BottomSheet>
       <DetailsSheet
-        row={cancelId === null ? detailsRow : null}
+        row={cancelId === null && deleteTarget === null ? detailsRow : null}
         onClose={() => setDetailsId(null)}
         onCancel={() => setCancelId(detailsId)}
+        onDelete={() => {
+          if (detailsRow) setDeleteTarget({ id: detailsRow.id, name: detailsRow.name, list: "zombies" });
+        }}
       />
       <CancelSubscriptionSheet
         open={cancelRow !== null}
@@ -466,9 +502,31 @@ export function SubscriptionsScreen() {
         }}
       />
       <GraveyardSheet
-        row={graveRow}
+        row={deleteTarget === null ? graveRow : null}
         onClose={() => setGraveId(null)}
         onBroughtBack={(id) => setMoveFocus({ list: "zombies", id })}
+        onDelete={() => {
+          if (graveRow) setDeleteTarget({ id: graveRow.id, name: graveRow.name, list: "graveyard" });
+        }}
+      />
+      <DeleteConfirmSheet
+        open={deleteTarget !== null}
+        onClose={() => {
+          setDeleteTarget(null);
+          setDetailsId(null);
+          setGraveId(null);
+        }}
+        name={deleteTarget?.name ?? ""}
+        confirmLabel={DELETE_LABEL}
+        onConfirm={async () => {
+          if (deleteTarget === null) return { ok: true, value: undefined };
+          const result = await deleteSubscription(deleteTarget.id);
+          if (result.ok) {
+            toast.show({ tone: "success", message: DELETED_MESSAGE });
+            setFocusList(deleteTarget.list);
+          }
+          return result;
+        }}
       />
     </main>
   );

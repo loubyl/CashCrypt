@@ -65,7 +65,11 @@ export function getPaymentPrefill(
   return Math.min(wanted, safeCents(debt.balanceCents));
 }
 
-/** Null for fallback and reduce actions, done actions and targets that no longer qualify. */
+/**
+ * Null for fallback and reduce actions, done actions and targets that no longer qualify.
+ * This includes a target row that is missing because the Debt or Subscription was deleted;
+ * the action itself can still be completed with `completePlanAction`.
+ */
 export function getDoItTarget(action: ExorcismAction, rows: DoItRows): DoItTarget | null {
   if (action.done || action.targetId === undefined) {
     return null;

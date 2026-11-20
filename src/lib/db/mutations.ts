@@ -132,6 +132,34 @@ export async function editSubscription(
   });
 }
 
+/**
+ * Removes a Debt row. Its `debt_payment` Events stay, so past effort keeps counting for momentum.
+ * Weekly_Plans are never touched; a plan action that targets it simply loses its "Do it" button.
+ */
+export async function deleteDebt(db: CryptDb, id: string): Promise<void> {
+  await db.transaction("rw", [db.debts], async () => {
+    const existing = await db.debts.get(id);
+    if (!existing) throw new DbNotFoundError(id);
+    await db.debts.delete(id);
+  });
+}
+
+/**
+ * Removes a Subscription row. For an active one (never canceled, or brought back) the
+ * cancellation Event is deleted too, because that cancellation was undone. A graveyard
+ * Subscription keeps its Event and its momentum. Weekly_Plans and other Events are never touched.
+ */
+export async function deleteSubscription(db: CryptDb, id: string): Promise<void> {
+  await db.transaction("rw", [db.subscriptions, db.events], async () => {
+    const existing = await db.subscriptions.get(id);
+    if (!existing) throw new DbNotFoundError(id);
+    await db.subscriptions.delete(id);
+    if (existing.active) {
+      await db.events.where("refKey").equals(cancelRefKey(id)).delete();
+    }
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Transactions
 // ---------------------------------------------------------------------------

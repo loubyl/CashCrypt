@@ -468,7 +468,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 9. WHEN there are no active Subscriptions, THE Subscriptions Screen SHALL show the empty state "No zombies in the basement. Suspiciously quiet."
 10. THE Subscriptions Screen SHALL show the total monthly cost of active Subscriptions in a summary Card.
 11. IF the Add subscription form has an empty name, a missing amount or an amount of 0, THEN THE form SHALL show an error on the field and SHALL create no row.
-12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a danger "Delete subscription" Button. WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet that states "Delete <name>? This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
+12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a danger "Delete subscription" Button. WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
 
 ### Requirement 24: Debts screen
 
@@ -485,7 +485,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 7. WHEN there are no Debts, THE Debts Screen SHALL show the empty state "No debts. The walls are holding."
 8. IF the Add debt form has an empty name, a negative or missing balance, an APR outside 0 to 100 percent, or a missing minimum payment, THEN THE form SHALL show an error on each invalid field and SHALL create no row.
 9. WHEN an edit changes a Debt balance, THE Debts Screen SHALL create no Event, since only the Log payment action records progress.
-10. THE Debt BottomSheet SHALL show a danger "Delete debt" Button, also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet that states "Delete <name>? This can't be undone." (for example "Delete Car loan? This can't be undone.") with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
+10. THE Debt BottomSheet SHALL show a danger "Delete debt" Button, also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
 
 ### Requirement 25: Log payment sheet
 

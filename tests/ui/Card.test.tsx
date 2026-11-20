@@ -65,6 +65,21 @@ describe("Card", () => {
     expect(root.className).not.toMatch(FORBIDDEN_CLASS_PATTERN);
   });
 
+  it("gives the heading the given id and makes it focusable by script", () => {
+    render(<Card title="Your debts" headingId="debts-heading" />);
+    const heading = screen.getByRole("heading", { name: "Your debts" });
+    expect(heading).toHaveAttribute("id", "debts-heading");
+    expect(heading).toHaveAttribute("tabindex", "-1");
+    heading.focus();
+    expect(heading).toHaveFocus();
+    expect(screen.getByRole("region", { name: "Your debts" })).toBeInTheDocument();
+  });
+
+  it("renders the heading without tabindex when no headingId is given", () => {
+    render(<Card title="Your debts" />);
+    expect(screen.getByRole("heading", { name: "Your debts" })).not.toHaveAttribute("tabindex");
+  });
+
   it("uses no border classes on an untitled card", () => {
     const { container } = render(<Card>plain</Card>);
     const root = container.firstElementChild as HTMLElement;

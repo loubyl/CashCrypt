@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CheckCircle2, Landmark, Plus } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
+import { DeleteConfirmSheet } from "@/components/sheets/DeleteConfirmSheet";
 import { LogPaymentSheet } from "@/components/sheets/LogPaymentSheet";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
@@ -43,6 +44,10 @@ const INVALID_APR_ERROR = "Enter a valid interest rate.";
 const GENERIC_ERROR = "Could not save the debt. Try again.";
 const APR_PATTERN = /^-?\d+(\.\d+)?$/;
 const APR_DEFAULT_TEXT = "";
+const DEBTS_HEADING_ID = "debts-heading";
+const DELETE_LABEL = "Delete debt";
+const DELETED_MESSAGE = "Debt deleted";
+const FOCUS_DELAY_MS = 0;
 
 type FieldErrors = {
   name?: string;
@@ -233,9 +238,10 @@ type RowSheetProps = {
   row: DebtRow | null;
   onClose: () => void;
   onLogPayment: () => void;
+  onDelete: () => void;
 };
 
-function RowSheet({ row, onClose, onLogPayment }: RowSheetProps) {
+function RowSheet({ row, onClose, onLogPayment, onDelete }: RowSheetProps) {
   const { editDebt } = useCryptActions();
   const toast = useToast();
   const paidOff = row !== null && row.balanceCents === 0;
@@ -276,6 +282,9 @@ function RowSheet({ row, onClose, onLogPayment }: RowSheetProps) {
               return null;
             }}
           />
+          <Button type="button" variant="danger" size="lg" onClick={onDelete}>
+            {DELETE_LABEL}
+          </Button>
         </div>
       ) : null}
     </BottomSheet>
@@ -284,9 +293,24 @@ function RowSheet({ row, onClose, onLogPayment }: RowSheetProps) {
 
 export function DebtsScreen() {
   const data = useCryptData();
+  const { deleteDebt } = useCryptActions();
+  const toast = useToast();
   const [addOpen, setAddOpen] = useState(false);
   const [rowId, setRowId] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
+  // The deleted row is gone, so the element that opened the sheet no longer exists. Focus the
+  // list heading once every sheet has closed and returned focus.
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [focusHeading, setFocusHeading] = useState(false);
+  const sheetOpen = addOpen || rowId !== null || paymentId !== null || deleteTarget !== null;
+  useEffect(() => {
+    if (!focusHeading || sheetOpen) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById(DEBTS_HEADING_ID)?.focus();
+      setFocusHeading(false);
+    }, FOCUS_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [focusHeading, sheetOpen]);
 
   if (data.status === "loading") {
     return (
@@ -318,7 +342,7 @@ export function DebtsScreen() {
           {debts.length} {debts.length === 1 ? "debt" : "debts"}
         </p>
       </Card>
-      <Card title="Your debts">
+      <Card title="Your debts" headingId={DEBTS_HEADING_ID}>
         {debts.length === 0 ? (
           <EmptyState icon={Landmark} title={EMPTY_TITLE} description={EMPTY_DESCRIPTION} />
         ) : (
@@ -343,9 +367,30 @@ export function DebtsScreen() {
         <AddDebtForm onClose={() => setAddOpen(false)} />
       </BottomSheet>
       <RowSheet
-        row={paymentId === null ? selected : null}
+        row={paymentId === null && deleteTarget === null ? selected : null}
         onClose={() => setRowId(null)}
         onLogPayment={() => setPaymentId(rowId)}
+        onDelete={() => {
+          if (selected) setDeleteTarget({ id: selected.id, name: selected.name });
+        }}
+      />
+      <DeleteConfirmSheet
+        open={deleteTarget !== null}
+        onClose={() => {
+          setDeleteTarget(null);
+          setRowId(null);
+        }}
+        name={deleteTarget?.name ?? ""}
+        confirmLabel={DELETE_LABEL}
+        onConfirm={async () => {
+          if (deleteTarget === null) return { ok: true, value: undefined };
+          const result = await deleteDebt(deleteTarget.id);
+          if (result.ok) {
+            toast.show({ tone: "success", message: DELETED_MESSAGE });
+            setFocusHeading(true);
+          }
+          return result;
+        }}
       />
       <LogPaymentSheet
         open={paymentId !== null}
