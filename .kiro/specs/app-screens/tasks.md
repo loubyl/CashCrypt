@@ -265,7 +265,7 @@ Conventions that apply to every task:
     - Assert every action is `done` and exactly three `exorcism_action_completed` Events exist per week; print light score, base score, momentum and decay level at start, after week 1 and after week 2 (expected 32.74 / 32.74 / 0.00 / L4, then 43.49 / 33.49 / 10.00 / L3, then 49.16 / 34.16 / 15.00 / L3); assert the decay level number after week 2 is lower than at the start; require no fixed target score
     - _Requirements: 17.8, 17.9, 17.10, 31.6_
 
-- [ ] 6. Checkpoint - Data layer, planner and demo
+- [x] 6. Checkpoint - Data layer, planner and demo
   - Run `npm test`, `npm run lint` and `npm run typecheck`; ensure all tests pass, ask the user if questions arise.
 
 - [x] 7. Group 6: Hooks and CryptProvider
@@ -415,20 +415,20 @@ Conventions that apply to every task:
     - Create `tests/ui/debts.test.tsx`: sorted rows and subtitles, total card, empty state, add flow, invalid add (empty name, negative balance, APR 101%, missing minimum) shows errors and creates no row, edit keeps the Event count unchanged, Log payment from a debt pre-fills the minimum and shows the balance drop, "Paid off" Chip and disabled button at balance 0
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7, 24.8, 24.9, 31.8_
 
-- [ ] 14. Group 12: Transactions and Add expense
-  - [ ] 14.1 Add transaction view helpers
+- [x] 14. Group 12: Transactions and Add expense
+  - [x] 14.1 Add transaction view helpers
     - In `src/lib/utils/listViews.ts` add `toTransactionRows(rows, now, income)` (30-day window via `isInWindow`, newest first, Ghost flag via `isSmallExpense`) and `getSmallExpenseSummary(...)` (small-expense total, Poltergeist threshold as `POLTERGEIST_RATIO` times income, awake flag)
     - _Requirements: 26.1, 26.2, 26.3_
 
-  - [ ] 14.2 Write property test for list views
+  - [x] 14.2 Write property test for list views
     - **Property 28: List views are permutations in the right order, with ghosts marked correctly**
     - **Validates: Requirements 23.1, 24.1, 26.1, 26.2**
 
-  - [ ] 14.3 Implement the Transactions screen
+  - [x] 14.3 Implement the Transactions screen
     - Create `src/components/screens/TransactionsScreen.tsx` and `src/app/(app)/transactions/page.tsx`: summary Card (small-expense total, threshold, "The Poltergeist is awake." when active), rows with description, "category · date" subtitle and outflow amount, "Ghost" Chip with icon and text, primary "Add expense" opening `AddExpenseSheet`, empty state "No ghosts this month. The house is quiet."
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.8, 28.6, 30.1, 30.4_
 
-  - [ ] 14.4 Write Transactions screen tests
+  - [x] 14.4 Write Transactions screen tests
     - Create `tests/ui/transactions.test.tsx`: window and order, Ghost chip only below the threshold, summary Card and Poltergeist text, empty state, add expense flow with "Ghost added: $X" toast and updated list, invalid expense keeps the sheet open and writes nothing
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.6, 26.7, 26.8, 31.8_
 

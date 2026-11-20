@@ -1264,6 +1264,73 @@
         "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
         "timestamp": 1795134038268
       }
+    ],
+    "14.1 Add transaction view helpers": [
+      {
+        "executionId": "1932c598-c22a-4b08-b345-c6de38fdd486",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142238157
+      },
+      {
+        "executionId": "1932c598-c22a-4b08-b345-c6de38fdd486",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142338624
+      }
+    ],
+    "6. Checkpoint - Data layer, planner and demo": [
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142396958
+      },
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142466773
+      }
+    ],
+    "14.2 Write property test for list views": [
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142479070
+      },
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142734319
+      }
+    ],
+    "14.3 Implement the Transactions screen": [
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142479319
+      },
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142734771
+      }
+    ],
+    "14.4 Write Transactions screen tests": [
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142737237
+      },
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142861818
+      }
+    ],
+    "14. Group 12: Transactions and Add expense": [
+      {
+        "executionId": "4bb40627-d36c-477c-adca-df27dd164cba",
+        "chatSessionId": "sess_f9fce447-f0f7-4a22-99be-f05f753ecba7",
+        "timestamp": 1795142861882
+      }
     ]
   }
 }
