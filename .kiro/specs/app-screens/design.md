@@ -255,7 +255,7 @@ export function reactivateSubscription(db: CryptDb, id: string, ctx: MutationCon
 export function completePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string, ctx: MutationContext): Promise<void>;
 export function uncompletePlanAction(db: CryptDb, weekKey: LocalDate, actionId: string): Promise<void>;
 export function deleteDebt(db: CryptDb, id: string): Promise<void>;          // removes the row only; Events and plans stay
-export function deleteSubscription(db: CryptDb, id: string): Promise<void>;  // active or graveyard; Events and plans stay
+export function deleteSubscription(db: CryptDb, id: string): Promise<void>;  // active: also deletes its undone cancel Event; graveyard: Events stay
 export function clearAllData(db: CryptDb): Promise<void>; // real db only
 
 export type LogPaymentOutcome = { debt: DebtRow; extraPrincipalCents: number; completedActionId: string | null };
@@ -272,7 +272,9 @@ Common shape of each mutation: validate with `src/lib/validation` first (no tran
 - **`uncompletePlanAction`**: sets `done: false`, removes `completedOn` from the action and keeps the event.
 - **`reactivateSubscription(db, id, ctx)`**: one `rw` transaction over `subscriptions` and `weeklyPlans`: set `active: true` and remove `canceledOn`; then, if the plan of `getPlanWeekStart(ctx.now)` has a done `cancel_subscription` action with `targetId === id`, run the same reset as `uncompletePlanAction` (the completion Event stays). Creates no Event and touches no other week's plan.
 - **`autoCompletePlanAction(db, kind, targetId, ctx)`** (internal, same transaction): takes the caller's `MutationContext`, not just `now`, because the completion Event needs `ctx.newId`. `plan = weeklyPlans.get(getPlanWeekStart(ctx.now))`; if no plan, or no action with that `kind` and `targetId`, return `null` and write nothing; otherwise run the same body as `completePlanAction`. It never generates a plan (Requirement 8.10). Any throw propagates and aborts the whole transaction (Requirement 8.11).
-- **`deleteDebt(db, id)` / `deleteSubscription(db, id)`**: one `rw` transaction over that table only: `get` (not-found if missing, nothing written), then `delete(id)`. No other table is touched: Events stay because the payments and cancellations really happened, so their momentum stays too; Weekly_Plans are frozen and stay. A deleted Subscription has no row, so the snapshot adapter's active-cancel filter (Requirement 4.4) no longer applies and its `subscription_canceled` Event keeps counting while in the window. A Plan_Action that targets a deleted row stays in its plan; `getDoItTarget` finds no row and returns `null`, so it shows no Do it, and ticking it still works because completion only reads the plan.
+- **`deleteDebt(db, id)`**: one `rw` transaction over `debts` only: `get` (not-found if missing, nothing written), then `delete(id)`. Events stay because the payments really happened, so their momentum stays too; Weekly_Plans are frozen and stay.
+- **`deleteSubscription(db, id)`**: one `rw` transaction over `subscriptions` and `events`: `get` (not-found if missing, nothing written), then `delete(id)`. If the row was **active**, it also deletes the Event whose `refKey` is `cancelRefKey(id)`, when one exists. Reason: an active Subscription with a cancel Event was canceled and brought back; the adapter ignores that Event only while an active row with that id exists (Requirement 4.4), so without this step deleting the row would make the undone cancellation count again. A **graveyard** Subscription keeps its Event, since that cancellation still stands. Weekly_Plans and every other Event stay.
+- A Plan_Action that targets a deleted row stays in its plan; `getDoItTarget` finds no row and returns `null`, so it shows no Do it, and ticking it still works because completion only reads the plan.
 - **`clearAllData`**: `assertRealDb(db)`, then `db.transaction("rw", allTables, () => Promise.all(tables.map(t => t.clear())))`.
 
 ### `src/lib/exorcism/` (Planner, pure)
@@ -741,7 +743,7 @@ Properties 1 to 3 cover the calendar, 4 and 5 the snapshot adapter, 6 to 14 the 
 
 ### Property 37: Deleting a row removes only that row
 
-*For any* Crypt and any existing Debt or Subscription (active or inactive), `deleteDebt` / `deleteSubscription` removes exactly that row, and every other row in every table (including all Events and Weekly_Plans) is unchanged; for an id that does not exist it rejects with `DbNotFoundError` and every table is unchanged. Afterwards, `getDoItTarget` returns `null` for every Plan_Action that targeted the deleted row, and `completePlanAction` on such an action still succeeds.
+*For any* Crypt and any existing Debt or Subscription (active or inactive), `deleteDebt` / `deleteSubscription` removes exactly that row; for an active Subscription it also removes its `subscription_canceled` Event (`refKey` `cancel:<id>`) when one exists, and nothing else; every other row in every table (including every other Event and all Weekly_Plans) is unchanged. For an id that does not exist it rejects with `DbNotFoundError` and every table is unchanged. Afterwards, the momentum of `computeHouseState(toFinancialSnapshot(rows, now))` is unchanged by deleting an active Subscription, `getDoItTarget` returns `null` for every Plan_Action that targeted the deleted row, and `completePlanAction` on such an action still succeeds.
 
 **Validates: Requirements 9.8, 9.9, 9.10, 9.11, 14.6, 22.9**
 
@@ -795,6 +797,7 @@ Pure cores (calendar, cents helpers, validators, adapter, planner, view helpers,
 | `tests/validation/inputs.test.ts` | node | Validator messages and limits (supports Property 6) |
 | `tests/db/snapshotAdapter.test.ts` | node | Properties 4 and 5 |
 | `tests/db/properties/p37-delete-row.test.ts` | node | Property 37 |
+| `tests/db/mutations.test.ts` (extend) | node | Delete mutations; level-4 Dirgebox cancel → bring back → delete leaves momentum unchanged and leaves no `subscription_canceled` Event; deleting a graveyard Subscription keeps its Event and its momentum |
 | `tests/ui/deleteRows.test.tsx` | ui | Delete debt (also paid off) and delete subscription (active and graveyard): danger button, confirmation text, Keep it writes nothing, confirm toasts, row gone, focus on the list heading; a plan action whose target was deleted shows no Do it and can still be ticked |
 | `tests/db/properties/p36-paid-off-minimums.test.ts`, `tests/demo/paidOffMinimum.test.ts` | node | Property 36; level-4 Student loan paid off: factor A drops from 610/3000 to 550/3000 while the stored $60 minimum stays |
 | `tests/db/properties/p35-canceled-events-follow-subscriptions.test.ts`, `tests/demo/cancelMomentum.test.ts` | node | Property 35; level-4 Dirgebox: cancel +2 momentum, bring back 0, cancel again +2 with the original event date and a single event |

@@ -215,8 +215,8 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 6. IF a Transaction date is later than `now`, THEN THE Data_Layer SHALL reject it with a validation error.
 7. THE Data_Layer SHALL provide queries for transactions in the 30-day window ending on a given Local_Date, sorted by date descending then by id, using the same window boundaries as `isInWindow`.
 8. WHEN `deleteDebt(debtId)` succeeds, THE Data_Layer SHALL remove that Debt row only, in one Dexie transaction, whatever its balance.
-9. WHEN `deleteSubscription(subscriptionId)` succeeds, THE Data_Layer SHALL remove that Subscription row only, in one Dexie transaction, whether it is active or in the Graveyard.
-10. WHEN a Debt or a Subscription is deleted, THE Data_Layer SHALL keep every Event (payments and cancellations really happened, so their momentum stays) and every Weekly_Plan unchanged, and SHALL leave every other row unchanged.
+9. WHEN `deleteSubscription(subscriptionId)` succeeds, THE Data_Layer SHALL remove that Subscription row, in one Dexie transaction, whether it is active or in the Graveyard. WHEN the Subscription is active, THE Data_Layer SHALL also delete its `subscription_canceled` Event (reference key `cancel:<subscriptionId>`), if one exists, in the same transaction: that cancellation was already undone by a reactivation, so it must not count for momentum again once no active row hides it (Requirement 4.4). WHEN the Subscription is in the Graveyard, its `subscription_canceled` Event SHALL stay.
+10. WHEN a Debt or a Subscription is deleted, THE Data_Layer SHALL keep every Event (payments and cancellations that still stand really happened, so their momentum stays), except the undone cancellation Event of criterion 9, and SHALL leave every Weekly_Plan and every other row unchanged. FOR ALL sequences cancel → bring back → delete on one Subscription, the momentum after the delete SHALL equal the momentum before the cancel.
 11. IF `deleteDebt` or `deleteSubscription` is called with an id that does not exist, THEN THE Data_Layer SHALL reject it with a not-found error and SHALL write nothing.
 
 ### Requirement 10: Hooks
