@@ -406,12 +406,12 @@ Conventions that apply to every task:
     - Create `tests/ui/subscriptions.test.tsx`: sorted rows and subtitles, total card, empty states, add flow with toast, invalid add (empty name, amount 0) creates no row, cancel flow toast "+$120/mo saved" and graveyard entry, "Bring it back" toast, focus returns to the opener after the sheet closes
     - _Requirements: 23.1, 23.3, 23.6, 23.7, 23.8, 23.9, 23.10, 23.11, 31.8_
 
-- [ ] 13. Group 11: Debts and Log payment sheet
-  - [ ] 13.1 Implement the Debts screen
+- [x] 13. Group 11: Debts and Log payment sheet
+  - [x] 13.1 Implement the Debts screen
     - Create `src/components/screens/DebtsScreen.tsx` and `src/app/(app)/debts/page.tsx`: rows sorted by balance with subtitle "APR X% · Minimum $Y/mo", total debt summary Card, primary "Add debt" sheet (name, balance, APR as percent stored through `aprPercentToFraction`, minimum payment) with per-field errors, row sheet with "Edit debt" form and "Log payment" opening `LogPaymentSheet` for that debt, "Paid off" Chip with "Log payment" disabled at balance 0, empty state "No debts. The walls are holding.", edits create no Event
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7, 24.8, 24.9, 25.3, 28.6, 30.1, 30.4_
 
-  - [ ] 13.2 Write Debts screen tests
+  - [x] 13.2 Write Debts screen tests
     - Create `tests/ui/debts.test.tsx`: sorted rows and subtitles, total card, empty state, add flow, invalid add (empty name, negative balance, APR 101%, missing minimum) shows errors and creates no row, edit keeps the Event count unchanged, Log payment from a debt pre-fills the minimum and shows the balance drop, "Paid off" Chip and disabled button at balance 0
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7, 24.8, 24.9, 31.8_
 

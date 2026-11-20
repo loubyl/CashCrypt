@@ -1233,6 +1233,37 @@
         "chatSessionId": "sess_68a7c210-95e6-4796-8ab7-fa146a4ad5ca",
         "timestamp": 1795131568700
       }
+    ],
+    "13.1 Implement the Debts screen": [
+      {
+        "executionId": "273efdb9-d566-4fcf-9895-533ad277c0a2",
+        "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
+        "timestamp": 1795133294761
+      },
+      {
+        "executionId": "273efdb9-d566-4fcf-9895-533ad277c0a2",
+        "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
+        "timestamp": 1795133850424
+      }
+    ],
+    "13.2 Write Debts screen tests": [
+      {
+        "executionId": "273efdb9-d566-4fcf-9895-533ad277c0a2",
+        "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
+        "timestamp": 1795133851040
+      },
+      {
+        "executionId": "273efdb9-d566-4fcf-9895-533ad277c0a2",
+        "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
+        "timestamp": 1795134038175
+      }
+    ],
+    "13. Group 11: Debts and Log payment sheet": [
+      {
+        "executionId": "273efdb9-d566-4fcf-9895-533ad277c0a2",
+        "chatSessionId": "sess_7fb120ad-3a77-4feb-b929-1ad672ac74e9",
+        "timestamp": 1795134038268
+      }
     ]
   }
 }
