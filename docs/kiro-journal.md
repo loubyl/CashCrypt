@@ -73,7 +73,7 @@ A dated log of how Kiro features shaped CashCrypt, kept for the Kiroween write-u
 - **Kiro feature:** Spec, property-based testing with fast-check
 - **What happened:** All tasks (1–14) in the `haunting-engine` spec are checked. Counted from the repo:
   - 10 test files in `tests/haunting/`, 209 tests, all passing.
-  - 46 fast-check properties, every one tagged with a `design.md` property number. All 20 properties in `design.md` (1–20) have at least one test, and no test uses a number that is not in `design.md`.
+  - 20 properties, 46 property-based tests: the 20 properties are defined in `design.md` (1–20), and they are checked by 46 fast-check tests (`fc.assert` calls), every one tagged with its `design.md` property number. All 20 properties have at least one test, and no test uses a number that is not in `design.md`.
   - Properties per file: `dates` P14 · `decay` P2, P3 · `ghosts` P8, P19, P20 · `integration` P5, P7 · `lightScore` P1, P4, P6, P13 · `momentum` P10, P11 · `robustness` P9, P12 · `zombies` P15–P18.
 - **Calibration results covered by tests:**
   - Five demo personas land on levels 1–5 with scores 87.22, 62.74, 42.74, 32.74 and 17.07 (`integration.test.ts`).

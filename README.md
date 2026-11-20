@@ -2,6 +2,8 @@
 
 > *Your money habits haunt your house.*
 
+**Live app: [cash-crypt.vercel.app](https://cash-crypt.vercel.app)** — try the demo crypt, no sign-up.
+
 CashCrypt is a local-first personal finance web app where your financial health is reflected as a living, decaying haunted house. Debt crumbles the walls. Recurring subscriptions shamble through the basement as zombies. Small daily expenses swarm as ghosts — and when they pile up, they merge into a monster. Pay your debts and cancel your subscriptions to bring the light back.
 
 Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
@@ -13,9 +15,9 @@ Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 ## ✨ What works today
 
 - **Light score and decay level** — the pure haunting engine (`src/lib/haunting/`) turns your income, debts, subscriptions, transactions and recent actions into a light score (0–100) and a decay level (1–5). The dashboard shows both.
-- **Debts** — add debts (name, balance, APR, minimum payment) and log payments. A payment lowers the balance and can raise the score.
-- **Zombie subscriptions** — add recurring subscriptions with a usage level (often, rarely, never) and cancel them.
-- **Ghost expenses** — add small transactions. When the 30-day total of small expenses passes the threshold, a Poltergeist banner appears on the dashboard.
+- **Debts** — add, edit and delete debts (name, balance, APR, minimum payment) and log payments. A payment lowers the balance and can raise the score; a paid-off debt no longer counts its minimum payment.
+- **Zombie subscriptions** — add, edit and delete recurring subscriptions with a usage level (often, rarely, never), cancel them into the graveyard and bring them back.
+- **Ghost expenses** — add and delete expenses. Small ones are ghosts; when the 30-day total of small expenses passes the threshold, a Poltergeist banner appears on the dashboard.
 - **Weekly exorcism plan** — three prioritized actions per week (see below).
 - **Demo crypt** — a seeded crypt with five scenarios, one per decay level. No sign-up needed.
 - **Local-first** — all data lives in your browser (IndexedDB). No accounts, no server, no telemetry.
@@ -53,12 +55,25 @@ The demo never reads or writes the real database, and demo-only operations (load
 
 ## 🕯️ Weekly exorcism plan
 
-Each week the app generates exactly three actions, ranked by monthly money freed: cancel a subscription, make an extra debt payment, or a fallback such as setting aside an emergency fund. You can:
+Each week the app generates exactly three actions, one per creature:
 
-- tick an action to mark it done, or untick it,
-- press **Do it** on an action that targets a subscription or debt. It opens the cancel or payment sheet, and the action completes when you confirm.
+- **Zombie:** cancel a subscription, ranked by its monthly cost × a usage weight (never-used subscriptions rank highest).
+- **Poltergeist:** cut its top small-expense category by the amount that puts small expenses back under the threshold.
+- **Debt:** an extra payment on the highest-APR debt. It is always included, even when it would rank lower.
 
-Completed actions and cancellations count as recent effort and add momentum to the light score.
+Fallbacks, such as setting aside an emergency fund, fill any slot without a real candidate. **Do it** performs the change from the plan (it opens the cancel or payment sheet) and completes the action when you confirm. You can also tick an action you did elsewhere. Completed actions, extra payments and cancellations add momentum to the light score.
+
+## 💡 How the light score works
+
+The light score (0–100) is a base score plus momentum. The base score is `100 / (1 + S)`, where `S` weighs your minimum payments, total debt and subscription cost, each relative to your income. Momentum (0–15) rewards the last 30 days of extra payments, cancellations and completed plan actions. The score sets one of five decay levels in bands of 20 (80–100 Pristine down to 0–19 Condemned). Details: [haunting-engine spec](.kiro/specs/haunting-engine/requirements.md).
+
+## 🤖 Built with Kiro
+
+- **Specs** in [`.kiro/specs/`](.kiro/specs): `haunting-engine`, `design-system-foundation` and `app-screens`, each written as requirements → design → tasks before the code.
+- **Steering** in [`.kiro/steering/`](.kiro/steering): product, tech, structure, conventions, design system and visual language.
+- **Property-based tests** with fast-check for every module: 73 properties, 141 property-based tests. Each spec's design defines the properties, and fast-check tests (`fc.assert`) check them, tagged with the property number: haunting-engine 20 properties / 46 tests, design-system-foundation 18 / 37, app-screens 35 / 58. A mutation-check rule in the steering requires every bug-fix test to fail when the bug is put back.
+- **1111 tests** in 117 files, plus axe checks on every screen and a keyboard test suite.
+- **Development journal** in [`docs/kiro-journal.md`](docs/kiro-journal.md): what the reviews, tests and manual checks caught along the way.
 
 ---
 
@@ -138,7 +153,7 @@ npm start
 | Scene animation | GSAP + `@gsap/react` |
 | House graphics | Inline SVG |
 | Local storage | Dexie.js (IndexedDB) |
-| Testing | Vitest + fast-check |
+| Testing | Vitest + fast-check, Testing Library, axe-core |
 | Deploy | Vercel |
 
 ---
