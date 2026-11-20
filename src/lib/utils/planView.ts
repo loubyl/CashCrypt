@@ -1,13 +1,15 @@
 // Pure view-model helpers for the exorcism plan and the payment sheet. No React, no Dexie.
 
 import type { ExorcismAction } from "@/lib/exorcism/types";
-import type { DebtRow, SubscriptionRow } from "@/types/finance";
+import type { DebtRow, LocalDate, SubscriptionRow } from "@/types/finance";
+import { formatMonthDay } from "./calendar";
 import { formatCentsShort } from "./cents";
 
 const PER_MONTH_SUFFIX = "/mo";
 const IMPACT_PREFIX = "+";
 const FREED_SUFFIX = "freed";
 const NO_AMOUNT_TOAST = "Action completed";
+const DONE_PREFIX = "Done";
 
 export type PlanSummary = {
   doneCount: number;
@@ -93,4 +95,15 @@ export function getActionImpactText(action: ExorcismAction): string | undefined 
 export function getToastForCompletion(action: ExorcismAction): string {
   const impact = getActionImpactText(action);
   return impact === undefined ? NO_AMOUNT_TOAST : `${impact} ${FREED_SUFFIX}`;
+}
+
+/**
+ * Row subtitle: the instruction while the action is pending, "Done Nov 19" once
+ * it is done (just "Done" if the completion date is missing).
+ */
+export function getPlanActionSubtitle(
+  action: Pick<ExorcismAction, "done" | "subtitle"> & { completedOn?: LocalDate },
+): string {
+  if (!action.done) return action.subtitle;
+  return action.completedOn ? `${DONE_PREFIX} ${formatMonthDay(action.completedOn)}` : DONE_PREFIX;
 }

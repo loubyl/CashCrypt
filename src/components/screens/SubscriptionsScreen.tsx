@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Flame, Hourglass, Plus, Skull, Ghost, Repeat, type LucideIcon } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -38,6 +38,12 @@ const GENERIC_ERROR = "Could not save the subscription. Try again.";
 const USAGE_ERROR = "Could not update the usage. Try again.";
 const REACTIVATE_ERROR = "Could not bring it back. Try again.";
 const DEFAULT_CADENCE: Cadence = "monthly";
+const FOCUS_DELAY_MS = 0;
+type RowList = "zombies" | "graveyard";
+/** DOM id of a subscription's row in one of the two lists. */
+function getRowDomId(list: RowList, subscriptionId: string): string {
+  return `${list}-row-${subscriptionId}`;
+}
 const DEFAULT_USAGE: Usage = "often";
 
 const CADENCE_LABELS: Record<Cadence, string> = {
@@ -263,9 +269,11 @@ function DetailsSheet({ row, onClose, onCancel }: DetailsSheetProps) {
 type GraveyardSheetProps = {
   row: SubscriptionRow | null;
   onClose: () => void;
+  /** Called after the subscription is active again, before the sheet closes. */
+  onBroughtBack: (subscriptionId: string) => void;
 };
 
-function GraveyardSheet({ row, onClose }: GraveyardSheetProps) {
+function GraveyardSheet({ row, onClose, onBroughtBack }: GraveyardSheetProps) {
   const { reactivateSubscription } = useCryptActions();
   const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
@@ -286,6 +294,7 @@ function GraveyardSheet({ row, onClose }: GraveyardSheetProps) {
       tone: "info",
       message: `${row.name} is back: ${formatCentsShort(getMonthlyCents(row))}${PER_MONTH_SUFFIX} returns`,
     });
+    onBroughtBack(row.id);
     onClose();
   };
 
@@ -318,6 +327,22 @@ export function SubscriptionsScreen() {
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [graveId, setGraveId] = useState<string | null>(null);
+  // A canceled or revived row moves to the other list, so the element that opened the sheet is
+  // gone and BottomSheet cannot return focus to it. Focus the row in its new list instead.
+  const [moveFocus, setMoveFocus] = useState<{ list: RowList; id: string } | null>(null);
+  const sheetOpen = cancelId !== null || graveId !== null || detailsId !== null;
+  useEffect(() => {
+    if (moveFocus === null || sheetOpen) return;
+    const domId = getRowDomId(moveFocus.list, moveFocus.id);
+    // Wait until the live query has moved the row.
+    if (document.getElementById(domId) === null) return;
+    // One tick later, so the sheet's own focus restore runs first.
+    const timer = window.setTimeout(() => {
+      document.getElementById(domId)?.focus();
+      setMoveFocus(null);
+    }, FOCUS_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [moveFocus, sheetOpen, data]);
 
   if (data.status === "loading") {
     return (
@@ -370,6 +395,7 @@ export function SubscriptionsScreen() {
             {active.map((row) => (
               <li key={row.id}>
                 <ListRow
+                  id={getRowDomId("zombies", row.id)}
                   icon={Repeat}
                   tone="neutral"
                   title={row.name}
@@ -398,6 +424,7 @@ export function SubscriptionsScreen() {
             {graveyard.map((row) => (
               <li key={row.id}>
                 <ListRow
+                  id={getRowDomId("graveyard", row.id)}
                   icon={Skull}
                   tone="neutral"
                   title={row.name}
@@ -428,8 +455,15 @@ export function SubscriptionsScreen() {
         subscriptionId={cancelRow?.id ?? ""}
         name={cancelRow?.name ?? ""}
         monthlyCents={cancelRow ? getMonthlyCents(cancelRow) : 0}
+        onCanceled={() => {
+          if (cancelRow) setMoveFocus({ list: "graveyard", id: cancelRow.id });
+        }}
       />
-      <GraveyardSheet row={graveRow} onClose={() => setGraveId(null)} />
+      <GraveyardSheet
+        row={graveRow}
+        onClose={() => setGraveId(null)}
+        onBroughtBack={(id) => setMoveFocus({ list: "zombies", id })}
+      />
     </main>
   );
 }

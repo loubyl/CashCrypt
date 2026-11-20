@@ -6,7 +6,7 @@ import { ExorcismActionRow } from "@/components/ui/ExorcismActionRow";
 import { useToast } from "@/components/ui/ToastRegion";
 import type { MutationResult } from "@/hooks/useCryptActions";
 import { formatCentsShort } from "@/lib/utils/cents";
-import { getToastForCompletion, type DoItTarget } from "@/lib/utils/planView";
+import { getPlanActionSubtitle, getToastForCompletion, type DoItTarget } from "@/lib/utils/planView";
 import type { StoredPlanAction } from "@/types/finance";
 
 const TOGGLE_ERROR_MESSAGE = "Could not save that action. Try again.";
@@ -58,7 +58,7 @@ export function ExorcismPlanAction({
       <ExorcismActionRow
         id={getPlanRowId(weekKey, action.id)}
         title={action.title}
-        subtitle={action.subtitle}
+        subtitle={getPlanActionSubtitle(action)}
         impactText={impactText}
         done={action.done}
         disabled={busy}

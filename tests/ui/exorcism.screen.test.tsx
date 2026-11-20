@@ -5,6 +5,9 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ExorcismScreen } from "@/components/screens/ExorcismScreen";
 import type { DebtRow, StoredPlanAction, SubscriptionRow, WeeklyPlanRow } from "@/types/finance";
+import { readAllRows } from "@/lib/db/queries";
+import { toFinancialSnapshot } from "@/lib/db/snapshotAdapter";
+import { computeHouseState } from "@/lib/haunting";
 import { renderWithCrypt, type RealSeed } from "./helpers/crypt";
 
 // Test control for completePlanAction: fail it, or hold it until released.
@@ -29,6 +32,8 @@ const NOW = "2025-06-02";
 const COMPLETE_MESSAGE = "Exorcism complete. The lights flicker back on.";
 const ERROR_MESSAGE = "Could not save that action. Try again.";
 const DO_IT_NAME = /^Do it:/;
+const EXPLANATION = "Tap Do it to make the change here, or tick an action you did somewhere else.";
+const LEVEL_NAMES = ["", "Pristine", "Uneasy", "Haunted", "Crumbling", "Condemned"];
 
 const SUB: SubscriptionRow = {
   id: "sub-1",
@@ -109,6 +114,39 @@ beforeEach(() => {
   control.gate = null;
 });
 afterEach(() => cleanup());
+
+describe("Exorcism screen completion", () => {
+  it("shows the result Card with the score change and level, announced politely, and hides the hint", async () => {
+    const user = userEvent.setup();
+    const ctx = await renderScreen([CANCEL, PAY, FALLBACK]);
+    expect(screen.getByText(EXPLANATION)).toBeTruthy();
+    // The polite live region exists before the Card appears, so its content is announced.
+    const regions = Array.from(document.querySelectorAll('[role="status"][aria-live="polite"]'));
+    const region = regions.find((el) => el.closest("main") !== null && el.textContent === "");
+    expect(region).toBeTruthy();
+
+    for (const action of [CANCEL, PAY, FALLBACK]) {
+      await user.click(checkboxFor(action.title));
+    }
+    const message = await screen.findByText(COMPLETE_MESSAGE);
+    expect(region?.contains(message)).toBe(true);
+    const house = computeHouseState(toFinancialSnapshot(await readAllRows(ctx.realDb), NOW));
+    const expected = `Light score 50 → ${Math.floor(house.lightScore)} · Level ${house.decayLevel} — ${LEVEL_NAMES[house.decayLevel]}`;
+    expect(await within(region as HTMLElement).findByText(expected)).toBeTruthy();
+    expect(screen.queryByText(EXPLANATION)).toBeNull();
+  });
+
+  it("replaces a done action's instruction with its completion date", async () => {
+    const user = userEvent.setup();
+    await renderScreen([CANCEL, PAY, FALLBACK]);
+    expect(screen.getByText(CANCEL.subtitle)).toBeTruthy();
+    await user.click(checkboxFor(CANCEL.title));
+    await waitFor(() => expect(screen.queryByText(CANCEL.subtitle)).toBeNull());
+    expect(screen.getByText("Done Jun 2")).toBeTruthy();
+    // Pending actions keep their instruction.
+    expect(screen.getByText(PAY.subtitle)).toBeTruthy();
+  });
+});
 
 describe("Exorcism screen", () => {
   it("shows a skeleton while the plan is loading", async () => {

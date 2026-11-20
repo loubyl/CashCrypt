@@ -76,3 +76,11 @@ export function getNextLevelText(level: DecayLevel, score: number): string | nul
   const distance = Math.max(MIN_DISTANCE, nextMin - displayedScore(score));
   return `${distance} to Level ${level - 1}`;
 }
+
+/**
+ * The week's result for the completion Card, from floored scores:
+ * (32.74, 43.49, 3) → "Light score 32 → 43 · Level 3 — Haunted".
+ */
+export function formatWeekResult(startScore: number, currentScore: number, level: DecayLevel): string {
+  return `Light score ${displayedScore(startScore)} → ${displayedScore(currentScore)} · ${getLevelLabel(level)}`;
+}

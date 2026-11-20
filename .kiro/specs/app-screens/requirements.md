@@ -436,15 +436,16 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 2. THE Exorcism Screen SHALL show the three Plan_Actions of the stored Weekly_Plan as ExorcismActionRows in stored order, with impact text such as "+$120/mo" or "+$5.50/mo" for actions whose `monthlyAmountCents` is above 0.
 3. WHEN the user toggles an ExorcismActionRow, THE Exorcism Screen SHALL call the matching complete or uncomplete Mutation, and WHEN it completes an action the Screen SHALL show a success toast that states the money figure ("+$120/mo freed") or "Action completed" for an action with no amount.
 4. THE Exorcism Screen SHALL show "Money freed this week" as the sum of `monthlyAmountCents` of the actions that are done, formatted as currency per month, next to "of $T/mo possible" where `$T` is the sum over all three actions.
-5. WHEN all three actions are done, THE Exorcism Screen SHALL show the text "Exorcism complete. The lights flicker back on."
+5. WHEN all three actions are done, THE Exorcism Screen SHALL show a Card with the candle-colored flame icon, the text "Exorcism complete. The lights flicker back on." and the week's result from floored scores, "Light score S → C · Level N — <name>", where S is the plan's `startLightScore`, C the current light score and N the current decay level ("Light score 32 → 43 · Level 3 — Haunted"). The Card SHALL appear inside a polite live region that is present before it appears, so screen readers announce it.
 6. WHILE a Mutation is running for a row, THE ExorcismActionRow SHALL be disabled.
 7. IF a Mutation fails, THEN THE Exorcism Screen SHALL leave the row state unchanged and SHALL show an error toast with the message "Could not save that action. Try again."
-8. THE Exorcism Screen SHALL show a short explanation under the list: "Tap Do it to make the change here, or tick an action you did somewhere else."
+8. WHILE at least one action is not done, THE Exorcism Screen SHALL show a short explanation under the list: "Tap Do it to make the change here, or tick an action you did somewhere else." WHEN all three actions are done, THE explanation SHALL be hidden.
 9. WHILE a `cancel_subscription` or `extra_payment` Plan_Action is not done and its target still qualifies (the Subscription is active, or the Debt balance is above 0), THE ExorcismActionRow area SHALL show a secondary "Do it" Button with the accessible name "Do it: <action title>", on the Exorcism Screen and on the Dashboard plan card.
 10. WHEN the user activates the Do_It_Button of a `cancel_subscription` action, THE Screen SHALL open the cancel confirmation BottomSheet of Requirement 23 criterion 5 for that Subscription, and WHEN the user activates the Do_It_Button of an `extra_payment` action, THE Screen SHALL open the Log payment BottomSheet of Requirement 25 for that Debt, pre-filled with the Debt's minimum monthly payment plus the action's `suggestedAmountCents`, limited to the Debt balance.
 11. WHEN the sheet opened by a Do_It_Button completes its Mutation, THE Screen SHALL show the toast of that Mutation, SHALL show the Plan_Action as done through Auto_Completion without a page reload, and SHALL NOT show a second toast for the completion.
 12. THE Exorcism Screen SHALL keep the checkbox of every Plan_Action usable, including those with a Do_It_Button, so that the user can tick actions done outside the App.
 13. THE Exorcism Screen SHALL render no more than one primary Button.
+14. WHEN a Plan_Action is done, THE ExorcismActionRow SHALL show "Done <Mon D>" from its `completedOn` (for example "Done Nov 19", formatted with `formatMonthDay`) instead of its instruction subtitle, on the Exorcism Screen and on the Dashboard plan Card.
 
 ### Requirement 23: Subscriptions screen
 
@@ -569,7 +570,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 2. THE Screens SHALL give every interactive element an accessible name through a visible label, `aria-label` or `aria-labelledby`.
 3. THE Screens SHALL announce results of Mutations through the Toast live regions, and SHALL announce a scenario change and a decay level change through `aria-live="polite"`.
 4. THE Screens SHALL show every status that uses color (usage, Ghost, Paid off, Demo mode, Poltergeist, done) with an icon and text.
-5. WHEN a BottomSheet closes, THE Screens SHALL return focus to the control that opened it.
+5. WHEN a BottomSheet closes, THE Screens SHALL return focus to the control that opened it. WHEN that control no longer exists because its row moved to another list (a Subscription canceled into the Graveyard, or brought back to Zombies), THE Screen SHALL focus the moved row in its new list, and focus SHALL never be left on `<body>`.
 6. THE Screens SHALL be fully operable with the keyboard alone, including the Tab_Bar, the Sidebar, every sheet and every form.
 7. WHEN the Axe_Check runs on a Screen in each of the states "empty real crypt", "populated real crypt", "demo level 4" and "loading", THE Test_Suite SHALL report zero violations.
 

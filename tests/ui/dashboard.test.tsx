@@ -269,6 +269,20 @@ describe("Plan actions without a Do it flow", () => {
     expect(screen.queryByText(POLTERGEIST_TEXT)).toBeNull();
   });
 
+  it("shows Done <date> instead of the instruction once an action is done", async () => {
+    const user = userEvent.setup();
+    const instruction = "Open Transactions to review it. Tick it when you are done.";
+    await renderWithCrypt(<Dashboard />, {
+      mode: "real",
+      now: REAL_NOW,
+      seed: { plans: [storedPlan([{ ...REDUCE, subtitle: instruction }, FALLBACK, THIRD])] },
+    });
+    expect(await screen.findByText(instruction)).toBeTruthy();
+    await user.click(checkboxFor(REDUCE.title));
+    expect(await screen.findByText("Done Jun 2")).toBeTruthy();
+    expect(screen.queryByText(instruction)).toBeNull();
+  });
+
   it("completes an action when its checkbox is ticked and shows the money toast", async () => {
     const user = userEvent.setup();
     const ctx = await renderWithCrypt(<Dashboard />, {
