@@ -42,6 +42,22 @@ describe("house scene art", () => {
     expect(windows!.compareDocumentPosition(ghosts!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it("draws the ghost body at 85% opacity so window light shows through, with solid eyes", () => {
+    const ghost = { transactionId: "g-1", amount: 500, description: "Latte", category: "Coffee", date: "2025-06-01" };
+    const { container } = renderScene(houseAt(1, { ghosts: [ghost] }));
+    const figure = container.querySelector('[data-part="ghost"]') as Element;
+    const body = figure.querySelector('[data-part="ghost-body"]') as Element;
+    expect(Number(body.getAttribute("opacity"))).toBe(0.85);
+    const eyes = figure.querySelectorAll('[data-part="ghost-eye"]');
+    expect(eyes).toHaveLength(2);
+    for (const eye of eyes) {
+      expect(eye.hasAttribute("opacity")).toBe(false);
+      for (let node = eye.parentElement; node && node !== figure; node = node.parentElement) {
+        expect(node.hasAttribute("opacity")).toBe(false);
+      }
+    }
+  });
+
   it("pulses the Poltergeist body and turns only its swirl, and keeps the attic window clear of it", () => {
     const poltergeist = { totalAmount: 36_000, transactionCount: 30, byCategory: { Coffee: 36_000 } };
     const { container } = renderScene(houseAt(4, { poltergeist }));

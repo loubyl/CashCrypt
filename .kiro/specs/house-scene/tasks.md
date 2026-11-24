@@ -207,7 +207,7 @@ Conventions that apply to every task:
     - With `vi.mock("gsap")`: with motion on, loops start after the lazy import; unmount removes timelines, ticker callback and listeners. With real gsap core and a mocked `IntersectionObserver`: off screen pauses `ambientRoot` only, `gsap.globalTimeline` is not paused, and a separate in-flight timeline keeps progressing. Mutation check: pause `globalTimeline` and confirm the test fails.
     - _Requirements: 20.1, 20.2, 21.3, 21.4, 21.8, 24.7_
 
-- [ ] 8. MANUAL CHECKPOINT 2: creatures, graveyard and ambient motion (user review in the browser)
+- [x] 8. MANUAL CHECKPOINT 2: creatures, graveyard and ambient motion (user review in the browser)
   - **Executor: STOP here. Do not start phase C until the user confirms.** Ask the user to review:
     - The five demo scenarios: zombies in the basement row (sizes, usage badge flame, hourglass and skull, posture differs by usage), ghosts around the house, Poltergeist at the roof (awake), tombstones in the graveyard row.
     - Tick the Poltergeist action on `/exorcism`, return to `/`: the Poltergeist shows the sigil ring, is dimmed and stops rotating and pulsing; untick returns it to awake. Reload keeps the bound state.
@@ -217,6 +217,7 @@ Conventions that apply to every task:
     - Creatures are not clickable and show no tooltips.
   - Apply any art changes the user requests before continuing.
   - Review round 1 (applied, waiting for the user's second look): hash avalanche and ghost spreading (Property 20), true ghost total with the merged ghosts, spirit Poltergeist beside the tower, larger zombies with the badge above the head, ghosts with eyes and tail drawn above the windows, tower proportions, volume and texture, `wonk` per level (design revision 3, C1 to C8). Grain overlay skipped (C8).
+  - Approved by the user after round 1, with one tweak: ghost bodies at 85% opacity (eyes solid) so window light shows through.
   - _Requirements: 3.4, 4.3, 6.8, 8.2, 9.2, 9.6, 9.7, 10.2, 19.2, 20.2, 24.9_
 
 - [ ] 9. Phase C: pure moment infrastructure

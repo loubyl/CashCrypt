@@ -48,7 +48,7 @@ All creature colors map to design-system accent tokens. No new hex values are in
 
 | Creature | Token | Hex | Notes |
 |---|---|---|---|
-| Ghost | `--accent-ghost` | `#7AB0FF` | Use at 90% opacity base with a light rim; glow at 25% opacity |
+| Ghost | `--accent-ghost` | `#7AB0FF` | Body at 85% opacity with a light rim, eyes solid; glow at 25% opacity |
 | Zombie | *(scene-only)* | `#4A6B3A` body / `#2E4A24` clothing | Desaturated green — no chrome equivalent; never bright |
 | Poltergeist | `--accent-spirit` | `#B69CFF` | Base color; inner glow at 60% opacity |
 | Exorcism flash | `--text-primary` | `#F7F7F8` | Brief white burst on completion |
@@ -118,7 +118,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 
 **Appearance**
 - Dome head with a wavy hem that flows into a small tail curling to one side, two round dark eyes with a highlight and a small mouth.
-- Fill: `--accent-ghost` (`#7AB0FF`) at 90% opacity with a faint light rim, so it reads against the sky and the house walls.
+- Fill: `--accent-ghost` (`#7AB0FF`) at 85% opacity with a faint light rim, so it reads against the sky and the house walls while a lit window behind it still shows through (window light is the main progress indicator). The eyes stay solid.
 - Glow: `--accent-ghost` at 25% opacity as a larger soft copy behind the body.
 - Drawn in front of the house and its windows.
 - Size: `32×40px` base; scales proportionally to the transaction amount (min 24px, max 56px).

@@ -8,7 +8,8 @@ export type GhostSwarmProps = {
 
 /** Local figure, centered on the origin and scaled by the ghost size. */
 const WIDTH_RATIO = 0.8;
-const BODY_OPACITY = 0.9;
+/** Lets a lit window show through a ghost; the eyes stay solid. */
+const BODY_OPACITY = 0.85;
 const HALO_OPACITY = 0.25;
 const HALO_SCALE = 1.22;
 const RIM_OPACITY = 0.45;
@@ -53,7 +54,7 @@ function GhostFigureBase({ ghost }: GhostFigureProps) {
           <g data-part="ghost-halo" transform={`scale(${HALO_SCALE})`}>
             <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={HALO_OPACITY} />
           </g>
-          <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={BODY_OPACITY} />
+          <path data-part="ghost-body" d={GHOST_PATH} fill={TOKEN.ghost} opacity={BODY_OPACITY} />
           <path
             d={GHOST_PATH}
             fill="none"
@@ -64,7 +65,7 @@ function GhostFigureBase({ ghost }: GhostFigureProps) {
           />
           {[-EYE_OFFSET, EYE_OFFSET].map((cx) => (
             <g key={cx}>
-              <ellipse cx={cx} cy={EYE_Y} rx={EYE_RX} ry={EYE_RY} fill={TOKEN.void} />
+              <ellipse data-part="ghost-eye" cx={cx} cy={EYE_Y} rx={EYE_RX} ry={EYE_RY} fill={TOKEN.void} />
               <circle cx={cx + EYE_RX * 0.35} cy={EYE_Y - EYE_RY * 0.4} r={SHINE_RADIUS} fill={TOKEN.ink} />
             </g>
           ))}
