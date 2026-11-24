@@ -180,16 +180,16 @@ Conventions that apply to every task:
     - Mutation check (conventions): temporarily make the ghost overflow equal the hidden count, confirm the test fails, then restore the fix and confirm it passes.
     - _Requirements: 4.1, 4.2, 4.8, 9.1, 9.2, 21.6_
 
-- [ ] 7. Phase B: creature components and ambient motion
-  - [ ] 7.1 Create `ZombieBasement.tsx`, `GhostSwarm.tsx`, `Poltergeist.tsx` and `GraveyardRow.tsx`; wire into `HouseScene`
+- [x] 7. Phase B: creature components and ambient motion
+  - [x] 7.1 Create `ZombieBasement.tsx`, `GhostSwarm.tsx`, `Poltergeist.tsx` and `GraveyardRow.tsx`; wire into `HouseScene`
     - Zombie row with usage badge (flame, hourglass, skull) and posture, ghosts at their rest position (ovoid with eye-spots), jagged Poltergeist with the sigil ring when bound (dimmed, rotation and pulse stopped by ambient), tombstones. Distinct shapes without color. Empty basement and empty graveyard draw no text. Memoized by id.
     - _Requirements: 8.1, 8.2, 8.6, 9.1, 9.2, 9.5, 9.6, 10.2, 10.3, 11.1, 11.3, 11.4, 21.6, 21.7, 23.3_
 
-  - [ ] 7.2 Create `src/hooks/useElementWidth.ts` and `SceneLabels.tsx`; wire into `HouseScene`
+  - [x] 7.2 Create `src/hooks/useElementWidth.ts` and `SceneLabels.tsx`; wire into `HouseScene`
     - `useElementWidth` uses `ResizeObserver` and returns `null` when unavailable or before measuring. `SceneLabels` is an `aria-hidden` HTML overlay: `+N` markers at 12px or more, tombstone labels (name and `R.I.P. $X/mo` via `formatCentsShort`) only when the measured width reaches `TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX`.
     - _Requirements: 4.3, 4.4, 5.7, 11.2, 19.5_
 
-  - [ ] 7.3 Create `AmbientMotion.tsx` and load it lazily
+  - [x] 7.3 Create `AmbientMotion.tsx` and load it lazily
     - GSAP via `useGSAP({ scope })`, all tweens children of one `ambientRoot` timeline: zombie sway, ghost figure-eight and bob, Poltergeist rotation and pulse (stopped when bound), fog, fireflies, bats, level 2 and 3 window flicker. Animate only `transform` and `opacity`.
     - Pause only `ambientRoot` and the ambient ticker callback when off screen (`IntersectionObserver`) or hidden (`visibilitychange`). Never pause `gsap.globalTimeline`. Clean up on unmount.
     - Load with `next/dynamic(..., { ssr: false })` from `HouseScene` only when motion is enabled. Check `matchMedia('(prefers-reduced-motion: reduce)')` before any timeline; under reduced motion hide fog, fireflies and bats and never request the module.
@@ -199,11 +199,11 @@ Conventions that apply to every task:
     - Overflow markers only when overflow above 0; tombstone labels follow the measured width (mock `ResizeObserver`); usage badges and postures; empty basement; Poltergeist awake and bound states; no text for an empty graveyard.
     - _Requirements: 4.3, 4.4, 5.7, 8.2, 10.2, 11.2, 11.3, 24.7_
 
-  - [ ] 7.5 Write reduced-motion tests for ambient motion
+  - [x] 7.5 Write reduced-motion tests for ambient motion
     - With `vi.mock("gsap")`: reduced motion creates no timeline, ticker or `AmbientMotion` module import.
     - _Requirements: 20.1, 20.2, 24.7_
 
-  - [ ] 7.6 Write component tests for ambient motion loops and pause
+  - [x] 7.6 Write component tests for ambient motion loops and pause
     - With `vi.mock("gsap")`: with motion on, loops start after the lazy import; unmount removes timelines, ticker callback and listeners. With real gsap core and a mocked `IntersectionObserver`: off screen pauses `ambientRoot` only, `gsap.globalTimeline` is not paused, and a separate in-flight timeline keeps progressing. Mutation check: pause `globalTimeline` and confirm the test fails.
     - _Requirements: 20.1, 20.2, 21.3, 21.4, 21.8, 24.7_
 

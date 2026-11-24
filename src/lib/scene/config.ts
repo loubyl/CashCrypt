@@ -150,6 +150,27 @@ export const LEVEL_TRANSITION_MS = 1200;
 export const WINDOW_INTERPOLATION_MS = 600;
 export const POLTERGEIST_PULSE_MS = 1500;
 export const POLTERGEIST_ROTATION_MS = 8000;
+export const POLTERGEIST_PULSE_SCALE = 1.08;
+/** Ambient loops (AmbientMotion only). Distances are in ViewBox units, durations in ms. */
+export const GHOST_ORBIT_PERIOD_MS = 24000;
+export const FOG_DRIFT_DISTANCE = 24;
+export const FOG_DRIFT_PERIOD_MS = 9000;
+export const FOG_DRIFT_STAGGER_MS = 1500;
+export const FIREFLY_RISE_DISTANCE = 40;
+export const FIREFLY_DRIFT_DISTANCE = 14;
+export const FIREFLY_PERIOD_MS = 5000;
+export const FIREFLY_STAGGER_MS = 900;
+export const FIREFLY_MIN_OPACITY = 0.2;
+export const BAT_CIRCLE_RADIUS_X = 36;
+export const BAT_CIRCLE_RADIUS_Y = 14;
+export const BAT_PERIOD_MS = 7000;
+export const BAT_STAGGER_MS = 1200;
+export const WINDOW_FLICKER_L2_PERIOD_MS = 4000;
+export const WINDOW_FLICKER_L2_MIN_OPACITY = 0.85;
+export const WINDOW_FLICKER_L3_MS = 200;
+export const WINDOW_FLICKER_L3_MIN_OPACITY = 0.6;
+export const WINDOW_FLICKER_L3_PAUSE_MS = 2200;
+export const WINDOW_FLICKER_STAGGER_MS = 700;
 
 // ---------------------------------------------------------------------------
 // Moments (durations equal the design-system.md moment catalog)

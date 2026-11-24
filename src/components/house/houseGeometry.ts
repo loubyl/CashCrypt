@@ -11,6 +11,7 @@ export const TOKEN = {
   overlay: "var(--surface-overlay)",
   candle: "var(--accent-candle)",
   spirit: "var(--accent-spirit)",
+  ghost: "var(--accent-ghost)",
   tertiary: "var(--text-tertiary)",
   ink: "var(--text-primary)",
 } as const;
@@ -169,3 +170,14 @@ export const MOON_EDGE_POLYLINES: readonly string[] = [
 /** x of the left and right tree trunks. */
 export const TREE_LEFT_X = 118;
 export const TREE_RIGHT_X = 688;
+
+/** Equality of small plain-data props, so memoized creature figures skip re-render when the model is rebuilt with equal data. */
+export function isSameData<T extends Record<string, unknown>>(previous: T, next: T): boolean {
+  return JSON.stringify(previous) === JSON.stringify(next);
+}
+
+/**
+ * Hides decorative atmosphere (fog bars, fireflies, bats) under Reduced_Motion without any script:
+ * the media query covers first paint, the scene container's data-motion attribute covers a live flip.
+ */
+export const REDUCED_MOTION_HIDE_CLASS = "motion-reduce:hidden group-data-[motion=reduced]/scene:hidden";

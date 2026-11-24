@@ -3,6 +3,7 @@ import { POLTERGEIST_CENTER, SCENE_FOG, SCENE_MOON, VIEWBOX_HEIGHT, VIEWBOX_WIDT
 import type { SceneModel } from "@/lib/scene";
 import {
   FOG_BACK_BARS,
+  REDUCED_MOTION_HIDE_CLASS,
   FOG_BAR_HEIGHT,
   FOG_BARS,
   FOG_FRONT_OPACITY,
@@ -45,7 +46,7 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
 
   return (
     <>
-      <g data-part="atmosphere-front">
+      <g data-part="atmosphere-front" className={REDUCED_MOTION_HIDE_CLASS}>
         {frontBars.map((bar) => (
           <rect
             key={`${bar.x}-${bar.y}`}
@@ -56,6 +57,7 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
             rx={FOG_BAR_HEIGHT / 2}
             fill={SCENE_FOG}
             opacity={FOG_FRONT_OPACITY}
+            data-ambient="fog"
           />
         ))}
       </g>

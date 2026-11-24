@@ -420,6 +420,73 @@
         "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
         "timestamp": 1795500998981
       }
+    ],
+    "7.1 Create `ZombieBasement.tsx`, `GhostSwarm.tsx`, `Poltergeist.tsx` and `GraveyardRow.tsx`; wire into `HouseScene`": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795501376281
+      },
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795501756671
+      }
+    ],
+    "7.2 Create `src/hooks/useElementWidth.ts` and `SceneLabels.tsx`; wire into `HouseScene`": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795501760391
+      },
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795502215051
+      }
+    ],
+    "7.3 Create `AmbientMotion.tsx` and load it lazily": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795502218523
+      },
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503014252
+      }
+    ],
+    "7.5 Write reduced-motion tests for ambient motion": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503018907
+      },
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503414122
+      }
+    ],
+    "7.6 Write component tests for ambient motion loops and pause": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503018985
+      },
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503414632
+      }
+    ],
+    "7. Phase B: creature components and ambient motion": [
+      {
+        "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
+        "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
+        "timestamp": 1795503414681
+      }
     ]
   }
 }

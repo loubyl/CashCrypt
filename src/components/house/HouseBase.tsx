@@ -24,6 +24,7 @@ import {
 import type { DecayLevel, GardenState, LevelFeatures, SceneModel, TreeState } from "@/lib/scene";
 import {
   BAT_PATH,
+  REDUCED_MOTION_HIDE_CLASS,
   BATS,
   BRICK_HEIGHT,
   BRICK_RADIUS,
@@ -161,6 +162,7 @@ function renderFogBars(from: number, to: number): ReactNode {
       rx={FOG_BAR_HEIGHT / 2}
       fill={SCENE_FOG}
       opacity={FOG_OPACITY}
+      data-ambient="fog"
     />
   ));
 }
@@ -175,18 +177,22 @@ function renderBackAtmosphere(features: LevelFeatures): ReactNode {
           <ellipse key={`${mound.cx}-${mound.cy}`} cx={mound.cx} cy={mound.cy} rx={mound.rx} ry={mound.ry} />
         ))}
       </g>
-      <g data-part="fog-back">{renderFogBars(0, backBars)}</g>
+      <g data-part="fog-back" className={REDUCED_MOTION_HIDE_CLASS}>{renderFogBars(0, backBars)}</g>
       {features.fireflies ? (
-        <g data-part="fireflies">
+        <g data-part="fireflies" className={REDUCED_MOTION_HIDE_CLASS}>
           {FIREFLIES.map((fly) => (
-            <circle key={`${fly.x}-${fly.y}`} cx={fly.x} cy={fly.y} r={3} fill={TOKEN.candle} opacity={0.8} />
+            <g key={`${fly.x}-${fly.y}`} data-ambient="firefly">
+              <circle cx={fly.x} cy={fly.y} r={3} fill={TOKEN.candle} opacity={0.8} />
+            </g>
           ))}
         </g>
       ) : null}
       {features.bats ? (
-        <g data-part="bats">
+        <g data-part="bats" className={REDUCED_MOTION_HIDE_CLASS}>
           {BATS.map((bat) => (
-            <path key={`${bat.x}-${bat.y}`} d={BAT_PATH} transform={`translate(${bat.x} ${bat.y})`} fill={SCENE_BAT} />
+            <g key={`${bat.x}-${bat.y}`} data-ambient="bat">
+              <path d={BAT_PATH} transform={`translate(${bat.x} ${bat.y})`} fill={SCENE_BAT} />
+            </g>
           ))}
         </g>
       ) : null}

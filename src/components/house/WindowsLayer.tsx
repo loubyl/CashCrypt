@@ -154,6 +154,8 @@ function renderWindow(window: SceneWindow, filterIds: SceneFilterIds, unlitOpaci
       data-part={`window:${window.index}`}
       data-state={window.state}
       data-shape={window.shape}
+      data-ambient={lit ? "window-flicker" : undefined}
+      data-window-index={window.index}
       opacity={lit ? undefined : unlitOpacity}
     >
       {lit ? renderLit(window, filterIds) : null}
