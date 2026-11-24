@@ -113,67 +113,72 @@ Conventions that apply to every task:
     - Install with `npm install gsap @gsap/react`. Confirm `gsap/DrawSVGPlugin` and `gsap/MotionPathPlugin` resolve and typecheck. Import no `MorphSVGPlugin`.
     - _Requirements: 1.6_
 
-- [ ] 6. Phase B: creatures in the scene model (pure)
-  - [ ] 6.1 Create `src/lib/scene/layout.ts` and complete `buildSceneModel`
+- [x] 6. Phase B: creatures in the scene model (pure)
+  - [x] 6.1 Create `src/lib/scene/layout.ts` and complete `buildSceneModel`
     - Zombie slots (sorted by monthly cost desc then id, centered row, size from cost over income, posture and badge by usage, tilt and sway from hashed id), ghost lanes (figure-eight, phase, bob period from `transactionId`), tombstone slots, overflow counts and anchors, Poltergeist state (`awake` or `bound`) with sigil geometry, ghosts omitted while a Poltergeist exists.
     - _Requirements: 3.3, 3.4, 3.8, 4.1, 4.2, 4.5, 4.6, 4.7, 5.4, 5.5, 5.6, 8.1, 8.2, 8.3, 8.4, 9.1, 9.2, 9.3, 10.1, 10.3, 11.1_
 
-  - [ ] 6.2 Complete `summary.ts`
+  - [x] 6.2 Complete `summary.ts`
     - Full summary: level number and name, true counts with singular and plural forms, "no zombies", "no ghosts", "no tombstones", and the "Poltergeist awake" or "Poltergeist bound" clause (omitted when null). Totals, not drawn counts.
     - _Requirements: 4.8, 8.6, 10.6, 19.2_
 
-  - [ ] 6.3 Create `tests/scene/arbitraries.ts`
+  - [x] 6.3 Create `tests/scene/arbitraries.ts`
     - fast-check generators: valid inputs with up to 40 zombies, 60 ghosts and 20 graveyard entries, hostile numbers (`NaN`, `Infinity`, negatives), empty arrays, permutations.
     - _Requirements: 24.1_
 
-  - [ ] 6.4 Write property test for determinism and permutation invariance
+  - [x] 6.4 Write property test for determinism and permutation invariance
     - **Property 1: Determinism and permutation invariance**
     - File: `tests/scene/properties/p01-determinism-permutation.test.ts`.
     - **Validates: Requirements 3.2, 3.3**
 
-  - [ ] 6.5 Write property test for stable ghost phase
+  - [x] 6.5 Write property test for stable ghost phase
     - **Property 2: Stable ghost phase**
     - File: `tests/scene/properties/p02-ghost-phase.test.ts`.
     - **Validates: Requirements 3.4, 9.4**
 
-  - [ ] 6.6 Write property test for no mutation and hostile numbers
+  - [x] 6.6 Write property test for no mutation and hostile numbers
     - **Property 3: No mutation and no throw on hostile numbers**
     - File: `tests/scene/properties/p03-no-mutation-hostile.test.ts`.
     - **Validates: Requirements 3.5, 3.6, 10.7**
 
-  - [ ] 6.7 Write property test for ViewBox bounds (model part)
+  - [x] 6.7 Write property test for ViewBox bounds (model part)
     - **Property 4: Everything stays inside the ViewBox** (windows, zombies, tombstones, Poltergeist, ghost orbit extremes, overflow anchors, sigil and chimney). The Moment art part is added in task 9.10.
     - File: `tests/scene/properties/p04-viewbox-bounds.test.ts`.
     - **Validates: Requirements 3.8, 15.7**
 
-  - [ ] 6.8 Write property test for caps and conservation
+  - [x] 6.8 Write property test for caps and conservation
     - **Property 5: Caps and conservation**
     - File: `tests/scene/properties/p05-caps-conservation.test.ts`.
     - **Validates: Requirements 4.1, 4.2, 4.8, 9.1, 9.2, 21.6**
 
-  - [ ] 6.9 Write property test for ranked prefixes
+  - [x] 6.9 Write property test for ranked prefixes
     - **Property 6: Drawn items are the best-ranked prefix**
     - File: `tests/scene/properties/p06-ranked-prefix.test.ts`.
     - **Validates: Requirements 4.5, 4.6, 4.7, 11.1**
 
-  - [ ] 6.10 Write property test for zombie slots and sizes
+  - [x] 6.10 Write property test for zombie slots and sizes
     - **Property 7: Zombie slots are distinct and sizes are bounded and monotone**
     - File: `tests/scene/properties/p07-zombie-slots-sizes.test.ts`.
     - **Validates: Requirements 5.5, 5.6**
 
-  - [ ] 6.11 Write property test for Poltergeist, bound state and posture
+  - [x] 6.11 Write property test for Poltergeist, bound state and posture
     - **Property 8: Poltergeist, bound state and posture**
     - File: `tests/scene/properties/p08-poltergeist-bound-posture.test.ts`.
     - **Validates: Requirements 8.2, 8.3, 8.4, 9.2, 10.1, 10.3**
 
-  - [ ] 6.12 Write property test for the scene summary
+  - [x] 6.12 Write property test for the scene summary
     - **Property 12: Scene summary states the true figures**
     - File: `tests/scene/properties/p12-summary.test.ts`.
     - **Validates: Requirements 4.8, 8.6, 10.6, 19.2**
 
-  - [ ]* 6.13 Write example tests for the summary
+  - [x]* 6.13 Write example tests for the summary
     - `tests/scene/summary.test.ts`: the string of Requirement 19.2, singular and plural, zero counts, the three Poltergeist clauses.
     - _Requirements: 19.2, 24.4_
+
+  - [x] 6.14 Extend the caps property test with the Poltergeist ghost case
+    - In `tests/scene/properties/p05-caps-conservation.test.ts`, assert explicitly that with a Poltergeist the drawn ghosts are 0, the ghost overflow is 0 and `totals.ghosts` equals `houseState.ghosts.length`, instead of skipping that case.
+    - Mutation check (conventions): temporarily make the ghost overflow equal the hidden count, confirm the test fails, then restore the fix and confirm it passes.
+    - _Requirements: 4.1, 4.2, 4.8, 9.1, 9.2, 21.6_
 
 - [ ] 7. Phase B: creature components and ambient motion
   - [ ] 7.1 Create `ZombieBasement.tsx`, `GhostSwarm.tsx`, `Poltergeist.tsx` and `GraveyardRow.tsx`; wire into `HouseScene`
@@ -407,24 +412,27 @@ Conventions that apply to every task:
     { "id": 5, "tasks": ["3.4"] },
     { "id": 6, "tasks": ["6.1"] },
     { "id": 7, "tasks": ["6.2", "6.3"] },
-    { "id": 8, "tasks": ["6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "6.10", "6.11", "6.12", "6.13", "7.1"] },
+    { "id": 8, "tasks": ["6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "6.10", "6.11", "6.12", "6.13", "6.14", "7.1"] },
     { "id": 9, "tasks": ["7.2"] },
     { "id": 10, "tasks": ["7.3"] },
     { "id": 11, "tasks": ["7.4", "7.5", "7.6"] },
-    { "id": 12, "tasks": ["9.1", "9.2", "9.3", "9.4"] },
-    { "id": 13, "tasks": ["9.5", "9.6", "9.7", "9.8", "9.9", "9.10", "9.11", "10.1"] },
-    { "id": 14, "tasks": ["10.2"] },
-    { "id": 15, "tasks": ["10.3"] },
-    { "id": 16, "tasks": ["10.4", "10.5"] },
-    { "id": 17, "tasks": ["11.1"] },
-    { "id": 18, "tasks": ["11.2", "12.1"] },
-    { "id": 19, "tasks": ["12.2", "13.1"] },
-    { "id": 20, "tasks": ["13.2", "14.1"] },
-    { "id": 21, "tasks": ["14.2", "15.1"] },
-    { "id": 22, "tasks": ["15.2", "16.1", "16.2"] },
-    { "id": 23, "tasks": ["18.1", "18.2", "18.3", "18.5"] },
-    { "id": 24, "tasks": ["18.4"] },
-    { "id": 25, "tasks": ["18.6"] }
+    { "id": 12, "tasks": ["8"] },
+    { "id": 13, "tasks": ["9.1", "9.2", "9.3", "9.4"] },
+    { "id": 14, "tasks": ["9.5", "9.6", "9.7", "9.8", "9.9", "9.10", "9.11", "10.1"] },
+    { "id": 15, "tasks": ["10.2"] },
+    { "id": 16, "tasks": ["10.3"] },
+    { "id": 17, "tasks": ["10.4", "10.5"] },
+    { "id": 18, "tasks": ["11.1"] },
+    { "id": 19, "tasks": ["11.2", "12.1"] },
+    { "id": 20, "tasks": ["12.2", "13.1"] },
+    { "id": 21, "tasks": ["13.2", "14.1"] },
+    { "id": 22, "tasks": ["14.2", "15.1"] },
+    { "id": 23, "tasks": ["15.2", "16.1", "16.2"] },
+    { "id": 24, "tasks": ["17"] },
+    { "id": 25, "tasks": ["18.1", "18.2", "18.3", "18.5"] },
+    { "id": 26, "tasks": ["18.4"] },
+    { "id": 27, "tasks": ["18.6"] },
+    { "id": 28, "tasks": ["19"] }
   ]
 }
 ```

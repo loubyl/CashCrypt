@@ -19,8 +19,10 @@ const FOCUSABLE_SELECTOR =
   "a[href], button, input, select, textarea, summary, [tabindex], [contenteditable], audio[controls], video[controls]";
 const REACT_PROPS_PREFIX = "__reactProps$";
 const HANDLER_PATTERN = /^on[A-Z]/;
-const LEVEL_4_SUMMARY = "Level 4, Crumbling.";
-const LEVEL_2_SUMMARY = "Level 2, Uneasy.";
+const LEVEL_4_PREFIX = /^Level 4, Crumbling\./;
+const EMPTY_TAIL = " no zombies, no ghosts, no tombstones";
+const LEVEL_4_SUMMARY = `Level 4, Crumbling.${EMPTY_TAIL}`;
+const LEVEL_2_SUMMARY = `Level 2, Uneasy.${EMPTY_TAIL}`;
 
 function modelAt(level: DecayLevel): SceneModel {
   const houseState: HouseState = {
@@ -99,7 +101,7 @@ describe("HouseScene accessibility", () => {
 describe("Dashboard scene states", () => {
   it("shows the scene in the level 4 demo and keeps its svg across a data change", async () => {
     const ctx = await renderWithCrypt(<Dashboard />, { mode: "demo", seed: "level-4" });
-    const scene = await screen.findByRole("img", { name: LEVEL_4_SUMMARY });
+    const scene = await screen.findByRole("img", { name: LEVEL_4_PREFIX });
     const svg = scene.querySelector("svg");
     expect(svg?.getAttribute("aria-hidden")).toBe("true");
     expect(screen.getAllByRole("img")).toHaveLength(1);
@@ -128,7 +130,7 @@ describe("Dashboard scene states", () => {
     expect(skeleton?.style.aspectRatio).toBe("4 / 3");
     expect(container.querySelector("main")?.getAttribute("aria-busy")).toBe("true");
     expect(screen.queryByRole("img")).toBeNull();
-    await screen.findByRole("img", { name: LEVEL_4_SUMMARY });
+    await screen.findByRole("img", { name: LEVEL_4_PREFIX });
     expect(container.querySelector('[data-part="scene-skeleton"]')).toBeNull();
     expect(container.querySelector("main")?.hasAttribute("aria-busy")).toBe(false);
   });
@@ -138,7 +140,7 @@ describe("Dashboard scene states", () => {
     ["mobile", MOBILE_WIDTH],
   ])("uses a single column by default and two columns from the lg breakpoint on %s", async (_name, width) => {
     const { container } = await renderWithCrypt(<Dashboard />, { mode: "demo", seed: "level-4", width });
-    await screen.findByRole("img", { name: LEVEL_4_SUMMARY });
+    await screen.findByRole("img", { name: LEVEL_4_PREFIX });
     const grid = container.querySelector("main > div.lg\\:grid") as HTMLElement;
     const classes = grid.className.split(/\s+/);
     // Unprefixed classes apply below lg: a single flex column.

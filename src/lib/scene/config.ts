@@ -98,6 +98,14 @@ export const TOMBSTONE_BASELINE_Y = 585;
 export const ZOMBIE_SLOT_UNITS = BASEMENT_BAND.w / MAX_VISIBLE_ZOMBIES;
 export const TOMBSTONE_SLOT_UNITS = GRAVEYARD_BAND.w / MAX_VISIBLE_TOMBSTONES;
 
+/** Overflow "+N" anchors (ViewBox units): zombies and tombstones at the right end of their band. */
+export const GHOST_OVERFLOW_ANCHOR: Readonly<Point> = { x: 750, y: 30 };
+/** Layout math constants (full turn, half, unit range) used by layout.ts. */
+export const FULL_TURN_RADIANS = 2 * Math.PI;
+export const HALF = 0.5;
+export const NO_COUNT = 0;
+export const SLOT_FIRST = 0;
+
 export type GhostLaneConfig = { cx: number; cy: number; rx: number; ry: number };
 export const GHOST_LANES: readonly GhostLaneConfig[] = [
   { cx: 400, cy: 250, rx: 320, ry: 140 },

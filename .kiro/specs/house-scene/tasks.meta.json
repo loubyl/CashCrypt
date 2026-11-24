@@ -11,6 +11,18 @@
     "1.6 Write property test for window opacity": {
       "status": "passed",
       "lastRunTimestamp": 1795491344486
+    },
+    "6.4 Write property test for determinism and permutation invariance": {
+      "status": "passed",
+      "lastRunTimestamp": 1795499748062
+    },
+    "6.8 Write property test for caps and conservation": {
+      "status": "passed",
+      "lastRunTimestamp": 1795499762224
+    },
+    "6.11 Write property test for Poltergeist, bound state and posture": {
+      "status": "passed",
+      "lastRunTimestamp": 1795499813354
     }
   },
   "executionHistory": {
@@ -232,6 +244,181 @@
         "executionId": "a986a2f9-bf40-4b33-b5b1-61686e8ab3a7",
         "chatSessionId": "sess_5aaa6d28-bc23-40fd-908b-42ba95922f39",
         "timestamp": 1795499136224
+      }
+    ],
+    "6.1 Create `src/lib/scene/layout.ts` and complete `buildSceneModel`": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499239734
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499352038
+      }
+    ],
+    "6.2 Complete `summary.ts`": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499352576
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499707486
+      }
+    ],
+    "6.3 Create `tests/scene/arbitraries.ts`": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499356626
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499707546
+      }
+    ],
+    "6.4 Write property test for determinism and permutation invariance": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499710766
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499771794
+      }
+    ],
+    "6.5 Write property test for stable ghost phase": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499711583
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499773397
+      }
+    ],
+    "6.6 Write property test for no mutation and hostile numbers": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499712363
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499772605
+      }
+    ],
+    "6.7 Write property test for ViewBox bounds (model part)": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499713167
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499770195
+      }
+    ],
+    "6.8 Write property test for caps and conservation": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499714076
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499770997
+      }
+    ],
+    "6.9 Write property test for ranked prefixes": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499774446
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499859094
+      }
+    ],
+    "6.10 Write property test for zombie slots and sizes": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499775251
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499859872
+      }
+    ],
+    "6.11 Write property test for Poltergeist, bound state and posture": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499776287
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499860902
+      }
+    ],
+    "6.12 Write property test for the scene summary": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499776896
+      },
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499861346
+      }
+    ],
+    "6. Phase B: creatures in the scene model (pure)": [
+      {
+        "executionId": "0bdc90b4-5e09-42ed-97f1-472c55f5f51b",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795499861386
+      }
+    ],
+    "6.13 Write example tests for the summary": [
+      {
+        "executionId": "1786af99-4e41-4561-9b1b-3b2338009dc8",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795500685935
+      },
+      {
+        "executionId": "1786af99-4e41-4561-9b1b-3b2338009dc8",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795500998218
+      }
+    ],
+    "6.14 Extend the caps property test with the Poltergeist ghost case": [
+      {
+        "executionId": "1786af99-4e41-4561-9b1b-3b2338009dc8",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795500686127
+      },
+      {
+        "executionId": "1786af99-4e41-4561-9b1b-3b2338009dc8",
+        "chatSessionId": "sess_9ed8913c-3c0d-4f6a-bbfa-b1e8a8e52110",
+        "timestamp": 1795500998981
       }
     ]
   }

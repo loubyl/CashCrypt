@@ -96,7 +96,7 @@ describe("Property 11: level and lighting follow the engine", () => {
       fc.property(houseStateArb(levelArb), (houseState) => {
         const model = buildSceneModel(inputOf(houseState));
         expect(model.levelName).toBe(LEVEL_NAMES[model.level]);
-        expect(model.summary).toBe(`Level ${model.level}, ${LEVEL_NAMES[model.level]}.`);
+        expect(model.summary.startsWith(`Level ${model.level}, ${LEVEL_NAMES[model.level]}. `)).toBe(true);
       }),
       { numRuns: NUM_RUNS },
     );

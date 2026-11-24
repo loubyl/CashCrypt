@@ -152,7 +152,7 @@ src/lib/scene/
   features.ts      # per-level feature table accessor + severity helpers
   windows.ts       # window layout, window state assignment, getWindowOpacity(), getFlareSteps()
   layout.ts        # zombie slots, ghost orbits, tombstone slots, sizes
-  summary.ts       # buildSceneSummary()
+  summary.ts       # LEVEL_NAMES, SceneSummaryParts, buildSceneSummary(parts: SceneSummaryParts): string
   momentGeometry.ts # pure ViewBox geometry of Moment art: paths, boxes, clips (bounds-tested)
   index.ts         # buildSceneModel() + re-exports (public API)
 src/lib/moments/
@@ -312,7 +312,7 @@ export type SceneModel = {
 
 ### Hash and determinism (`hash.ts`)
 
-`hashId(id, salt)` is 32-bit FNV-1a over `salt + "\u0000" + id`. `unitFromId` divides by 2³². Every value that looks random derives from it: zombie tilt, sway phase and period, ghost phase, bob period and lane, label-free details. No function reads input array order. Selection and slot assignment sort by explicit keys with the id as the final tie-breaker (`localeCompare` is avoided; ids compare by `<`).
+`hashId(id, salt)` is 32-bit FNV-1a over `salt + "\u0000" + id`. `unitFromId` divides by 2³². Every value that looks random derives from it: zombie tilt, sway phase and period, ghost phase, bob period and lane, label-free details. The salts used in `layout.ts` are `"tilt"`, `"swayPhase"` and `"swayPeriod"` for zombies, and `"lane"`, `"ghostPhase"` and `"bobPeriod"` for ghosts. No function reads input array order. Selection and slot assignment sort by explicit keys with the id as the final tie-breaker (`localeCompare` is avoided; ids compare by `<`).
 
 ### `buildSceneModel(input, config = SCENE_CONFIG): SceneModel`
 
@@ -323,7 +323,7 @@ export type SceneModel = {
 5. **Ghosts**: if `houseState.poltergeist !== null`, draw none (the overflow is also 0, the figures have merged); otherwise sort by `amount` descending then `transactionId`, draw the first `MAX_VISIBLE_GHOSTS`. `totals.ghosts` is always the true count `houseState.ghosts.length`.
 6. **Poltergeist**: `null` when the engine reports none, else `state = bound` if `input.bound` else `awake`.
 7. **Tombstones**: sort the graveyard by `canceledOn` descending then `subscriptionId` ascending, draw the first `MAX_VISIBLE_TOMBSTONES`.
-8. **Summary** (see Accessibility).
+8. **Summary**: `buildSceneSummary(parts: SceneSummaryParts): string` with `SceneSummaryParts = { level, levelName, totals, poltergeist }`, where `totals` are the true totals (not the drawn counts) and `poltergeist` is `"awake" | "bound" | null`. The text is `Level <n>, <name>.` followed by the clauses in this order: zombies, ghosts, Poltergeist (omitted when `null`), tombstones, joined by `, ` with no trailing period. Example: `Level 3, Haunted. 4 zombies, 30 ghosts, Poltergeist awake, 1 tombstone`. A count of 1 is singular and a count of 0 reads `no zombies`, `no ghosts` or `no tombstones`.
 
 The function copies what it needs and never writes to its input (Requirement 3.5).
 
@@ -355,7 +355,7 @@ All coordinates are ViewBox units (800 by 600).
 
 The ring is drawn at 60% opacity over the roof and the upper windows. It carries no text and the windows beneath stay visible, so it hides no information. Because the ring is a stroke drawn in front of the roof, it may cross roof and window art but never the chimney box, which `validateSceneConfig` checks (Requirement 15.7).
 
-**Zombies.** Slot width `ZOMBIE_SLOT_UNITS = 680 / 6 ≈ 113`. For `n` drawn zombies sorted as above, slot `i` has center `x = 60 + (6 − n)·slot/2 + (i + 0.5)·slot`, so the row stays centered. Height is `lerp(46, 114, clamp(cost / income / ZOMBIE_FULL_RATIO, 0, 1))` (0 when income is 0, so the zombie is the smallest). Width is 0.625 of height, always below the slot width, so slot boxes never overlap (Property 8). The box bottom is the baseline `515`; the tallest zombie (114) tops out at `y 401`, inside the basement band. Posture is a total map `often → upright`, `rarely → leaning`, `never → slumped`; badge `flame`, `hourglass`, `skull`. Tilt is `lerp(−5, 5, unitFromId(id, "tilt"))`.
+**Zombies.** Slot width `ZOMBIE_SLOT_UNITS = 680 / 6 ≈ 113`. For `n` drawn zombies sorted as above, slot `i` has center `x = 60 + (6 − n)·slot/2 + (i + 0.5)·slot`, so the row stays centered. Height is `lerp(46, 114, clamp(cost / income / ZOMBIE_FULL_RATIO, 0, 1))` (0 when income is 0, so the zombie is the smallest). Width is 0.625 of height, always below the slot width, so slot boxes never overlap (Property 7). The box bottom is the baseline `515`; the tallest zombie (114) tops out at `y 401`, inside the basement band. Posture is a total map `often → upright`, `rarely → leaning`, `never → slumped`; badge `flame`, `hourglass`, `skull`. Tilt is `lerp(−5, 5, unitFromId(id, "tilt"))`.
 
 When another zombie is added or canceled, ranks shift and the row re-centers. The Scene tweens `transform` between old and new slots over 300ms (CSS transition, none under Reduced_Motion). This is acceptable because a zombie's identity is its `data-part="zombie:<id>"` key, not its slot.
 
@@ -367,11 +367,24 @@ When another zombie is added or canceled, ranks shift and the row re-centers. Th
 | 1 | 400 | 300 | 280 | 110 |
 | 2 | 400 | 200 | 340 | 90 |
 
-`lane = floor(unitFromId(id, "lane") × 3)`, `phase = 2π·unitFromId(id, "phase")`, `rest = point at phase`. Size is `lerp(34, 80, clamp(amount / SMALL_EXPENSE_THRESHOLD_CENTS, 0, 1))`. The extreme of each lane plus half the largest ghost stays inside the ViewBox (lane 2: `x 400 ± 340 ± 40 = 20..780`). A ghost keeps the same `phase` in every model that contains it, because it depends on `transactionId` only (Property 2).
+`lane = floor(unitFromId(id, "lane") × 3)`, `phase = 2π·unitFromId(id, "ghostPhase")`, `rest = point at phase`. Size is `lerp(34, 80, clamp(amount / SMALL_EXPENSE_THRESHOLD_CENTS, 0, 1))`. The extreme of each lane plus half the largest ghost stays inside the ViewBox (lane 2: `x 400 ± 340 ± 40 = 20..780`). A ghost keeps the same `phase` in every model that contains it, because it depends on `transactionId` only (Property 2).
 
 **Tombstones.** Slot width is the same 113 units, centers from the left of the graveyard band, newest first at the left. Box 64 by 56, baseline `y 585`.
 
-**Overflow markers.** `"+N"` anchors: zombies at the right end of the basement row, ghosts at the top-right of the sky, tombstones at the right end of the graveyard band. They are HTML overlay text (D2).
+**Overflow markers.** `"+N"` anchors: zombies at the right end of the basement row, ghosts at the top-right of the sky, tombstones at the right end of the graveyard band. They are HTML overlay text (D2). `getOverflowAnchors(config)` returns them: zombies at the right end of the basement band (`x = BASEMENT_BAND.x + BASEMENT_BAND.w`, `y = ZOMBIE_BASELINE_Y`), tombstones at the right end of the graveyard band (`x = GRAVEYARD_BAND.x + GRAVEYARD_BAND.w`, `y = TOMBSTONE_BASELINE_Y`) and ghosts at `GHOST_OVERFLOW_ANCHOR = (750, 30)`. Property 4 covers the bounds of all three anchors, the ghost anchor included.
+
+**Layout and motion constants outside `SceneConfig`.** `GHOST_OVERFLOW_ANCHOR`, `ZOMBIE_TILT_DEG`, `ZOMBIE_SWAY_PERIOD_MIN_MS`, `ZOMBIE_SWAY_PERIOD_MAX_MS`, `GHOST_BOB_PERIOD_MIN_MS`, `GHOST_BOB_PERIOD_MAX_MS`, `FULL_TURN_RADIANS`, `HALF`, `NO_COUNT` and `SLOT_FIRST` are module constants exported from `config.ts`. They are not fields of `SceneConfig` and `validateSceneConfig` does not check them, so a test config cannot vary them.
+
+**Public layout API** (`layout.ts`, used by the house components and `buildSceneModel`; every function that takes `config` defaults it to `SCENE_CONFIG`):
+
+| Function | Signature |
+|---|---|
+| `layoutZombies` | `(zombies: readonly Zombie[], monthlyIncomeCents: number, config?) => { drawn: SceneZombie[]; overflow: number }` |
+| `layoutGhosts` | `(ghosts: readonly Ghost[], hasPoltergeist: boolean, config?) => { drawn: SceneGhost[]; overflow: number }` |
+| `layoutTombstones` | `(graveyard: readonly GraveyardEntry[], config?) => { drawn: SceneTombstone[]; overflow: number }` |
+| `layoutPoltergeist` | `(poltergeist: Poltergeist \| null, bound: boolean, config?) => ScenePoltergeist \| null` |
+| `getLanePoint` | `(lane: { cx; cy; rx; ry }, t: number) => Point` |
+| `getOverflowAnchors` | `(config?) => { zombies: Point; ghosts: Point; tombstones: Point }` |
 
 ### Window opacity (`windows.ts`)
 
@@ -854,7 +867,7 @@ Reflection on the prework: the items on determinism and permutation invariance a
 
 ### Property 5: Caps and conservation
 
-*For any* valid Scene_Input and each kind (zombies, ghosts, tombstones), the number drawn is at most the cap, and drawn plus `overflow` equals `totals` for that kind. `totals` equal the true row counts of the input. While a Poltergeist exists, the drawn ghost count is 0 and `totals.ghosts` still equals `houseState.ghosts.length`.
+*For any* valid Scene_Input and each kind (zombies, ghosts, tombstones), the number drawn is at most the cap, and `totals` equal the true row counts of the input. For zombies and tombstones, and for ghosts without a Poltergeist, drawn plus `overflow` equals `totals`. While a Poltergeist exists, the drawn ghost count is 0, the ghost `overflow` is 0 (so drawn plus overflow does not equal the total), and `totals.ghosts` still equals `houseState.ghosts.length`.
 
 **Validates: Requirements 4.1, 4.2, 4.8, 9.1, 9.2, 21.6**
 

@@ -6,6 +6,7 @@ import type { DecayLevel } from "@/lib/haunting/config";
 import { SCENE_CONFIG, windowOpacityFromFloors } from "./config";
 import type { SceneConfig } from "./config";
 import { WINDOW_LAYOUT, assignWindowStates } from "./windows";
+import { layoutGhosts, layoutPoltergeist, layoutTombstones, layoutZombies } from "./layout";
 import { LEVEL_NAMES, buildSceneSummary } from "./summary";
 import type {
   Lighting,
@@ -21,10 +22,10 @@ export * from "./features";
 export * from "./windows";
 export * from "./hash";
 export * from "./summary";
+export * from "./layout";
 
 const FIRST_LEVEL: DecayLevel = 1;
 const LAST_LEVEL: DecayLevel = 5;
-const EMPTY_COUNT = 0;
 
 /** Non-finite or negative numbers become 0. */
 function sanitizeNumber(value: number): number {
@@ -70,6 +71,16 @@ export function buildSceneModel(input: SceneInput, config: SceneConfig = SCENE_C
   const levelName = LEVEL_NAMES[level];
   const features: LevelFeatures = { ...config.LEVEL_FEATURES[level] };
   const hasPoltergeist = input.houseState.poltergeist !== null;
+  const zombies = layoutZombies(input.houseState.zombies, input.monthlyIncomeCents, config);
+  const ghosts = layoutGhosts(input.houseState.ghosts, hasPoltergeist, config);
+  const tombstones = layoutTombstones(input.graveyard, config);
+
+  const totals = {
+    zombies: input.houseState.zombies.length,
+    ghosts: input.houseState.ghosts.length,
+    tombstones: input.graveyard.length,
+  };
+  const poltergeist = layoutPoltergeist(input.houseState.poltergeist, input.bound, config);
 
   return {
     level,
@@ -77,16 +88,21 @@ export function buildSceneModel(input: SceneInput, config: SceneConfig = SCENE_C
     features,
     lighting: pickLighting(level, hasPoltergeist),
     windows: buildWindows(level, brightness, features, config),
-    zombies: [],
-    ghosts: [],
-    poltergeist: null,
-    tombstones: [],
-    totals: {
-      zombies: input.houseState.zombies.length,
-      ghosts: input.houseState.ghosts.length,
-      tombstones: input.graveyard.length,
+    zombies: zombies.drawn,
+    ghosts: ghosts.drawn,
+    poltergeist,
+    tombstones: tombstones.drawn,
+    totals,
+    overflow: {
+      zombies: zombies.overflow,
+      ghosts: ghosts.overflow,
+      tombstones: tombstones.overflow,
     },
-    overflow: { zombies: EMPTY_COUNT, ghosts: EMPTY_COUNT, tombstones: EMPTY_COUNT },
-    summary: buildSceneSummary(level, levelName),
+    summary: buildSceneSummary({
+      level,
+      levelName,
+      totals,
+      poltergeist: poltergeist === null ? null : poltergeist.state,
+    }),
   };
 }

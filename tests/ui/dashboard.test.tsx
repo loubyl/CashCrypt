@@ -75,7 +75,7 @@ describe("Dashboard on the level 4 demo", () => {
     expect(meter.getAttribute("aria-valuetext")).toBe("Light score 32 of 100");
     expect(screen.getByText(POLTERGEIST_TEXT)).toBeTruthy();
     expect(screen.getByText("Poltergeist")).toBeTruthy();
-    expect(screen.getByRole("img", { name: "Level 4, Crumbling." })).toBeTruthy();
+    expect(screen.getByRole("img", { name: /^Level 4, Crumbling\./ })).toBeTruthy();
     expect(screen.queryByText("House scene arrives in the next update")).toBeNull();
     const live = screen.getByText("House is now Crumbling — light score 32");
     expect(live.getAttribute("aria-live")).toBe("polite");
@@ -89,7 +89,7 @@ describe("Dashboard on the level 4 demo", () => {
     expect(grid.className).toContain("xl:grid-cols-[7fr_5fr]");
     expect(grid.className).toContain("flex-col");
     for (const column of Array.from(grid.children)) expect(column.className).toContain("contents");
-    const scene = screen.getByRole("img", { name: "Level 4, Crumbling." });
+    const scene = screen.getByRole("img", { name: /^Level 4, Crumbling\./ });
     const score = screen.getByText("Light score", { selector: "p" });
     const banner = screen.getByText(POLTERGEIST_TEXT);
     const plan = screen.getByRole("heading", { name: "This week's exorcism" });
