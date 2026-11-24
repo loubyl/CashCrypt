@@ -1,14 +1,27 @@
 import type { ReactNode } from "react";
-import { SCENE_TEAL_LIGHT, WINDOW_INTERPOLATION_MS } from "@/lib/scene";
+import { DECAY_TINTS, SCENE_TEAL, SCENE_TEAL_LIGHT, WINDOW_INTERPOLATION_MS } from "@/lib/scene";
 import type { SceneModel, SceneWindow } from "@/lib/scene";
 import { TOKEN, getStructureTransform } from "./houseGeometry";
+import type { SceneFilterIds } from "./houseGeometry";
 
 export type WindowsLayerProps = {
   model: SceneModel;
+  filterIds: SceneFilterIds;
 };
 
-const GLOW_PAD = 10;
-const GLOW_FACTOR = 0.3;
+/** Model opacity (0..1) maps linearly to halo strength and pane brightness, so even 0.26 reads as lit. */
+const HALO_PAD = 8;
+const HALO_MIN = 0.25;
+const HALO_RANGE = 0.6;
+const PANE_MIN = 0.6;
+const PANE_RANGE = 0.4;
+const FRAME_PAD = 3;
+const CANDLE_WIDTH = 5;
+const CANDLE_HEIGHT = 12;
+const FLAME_RX = 2.6;
+const FLAME_RY = 4.2;
+const FLAME_LIFT = 4;
+const CANDLE_BASE_GAP = 4;
 const SILL_HEIGHT = 5;
 const MULLION_WIDTH = 2.5;
 const PLANK_WIDTH = 8;
@@ -45,7 +58,7 @@ function renderMullions(window: SceneWindow): ReactNode {
   return (
     <path
       d={`M${cx} ${y} V${y + h} M${x} ${cy} H${x + w}`}
-      stroke={TOKEN.void}
+      stroke={SCENE_TEAL}
       strokeWidth={MULLION_WIDTH}
       fill="none"
     />
@@ -58,28 +71,41 @@ function renderSill(window: SceneWindow): ReactNode {
   return <rect x={x - 4} y={y + h} width={w + 8} height={SILL_HEIGHT} fill={SCENE_TEAL_LIGHT} />;
 }
 
-function renderLit(window: SceneWindow): ReactNode {
+function renderCandle(window: SceneWindow): ReactNode {
   const { x, y, w, h } = window.box;
+  const cx = x + w / 2;
+  const top = y + h - CANDLE_BASE_GAP - CANDLE_HEIGHT;
+  return (
+    <g data-part="candle">
+      <rect x={cx - CANDLE_WIDTH / 2} y={top} width={CANDLE_WIDTH} height={CANDLE_HEIGHT} rx={1.5} fill={DECAY_TINTS[1]} />
+      <ellipse cx={cx} cy={top - FLAME_LIFT} rx={FLAME_RX} ry={FLAME_RY} fill={DECAY_TINTS[2]} />
+    </g>
+  );
+}
+
+function renderLit(window: SceneWindow, filterIds: SceneFilterIds): ReactNode {
   return (
     <>
       <g
         data-part="glow"
         className="transition-opacity motion-reduce:transition-none"
         style={{ transitionDuration: `${WINDOW_INTERPOLATION_MS}ms` }}
-        opacity={window.opacity * GLOW_FACTOR}
+        opacity={HALO_MIN + HALO_RANGE * window.opacity}
+        filter={`url(#${filterIds.halo})`}
       >
-        {renderShape(window, GLOW_PAD, TOKEN.candle)}
+        {renderShape(window, HALO_PAD, TOKEN.candle)}
       </g>
+      {renderShape(window, FRAME_PAD, SCENE_TEAL)}
       {renderShape(window, 0, TOKEN.void)}
       <g
         data-part="light"
         className="transition-opacity motion-reduce:transition-none"
         style={{ transitionDuration: `${WINDOW_INTERPOLATION_MS}ms` }}
-        opacity={window.opacity}
+        opacity={PANE_MIN + PANE_RANGE * window.opacity}
       >
         {renderShape(window, 0, TOKEN.candle)}
-        <rect x={x + w / 2 - 2} y={y + h - 16} width={4} height={12} rx={1} fill={TOKEN.void} opacity={0.35} />
       </g>
+      {renderCandle(window)}
       {renderMullions(window)}
     </>
   );
@@ -120,10 +146,17 @@ function renderBroken(window: SceneWindow): ReactNode {
   );
 }
 
-function renderWindow(window: SceneWindow): ReactNode {
+function renderWindow(window: SceneWindow, filterIds: SceneFilterIds, unlitOpacity: number): ReactNode {
+  const lit = window.state === "lit";
   return (
-    <g key={window.index} data-part={`window:${window.index}`} data-state={window.state} data-shape={window.shape}>
-      {window.state === "lit" ? renderLit(window) : null}
+    <g
+      key={window.index}
+      data-part={`window:${window.index}`}
+      data-state={window.state}
+      data-shape={window.shape}
+      opacity={lit ? undefined : unlitOpacity}
+    >
+      {lit ? renderLit(window, filterIds) : null}
       {window.state === "boarded" ? renderBoarded(window) : null}
       {window.state === "broken" ? renderBroken(window) : null}
       {renderSill(window)}
@@ -131,11 +164,16 @@ function renderWindow(window: SceneWindow): ReactNode {
   );
 }
 
-/** Six windows with candlelight, boards or broken glass. Opacity comes straight from the model. */
-export function WindowsLayer({ model }: WindowsLayerProps) {
+/**
+ * Six windows with candlelight, boards or broken glass. Opacity comes straight from the model.
+ * Drawn above the darkness overlay so lit windows stay the brightest element; windows that
+ * give no light are dimmed by the same amount as the rest of the house.
+ */
+export function WindowsLayer({ model, filterIds }: WindowsLayerProps) {
+  const unlitOpacity = 1 - model.features.darkness;
   return (
     <g data-part="windows" transform={getStructureTransform(model.features)}>
-      {model.windows.map(renderWindow)}
+      {model.windows.map((window) => renderWindow(window, filterIds, unlitOpacity))}
     </g>
   );
 }

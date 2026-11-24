@@ -10,18 +10,19 @@ The haunted aesthetic is **gothic-cozy**, not horror. The house should feel mela
 
 ## Style Reference
 
-The house art follows the flat-vector reference in `.kiro/specs/house-scene/references/house-reference-1.jpg` (about decay level 3 to 4 in mood): no outlines, two or three close tones per shape, muted colors, a tall central gable with a round attic window, a chimney, a porch roof, a lantern, bare trees, a fence, pale fog bars and a pale moon. The reference sets shapes and mood only. Layout follows the design zones (wide basement band for the zombie row, graveyard band at the bottom), and the feature table decides what appears at each level. Warm light appears only in the windows.
+The house art follows the flat-vector reference in `.kiro/specs/house-scene/references/house-reference-1.jpg` (about decay level 3 to 4 in mood): no outlines, two or three close tones per shape, muted colors, a tall central gable with a round attic window, a chimney, a porch roof, a lantern, a tree on each side, a fence, rounded mint fog and a pale mint moon. The reference sets shapes and mood only. Layout follows the design zones (wide basement band for the zombie row, graveyard band at the bottom), and the feature table decides what appears at each level. Warm light appears only in the windows.
 
 | Reference element | Color source |
 |---|---|
-| Sky | `--surface-void` |
-| Basement block | `--surface-card` |
-| Window glow and candles | `--accent-candle` |
-| Walls, tombstones, chimney | Decay tint of the current level, shaded one step darker on the shadow face |
-| Moon | `--text-tertiary` at 30 to 60% opacity |
+| Sky | Scene-only `#22252A` (`SCENE_SKY`), lighter than `--surface-void` |
+| Basement and graveyard soil | Scene-only `SCENE_SOIL` `#0F0F12` and `SCENE_SOIL_GRAVE` `#1B1A21`; `SCENE_STONE` `#2C2C34` for block lines, pebbles, roots |
+| Window glow and candles | `--accent-candle` pane and blurred halo, cream candle and flame from `DECAY_TINTS` |
+| Walls, chimney | Slate `SCENE_WALL` `#3F3F4B` and `SCENE_WALL_SHADE` `#3A3A46` at every level; the level tint of `DECAY_TINTS` is only a 10% overlay |
+| Brick accents | Scene-only `SCENE_BRICK` `#34343F` |
+| Moon | Scene-only pale mint `#CEE1DD` (`SCENE_MOON`) with a soft halo |
 | Roof and trees | Scene-only teal `#29464A` (`SCENE_TEAL`) |
-| Ground line and trim | Scene-only teal `#395F60` (`SCENE_TEAL_LIGHT`) |
-| Fog bars | Scene-only mint `#B7D4CF` (`SCENE_FOG`) at low opacity |
+| Ground line and trim | Scene-only teal `#395F60` (`SCENE_TEAL_LIGHT`), no amber overlay |
+| Fog bars and mounds | Scene-only mint `#B7D4CF` (`SCENE_FOG`) at visible opacity |
 
 New scene-only colors live in `src/lib/scene/config.ts` only; see `house-scene/design.md` → Style reference.
 
@@ -63,7 +64,8 @@ Each level affects the SVG house layers: walls, windows, roof, garden, and ambie
 The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level 5), with intermediate values mapped linearly to the light score within each band. The percentages in the level list below are **nominal** (they describe the intended mood of each level); the real candlelight opacity is decided by the window opacity curve in `src/lib/scene/config.ts` (see the house-scene design), which keeps the curve non-decreasing within and across levels and makes a payment visible. The `LightScoreBar` in the chrome always shows the numeric score alongside the visual change.
 
 ### Level 1 — Pristine
-- Walls: clean, warm cream (`#F5EFC8` tint).
+- Walls: slate base with a faint warm-cream tint (`#F5EFC8` overlay), slightly lighter than other levels.
+- Trees: a full rounded teal canopy on each side.
 - Windows: soft `--accent-candle` glow from inside; full brightness.
 - Roof: intact, deep slate.
 - Garden: green grass, one lit lantern.
@@ -74,6 +76,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Walls: slightly yellowed, one hairline crack on the left facade.
 - Windows: `--accent-candle` at a nominal ~70% brightness, slow flicker (4s cycle).
 - Roof: a few shingles missing.
+- Trees: thinner canopy.
 - Garden: grass slightly brown at edges, lantern dimmer.
 - Atmosphere: faint fog at ground level.
 - Financial trigger: light score 60–79.
@@ -82,6 +85,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Walls: visible cracks on two sides, dark staining near the foundation.
 - Windows: `--accent-candle` at a nominal ~40% brightness (amber tone), one window boarded up.
 - Roof: sagging in one corner, moss growing.
+- Trees: bare.
 - Garden: mostly dead grass, lantern unlit (silhouette only).
 - Atmosphere: fog thicker, slow-moving shadow passes behind a window.
 - Financial trigger: light score 40–59.
@@ -90,7 +94,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Walls: large cracks, one section of plaster missing revealing dark interior.
 - Windows: `--accent-candle` at a nominal ~15% brightness, two boarded up, one broken.
 - Roof: partial collapse on the right wing.
-- Garden: bare earth, dead tree, broken fence.
+- Garden: bare earth, twisted tree, broken fence.
 - Atmosphere: heavy fog, bats circling overhead.
 - Financial trigger: light score 20–39.
 
@@ -99,7 +103,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Windows: all boarded or broken; no candlelight remains.
 - Roof: heavily collapsed, only the chimney stands.
 - Garden: scorched earth, the dead tree is split and charred.
-- Atmosphere: near-total darkness. If the Poltergeist is active, its `--accent-spirit` glow is the sole light source in the scene. If there is no Poltergeist, faint moonlight (`--text-tertiary` at 30% opacity) provides the only illumination.
+- Atmosphere: darkness (overlay about 50%, silhouette kept readable by a faint rim light). If the Poltergeist is active, its `--accent-spirit` glow is the sole light source in the scene. If there is no Poltergeist, faint moonlight (`--text-tertiary` at 30% opacity) provides the only illumination.
 - Financial trigger: light score 0–19.
 
 ---

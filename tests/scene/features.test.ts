@@ -88,8 +88,8 @@ describe("level 4, Crumbling", () => {
     expect(f.roof).toBe("partialCollapse");
   });
 
-  it("has bare earth, a dead tree and a broken fence", () => {
-    expect([f.garden, f.tree, f.fence]).toEqual(["bare", "bare", "broken"]);
+  it("has bare earth, a twisted tree and a broken fence", () => {
+    expect([f.garden, f.tree, f.fence]).toEqual(["bare", "twisted", "broken"]);
   });
 
   it("has heavy fog and bats circling", () => {
@@ -120,7 +120,7 @@ describe("level 5, Condemned", () => {
 
   it("has an unlit lantern and near-total darkness", () => {
     expect(f.lantern).toBe("unlit");
-    expect(f.darkness).toBeGreaterThanOrEqual(0.8);
+    expect(f.darkness).toBeGreaterThanOrEqual(0.5);
   });
 
   it("has the heaviest fog", () => {
@@ -131,6 +131,16 @@ describe("level 5, Condemned", () => {
 describe("whole feature table", () => {
   it("is monotone in severity from level 1 to level 5", () => {
     expect(isSeverityMonotone(LEVEL_FEATURES)).toBe(true);
+  });
+
+  it("has a full tree at level 1 and a bare tree at level 3", () => {
+    expect([1, 2, 3, 4, 5].map((l) => LEVEL_FEATURES[l as 1 | 2 | 3 | 4 | 5].tree)).toEqual([
+      "full", "thin", "bare", "twisted", "charred",
+    ]);
+  });
+
+  it("keeps level 5 dark enough to read the silhouette (darkness at most 0.55)", () => {
+    expect(LEVEL_FEATURES[5].darkness).toBeLessThanOrEqual(0.55);
   });
 
   it("shows fireflies only at level 1", () => {

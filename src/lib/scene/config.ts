@@ -200,8 +200,21 @@ export const ZOMBIE_CLOTHING = "#2E4A24";
 export const SCENE_TEAL = "#29464A";
 /** Ground line and trim color. */
 export const SCENE_TEAL_LIGHT = "#395F60";
-/** Fog bars, always drawn at low opacity. */
+/** Fog bars and mounds (rounded mint shapes). */
 export const SCENE_FOG = "#B7D4CF";
+/** Sky behind the house; lighter than the page background (reference #22252A). */
+export const SCENE_SKY = "#22252A";
+/** Wall base at every level (lit face) and its shaded face; DECAY_TINTS only overlay it. */
+export const SCENE_WALL = "#3F3F4B";
+export const SCENE_WALL_SHADE = "#3A3A46";
+/** Brick accents and stone-block lines (slightly darker or lighter than the wall). */
+export const SCENE_BRICK = "#34343F";
+/** Pale mint moon. */
+export const SCENE_MOON = "#CEE1DD";
+/** Underground cross-section: basement soil, graveyard soil and pebbles, roots and block lines. */
+export const SCENE_SOIL = "#0F0F12";
+export const SCENE_SOIL_GRAVE = "#1B1A21";
+export const SCENE_STONE = "#2C2C34";
 
 // ---------------------------------------------------------------------------
 // Feature table (see design "Decay levels")
@@ -212,28 +225,28 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     crackCount: 0, stainCount: 0, plasterHole: false,
     boardedWindows: 0, brokenWindows: 0,
     roof: "intact", moss: false, garden: "green", lantern: "lit",
-    tree: "none", fence: "intact", structure: "sound",
+    tree: "full", fence: "intact", structure: "sound",
     fog: 0, bats: false, fireflies: true, shadowPass: false, darkness: 0,
   },
   2: {
     crackCount: 1, stainCount: 0, plasterHole: false,
     boardedWindows: 0, brokenWindows: 0,
     roof: "missingShingles", moss: false, garden: "browning", lantern: "dim",
-    tree: "none", fence: "intact", structure: "sound",
+    tree: "thin", fence: "intact", structure: "sound",
     fog: 1, bats: false, fireflies: false, shadowPass: false, darkness: 0.05,
   },
   3: {
     crackCount: 2, stainCount: 1, plasterHole: false,
     boardedWindows: 1, brokenWindows: 0,
     roof: "sagging", moss: true, garden: "dead", lantern: "unlit",
-    tree: "none", fence: "intact", structure: "sound",
+    tree: "bare", fence: "intact", structure: "sound",
     fog: 2, bats: false, fireflies: false, shadowPass: true, darkness: 0.15,
   },
   4: {
     crackCount: 3, stainCount: 2, plasterHole: true,
     boardedWindows: 2, brokenWindows: 1,
     roof: "partialCollapse", moss: true, garden: "bare", lantern: "unlit",
-    tree: "bare", fence: "broken", structure: "sound",
+    tree: "twisted", fence: "broken", structure: "sound",
     fog: 3, bats: true, fireflies: false, shadowPass: true, darkness: 0.35,
   },
   5: {
@@ -241,14 +254,14 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     boardedWindows: 3, brokenWindows: 3,
     roof: "collapsed", moss: true, garden: "scorched", lantern: "unlit",
     tree: "charred", fence: "broken", structure: "collapsing",
-    fog: 4, bats: true, fireflies: false, shadowPass: false, darkness: 0.8,
+    fog: 4, bats: true, fireflies: false, shadowPass: false, darkness: 0.5,
   },
 };
 
 const ROOF_ORDER = ["intact", "missingShingles", "sagging", "partialCollapse", "collapsed"];
 const GARDEN_ORDER = ["green", "browning", "dead", "bare", "scorched"];
 const LANTERN_ORDER = ["lit", "dim", "unlit"];
-const TREE_ORDER = ["none", "bare", "charred"];
+const TREE_ORDER = ["full", "thin", "bare", "twisted", "charred"];
 const FENCE_ORDER = ["intact", "broken"];
 const STRUCTURE_ORDER = ["sound", "collapsing"];
 
@@ -390,6 +403,14 @@ export type SceneConfig = {
   SCENE_TEAL: string;
   SCENE_TEAL_LIGHT: string;
   SCENE_FOG: string;
+  SCENE_SKY: string;
+  SCENE_WALL: string;
+  SCENE_WALL_SHADE: string;
+  SCENE_BRICK: string;
+  SCENE_MOON: string;
+  SCENE_SOIL: string;
+  SCENE_SOIL_GRAVE: string;
+  SCENE_STONE: string;
   LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>>;
 };
 
@@ -459,6 +480,14 @@ export const SCENE_CONFIG: SceneConfig = {
   SCENE_TEAL,
   SCENE_TEAL_LIGHT,
   SCENE_FOG,
+  SCENE_SKY,
+  SCENE_WALL,
+  SCENE_WALL_SHADE,
+  SCENE_BRICK,
+  SCENE_MOON,
+  SCENE_SOIL,
+  SCENE_SOIL_GRAVE,
+  SCENE_STONE,
   LEVEL_FEATURES,
 };
 
@@ -751,7 +780,8 @@ function checkLabelsAndColors(c: Obj, problems: string[]): void {
       problems.push(`DECAY_TINTS[${level}] must be a #RRGGBB color`);
     }
   }
-  for (const key of ["ZOMBIE_BODY", "ZOMBIE_CLOTHING", "SCENE_TEAL", "SCENE_TEAL_LIGHT", "SCENE_FOG"]) {
+  for (const key of ["ZOMBIE_BODY", "ZOMBIE_CLOTHING", "SCENE_TEAL", "SCENE_TEAL_LIGHT", "SCENE_FOG",
+    "SCENE_SKY", "SCENE_WALL", "SCENE_WALL_SHADE", "SCENE_BRICK", "SCENE_MOON", "SCENE_SOIL", "SCENE_SOIL_GRAVE", "SCENE_STONE"]) {
     const value = c[key];
     if (typeof value !== "string" || !HEX_COLOR.test(value)) problems.push(`${key} must be a #RRGGBB color`);
   }

@@ -96,7 +96,7 @@ Conventions that apply to every task:
     - Exactly one `role="img"` whose `aria-label` equals the summary and updates on data change; SVG `aria-hidden`; no focusable element or handler; the `<svg>` is not remounted on a model change; two-column classes at the desktop breakpoint and single column below it; Scene shown in "empty real crypt", "demo level 4" and "loading" (with `aria-busy`).
     - _Requirements: 19.1, 19.3, 19.6, 21.7, 22.5, 22.11, 24.7, 24.8_
 
-- [ ] 4. MANUAL CHECKPOINT 1: static house and five levels (user review in the browser)
+- [-] 4. MANUAL CHECKPOINT 1: static house and five levels (user review in the browser)
   - **Executor: STOP here. Do not start phase B until the user confirms.** Ask the user to run `npm run dev` and review:
     - Open the Demo Crypt, use the scenario switcher to visit levels 1 to 5. Check that each level is clearly different (walls, cracks, roof, garden, lantern, fog, darkness) and the art style is acceptable (gothic-cozy, rounded, no gore).
     - Window glow: level 4 to level 3 shows a clear brightness step. Boarded and broken windows have different shapes. Level 5 has no candlelight and moonlight only (no Poltergeist yet).

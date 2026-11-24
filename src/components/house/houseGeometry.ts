@@ -12,11 +12,30 @@ export const TOKEN = {
   candle: "var(--accent-candle)",
   spirit: "var(--accent-spirit)",
   tertiary: "var(--text-tertiary)",
+  ink: "var(--text-primary)",
 } as const;
+
+/** Ids of the SVG filters defined once per scene in <defs> (unique per mounted scene). */
+export type SceneFilterIds = { halo: string; moon: string };
+
+export function makeFilterIds(rawId: string): SceneFilterIds {
+  const id = rawId.replace(/[^a-zA-Z0-9_-]/g, "");
+  return { halo: `scene-halo-${id}`, moon: `scene-moon-halo-${id}` };
+}
+
+export const HALO_BLUR = 7;
+export const MOON_BLUR = 9;
+
+/** Overlay opacity of the decay tint on the slate walls (subtle). */
+export const TINT_OVERLAY_OPACITY = 0.1;
+/** Level 1 walls get a light veil, level 5 a dark one; 0 elsewhere. */
+export const WALL_LIGHT_VEIL: Readonly<Record<number, number>> = { 1: 0.04 };
+export const WALL_DARK_VEIL: Readonly<Record<number, number>> = { 5: 0.22 };
 
 export const WALLS = { x: 200, y: 190, w: 400, h: 210 } as const;
 export const GROUND_Y = 400;
 export const MOON = { cx: 110, cy: 100, r: 28 } as const;
+export const MOON_HALO_RADIUS = 44;
 
 export const GABLE_WALL = "320,196 400,84 480,196";
 export const GABLE_WALL_COLLAPSED = "320,196 340,140 372,150 400,110 430,150 462,138 480,196";
@@ -65,12 +84,23 @@ export const PLASTER_HOLE = "430,330 470,322 484,350 466,380 436,372";
 export const FOG_BARS: readonly { x: number; y: number; w: number }[] = [
   { x: 40, y: 350, w: 320 },
   { x: 470, y: 322, w: 300 },
-  { x: 150, y: 372, w: 400 },
-  { x: 380, y: 300, w: 340 },
+  { x: 120, y: 380, w: 380 },
+  { x: 560, y: 296, w: 220 },
 ];
 export const FOG_BAR_HEIGHT = 14;
 export const FOG_BACK_BARS = 2;
-export const FOG_OPACITY = 0.12;
+export const FOG_OPACITY = 0.3;
+export const FOG_FRONT_OPACITY = 0.2;
+
+/** Soft mint mounds behind the house (ellipses), as in the reference. */
+export const FOG_MOUNDS: readonly { cx: number; cy: number; rx: number; ry: number }[] = [
+  { cx: 150, cy: 392, rx: 90, ry: 52 },
+  { cx: 235, cy: 396, rx: 60, ry: 34 },
+  { cx: 650, cy: 388, rx: 80, ry: 56 },
+  { cx: 735, cy: 396, rx: 50, ry: 34 },
+];
+export const FOG_MOUND_BASE_OPACITY = 0.1;
+export const FOG_MOUND_STEP_OPACITY = 0.035;
 
 export const BATS: readonly { x: number; y: number }[] = [
   { x: 160, y: 110 },
@@ -95,3 +125,31 @@ export const STARS: readonly { x: number; y: number }[] = [
   { x: 700, y: 110 },
   { x: 740, y: 40 },
 ];
+
+/** Brick accents on the walls: x, y, width (height is BRICK_HEIGHT). */
+export const BRICKS: readonly { x: number; y: number; w: number }[] = [
+  { x: 330, y: 214, w: 18 },
+  { x: 452, y: 236, w: 16 },
+  { x: 214, y: 300, w: 16 },
+  { x: 566, y: 296, w: 18 },
+  { x: 352, y: 372, w: 16 },
+  { x: 446, y: 296, w: 14 },
+];
+export const BRICK_HEIGHT = 7;
+export const BRICK_RADIUS = 3;
+
+/** Grass tufts along the ground line (x of each tuft base). */
+export const TUFTS: readonly number[] = [76, 158, 262, 332, 468, 540, 596, 700, 762];
+export const TUFT_PATH = "M-5 0 L-3 -9 L0 -3 L2 -11 L4 -3 L7 -8 L6 0 Z";
+
+/** Two bushes at the house corners: overlapping rounded blobs. */
+export const BUSHES: readonly { cx: number; cy: number; r: number }[] = [
+  { cx: 226, cy: 392, r: 14 },
+  { cx: 244, cy: 394, r: 11 },
+  { cx: 566, cy: 392, r: 14 },
+  { cx: 582, cy: 395, r: 10 },
+];
+
+/** Rim light of the level 5 silhouette: x of the left and right tree trunks. */
+export const TREE_LEFT_X = 118;
+export const TREE_RIGHT_X = 688;

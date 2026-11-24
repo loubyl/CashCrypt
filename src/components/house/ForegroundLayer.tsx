@@ -1,7 +1,22 @@
 import { useId } from "react";
 import { POLTERGEIST_CENTER, SCENE_FOG, VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
 import type { SceneModel } from "@/lib/scene";
-import { FOG_BACK_BARS, FOG_BAR_HEIGHT, FOG_BARS, FOG_OPACITY, MOON, TOKEN } from "./houseGeometry";
+import {
+  CHIMNEY_BODY,
+  FOG_BACK_BARS,
+  FOG_BAR_HEIGHT,
+  FOG_BARS,
+  FOG_FRONT_OPACITY,
+  GABLE_WALL_COLLAPSED,
+  LEFT_HIP_COLLAPSED,
+  MOON,
+  RIGHT_HIP_COLLAPSED,
+  STUMP_LEFT,
+  STUMP_RIGHT,
+  TOKEN,
+  WALLS,
+  getStructureTransform,
+} from "./houseGeometry";
 
 export type ForegroundLayerProps = {
   model: SceneModel;
@@ -12,6 +27,8 @@ const SPIRIT_HALO_RADIUS = 140;
 const SPIRIT_HALO_OPACITY = 0.3;
 const MOON_GLOW_RADIUS = 80;
 const MOON_GLOW_OPACITY = 0.3;
+const RIM_WIDTH = 2;
+const RIM_OPACITY = 0.4;
 
 /** Front fog bars plus the darkness overlay (level 5 keeps one light source through a mask). */
 export function ForegroundLayer({ model }: ForegroundLayerProps) {
@@ -37,7 +54,7 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
             height={FOG_BAR_HEIGHT}
             rx={FOG_BAR_HEIGHT / 2}
             fill={SCENE_FOG}
-            opacity={FOG_OPACITY}
+            opacity={FOG_FRONT_OPACITY}
           />
         ))}
       </g>
@@ -73,6 +90,25 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
             opacity={model.features.darkness}
             mask={glow ? `url(#${maskId}-m)` : undefined}
           />
+        ) : null}
+        {model.level === 5 ? (
+          <g
+            data-part="rim-light"
+            transform={getStructureTransform(model.features)}
+            fill="none"
+            stroke={SCENE_FOG}
+            strokeWidth={RIM_WIDTH}
+            strokeLinejoin="round"
+            opacity={RIM_OPACITY}
+          >
+            <rect x={WALLS.x} y={WALLS.y} width={WALLS.w} height={WALLS.h} />
+            <polygon points={GABLE_WALL_COLLAPSED} />
+            <polygon points={LEFT_HIP_COLLAPSED} />
+            <polygon points={RIGHT_HIP_COLLAPSED} />
+            <polygon points={STUMP_LEFT} />
+            <polygon points={STUMP_RIGHT} />
+            <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} />
+          </g>
         ) : null}
         {glow ? (
           <circle data-part="spirit-glow" cx={center.x} cy={center.y} r={SPIRIT_HALO_RADIUS} fill={`url(#${spiritId})`} />

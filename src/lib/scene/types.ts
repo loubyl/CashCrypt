@@ -42,7 +42,7 @@ export type RoofState =
   | "collapsed";
 export type GardenState = "green" | "browning" | "dead" | "bare" | "scorched";
 export type LanternState = "lit" | "dim" | "unlit";
-export type TreeState = "none" | "bare" | "charred";
+export type TreeState = "full" | "thin" | "bare" | "twisted" | "charred";
 export type FenceState = "intact" | "broken";
 export type StructureState = "sound" | "collapsing";
 export type FogDensity = 0 | 1 | 2 | 3 | 4;

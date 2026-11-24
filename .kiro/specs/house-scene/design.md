@@ -62,26 +62,28 @@ What to take from it:
 
 - **Flat vector, no outlines.** Shapes are filled with two or three close tones (a lit face and a shaded face). No strokes except thin details (fence, window bars, tree branches), no gradients on the house, no textures.
 - **Silhouette.** A narrow two-story house with a tall central gable, a round attic window under the peak, a lower hip roof on each side, one brick chimney on the right, a small porch roof over the door, and a lantern beside the door. This matches the six-window layout (three upper, two ground flanking the door, one round attic).
-- **Windows.** Arched or rectangular panes with a cross mullion, a small sill, a soft candle glow halo and one candle inside.
-- **Surroundings.** A flat ground line, a bare tree on each side, bushes at the base, a fence at the right, and pale flat fog bars behind the house.
-- **Sky.** Near-black sky with a pale round moon and a few star dots. The level 5 moonlight rule of `visual-language.md` still applies.
+- **Windows.** The brightest element at levels 1 to 4: arched or rectangular candle-colored pane with a teal frame, cross mullion and sill, a soft blurred halo (one `feGaussianBlur` filter defined once in `<defs>`), and a small cream candle with a flame instead of a dark rectangle. The model opacity `o` maps linearly to halo opacity `0.25 + 0.6·o` and pane opacity `0.6 + 0.4·o`, so 0.26 (level 4) still reads clearly lit and 0.435 (level 3) is visibly brighter. The opacity model itself is unchanged.
+- **Walls.** Slate `#3F3F4B` (lit) and `#3A3A46` (shaded) at every level; `DECAY_TINTS` are only a 10% overlay. Level 1 gets a faint light veil, level 5 a dark veil. A few rounded brick accents, a floor band, teal trim and sills, a door knob.
+- **Surroundings.** A flat ground line, one tree on each side at every level (full rounded teal canopy at level 1, thin at 2, bare at 3, twisted at 4, charred at 5), two bushes at the house corners, grass tufts (fewer as the garden worsens, tinted by the garden state; no overlay on the ground line), a fence at the right, soft mint mounds behind the house, and rounded mint fog bars behind and in front of it.
+- **Underground.** The basement band is a cross-section: dark soil (`SCENE_SOIL`) with a rounded top edge under the ground line, faint stone-block lines, pebbles and roots. The graveyard band uses a slightly different soil tone (`SCENE_SOIL_GRAVE`).
+- **Sky.** Charcoal sky `SCENE_SKY` (lighter than the page background), a few star dots and a pale mint moon (`SCENE_MOON`) with a soft blurred halo and no craters. The level 5 moonlight rule of `visual-language.md` still applies.
 - **Calm and cozy.** Muted, low-saturation colors; the only warm color is window light.
 
 Measured colors (pixel samples of the image) and what each becomes. Existing tokens are used wherever one is close, so new colors stay at a minimum:
 
 | Reference element | Measured | Used in the scene as |
 |---|---|---|
-| Sky | `#22252A` | `--surface-void` (no new color) |
-| Basement block | `#16171B` | `--surface-card` (`#151518`, nearly identical; no new color) |
+| Sky | `#22252A` | **New scene-only constant** (`SCENE_SKY`); `--surface-void` is too dark |
+| Basement block | `#16171B` | `SCENE_SOIL` `#0F0F12` (basement), `SCENE_SOIL_GRAVE` `#1B1A21` (graveyard band), ground below the line `--surface-card`; `SCENE_STONE` `#2C2C34` for block lines, pebbles and roots |
 | Window light and candles | `#E1954A` | `--accent-candle`, at the opacity from `getWindowOpacity` |
-| Walls | `#3F3F4B`, `#3A3A46` | `DECAY_TINTS` of the current level; the shaded face is the same tint under a `--surface-void` overlay. The gray-violet of the image is not copied, because the tint spectrum decides wall color per level |
-| Tombstones, chimney | `#5A5667`, `#4A4758` | The wall tint (lit face and shaded face), same rule as walls; no new color |
-| Moon | `#CEE1DD` | `--text-tertiary` at 30 to 60% opacity (same rule as the level 5 moonlight); no new color |
+| Walls | `#3F3F4B`, `#3A3A46` | **New scene-only constants** `SCENE_WALL` and `SCENE_WALL_SHADE` at every level; `DECAY_TINTS` of the level only as a 10% overlay; `SCENE_BRICK` `#34343F` for brick accents |
+| Chimney | `#5A5667`, `#4A4758` | Same wall constants as the walls (lit and shaded face) |
+| Moon | `#CEE1DD` | **New scene-only constant** (`SCENE_MOON`), with a blurred halo; the level 5 moonlight glow still uses `--text-tertiary` at 30% |
 | Roof and trees | `#29464A` | **New scene-only constant** (`SCENE_TEAL`) |
 | Ground line and trim | `#395F60` | **New scene-only constant** (`SCENE_TEAL_LIGHT`); no token is close (`--accent-ecto` is `#3DDC97`, far brighter) |
-| Fog bars | `#B7D4CF` | **New scene-only constant** (`SCENE_FOG`), drawn at low opacity |
+| Fog bars | `#B7D4CF` | **New scene-only constant** (`SCENE_FOG`): bars at 30% (back) and 20% (front), mounds at 10 to 24% |
 
-So at most three new hex values enter `config.ts`, next to `DECAY_TINTS`, `ZOMBIE_BODY` and `ZOMBIE_CLOTHING`: `SCENE_TEAL`, `SCENE_TEAL_LIGHT` and `SCENE_FOG`. The module stays the only place with hex values (the color scan allows `src/lib/scene/config.ts` only, Requirement 2.3). Components read colors from the config or CSS variables, never inline hex.
+The new hex values in `config.ts`, next to `DECAY_TINTS`, `ZOMBIE_BODY` and `ZOMBIE_CLOTHING`, are `SCENE_TEAL`, `SCENE_TEAL_LIGHT`, `SCENE_FOG`, `SCENE_SKY`, `SCENE_WALL`, `SCENE_WALL_SHADE`, `SCENE_BRICK`, `SCENE_MOON`, `SCENE_SOIL`, `SCENE_SOIL_GRAVE` and `SCENE_STONE` (all checked by `validateSceneConfig`). The module stays the only place with hex values (the color scan allows `src/lib/scene/config.ts` only, Requirement 2.3). Components read colors from the config or CSS variables, never inline hex.
 
 ### Research findings
 
@@ -227,7 +229,7 @@ All constants are exported and gathered in `SCENE_CONFIG: SceneConfig` so `valid
 | Motion data | zombie tilt `±5°`, sway amplitude 3px and period 3000 to 5000ms, ghost bob 6px and period 2500 to 3500ms, ghost spawn 300ms, level transition 1200ms, window interpolation 600ms, Poltergeist pulse 1500ms and rotation 8000ms |
 | Moments | `MOMENT_DURATION_MS = { cancel: 1400, payment: 1200, sigil: 1200, levelBetter: 1600, levelWorse: 1000, exorcismComplete: 1200 }`, `MOMENT_HARD_CAP_MS = 2500`, `MOMENT_INPUT_UNBLOCK_MS = 300`, `MOMENT_GAP_MS = 200`, `MOMENT_BEAT_MIN_MS = 300`, `MOMENT_QUEUE_MAX_PENDING = 4`, `REDUCED_MOTION_FADE_MS = 150`, `SETTLE_TIMEOUT_MS = 800` |
 | Labels | `MIN_SCENE_WIDTH_DESKTOP_PX = 480`, `MIN_LABEL_PX = 12`, `TOMBSTONE_LABEL_MIN_SLOT_PX = 64`, derived `TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX = ceil(TOMBSTONE_LABEL_MIN_SLOT_PX × VIEWBOX_WIDTH / TOMBSTONE_SLOT_UNITS)` (about 453) |
-| Scene-only colors | `DECAY_TINTS` (five), `ZOMBIE_BODY`, `ZOMBIE_CLOTHING`, `SCENE_TEAL`, `SCENE_TEAL_LIGHT`, `SCENE_FOG` (from "Style reference"; the only hex values in the module) |
+| Scene-only colors | `DECAY_TINTS` (five), `ZOMBIE_BODY`, `ZOMBIE_CLOTHING`, `SCENE_TEAL`, `SCENE_TEAL_LIGHT`, `SCENE_FOG`, `SCENE_SKY`, `SCENE_WALL`, `SCENE_WALL_SHADE`, `SCENE_BRICK`, `SCENE_MOON`, `SCENE_SOIL`, `SCENE_SOIL_GRAVE`, `SCENE_STONE` (from "Style reference"; the only hex values in the module) |
 | Feature table | `LEVEL_FEATURES: Record<DecayLevel, LevelFeatures>` (see Decay levels) |
 
 `validateSceneConfig(config: unknown): string[]` never throws. It checks: caps are integers of at least 1; ViewBox sides are positive and finite; every moment duration is within 600 and `MOMENT_HARD_CAP_MS`; `MOMENT_INPUT_UNBLOCK_MS` is below each duration; opacity floors are finite, in 0 to 1 and non-increasing as the level worsens; every level opacity from `getWindowOpacity` stays in 0 to 1; `getWindowOpacity(3, 0.43) − getWindowOpacity(4, 0.327) ≥ MIN_VISIBLE_WINDOW_DELTA`; the feature table is monotone and its levels are pairwise distinct; size ranges have `min ≤ max`; `PAYMENT_FLARE_BOOST` is finite and in the range above 0 up to 1; the sigil extent (`SIGIL_DIAMETER / 2 + SIGIL_STROKE / 2 + SIGIL_GLOW_PAD` around `POLTERGEIST_CENTER`, plus `SIGIL_SHAKE` horizontally) lies inside the ViewBox, does not intersect the chimney box, and `SIGIL_DIAMETER ≥ 1.5 × Poltergeist size`.
@@ -264,7 +266,7 @@ export type SceneWindow = {
 export type RoofState = "intact" | "missingShingles" | "sagging" | "partialCollapse" | "collapsed";
 export type GardenState = "green" | "browning" | "dead" | "bare" | "scorched";
 export type LanternState = "lit" | "dim" | "unlit";
-export type TreeState = "none" | "bare" | "charred";
+export type TreeState = "full" | "thin" | "bare" | "twisted" | "charred";
 export type LevelFeatures = {
   crackCount: number; stainCount: number; plasterHole: boolean;
   boardedWindows: number; brokenWindows: number;
@@ -444,18 +446,18 @@ Source of truth for Requirement 6; text follows `visual-language.md`.
 | moss | no | no | yes | yes | yes |
 | garden | green | browning | dead | bare | scorched |
 | lantern | lit | dim | unlit | unlit | unlit |
-| tree | none | none | none | bare | charred |
+| tree (one on each side) | full | thin | bare | twisted | charred |
 | fence | intact | intact | intact | broken | broken |
 | structure | sound | sound | sound | sound | collapsing (leaning walls, exposed beams) |
 | fog (0 to 4) | 0 | 1 | 2 | 3 | 4 |
 | bats | no | no | no | yes | yes |
 | fireflies | yes | no | no | no | no |
 | shadowPass | no | no | yes | yes | no |
-| darkness | 0 | 0.05 | 0.15 | 0.35 | 0.8 |
+| darkness | 0 | 0.05 | 0.15 | 0.35 | 0.5 |
 
 "Severity" is the ordinal of each field (`crackCount`, `stainCount`, `plasterHole`, boarded plus broken, `roof`, `moss`, `garden`, `lantern`, `tree`, `fence`, `structure`, `fog`, `bats`, `darkness`). `fireflies` and `shadowPass` are ambient flags excluded from the monotone set. The property checks that every ordinal is non-decreasing as the level worsens and that each pair of levels differs in at least one feature (Property 9).
 
-Level 5 darkness is an SVG `mask` overlay. With `lighting = poltergeistGlow` the mask has a radial hole at the Poltergeist center, so its glow is the only light; with `moonlight` the mask has a faint `--text-tertiary` moon glow at 30% opacity.
+Level 5 darkness (0.5, so the silhouette stays readable) is an SVG `mask` overlay, with a faint `SCENE_FOG` rim light on the house outline above it. The windows layer is drawn above the darkness overlay so lit windows stay the brightest element; windows that give no light are dimmed by `1 − darkness`. With `lighting = poltergeistGlow` the mask has a radial hole at the Poltergeist center, so its glow is the only light; with `moonlight` the mask has a faint `--text-tertiary` moon glow at 30% opacity.
 
 ### SVG layer structure
 
@@ -463,10 +465,10 @@ One `<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden=
 
 | z | Layer (`data-part`) | Contents | Driven by |
 |---|---|---|---|
-| 1 | `sky` | `--surface-void` backdrop, stars, moon | level (tint) |
+| 1 | `sky` | `SCENE_SKY` backdrop, stars, moon with halo | level (tint) |
 | 2 | `atmosphere-back` | back fog, fireflies, bats | features, AmbientMotion |
 | 3 | `garden` | ground, grass, fence, lantern, tree | features |
-| 4 | `house` | walls (decay tint), foundation, roof, chimney, attic | features, tint |
+| 4 | `house` | slate walls (decay tint overlay), foundation, roof, chimney, attic | features, tint |
 | 5 | `decay` | cracks (`crack:0..3`), stains, moss, plaster hole, shutters | features |
 | 6 | `windows` | `window:0..5`: candle glow, boards, broken glass | `windows[]` |
 | 7 | `basement` | cutaway, `zombie:<id>`, `zombie-overflow` anchor | `zombies[]` |
@@ -476,7 +478,7 @@ One `<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden=
 | 11 | `atmosphere-front` | front fog | features |
 | 12 | `darkness` | level-5 mask overlay, `incoming-level` slot | `lighting`, `darkness` |
 
-Window glow and creature glows use SVG `filter` drop-shadows defined once in `<defs>`. Level tints come from `DECAY_TINTS`; all other fills are design-system tokens through CSS variables (`var(--accent-candle)` and so on), so no new hex values appear in `house/`.
+Window halos, the moon halo and the lantern glow use SVG blur filters defined once in `<defs>` (ids from `useId`); creature glows use the same approach. In z-order the `windows` layer is drawn after the `darkness` layer. Level tints come from `DECAY_TINTS`; all other fills are design-system tokens through CSS variables (`var(--accent-candle)` and so on), so no new hex values appear in `house/`.
 
 The container is `<div role="img" aria-label={summary} class="@container" style={{ aspectRatio: "4 / 3" }}>` with the `<svg>` and the label overlay as children. `aspect-ratio` reserves the height before any script runs (Requirement 5.2).
 
