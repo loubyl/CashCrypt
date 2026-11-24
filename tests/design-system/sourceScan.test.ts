@@ -14,6 +14,9 @@ const COLOR_SCAN_EXCLUDED = [
   "src/lib/exorcism/",
   "src/components/house/",
   "src/components/moments/",
+  // Scene-only decay tints and creature colors with no chrome equivalent (house-scene Requirement 2.3).
+  // A single file, not the folder, so the rest of src/lib/scene/ stays scanned.
+  "src/lib/scene/config.ts",
 ];
 
 const HEX_COLOR_PATTERN = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})(?![0-9a-zA-Z_])/;

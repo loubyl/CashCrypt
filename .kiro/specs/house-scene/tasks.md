@@ -22,42 +22,47 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Phase A: scene config, windows and features (pure)
-  - [ ] 1.1 Create `src/lib/scene/config.ts`, `types.ts` and `hash.ts`
+- [x] 1. Phase A: scene config, windows and features (pure)
+  - [x] 1.1 Create `src/lib/scene/config.ts`, `types.ts` and `hash.ts`
     - Define every constant of the design's config table as named exports and gather them in `SCENE_CONFIG`, including `OPACITY_FLOOR_BY_LEVEL = { 1: 0.8, 2: 0.6, 3: 0.4, 4: 0.02, 5: 0 }`, `PAYMENT_FLARE_BOOST`, the Poltergeist center `(400, 150)`, sigil geometry, the chimney box, moment durations and the scene-only colors (the only hex values in the module).
     - Implement `validateSceneConfig(config: unknown): string[]` that never throws and checks every rule of Requirement 2.5 and the design.
     - Define `SceneInput`, `SceneModel` and the part types. Implement `hashId` (FNV-1a) and `unitFromId`.
     - _Requirements: 1.1, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 3.3_
 
-  - [ ] 1.2 Create `features.ts` and `windows.ts`
+  - [x] 1.2 Create `features.ts` and `windows.ts`
     - `features.ts`: `LEVEL_FEATURES` table (design "Decay levels") and severity ordinal helpers.
     - `windows.ts`: fixed window layout (six windows), `WINDOW_FAILURE_ORDER` state assignment, `getWindowOpacity(level, brightness)` and `getFlareSteps(previous, live, boost)`.
     - _Requirements: 6.2, 6.3, 7.1, 7.2, 7.3, 7.6, 7.7, 14.3_
 
-  - [ ] 1.3 Write property test for config validation
+  - [x] 1.3 Write property test for config validation
     - **Property 13: Config validation never throws and flags broken configs**
     - File: `tests/scene/properties/p13-config-validation.test.ts`.
     - **Validates: Requirements 2.4, 2.5**
 
-  - [ ] 1.4 Write example tests for config, features and windows
+  - [x] 1.4 Write example tests for config, features and windows
     - `tests/scene/config.test.ts`: shipped config passes; one failing example per rule; `getWindowOpacity(3, 0.43) - getWindowOpacity(4, 0.327) >= MIN_VISIBLE_WINDOW_DELTA`; sigil extent `y 9..291`, `x 253..547` is inside the ViewBox and clear of the chimney; moving the Poltergeist center to `y 110` is reported (mutation check for R2).
     - `tests/scene/features.test.ts`: the table against `visual-language.md` for each level.
     - _Requirements: 2.5, 6.1, 6.2, 7.6, 15.7_
 
-  - [ ] 1.5 Write property test for the feature table
+  - [x] 1.5 Write property test for the feature table
     - **Property 9: Level feature table is monotone and distinct**
     - File: `tests/scene/properties/p09-feature-table.test.ts`.
     - **Validates: Requirements 6.2, 6.3, 7.3**
 
-  - [ ] 1.6 Write property test for window opacity
+  - [x] 1.6 Write property test for window opacity
     - **Property 10: Window opacity range, level 5 and monotonicity**
     - File: `tests/scene/properties/p10-window-opacity.test.ts`.
     - **Validates: Requirements 7.1, 7.2, 7.4, 7.5, 7.7**
 
-  - [ ] 1.7 Write property test for the flare steps
+  - [x] 1.7 Write property test for the flare steps
     - **Property 19: The flare peaks at most at 1, never below the live value, and ends on it**
     - File: `tests/scene/properties/p19-flare-steps.test.ts`. Mutation check: drop the `min(1, …)` cap and confirm the test fails.
     - **Validates: Requirements 14.3, 14.6**
+
+  - [x] 1.8 Allow-list the scene config in the color scan and harden `getFlareSteps`
+    - Add `"src/lib/scene/config.ts"` (the single file, not the folder) to `COLOR_SCAN_EXCLUDED` in `tests/design-system/sourceScan.test.ts`, with a comment citing house-scene Requirement 2.3. Mutation check: add `"#123456"` to `src/lib/scene/windows.ts`, confirm the scan fails naming that file and line, then revert.
+    - Make sure `getFlareSteps` never returns NaN for non-finite brightness or boost (`Math.min(1, NaN)` is NaN). If it can, sanitize the inputs, add the case to `tests/scene/properties/p19-flare-steps.test.ts`, and do a mutation check (remove the sanitizing, confirm the test fails, restore).
+    - _Requirements: 2.3, 14.3, 14.6_
 
 - [ ] 2. Phase A: scene model skeleton
   - [ ] 2.1 Create `src/lib/scene/index.ts` (`buildSceneModel`) and `summary.ts`
@@ -75,6 +80,7 @@ Conventions that apply to every task:
     - `HouseBase.tsx`, `DecayLayer.tsx`, `WindowsLayer.tsx` and `HouseScene.tsx` (no GSAP, no labels, no ambient motion). One `<svg>` with `viewBox="0 0 800 600"` and `preserveAspectRatio="xMidYMid meet"`, container `role="img"` with `aria-label` from the summary, `aspect-ratio: 4 / 3`, SVG `aria-hidden`.
     - Draw the five levels from the feature table, level tints, window states with distinct shapes for boarded and broken, level-5 darkness with the Poltergeist-glow or moonlight mask, the chimney box position, and the wordmark-font nameplate if drawn. Original art, design-system tokens through CSS variables, scene-only colors from the config.
     - Layers carry `data-part` keys. Level changes without an action apply at once.
+    - Style: follow `design.md` → Style reference and `references/house-reference-1.jpg` for shapes and mood only (flat vector, no outlines, tall gable, round attic window, chimney, porch roof, lantern, bare trees, fence, fog bars, moon). Layout follows the design zones (basement band `x 60..740`, graveyard band at the bottom), not the image. Sky, basement, window light and moon use existing tokens, walls, tombstones and chimney use `DECAY_TINTS`. Add only `SCENE_TEAL` (`#29464A`), `SCENE_TEAL_LIGHT` (`#395F60`) and `SCENE_FOG` (`#B7D4CF`) as scene-only constants in `src/lib/scene/config.ts` (the only file allowed hex values); no inline hex in components.
     - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 6.4, 6.5, 6.6, 6.7, 7.1, 7.3, 7.8, 19.1, 19.6, 19.8, 21.1, 21.7, 23.1, 23.2, 23.3_
 
   - [ ] 3.2 Create `src/hooks/useSceneModel.ts`
@@ -396,7 +402,7 @@ Conventions that apply to every task:
     { "id": 0, "tasks": ["1.1", "5.1"] },
     { "id": 1, "tasks": ["1.2"] },
     { "id": 2, "tasks": ["1.3", "1.4", "1.5", "1.6", "1.7", "2.1"] },
-    { "id": 3, "tasks": ["2.2", "3.1", "3.2"] },
+    { "id": 3, "tasks": ["1.8", "2.2", "3.1", "3.2"] },
     { "id": 4, "tasks": ["3.3"] },
     { "id": 5, "tasks": ["3.4"] },
     { "id": 6, "tasks": ["6.1"] },

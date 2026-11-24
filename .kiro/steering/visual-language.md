@@ -8,6 +8,25 @@ The haunted aesthetic is **gothic-cozy**, not horror. The house should feel mela
 
 ---
 
+## Style Reference
+
+The house art follows the flat-vector reference in `.kiro/specs/house-scene/references/house-reference-1.jpg` (about decay level 3 to 4 in mood): no outlines, two or three close tones per shape, muted colors, a tall central gable with a round attic window, a chimney, a porch roof, a lantern, bare trees, a fence, pale fog bars and a pale moon. The reference sets shapes and mood only. Layout follows the design zones (wide basement band for the zombie row, graveyard band at the bottom), and the feature table decides what appears at each level. Warm light appears only in the windows.
+
+| Reference element | Color source |
+|---|---|
+| Sky | `--surface-void` |
+| Basement block | `--surface-card` |
+| Window glow and candles | `--accent-candle` |
+| Walls, tombstones, chimney | Decay tint of the current level, shaded one step darker on the shadow face |
+| Moon | `--text-tertiary` at 30 to 60% opacity |
+| Roof and trees | Scene-only teal `#29464A` (`SCENE_TEAL`) |
+| Ground line and trim | Scene-only teal `#395F60` (`SCENE_TEAL_LIGHT`) |
+| Fog bars | Scene-only mint `#B7D4CF` (`SCENE_FOG`) at low opacity |
+
+New scene-only colors live in `src/lib/scene/config.ts` only; see `house-scene/design.md` → Style reference.
+
+---
+
 ## Decay Spectrum
 
 The five decay levels share a color language that derives from, but extends beyond, the chrome palette. These tints apply to SVG scene elements only — never to chrome surfaces, text or controls.

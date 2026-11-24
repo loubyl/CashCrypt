@@ -52,6 +52,37 @@ These changes follow a recomputation of the demo path with the real engine (see 
 | R3 | When a second action begins during a hold, the **first frozen model is kept**. The rule is a pure reducer, so it is property-tested. | Observer, hold and settle, Property 18, Requirement 12.19 |
 | R4 | The off-screen and hidden-document pause applies **only to the AmbientMotion timelines and ticker callback**, never to `gsap.globalTimeline`, so a playing Moment is never stalled. | AmbientMotion, Requirement 21.4 |
 
+### Style reference
+
+`.kiro/specs/house-scene/references/house-reference-1.jpg` is the owner-supplied style reference for the house art. It shows a house at about **decay level 3 to 4** in mood (muted, dim, windows lit but not at full brightness). It sets mood, proportions and shape language only. The SVG is original art drawn from the feature table, not a trace of the image.
+
+**The layout follows the design zones, not the image.** Positions come from "Layout algorithms": the zombie row sits in the wide basement band (`y 400..520`, `x 60..740`), the tombstones in the graveyard band at the bottom (`y 520..590`), the Poltergeist at `POLTERGEIST_CENTER`, windows from `WINDOW_LAYOUT`. The image's narrow basement block and the tombstones beside the house are not placed from it. How many cracks, boarded windows, bats or fog layers appear at each level comes from the feature table, not from what the image happens to show.
+
+What to take from it:
+
+- **Flat vector, no outlines.** Shapes are filled with two or three close tones (a lit face and a shaded face). No strokes except thin details (fence, window bars, tree branches), no gradients on the house, no textures.
+- **Silhouette.** A narrow two-story house with a tall central gable, a round attic window under the peak, a lower hip roof on each side, one brick chimney on the right, a small porch roof over the door, and a lantern beside the door. This matches the six-window layout (three upper, two ground flanking the door, one round attic).
+- **Windows.** Arched or rectangular panes with a cross mullion, a small sill, a soft candle glow halo and one candle inside.
+- **Surroundings.** A flat ground line, a bare tree on each side, bushes at the base, a fence at the right, and pale flat fog bars behind the house.
+- **Sky.** Near-black sky with a pale round moon and a few star dots. The level 5 moonlight rule of `visual-language.md` still applies.
+- **Calm and cozy.** Muted, low-saturation colors; the only warm color is window light.
+
+Measured colors (pixel samples of the image) and what each becomes. Existing tokens are used wherever one is close, so new colors stay at a minimum:
+
+| Reference element | Measured | Used in the scene as |
+|---|---|---|
+| Sky | `#22252A` | `--surface-void` (no new color) |
+| Basement block | `#16171B` | `--surface-card` (`#151518`, nearly identical; no new color) |
+| Window light and candles | `#E1954A` | `--accent-candle`, at the opacity from `getWindowOpacity` |
+| Walls | `#3F3F4B`, `#3A3A46` | `DECAY_TINTS` of the current level; the shaded face is the same tint under a `--surface-void` overlay. The gray-violet of the image is not copied, because the tint spectrum decides wall color per level |
+| Tombstones, chimney | `#5A5667`, `#4A4758` | The wall tint (lit face and shaded face), same rule as walls; no new color |
+| Moon | `#CEE1DD` | `--text-tertiary` at 30 to 60% opacity (same rule as the level 5 moonlight); no new color |
+| Roof and trees | `#29464A` | **New scene-only constant** (`SCENE_TEAL`) |
+| Ground line and trim | `#395F60` | **New scene-only constant** (`SCENE_TEAL_LIGHT`); no token is close (`--accent-ecto` is `#3DDC97`, far brighter) |
+| Fog bars | `#B7D4CF` | **New scene-only constant** (`SCENE_FOG`), drawn at low opacity |
+
+So at most three new hex values enter `config.ts`, next to `DECAY_TINTS`, `ZOMBIE_BODY` and `ZOMBIE_CLOTHING`: `SCENE_TEAL`, `SCENE_TEAL_LIGHT` and `SCENE_FOG`. The module stays the only place with hex values (the color scan allows `src/lib/scene/config.ts` only, Requirement 2.3). Components read colors from the config or CSS variables, never inline hex.
+
 ### Research findings
 
 - **GSAP licence and packages.** Since GSAP 3.13 the whole library, including the former Club plugins (DrawSVGPlugin, MotionPathPlugin, MorphSVGPlugin), ships in the public `gsap` npm package under the standard no-charge licence ([GSAP plugins docs](https://gsap.com/docs/v3/Plugins/), [npm gsap](https://www.npmjs.com/package/gsap)). Plugins are imported from the package, for example `gsap/DrawSVGPlugin`. Content was rephrased for compliance with licensing restrictions.
@@ -196,7 +227,7 @@ All constants are exported and gathered in `SCENE_CONFIG: SceneConfig` so `valid
 | Motion data | zombie tilt `±5°`, sway amplitude 3px and period 3000 to 5000ms, ghost bob 6px and period 2500 to 3500ms, ghost spawn 300ms, level transition 1200ms, window interpolation 600ms, Poltergeist pulse 1500ms and rotation 8000ms |
 | Moments | `MOMENT_DURATION_MS = { cancel: 1400, payment: 1200, sigil: 1200, levelBetter: 1600, levelWorse: 1000, exorcismComplete: 1200 }`, `MOMENT_HARD_CAP_MS = 2500`, `MOMENT_INPUT_UNBLOCK_MS = 300`, `MOMENT_GAP_MS = 200`, `MOMENT_BEAT_MIN_MS = 300`, `MOMENT_QUEUE_MAX_PENDING = 4`, `REDUCED_MOTION_FADE_MS = 150`, `SETTLE_TIMEOUT_MS = 800` |
 | Labels | `MIN_SCENE_WIDTH_DESKTOP_PX = 480`, `MIN_LABEL_PX = 12`, `TOMBSTONE_LABEL_MIN_SLOT_PX = 64`, derived `TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX = ceil(TOMBSTONE_LABEL_MIN_SLOT_PX × VIEWBOX_WIDTH / TOMBSTONE_SLOT_UNITS)` (about 453) |
-| Scene-only colors | `DECAY_TINTS` (five), `ZOMBIE_BODY`, `ZOMBIE_CLOTHING` (the only hex values in the module) |
+| Scene-only colors | `DECAY_TINTS` (five), `ZOMBIE_BODY`, `ZOMBIE_CLOTHING`, `SCENE_TEAL`, `SCENE_TEAL_LIGHT`, `SCENE_FOG` (from "Style reference"; the only hex values in the module) |
 | Feature table | `LEVEL_FEATURES: Record<DecayLevel, LevelFeatures>` (see Decay levels) |
 
 `validateSceneConfig(config: unknown): string[]` never throws. It checks: caps are integers of at least 1; ViewBox sides are positive and finite; every moment duration is within 600 and `MOMENT_HARD_CAP_MS`; `MOMENT_INPUT_UNBLOCK_MS` is below each duration; opacity floors are finite, in 0 to 1 and non-increasing as the level worsens; every level opacity from `getWindowOpacity` stays in 0 to 1; `getWindowOpacity(3, 0.43) − getWindowOpacity(4, 0.327) ≥ MIN_VISIBLE_WINDOW_DELTA`; the feature table is monotone and its levels are pairwise distinct; size ranges have `min ≤ max`; `PAYMENT_FLARE_BOOST` is finite and in the range above 0 up to 1; the sigil extent (`SIGIL_DIAMETER / 2 + SIGIL_STROKE / 2 + SIGIL_GLOW_PAD` around `POLTERGEIST_CENTER`, plus `SIGIL_SHAKE` horizontally) lies inside the ViewBox, does not intersect the chimney box, and `SIGIL_DIAMETER ≥ 1.5 × Poltergeist size`.
