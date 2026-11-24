@@ -215,6 +215,13 @@ export const SCENE_MOON = "#CEE1DD";
 export const SCENE_SOIL = "#0F0F12";
 export const SCENE_SOIL_GRAVE = "#1B1A21";
 export const SCENE_STONE = "#2C2C34";
+/** Basement stone-block lines: halfway between SCENE_SOIL and SCENE_STONE (half the contrast). */
+export const SCENE_STONE_LINE = "#1E1E23";
+/** Level 5 charred trees: warm charcoal, and the faint ember tint of their cracks. */
+export const SCENE_CHAR = "#2E2829";
+export const SCENE_EMBER = "#5A2E24";
+/** Bats at levels 4 and 5: lighter than the overlay surface so they read against the sky. */
+export const SCENE_BAT = "#4A4A56";
 
 // ---------------------------------------------------------------------------
 // Feature table (see design "Decay levels")
@@ -411,6 +418,10 @@ export type SceneConfig = {
   SCENE_SOIL: string;
   SCENE_SOIL_GRAVE: string;
   SCENE_STONE: string;
+  SCENE_STONE_LINE: string;
+  SCENE_CHAR: string;
+  SCENE_EMBER: string;
+  SCENE_BAT: string;
   LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>>;
 };
 
@@ -488,6 +499,10 @@ export const SCENE_CONFIG: SceneConfig = {
   SCENE_SOIL,
   SCENE_SOIL_GRAVE,
   SCENE_STONE,
+  SCENE_STONE_LINE,
+  SCENE_CHAR,
+  SCENE_EMBER,
+  SCENE_BAT,
   LEVEL_FEATURES,
 };
 
@@ -781,7 +796,8 @@ function checkLabelsAndColors(c: Obj, problems: string[]): void {
     }
   }
   for (const key of ["ZOMBIE_BODY", "ZOMBIE_CLOTHING", "SCENE_TEAL", "SCENE_TEAL_LIGHT", "SCENE_FOG",
-    "SCENE_SKY", "SCENE_WALL", "SCENE_WALL_SHADE", "SCENE_BRICK", "SCENE_MOON", "SCENE_SOIL", "SCENE_SOIL_GRAVE", "SCENE_STONE"]) {
+    "SCENE_SKY", "SCENE_WALL", "SCENE_WALL_SHADE", "SCENE_BRICK", "SCENE_MOON", "SCENE_SOIL", "SCENE_SOIL_GRAVE", "SCENE_STONE",
+    "SCENE_STONE_LINE", "SCENE_CHAR", "SCENE_EMBER", "SCENE_BAT"]) {
     const value = c[key];
     if (typeof value !== "string" || !HEX_COLOR.test(value)) problems.push(`${key} must be a #RRGGBB color`);
   }

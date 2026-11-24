@@ -15,7 +15,7 @@ The house art follows the flat-vector reference in `.kiro/specs/house-scene/refe
 | Reference element | Color source |
 |---|---|
 | Sky | Scene-only `#22252A` (`SCENE_SKY`), lighter than `--surface-void` |
-| Basement and graveyard soil | Scene-only `SCENE_SOIL` `#0F0F12` and `SCENE_SOIL_GRAVE` `#1B1A21`; `SCENE_STONE` `#2C2C34` for block lines, pebbles, roots |
+| Basement and graveyard soil | Scene-only `SCENE_SOIL` `#0F0F12` and `SCENE_SOIL_GRAVE` `#1B1A21`; `SCENE_STONE` `#2C2C34` for pebbles and roots, `SCENE_STONE_LINE` `#1E1E23` for block lines; charred trees `SCENE_CHAR` `#2E2829` with `SCENE_EMBER` `#5A2E24`; bats `SCENE_BAT` `#4A4A56` |
 | Window glow and candles | `--accent-candle` pane and blurred halo, cream candle and flame from `DECAY_TINTS` |
 | Walls, chimney | Slate `SCENE_WALL` `#3F3F4B` and `SCENE_WALL_SHADE` `#3A3A46` at every level; the level tint of `DECAY_TINTS` is only a 10% overlay |
 | Brick accents | Scene-only `SCENE_BRICK` `#34343F` |
@@ -103,7 +103,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Windows: all boarded or broken; no candlelight remains.
 - Roof: heavily collapsed, only the chimney stands.
 - Garden: scorched earth, the dead tree is split and charred.
-- Atmosphere: darkness (overlay about 50%, silhouette kept readable by a faint rim light). If the Poltergeist is active, its `--accent-spirit` glow is the sole light source in the scene. If there is no Poltergeist, faint moonlight (`--text-tertiary` at 30% opacity) provides the only illumination.
+- Atmosphere: darkness (overlay about 50%, silhouette kept readable by walls slightly lighter than the sky and a faint moonlight edge on the top roof edges only). If the Poltergeist is active, its `--accent-spirit` glow is the sole light source in the scene. If there is no Poltergeist, faint moonlight (`--text-tertiary` at 30% opacity) provides the only illumination.
 - Financial trigger: light score 0–19.
 
 ---

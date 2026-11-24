@@ -3,13 +3,17 @@ import {
   BASEMENT_BAND,
   DECAY_TINTS,
   GRAVEYARD_BAND,
+  SCENE_BAT,
   SCENE_BRICK,
+  SCENE_CHAR,
+  SCENE_EMBER,
   SCENE_FOG,
   SCENE_MOON,
   SCENE_SKY,
   SCENE_SOIL,
   SCENE_SOIL_GRAVE,
   SCENE_STONE,
+  SCENE_STONE_LINE,
   SCENE_TEAL,
   SCENE_TEAL_LIGHT,
   SCENE_WALL,
@@ -182,7 +186,7 @@ function renderBackAtmosphere(features: LevelFeatures): ReactNode {
       {features.bats ? (
         <g data-part="bats">
           {BATS.map((bat) => (
-            <path key={`${bat.x}-${bat.y}`} d={BAT_PATH} transform={`translate(${bat.x} ${bat.y})`} fill={TOKEN.overlay} />
+            <path key={`${bat.x}-${bat.y}`} d={BAT_PATH} transform={`translate(${bat.x} ${bat.y})`} fill={SCENE_BAT} />
           ))}
         </g>
       ) : null}
@@ -250,7 +254,7 @@ function renderTreeBody(tree: TreeState): ReactNode {
         <>
           <path d="M0 400 L4 330 L-2 290" strokeWidth={TRUNK_WIDTH} />
           <path d={TREE_BRANCHES} strokeWidth={BRANCH_WIDTH} />
-          {tree === "charred" ? <path d="M3 330 L6 366" stroke={TOKEN.void} strokeWidth={3} /> : null}
+          {tree === "charred" ? <path d="M3 330 L6 366" stroke={SCENE_EMBER} strokeWidth={3} /> : null}
         </>
       );
   }
@@ -258,7 +262,7 @@ function renderTreeBody(tree: TreeState): ReactNode {
 
 /** One tree on each side at every level; the state sets how much of it is left. */
 function renderTrees(features: LevelFeatures): ReactNode {
-  const stroke = features.tree === "charred" ? DECAY_TINTS[5] : SCENE_TEAL;
+  const stroke = features.tree === "charred" ? SCENE_CHAR : SCENE_TEAL;
   const transforms = [`translate(${TREE_LEFT_X} 0)`, `translate(${TREE_RIGHT_X} 0) scale(-1 1)`];
   return (
     <g data-part="tree" data-tree={features.tree} stroke={stroke} strokeLinecap="round" fill="none">
@@ -484,7 +488,7 @@ function renderBasement(): ReactNode {
           rx={16}
           fill={SCENE_SOIL}
         />
-        <g stroke={SCENE_STONE} strokeWidth={BLOCK_LINE_WIDTH} opacity={SOIL_LINE_OPACITY} fill="none" strokeLinecap="round">
+        <g stroke={SCENE_STONE_LINE} strokeWidth={BLOCK_LINE_WIDTH} opacity={SOIL_LINE_OPACITY} fill="none" strokeLinecap="round">
           {BLOCK_ROWS.map((y, row) => (
             <g key={y}>
               <path d={`M${BASEMENT_BAND.x + 12} ${y} H${BASEMENT_BAND.x + BASEMENT_BAND.w - 12}`} />

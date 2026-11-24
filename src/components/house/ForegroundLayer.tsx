@@ -1,20 +1,17 @@
 import { useId } from "react";
-import { POLTERGEIST_CENTER, SCENE_FOG, VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
+import { POLTERGEIST_CENTER, SCENE_FOG, SCENE_MOON, VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
 import type { SceneModel } from "@/lib/scene";
 import {
-  CHIMNEY_BODY,
   FOG_BACK_BARS,
   FOG_BAR_HEIGHT,
   FOG_BARS,
   FOG_FRONT_OPACITY,
-  GABLE_WALL_COLLAPSED,
-  LEFT_HIP_COLLAPSED,
+  FOG_DOOR_BAR_INDEX,
+  FOG_DOOR_CLEAR_BARS,
+  FOG_DOOR_CLEAR_MIN_LEVEL,
   MOON,
-  RIGHT_HIP_COLLAPSED,
-  STUMP_LEFT,
-  STUMP_RIGHT,
+  MOON_EDGE_POLYLINES,
   TOKEN,
-  WALLS,
   getStructureTransform,
 } from "./houseGeometry";
 
@@ -27,8 +24,8 @@ const SPIRIT_HALO_RADIUS = 140;
 const SPIRIT_HALO_OPACITY = 0.3;
 const MOON_GLOW_RADIUS = 80;
 const MOON_GLOW_OPACITY = 0.3;
-const RIM_WIDTH = 2;
-const RIM_OPACITY = 0.4;
+const EDGE_WIDTH = 1.5;
+const EDGE_OPACITY = 0.28;
 
 /** Front fog bars plus the darkness overlay (level 5 keeps one light source through a mask). */
 export function ForegroundLayer({ model }: ForegroundLayerProps) {
@@ -40,7 +37,11 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
   const glow = model.lighting === "poltergeistGlow";
   const moonlight = model.lighting === "moonlight";
   const center = POLTERGEIST_CENTER;
-  const frontBars = FOG_BARS.slice(FOG_BACK_BARS, model.features.fog);
+  const frontBars = FOG_BARS.slice(FOG_BACK_BARS, model.features.fog).flatMap((bar, index) =>
+    model.level >= FOG_DOOR_CLEAR_MIN_LEVEL && index + FOG_BACK_BARS === FOG_DOOR_BAR_INDEX
+      ? FOG_DOOR_CLEAR_BARS
+      : [bar],
+  );
 
   return (
     <>
@@ -93,21 +94,18 @@ export function ForegroundLayer({ model }: ForegroundLayerProps) {
         ) : null}
         {model.level === 5 ? (
           <g
-            data-part="rim-light"
+            data-part="moon-edge"
             transform={getStructureTransform(model.features)}
             fill="none"
-            stroke={SCENE_FOG}
-            strokeWidth={RIM_WIDTH}
+            stroke={SCENE_MOON}
+            strokeWidth={EDGE_WIDTH}
             strokeLinejoin="round"
-            opacity={RIM_OPACITY}
+            strokeLinecap="round"
+            opacity={EDGE_OPACITY}
           >
-            <rect x={WALLS.x} y={WALLS.y} width={WALLS.w} height={WALLS.h} />
-            <polygon points={GABLE_WALL_COLLAPSED} />
-            <polygon points={LEFT_HIP_COLLAPSED} />
-            <polygon points={RIGHT_HIP_COLLAPSED} />
-            <polygon points={STUMP_LEFT} />
-            <polygon points={STUMP_RIGHT} />
-            <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} />
+            {MOON_EDGE_POLYLINES.map((points) => (
+              <polyline key={points} points={points} />
+            ))}
           </g>
         ) : null}
         {glow ? (

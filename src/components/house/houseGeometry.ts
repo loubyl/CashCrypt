@@ -30,7 +30,7 @@ export const MOON_BLUR = 9;
 export const TINT_OVERLAY_OPACITY = 0.1;
 /** Level 1 walls get a light veil, level 5 a dark one; 0 elsewhere. */
 export const WALL_LIGHT_VEIL: Readonly<Record<number, number>> = { 1: 0.04 };
-export const WALL_DARK_VEIL: Readonly<Record<number, number>> = { 5: 0.22 };
+export const WALL_DARK_VEIL: Readonly<Record<number, number>> = {};
 
 export const WALLS = { x: 200, y: 190, w: 400, h: 210 } as const;
 export const GROUND_Y = 400;
@@ -79,7 +79,7 @@ export const STAINS: readonly { cx: number; cy: number; rx: number; ry: number }
   { cx: 360, cy: 392, rx: 30, ry: 8 },
 ];
 
-export const PLASTER_HOLE = "430,330 470,322 484,350 466,380 436,372";
+export const PLASTER_HOLE = "448,226 486,220 496,254 478,286 452,274";
 
 export const FOG_BARS: readonly { x: number; y: number; w: number }[] = [
   { x: 40, y: 350, w: 320 },
@@ -87,6 +87,13 @@ export const FOG_BARS: readonly { x: number; y: number; w: number }[] = [
   { x: 120, y: 380, w: 380 },
   { x: 560, y: 296, w: 220 },
 ];
+/** Levels 4 and 5 replace the third bar (it crossed door and porch) by two short bars beside the door (door x 370..430, porch x 342..458). */
+export const FOG_DOOR_BAR_INDEX = 2;
+export const FOG_DOOR_CLEAR_BARS: readonly { x: number; y: number; w: number }[] = [
+  { x: 110, y: 380, w: 220 },
+  { x: 470, y: 380, w: 140 },
+];
+export const FOG_DOOR_CLEAR_MIN_LEVEL = 4;
 export const FOG_BAR_HEIGHT = 14;
 export const FOG_BACK_BARS = 2;
 export const FOG_OPACITY = 0.3;
@@ -150,6 +157,15 @@ export const BUSHES: readonly { cx: number; cy: number; r: number }[] = [
   { cx: 582, cy: 395, r: 10 },
 ];
 
-/** Rim light of the level 5 silhouette: x of the left and right tree trunks. */
+/** Moonlight edge of level 5: open polylines along the top edges of the collapsed roof, gable and chimney. */
+export const MOON_EDGE_POLYLINES: readonly string[] = [
+  "184,204 210,190 240,200 270,192 296,204",
+  "616,204 590,190 560,200 530,192 504,204",
+  "296,196 330,150 350,172",
+  "504,196 470,160 450,180",
+  "320,196 340,140 372,150 400,110 430,150 462,138 480,196",
+];
+
+/** x of the left and right tree trunks. */
 export const TREE_LEFT_X = 118;
 export const TREE_RIGHT_X = 688;
