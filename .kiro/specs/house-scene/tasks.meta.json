@@ -116,6 +116,37 @@
         "chatSessionId": "sess_ae385b73-d5da-4b89-8369-0abd85659f37",
         "timestamp": 1795491847910
       }
+    ],
+    "2.1 Create `src/lib/scene/index.ts` (`buildSceneModel`) and `summary.ts`": [
+      {
+        "executionId": "c2a2423b-628f-43c3-b4ac-20f6ce48c0e9",
+        "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
+        "timestamp": 1795494560153
+      },
+      {
+        "executionId": "c2a2423b-628f-43c3-b4ac-20f6ce48c0e9",
+        "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
+        "timestamp": 1795494696577
+      }
+    ],
+    "2.2 Write property test for level and lighting": [
+      {
+        "executionId": "c2a2423b-628f-43c3-b4ac-20f6ce48c0e9",
+        "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
+        "timestamp": 1795494697131
+      },
+      {
+        "executionId": "c2a2423b-628f-43c3-b4ac-20f6ce48c0e9",
+        "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
+        "timestamp": 1795494779326
+      }
+    ],
+    "2. Phase A: scene model skeleton": [
+      {
+        "executionId": "c2a2423b-628f-43c3-b4ac-20f6ce48c0e9",
+        "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
+        "timestamp": 1795494779380
+      }
     ]
   }
 }

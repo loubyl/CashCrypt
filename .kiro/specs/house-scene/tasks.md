@@ -64,13 +64,13 @@ Conventions that apply to every task:
     - Make sure `getFlareSteps` never returns NaN for non-finite brightness or boost (`Math.min(1, NaN)` is NaN). If it can, sanitize the inputs, add the case to `tests/scene/properties/p19-flare-steps.test.ts`, and do a mutation check (remove the sanitizing, confirm the test fails, restore).
     - _Requirements: 2.3, 14.3, 14.6_
 
-- [ ] 2. Phase A: scene model skeleton
-  - [ ] 2.1 Create `src/lib/scene/index.ts` (`buildSceneModel`) and `summary.ts`
+- [x] 2. Phase A: scene model skeleton
+  - [x] 2.1 Create `src/lib/scene/index.ts` (`buildSceneModel`) and `summary.ts`
     - Sanitize numbers, copy inputs (no mutation), set level, name, features, lighting and windows. Poltergeist handling and creature lists return empty or null for now. The summary is level-aware ("Level 3, Haunted.").
     - Public API re-exports. No React, GSAP, clock or random source.
     - _Requirements: 1.1, 3.1, 3.2, 3.5, 3.6, 3.7, 6.4, 6.5, 7.1_
 
-  - [ ] 2.2 Write property test for level and lighting
+  - [x] 2.2 Write property test for level and lighting
     - **Property 11: Level and lighting follow the engine**
     - File: `tests/scene/properties/p11-level-lighting.test.ts`.
     - **Validates: Requirements 3.7, 6.4, 6.5**
