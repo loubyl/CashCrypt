@@ -110,7 +110,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 1. THE Scene_Builder SHALL accept a Scene_Input and return a Scene_Model that contains the Decay_Level, the window list, the decay features, the drawn Zombies, the drawn Ghosts, the Poltergeist state, the drawn tombstones, the three Overflow_Counts and the Scene_Summary.
 2. THE Scene_Builder SHALL return an identical Scene_Model for identical Scene_Inputs (determinism).
 3. THE Scene_Builder SHALL derive every position, phase and tilt from the row ids and the Scene_Config only, and SHALL NOT use the order of the input arrays, so that FOR ALL permutations of the input arrays the Scene_Model is deeply equal (permutation invariance).
-4. THE Scene_Builder SHALL give a Ghost the same phase offset in every Scene_Model that contains it, because the offset depends only on the Ghost's `transactionId`.
+4. THE Scene_Builder SHALL derive a Ghost's lane, bob period and preferred phase offset only from its `transactionId`. It SHALL draw the Ghost at its preferred phase, or a whole number of steps of `2π / GHOST_PHASE_STEPS` past it only while the preferred rest point is closer than `GHOST_MIN_REST_DISTANCE` to a drawn Ghost with a smaller id (Requirement 9.7). Drawn Ghosts with larger ids never move it, and a Ghost drawn alone is always at its preferred phase.
 5. THE Scene_Builder SHALL NOT mutate its inputs.
 6. IF the Scene_Input contains non-finite or negative numbers, THEN THE Scene_Builder SHALL treat them as 0 and SHALL still return a valid Scene_Model without throwing.
 7. THE Scene_Builder SHALL read the Decay_Level, the light score and the window brightness from the House_State and SHALL recompute none of them.
@@ -158,6 +158,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 5. WHILE the Decay_Level is 5 and the Poltergeist is null, THE Scene SHALL draw only the faint moonlight that `visual-language.md` specifies.
 6. THE Scene SHALL draw the level tints from the scene-only palette and every other color from design-system tokens.
 7. WHEN the Decay_Level changes without a user action in the same session, THE Scene SHALL show the new level at once, with at most an opacity fade of `REDUCED_MOTION_FADE_MS`.
+8. THE feature table SHALL give each level a `wonk` value from 0 to 1, near 0 at level 1 and 1 at level 5, non-decreasing as the level worsens. THE Scene SHALL scale its hand-drawn irregularities by it: slightly non-parallel walls and roofs, small window rotations, a tilted chimney and uneven fence pickets, every offset derived deterministically from a stable key, never from a random source.
 
 ### Requirement 7: Window light
 
@@ -181,7 +182,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 #### Acceptance Criteria
 
 1. THE Scene SHALL draw one Zombie figure per drawn entry of `House_State.zombies`, up to `MAX_VISIBLE_ZOMBIES` (Requirement 4).
-2. THE Scene SHALL show the usage of each Zombie with the badge icon that `visual-language.md` assigns (flame for `often`, hourglass for `rarely`, skull for `never`) and with a different posture per usage, so that usage is not shown by color alone.
+2. THE Scene SHALL show the usage of each Zombie with the badge icon that `visual-language.md` assigns (flame for `often`, hourglass for `rarely`, skull for `never`) and with a different posture per usage, so that usage is not shown by color alone. The badge SHALL be a small icon on a dark round backdrop above the Zombie's head, inside the basement band.
 3. THE Scene_Builder SHALL expose each drawn Zombie's `usage` as data, and SHALL give Zombies of different usage different posture values.
 4. THE Scene SHALL give each Zombie a head tilt and a sway phase derived from its `subscriptionId`.
 5. WHILE the Scene is not in Reduced_Motion, THE Scene SHALL sway each Zombie with the idle motion of `visual-language.md`.
@@ -196,9 +197,10 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 1. WHILE `House_State.poltergeist` is null, THE Scene SHALL draw one Ghost figure per drawn entry of `House_State.ghosts`, up to `MAX_VISIBLE_GHOSTS`.
 2. WHILE `House_State.poltergeist` is not null, THE Scene SHALL draw one Poltergeist figure and no individual Ghost figures, because the Ghosts have merged into it.
 3. THE Scene_Builder SHALL base this on `House_State.poltergeist` only, and SHALL NOT recompute the threshold or the 30-day window.
-4. WHILE the Scene is not in Reduced_Motion, THE Scene SHALL move each Ghost on the figure-eight orbit and vertical bob of `visual-language.md`, with the phase derived from its `transactionId`, and SHALL rotate and pulse the Poltergeist as `visual-language.md` specifies.
+4. WHILE the Scene is not in Reduced_Motion, THE Scene SHALL move each Ghost on the figure-eight orbit and vertical bob of `visual-language.md`, starting from its drawn phase, and SHALL turn the Poltergeist's smoke swirl and pulse its body as `visual-language.md` specifies (the body itself does not rotate, because the spirit has a face and a tail).
 5. WHEN the Poltergeist appears or disappears because the data changed, THE Scene SHALL fade it in or out over `REDUCED_MOTION_FADE_MS` or the Ghost spawn duration, and SHALL play no merge or split morph (out of scope).
-6. THE Scene SHALL draw the Ghost and the Poltergeist with distinct shapes (an ovoid with eye-spots, and an amorphous jagged figure), so that they differ without color.
+6. THE Scene SHALL draw the Ghost and the Poltergeist with distinct shapes: the Ghost as a small dome with a wavy hem, a curling tail and two round eyes with a highlight; the Poltergeist as a large semi-transparent spirit with a wavy, bumpy head (no star spikes), a smoky tail, hollow eyes, a small mouth and a soft spirit-colored glow. They SHALL differ without color, and both SHALL read against the sky and the house.
+7. FOR ALL sets of drawn Ghosts, THE Scene_Builder SHALL place every rest point at least `GHOST_MIN_REST_DISTANCE` from every other, except for a Ghost whose every candidate step on its lane is already closer than that to a drawn Ghost with a smaller id (the lane is crowded) (spread property).
 
 ### Requirement 10: Bound Poltergeist
 
@@ -343,7 +345,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 #### Acceptance Criteria
 
 1. THE Scene SHALL be exactly one element with `role="img"` and an `aria-label` equal to the Scene_Summary, and its child SVG content SHALL be hidden from the accessibility tree.
-2. THE Scene_Builder SHALL produce a Scene_Summary of the form "Level 3, Haunted. 4 zombies, 30 ghosts, Poltergeist awake, 1 tombstone", using the level number, the level name, the true counts, the correct singular and plural forms, "no zombies", "no ghosts" and "no tombstones" for zero, and the Poltergeist clause "Poltergeist awake", "Poltergeist bound" or omitted when the Poltergeist is null.
+2. THE Scene_Builder SHALL produce a Scene_Summary of the form "Level 3, Haunted. 4 zombies, 30 ghosts, Poltergeist awake, 1 tombstone", using the level number, the level name, the true counts, the correct singular and plural forms, "no zombies", "no ghosts" and "no tombstones" for zero, and the Poltergeist clause "Poltergeist awake", "Poltergeist bound" or omitted when the Poltergeist is null. The ghost count is the true number of small expenses: the individual Ghosts plus the ones merged into the Poltergeist (`House_State.poltergeist.transactionCount`), so the level-4 demo reads "Level 4, Crumbling. 5 zombies, 30 ghosts, Poltergeist awake, no tombstones".
 3. WHEN the House_State, the Graveyard_Entries or the Bound_Flag change, THE Scene SHALL update its `aria-label` to the new Scene_Summary.
 4. THE Scene_Summary SHALL NOT be a live region, because the Dashboard already announces level changes and the toasts announce action results.
 5. THE Moment_Layer, every Moment element and every GSAP animation container SHALL carry `aria-hidden="true"`.

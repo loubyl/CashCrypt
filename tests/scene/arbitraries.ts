@@ -221,3 +221,12 @@ export const sceneInputWithPermutationArb: fc.Arbitrary<{ input: SceneInput; per
   sceneInputArb.chain((input) =>
     permutedSceneInputArb(input).map((permuted) => ({ input, permuted })),
   );
+
+/**
+ * True small-expense count: the individual ghosts plus the ones merged into the Poltergeist
+ * (its transactionCount; a non-finite or negative count counts as 0, a fraction is floored).
+ */
+export function expectedGhostTotal(input: SceneInput): number {
+  const merged = input.houseState.poltergeist?.transactionCount ?? 0;
+  return input.houseState.ghosts.length + (Number.isFinite(merged) && merged > 0 ? Math.floor(merged) : 0);
+}

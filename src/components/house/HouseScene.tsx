@@ -3,14 +3,14 @@ import dynamic from "next/dynamic";
 import { useId, useRef } from "react";
 import { useElementWidth } from "@/hooks/useElementWidth";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
-import { VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
+import { SCENE_TEAL_LIGHT, VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
 import type { SceneModel } from "@/lib/scene";
 import { DecayLayer } from "./DecayLayer";
 import { GhostSwarm } from "./GhostSwarm";
 import { GraveyardRow } from "./GraveyardRow";
 import { ForegroundLayer } from "./ForegroundLayer";
 import { HouseBase } from "./HouseBase";
-import { HALO_BLUR, MOON_BLUR, makeFilterIds } from "./houseGeometry";
+import { HALO_BLUR, MOON_BLUR, SHINGLE_TILE, makeFilterIds } from "./houseGeometry";
 import { Poltergeist } from "./Poltergeist";
 import { SceneLabels } from "./SceneLabels";
 import { WindowsLayer } from "./WindowsLayer";
@@ -76,15 +76,30 @@ export function HouseScene({ model, className }: HouseSceneProps) {
           <filter id={filterIds.moon} x="-80%" y="-80%" width="260%" height="260%">
             <feGaussianBlur stdDeviation={MOON_BLUR} />
           </filter>
+          {/* Scalloped shingle rows: two offset rows of downward arcs per tile. */}
+          <pattern
+            id={filterIds.shingles}
+            patternUnits="userSpaceOnUse"
+            width={SHINGLE_TILE.w}
+            height={SHINGLE_TILE.h * 2}
+          >
+            <path
+              d={`M0 ${SHINGLE_TILE.h} A${SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 0.8} 0 0 0 ${SHINGLE_TILE.w} ${SHINGLE_TILE.h} M${-SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 2} A${SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 0.8} 0 0 0 ${SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 2} M${SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 2} A${SHINGLE_TILE.w / 2} ${SHINGLE_TILE.h * 0.8} 0 0 0 ${SHINGLE_TILE.w * 1.5} ${SHINGLE_TILE.h * 2}`}
+              fill="none"
+              stroke={SCENE_TEAL_LIGHT}
+              strokeWidth={1.4}
+            />
+          </pattern>
         </defs>
         <HouseBase model={model} filterIds={filterIds} />
         <DecayLayer model={model} />
         <ZombieBasement zombies={model.zombies} />
         <GraveyardRow tombstones={model.tombstones} />
-        <GhostSwarm ghosts={model.ghosts} />
         <ForegroundLayer model={model} />
         <WindowsLayer model={model} filterIds={filterIds} />
-        <Poltergeist poltergeist={model.poltergeist} />
+        {/* Ghosts fly in front of the house, so they are drawn above the windows. */}
+        <GhostSwarm ghosts={model.ghosts} />
+        <Poltergeist poltergeist={model.poltergeist} filterIds={filterIds} />
       </svg>
       <SceneLabels model={model} sceneWidthPx={sceneWidthPx} />
       {motionEnabled ? <AmbientMotion scope={containerRef} signature={getAmbientSignature(model)} /> : null}

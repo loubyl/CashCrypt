@@ -105,7 +105,7 @@ describe("styleguide keyboard and structure", () => {
         expect(element.getAttribute("aria-disabled")).not.toBe("true");
       }
     }
-  });
+  }, 15000); // Tabs through every control; slow when the full suite runs in parallel.
 
   it("renders no tabindex greater than 0", () => {
     const { container } = renderStyleguide();

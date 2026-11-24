@@ -65,6 +65,8 @@ export type LevelFeatures = {
   fireflies: boolean;
   shadowPass: boolean;
   darkness: number; // overlay opacity 0..1
+  /** Hand-drawn irregularity 0..1: near 0 at level 1, strongest at level 5 (monotone). */
+  wonk: number;
 };
 
 export type Usage = "often" | "rarely" | "never";
@@ -79,6 +81,8 @@ export type SceneZombie = {
   slot: number;
   box: Box;
   heightUnits: number;
+  /** Center of the usage badge, above the head and inside the basement band. */
+  badgeCenter: Point;
   tiltDeg: number;
   swayPhase: number;
   swayPeriodMs: number;

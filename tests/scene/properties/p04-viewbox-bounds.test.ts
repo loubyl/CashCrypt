@@ -4,6 +4,8 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import {
+  BADGE_SIZE,
+  BASEMENT_BAND,
   CHIMNEY_BOX,
   GHOST_SIZE_MAX,
   SCENE_CONFIG,
@@ -50,7 +52,14 @@ describe("Property 4: everything stays inside the ViewBox (model part)", () => {
         const model = buildSceneModel(input);
 
         for (const w of model.windows) expect(boxInside(w.box)).toBe(true);
-        for (const z of model.zombies) expect(boxInside(z.box)).toBe(true);
+        for (const z of model.zombies) {
+          expect(boxInside(z.box)).toBe(true);
+          // The usage badge sits above the head and stays inside the basement band.
+          const badgeTop = z.badgeCenter.y - BADGE_SIZE / 2;
+          expect(badgeTop).toBeGreaterThanOrEqual(BASEMENT_BAND.y);
+          expect(z.badgeCenter.y + BADGE_SIZE / 2).toBeLessThanOrEqual(z.box.y);
+          expect(z.badgeCenter.x).toBeCloseTo(z.box.x + z.box.w / 2, 9);
+        }
         for (const t of model.tombstones) expect(boxInside(t.box)).toBe(true);
 
         const anchors = getOverflowAnchors();

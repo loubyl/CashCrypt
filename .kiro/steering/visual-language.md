@@ -48,7 +48,7 @@ All creature colors map to design-system accent tokens. No new hex values are in
 
 | Creature | Token | Hex | Notes |
 |---|---|---|---|
-| Ghost | `--accent-ghost` | `#7AB0FF` | Use at 75% opacity base; glow at 20% opacity |
+| Ghost | `--accent-ghost` | `#7AB0FF` | Use at 90% opacity base with a light rim; glow at 25% opacity |
 | Zombie | *(scene-only)* | `#4A6B3A` body / `#2E4A24` clothing | Desaturated green — no chrome equivalent; never bright |
 | Poltergeist | `--accent-spirit` | `#B69CFF` | Base color; inner glow at 60% opacity |
 | Exorcism flash | `--text-primary` | `#F7F7F8` | Brief white burst on completion |
@@ -60,6 +60,10 @@ All creature colors map to design-system accent tokens. No new hex values are in
 ## House Decay Levels
 
 Each level affects the SVG house layers: walls, windows, roof, garden, and ambient lighting. Window light intensity interpolates continuously with the light score within a level, so every debt payment produces a perceptible brightening even without a level change.
+
+The house is a tall, narrow central tower with a gable and a round attic window between two lower wings with hipped roofs. The tower is one step lighter than the wings, eaves cast a shadow band, the base is a darker stone band and the left edges catch a faint moonlight. Texture comes from shapes, not filters: scalloped shingle rows, irregular bricks, vertical door planks, framed windows with an inner shadow, tapered tree limbs, lumpy bushes, chimney smoke puffs and mint fog mounds.
+
+The house grows **wonkier** as it decays: slightly non-parallel walls and roofs, small window rotations, a tilted chimney and uneven fence pickets. The amount is a per-level `wonk` value (near 0 at level 1, strongest at level 5); every offset is deterministic, so the same level always looks the same.
 
 The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level 5), with intermediate values mapped linearly to the light score within each band. The percentages in the level list below are **nominal** (they describe the intended mood of each level); the real candlelight opacity is decided by the window opacity curve in `src/lib/scene/config.ts` (see the house-scene design), which keeps the curve non-decreasing within and across levels and makes a payment visible. The `LightScoreBar` in the chrome always shows the numeric score alongside the visual change.
 
@@ -113,14 +117,15 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 ### Ghosts (Small Expenses)
 
 **Appearance**
-- Simple ovoid SVG shape with two dark eye-spots.
-- Fill: `--accent-ghost` (`#7AB0FF`) at 75% opacity.
-- Glow: `--accent-ghost` at 20% opacity as a drop-shadow filter.
+- Dome head with a wavy hem that flows into a small tail curling to one side, two round dark eyes with a highlight and a small mouth.
+- Fill: `--accent-ghost` (`#7AB0FF`) at 90% opacity with a faint light rim, so it reads against the sky and the house walls.
+- Glow: `--accent-ghost` at 25% opacity as a larger soft copy behind the body.
+- Drawn in front of the house and its windows.
 - Size: `32×40px` base; scales proportionally to the transaction amount (min 24px, max 56px).
 
 **Movement**
 - Float in a lazy figure-eight orbit around the house perimeter.
-- Each ghost has a randomized phase offset (0–2π) so they don't clump.
+- Each ghost has a phase offset (0–2π) derived from its id; when two would start too close, the later one moves forward along its lane, so they don't clump.
 - Vertical bob: sinusoidal, amplitude 6px, period 2.5–3.5s (randomized per ghost).
 - On hover: ghost brightens to 100% opacity and shows the transaction amount in a chrome tooltip.
 
@@ -136,7 +141,8 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Fill: desaturated green `#4A6B3A` body, `#2E4A24` clothing. These are scene-only values with no chrome equivalent.
 - Size scales with monthly cost / monthly income ratio (min 32px tall, max 80px tall).
 - Each zombie has a unique stagger so they don't all look identical (head tilt variation ±5°).
-- Usage badge: a small icon overlaid on the zombie's chest indicates usage (`often` = flame, `rarely` = hourglass, `never` = skull). Communicates cancellation priority without relying on color alone.
+- Hunched, arms reaching forward, torn shirt and visible eyes; they fill most of the basement height.
+- Usage badge: a small icon on a dark round backdrop above the zombie's head indicates usage (`often` = flame, `rarely` = hourglass, `never` = skull). Communicates cancellation priority without relying on color alone.
 
 **Movement**
 - Stand in a row in the basement section of the house SVG.
@@ -150,13 +156,12 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 ### Poltergeist Monster (Expense Pile-Up)
 
 **Appearance**
-- Large amorphous SVG shape, `120×120px`.
-- Fill: `--accent-spirit` (`#B69CFF`) with an inner glow at 60% opacity.
-- Outlined with jagged, irregular strokes to suggest merged ghost energy.
-- Floats at the center-top of the house scene, partially overlapping the roof.
+- Large semi-transparent spirit, `105×105px` at 1280px: a wavy, bumpy head (no star spikes) flowing into a smoky tail with trailing wisps, hollow eyes and a small mouth.
+- Fill: `--accent-spirit` (`#B69CFF`) at about 78% opacity with a faint inner core and a soft blurred spirit glow behind it.
+- Floats above the left wing roof, beside the tower, partially overlapping the roof; it never covers the round attic window.
 
 **Movement**
-- Rotates slowly (full 360° over 8s).
+- Its dashed smoke swirl rotates slowly (full 360° over 8s); the body itself does not rotate, because it has a face and a tail.
 - Pulses in scale: 1.0 → 1.08 → 1.0, period 1.5s.
 - Emits small particle dots in `--accent-spirit` that drift outward and fade.
 

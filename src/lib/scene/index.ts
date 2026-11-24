@@ -64,6 +64,17 @@ function buildWindows(
   });
 }
 
+/**
+ * True small-expense count: the individual ghosts plus the ones merged into the Poltergeist.
+ * The engine empties `ghosts` when the Poltergeist forms and keeps the count in
+ * `poltergeist.transactionCount`, so counting `ghosts` alone said "no ghosts" at level 4.
+ */
+function countGhosts(input: SceneInput): number {
+  const merged = input.houseState.poltergeist?.transactionCount ?? 0;
+  const mergedCount = Number.isFinite(merged) && merged > 0 ? Math.floor(merged) : 0;
+  return input.houseState.ghosts.length + mergedCount;
+}
+
 /** Builds the scene model from engine output. Never mutates `input`. */
 export function buildSceneModel(input: SceneInput, config: SceneConfig = SCENE_CONFIG): SceneModel {
   const level = sanitizeLevel(input.houseState.decayLevel);
@@ -77,7 +88,7 @@ export function buildSceneModel(input: SceneInput, config: SceneConfig = SCENE_C
 
   const totals = {
     zombies: input.houseState.zombies.length,
-    ghosts: input.houseState.ghosts.length,
+    ghosts: countGhosts(input),
     tombstones: input.graveyard.length,
   };
   const poltergeist = layoutPoltergeist(input.houseState.poltergeist, input.bound, config);

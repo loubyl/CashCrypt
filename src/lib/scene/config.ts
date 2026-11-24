@@ -69,20 +69,28 @@ export const DEMO_STEP_BRIGHTNESS_AFTER = 0.43;
 // Sizes (ViewBox units)
 // ---------------------------------------------------------------------------
 
-export const ZOMBIE_HEIGHT_MIN = 46;
-export const ZOMBIE_HEIGHT_MAX = 114;
+// Zombies fill most of the basement (band y 400..520, baseline 515): 66..88 units tall, with the
+// usage badge above the head (gap + badge) still inside the band.
+export const ZOMBIE_HEIGHT_MIN = 66;
+export const ZOMBIE_HEIGHT_MAX = 88;
 export const ZOMBIE_WIDTH_RATIO = 0.625;
 export const ZOMBIE_FULL_RATIO = 0.1;
 export const GHOST_SIZE_MIN = 34;
 export const GHOST_SIZE_MAX = 80;
-export const POLTERGEIST_SIZE = 171;
-export const POLTERGEIST_CENTER: Readonly<Point> = { x: 400, y: 150 };
-export const SIGIL_DIAMETER = 262;
+// The Poltergeist hovers above the left wing roof, beside the tower, so the round attic window
+// (x 380..420, y 92..132) stays visible. Size 150 and sigil 226 (ratio 1.507): the sigil spans
+// y 3..249 and x 123..381 with stroke, glow pad and shake, inside the ViewBox and clear of the
+// chimney box.
+export const POLTERGEIST_SIZE = 150;
+export const POLTERGEIST_CENTER: Readonly<Point> = { x: 252, y: 126 };
+export const SIGIL_DIAMETER = 226;
 export const SIGIL_STROKE = 4;
 export const SIGIL_GLOW_PAD = 8;
 export const SIGIL_SHAKE = 6;
 export const SIGIL_MIN_RATIO = 1.5;
-export const BADGE_SIZE = 24;
+export const BADGE_SIZE = 18;
+/** Gap between the top of a zombie box and the bottom of its usage badge. */
+export const ZOMBIE_BADGE_GAP = 3;
 export const CHIMNEY_BOX: Readonly<Box> = { x: 555, y: 105, w: 40, h: 60 };
 
 // ---------------------------------------------------------------------------
@@ -107,6 +115,14 @@ export const NO_COUNT = 0;
 export const SLOT_FIRST = 0;
 
 export type GhostLaneConfig = { cx: number; cy: number; rx: number; ry: number };
+/**
+ * Ghost rest spreading: a ghost starts at its preferred phase (from its id) and moves forward in
+ * whole steps of 2π / GHOST_PHASE_STEPS only while its rest point is closer than
+ * GHOST_MIN_REST_DISTANCE to a drawn ghost with a smaller id. A lane is crowded when every step
+ * is blocked; only then may two rests be closer than the minimum.
+ */
+export const GHOST_MIN_REST_DISTANCE = 48;
+export const GHOST_PHASE_STEPS = 24;
 export const GHOST_LANES: readonly GhostLaneConfig[] = [
   { cx: 400, cy: 250, rx: 320, ry: 140 },
   { cx: 400, cy: 300, rx: 280, ry: 110 },
@@ -236,6 +252,8 @@ export const SCENE_SKY = "#22252A";
 /** Wall base at every level (lit face) and its shaded face; DECAY_TINTS only overlay it. */
 export const SCENE_WALL = "#3F3F4B";
 export const SCENE_WALL_SHADE = "#3A3A46";
+/** The central tower is one step lighter than the wings, so the house reads in volume. */
+export const SCENE_WALL_LIGHT = "#474756";
 /** Brick accents and stone-block lines (slightly darker or lighter than the wall). */
 export const SCENE_BRICK = "#34343F";
 /** Pale mint moon. */
@@ -263,6 +281,7 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     roof: "intact", moss: false, garden: "green", lantern: "lit",
     tree: "full", fence: "intact", structure: "sound",
     fog: 0, bats: false, fireflies: true, shadowPass: false, darkness: 0,
+    wonk: 0.04,
   },
   2: {
     crackCount: 1, stainCount: 0, plasterHole: false,
@@ -270,6 +289,7 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     roof: "missingShingles", moss: false, garden: "browning", lantern: "dim",
     tree: "thin", fence: "intact", structure: "sound",
     fog: 1, bats: false, fireflies: false, shadowPass: false, darkness: 0.05,
+    wonk: 0.25,
   },
   3: {
     crackCount: 2, stainCount: 1, plasterHole: false,
@@ -277,6 +297,7 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     roof: "sagging", moss: true, garden: "dead", lantern: "unlit",
     tree: "bare", fence: "intact", structure: "sound",
     fog: 2, bats: false, fireflies: false, shadowPass: true, darkness: 0.15,
+    wonk: 0.5,
   },
   4: {
     crackCount: 3, stainCount: 2, plasterHole: true,
@@ -284,6 +305,7 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     roof: "partialCollapse", moss: true, garden: "bare", lantern: "unlit",
     tree: "twisted", fence: "broken", structure: "sound",
     fog: 3, bats: true, fireflies: false, shadowPass: true, darkness: 0.35,
+    wonk: 0.75,
   },
   5: {
     crackCount: 4, stainCount: 3, plasterHole: true,
@@ -291,6 +313,7 @@ export const LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>> = {
     roof: "collapsed", moss: true, garden: "scorched", lantern: "unlit",
     tree: "charred", fence: "broken", structure: "collapsing",
     fog: 4, bats: true, fireflies: false, shadowPass: false, darkness: 0.5,
+    wonk: 1,
   },
 };
 
@@ -305,7 +328,7 @@ const STRUCTURE_ORDER = ["sound", "collapsing"];
 const DISTINCTION_KEYS: readonly (keyof LevelFeatures)[] = [
   "crackCount", "stainCount", "plasterHole", "boardedWindows", "brokenWindows",
   "roof", "moss", "garden", "lantern", "tree", "fence", "structure",
-  "fog", "bats", "fireflies", "shadowPass", "darkness",
+  "fog", "bats", "fireflies", "shadowPass", "darkness", "wonk",
 ];
 
 /**
@@ -328,6 +351,7 @@ export function featureSeverity(features: LevelFeatures): number[] {
     features.fog,
     Number(features.bats),
     features.darkness,
+    features.wonk,
   ];
 }
 

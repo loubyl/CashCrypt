@@ -82,11 +82,17 @@ function addZombieSway(root: gsap.core.Timeline, scope: HTMLElement): void {
   }
 }
 
-/** Poltergeist: constant rotation plus a pulse. Only the awake body carries the hook. */
+/**
+ * Poltergeist: its smoke swirl turns constantly and its body pulses. The spirit has a face and a
+ * tail, so the swirl rotates instead of the whole body. Only the awake figure carries the hooks.
+ */
 function addPoltergeist(root: gsap.core.Timeline, scope: HTMLElement): void {
-  for (const element of query(scope, "poltergeist")) {
+  for (const element of query(scope, "poltergeist-swirl")) {
     gsap.set(element, { transformOrigin: ORIGIN_CENTER });
     root.to(element, { rotation: FULL_TURN_DEG, duration: seconds(POLTERGEIST_ROTATION_MS), ease: "none", repeat: -1 }, 0);
+  }
+  for (const element of query(scope, "poltergeist")) {
+    gsap.set(element, { transformOrigin: ORIGIN_CENTER });
     root.to(
       element,
       {

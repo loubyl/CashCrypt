@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { DECAY_TINTS, SCENE_TEAL, SCENE_TEAL_LIGHT, WINDOW_INTERPOLATION_MS } from "@/lib/scene";
 import type { SceneModel, SceneWindow } from "@/lib/scene";
-import { TOKEN, getStructureTransform } from "./houseGeometry";
+import { TOKEN, WONK_MAX, getStructureTransform, wonkOffset } from "./houseGeometry";
 import type { SceneFilterIds } from "./houseGeometry";
 
 export type WindowsLayerProps = {
@@ -15,7 +15,10 @@ const HALO_MIN = 0.25;
 const HALO_RANGE = 0.6;
 const PANE_MIN = 0.6;
 const PANE_RANGE = 0.4;
-const FRAME_PAD = 3;
+const FRAME_PAD = 5;
+const FRAME_EDGE_PAD = 1.5;
+const INNER_SHADOW_WIDTH = 3.5;
+const INNER_SHADOW_OPACITY = 0.35;
 const CANDLE_WIDTH = 5;
 const CANDLE_HEIGHT = 12;
 const FLAME_RX = 2.6;
@@ -49,6 +52,29 @@ function renderShape(window: SceneWindow, pad: number, fill: string, opacity?: n
   const props = paneProps(window, pad);
   if (props.d) return <path d={props.d} fill={fill} opacity={opacity} />;
   return <circle cx={props.cx} cy={props.cy} r={props.r} fill={fill} opacity={opacity} />;
+}
+
+/** Frame with thickness: a lighter outer lip, the frame itself and an inner shadow on the pane edge. */
+function renderFrame(window: SceneWindow): ReactNode {
+  return (
+    <>
+      {renderShape(window, FRAME_PAD + FRAME_EDGE_PAD, SCENE_TEAL_LIGHT)}
+      {renderShape(window, FRAME_PAD, SCENE_TEAL)}
+    </>
+  );
+}
+
+/** Dark stroke along the pane outline: half of it falls inside the pane, like a recessed sash. */
+function renderInnerShadow(window: SceneWindow): ReactNode {
+  const props = paneProps(window, 0);
+  const common = {
+    fill: "none",
+    stroke: TOKEN.void,
+    strokeWidth: INNER_SHADOW_WIDTH,
+    opacity: INNER_SHADOW_OPACITY,
+  } as const;
+  if (props.d) return <path d={props.d} {...common} />;
+  return <circle cx={props.cx} cy={props.cy} r={props.r} {...common} />;
 }
 
 function renderMullions(window: SceneWindow): ReactNode {
@@ -95,7 +121,7 @@ function renderLit(window: SceneWindow, filterIds: SceneFilterIds): ReactNode {
       >
         {renderShape(window, HALO_PAD, TOKEN.candle)}
       </g>
-      {renderShape(window, FRAME_PAD, SCENE_TEAL)}
+      {renderFrame(window)}
       {renderShape(window, 0, TOKEN.void)}
       <g
         data-part="light"
@@ -107,6 +133,7 @@ function renderLit(window: SceneWindow, filterIds: SceneFilterIds): ReactNode {
       </g>
       {renderCandle(window)}
       {renderMullions(window)}
+      {renderInnerShadow(window)}
     </>
   );
 }
@@ -116,6 +143,7 @@ function renderBoarded(window: SceneWindow): ReactNode {
   const { x, y, w, h } = window.box;
   return (
     <>
+      {renderFrame(window)}
       {renderShape(window, 0, TOKEN.void, FRAME_FILL_OPACITY)}
       <path
         d={`M${x - 4} ${y + 6} L${x + w + 4} ${y + h - 6} M${x + w + 4} ${y + 6} L${x - 4} ${y + h - 6}`}
@@ -134,6 +162,7 @@ function renderBroken(window: SceneWindow): ReactNode {
   const third = w / 3;
   return (
     <>
+      {renderFrame(window)}
       {renderShape(window, 0, TOKEN.void, FRAME_FILL_OPACITY)}
       <g fill={TOKEN.overlay}>
         <polygon points={`${x},${y + h} ${x + third / 2},${y + h * 0.55} ${x + third},${y + h}`} />
@@ -146,11 +175,14 @@ function renderBroken(window: SceneWindow): ReactNode {
   );
 }
 
-function renderWindow(window: SceneWindow, filterIds: SceneFilterIds, unlitOpacity: number): ReactNode {
+function renderWindow(window: SceneWindow, filterIds: SceneFilterIds, unlitOpacity: number, wonk: number): ReactNode {
   const lit = window.state === "lit";
+  const { x, y, w, h } = window.box;
+  const tilt = wonkOffset(`window:${window.index}`, wonk, WONK_MAX.windowRotateDeg);
   return (
     <g
       key={window.index}
+      transform={tilt === 0 ? undefined : `rotate(${tilt.toFixed(2)} ${x + w / 2} ${y + h / 2})`}
       data-part={`window:${window.index}`}
       data-state={window.state}
       data-shape={window.shape}
@@ -175,7 +207,7 @@ export function WindowsLayer({ model, filterIds }: WindowsLayerProps) {
   const unlitOpacity = 1 - model.features.darkness;
   return (
     <g data-part="windows" transform={getStructureTransform(model.features)}>
-      {model.windows.map((window) => renderWindow(window, filterIds, unlitOpacity))}
+      {model.windows.map((window) => renderWindow(window, filterIds, unlitOpacity, model.features.wonk))}
     </g>
   );
 }

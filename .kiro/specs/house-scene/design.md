@@ -52,6 +52,19 @@ These changes follow a recomputation of the demo path with the real engine (see 
 | R3 | When a second action begins during a hold, the **first frozen model is kept**. The rule is a pure reducer, so it is property-tested. | Observer, hold and settle, Property 18, Requirement 12.19 |
 | R4 | The off-screen and hidden-document pause applies **only to the AmbientMotion timelines and ticker callback**, never to `gsap.globalTimeline`, so a playing Moment is never stalled. | AmbientMotion, Requirement 21.4 |
 
+### Changes after checkpoint 2 (revision 3)
+Found in the checkpoint 2 review of the deployed demo, compared with `references/house-reference-1.jpg`. Each has a matching edit in `requirements.md`.
+| # | Change | Where |
+|---|---|---|
+| C1 | **Hash avalanche.** `hashId` adds a murmur3 fmix32 finalizer after FNV-1a. FNV-1a alone mixes trailing characters poorly: the demo ids `demo:level-2:tx:0` to `:3` got `unitFromId` values about 0.004 apart, so all four ghosts shared lane 2 and a phase near π, which puts `sin t` near 0 and every ghost near `x = 400`. | Hash and determinism |
+| C2 | **Ghost spreading.** Each ghost keeps a preferred phase from its id; the builder places drawn ghosts in id order and moves a ghost forward in whole steps of `2π / GHOST_PHASE_STEPS` (24) while its rest is closer than `GHOST_MIN_REST_DISTANCE` (48) to a placed ghost. Only a crowded lane (no free step) may leave two rests closer. This narrows Requirement 3.4 and Property 2: lane and bob period never change, a lone ghost is always at its preferred phase, and ghosts with larger ids never move it. | Layout (Ghosts), Requirements 3.4, 9.7, Properties 2 and 20 |
+| C3 | **True ghost total.** `totals.ghosts` adds `poltergeist.transactionCount` (the merged ghosts) to `ghosts.length`; the engine empties `ghosts` when the Poltergeist forms, so the level-4 summary used to say "no ghosts". | `buildSceneModel` step 5, Requirement 19.2, Properties 5 and 12 |
+| C4 | **House proportions.** A tall, narrow central tower (`x 338..462`, walls from `y 154`, gable apex `y 28`) between two lower wings (`x 200..338` and `462..600`, walls from `y 212`). The tower is one step lighter (`SCENE_WALL_LIGHT`), the right wing one step darker; shadow bands under the eaves, a dark stone foundation band and a faint moonlit left edge give volume. Scalloped shingle rows (an SVG pattern), irregular bricks, vertical door planks, window frames with an outer lip and an inner shadow, tapered curved tree limbs, lumpy bushes, chimney smoke puffs and larger mint fog mounds give texture. | Layout zones, Window layout, SVG layers |
+| C5 | **Wonk.** A monotone `wonk` value in the feature table (0.04, 0.25, 0.5, 0.75, 1) scales deterministic irregularities: wall corners and wing tops, hip and gable rotations, window rotations (≤ 5°), chimney tilt (≤ 7°), picket height and lean. | Feature table, Property 9, Requirement 6.8 |
+| C6 | **Poltergeist as a spirit, beside the tower.** Size 150 at `(252, 126)` above the left wing roof, sigil 226 (ratio 1.507); the round attic window stays visible. A semi-transparent body with a bumpy head and a smoky tail, hollow eyes, a small mouth and a blurred spirit glow; the smoke swirl turns, the body only pulses. | Poltergeist and sigil geometry, Requirements 9.4, 9.6 |
+| C7 | **Creatures.** Zombies 66 to 88 units tall (most of the basement), hunched, arms forward, torn shirt, eyes, with the usage badge above the head (`badgeCenter` in the model). Ghosts get a wavy curling tail, round eyes with a highlight, a light rim and 90% opacity, and are drawn above the windows layer so no ghost hides behind a window. | Zombies, Ghosts, SVG layers, Requirement 8.2, Property 4 |
+| C8 | **Grain skipped.** A full-scene `feTurbulence` overlay was considered and left out: the ghosts and the Poltergeist animate above it, and every repaint of their dirty region would re-run the filter on mobile. | — |
+
 ### Style reference
 
 `.kiro/specs/house-scene/references/house-reference-1.jpg` is the owner-supplied style reference for the house art. It shows a house at about **decay level 3 to 4** in mood (muted, dim, windows lit but not at full brightness). It sets mood, proportions and shape language only. The SVG is original art drawn from the feature table, not a trace of the image.
@@ -223,7 +236,7 @@ All constants are exported and gathered in `SCENE_CONFIG: SceneConfig` so `valid
 | ViewBox | `VIEWBOX_WIDTH = 800`, `VIEWBOX_HEIGHT = 600`, `REFERENCE_WIDTH_PX = 560`, `UNITS_PER_REFERENCE_PX = VIEWBOX_WIDTH / REFERENCE_WIDTH_PX` |
 | Caps | `MAX_VISIBLE_ZOMBIES = 6`, `MAX_VISIBLE_GHOSTS = 12`, `MAX_VISIBLE_TOMBSTONES = 6` |
 | Windows | `WINDOW_COUNT = 6`, `WINDOW_FAILURE_ORDER = [3, 1, 4, 0, 5, 2]`, `MIN_VISIBLE_WINDOW_DELTA = 0.15`, `OPACITY_FLOOR_BY_LEVEL = { 1: 0.8, 2: 0.6, 3: 0.4, 4: 0.02, 5: 0 }`, `PAYMENT_FLARE_BOOST = 0.35` |
-| Sizes (units) | zombie height 46 to 114, ghost 34 to 80, Poltergeist 171 at `POLTERGEIST_CENTER = (400, 150)`, `SIGIL_DIAMETER = 262`, `SIGIL_STROKE = 4`, `SIGIL_GLOW_PAD = 8`, `SIGIL_SHAKE = 6`, badge 24; `ZOMBIE_FULL_RATIO = 0.1` (monthly cost over income at which a zombie is largest) |
+| Sizes (units) | zombie height 66 to 88, ghost 34 to 80, Poltergeist 150 at `POLTERGEIST_CENTER = (252, 126)`, `SIGIL_DIAMETER = 226`, `SIGIL_STROKE = 4`, `SIGIL_GLOW_PAD = 8`, `SIGIL_SHAKE = 6`, badge 18 with `ZOMBIE_BADGE_GAP = 3`; `ZOMBIE_FULL_RATIO = 0.1` (monthly cost over income at which a zombie is largest); ghost spreading `GHOST_MIN_REST_DISTANCE = 48`, `GHOST_PHASE_STEPS = 24` (module constants) |
 | Moment art (units) | `SHOVEL_HEIGHT = 180`, `SHOVEL_BOUND_RADIUS = 100`, `SHOVEL_START = (700, 140)`, `BAT_HALF_SIZE = 20`, `BAT_START = (520, 70)`, `BAT_END = (750, 40)`, `ZOMBIE_SINK_SCALE = 1.4`, `ZOMBIE_SINK_CLIP`, `TOMBSTONE_CLIP`, `CANDLE_BOX = 24 by 80`, `CANDLE_ROW_ORIGIN = (60, 40)`, `CANDLE_SPACING = 60`, `SHUTTER_WIDTH = 24`; screen pixels for HTML layer art: `FLAME_PX = 32`, `ORB_PX = 28` |
 | Layout | basement band `y 400..520`, zombie baseline `515`, graveyard band `520..590`, tombstone box 64 by 56, three ghost lanes (see Layout) |
 | Motion data | zombie tilt `±5°`, sway amplitude 3px and period 3000 to 5000ms, ghost bob 6px and period 2500 to 3500ms, ghost spawn 300ms, level transition 1200ms, window interpolation 600ms, Poltergeist pulse 1500ms and rotation 8000ms |
@@ -312,7 +325,7 @@ export type SceneModel = {
 
 ### Hash and determinism (`hash.ts`)
 
-`hashId(id, salt)` is 32-bit FNV-1a over `salt + "\u0000" + id`. `unitFromId` divides by 2³². Every value that looks random derives from it: zombie tilt, sway phase and period, ghost phase, bob period and lane, label-free details. The salts used in `layout.ts` are `"tilt"`, `"swayPhase"` and `"swayPeriod"` for zombies, and `"lane"`, `"ghostPhase"` and `"bobPeriod"` for ghosts. No function reads input array order. Selection and slot assignment sort by explicit keys with the id as the final tie-breaker (`localeCompare` is avoided; ids compare by `<`).
+`hashId(id, salt)` is 32-bit FNV-1a over `salt + "\u0000" + id`, followed by the murmur3 fmix32 finalizer (C1). `unitFromId` divides by 2³². Every value that looks random derives from it: zombie tilt, sway phase and period, ghost phase, bob period and lane, label-free details. The salts used in `layout.ts` are `"tilt"`, `"swayPhase"` and `"swayPeriod"` for zombies, and `"lane"`, `"ghostPhase"` and `"bobPeriod"` for ghosts. No function reads input array order. Selection and slot assignment sort by explicit keys with the id as the final tie-breaker (`localeCompare` is avoided; ids compare by `<`).
 
 ### `buildSceneModel(input, config = SCENE_CONFIG): SceneModel`
 
@@ -320,7 +333,7 @@ export type SceneModel = {
 2. **Level and features**: `level = houseState.decayLevel` (clamped to 1 to 5), `features = LEVEL_FEATURES[level]`.
 3. **Windows** (see Window opacity): layout is fixed; states come from the feature table and `WINDOW_FAILURE_ORDER`; `opacity` is `getWindowOpacity(level, windowBrightness)` for lit windows and 0 otherwise.
 4. **Zombies**: sort `houseState.zombies` by `monthlyCost` descending then `subscriptionId` ascending; draw the first `MAX_VISIBLE_ZOMBIES`; `overflow.zombies = total − drawn`.
-5. **Ghosts**: if `houseState.poltergeist !== null`, draw none (the overflow is also 0, the figures have merged); otherwise sort by `amount` descending then `transactionId`, draw the first `MAX_VISIBLE_GHOSTS`. `totals.ghosts` is always the true count `houseState.ghosts.length`.
+5. **Ghosts**: if `houseState.poltergeist !== null`, draw none (the overflow is also 0, the figures have merged); otherwise sort by `amount` descending then `transactionId`, draw the first `MAX_VISIBLE_GHOSTS`. `totals.ghosts` is always the true count `houseState.ghosts.length + poltergeist.transactionCount` (a non-finite or negative count counts as 0, a fraction is floored), so the merged ghosts are counted (C3).
 6. **Poltergeist**: `null` when the engine reports none, else `state = bound` if `input.bound` else `awake`.
 7. **Tombstones**: sort the graveyard by `canceledOn` descending then `subscriptionId` ascending, draw the first `MAX_VISIBLE_TOMBSTONES`.
 8. **Summary**: `buildSceneSummary(parts: SceneSummaryParts): string` with `SceneSummaryParts = { level, levelName, totals, poltergeist }`, where `totals` are the true totals (not the drawn counts) and `poltergeist` is `"awake" | "bound" | null`. The text is `Level <n>, <name>.` followed by the clauses in this order: zombies, ghosts, Poltergeist (omitted when `null`), tombstones, joined by `, ` with no trailing period. Example: `Level 3, Haunted. 4 zombies, 30 ghosts, Poltergeist awake, 1 tombstone`. A count of 1 is singular and a count of 0 reads `no zombies`, `no ghosts` or `no tombstones`.
@@ -336,26 +349,26 @@ All coordinates are ViewBox units (800 by 600).
 | Zone | Rectangle |
 |---|---|
 | Sky and garden backdrop | `0,0` to `800,400` |
-| House walls | `x 200..600`, `y 190..400` (roof apex at `y 60`, chimney box `x 555..595, y 105..165`) |
+| House walls | wings `x 200..338` and `x 462..600`, `y 212..400`; tower `x 338..462`, `y 154..400`, gable apex `y 28`; chimney box `x 555..595, y 105..165` on the right wing |
 | Basement cutaway | `x 60..740`, `y 400..520` |
 | Graveyard band | `x 60..740`, `y 520..590` |
-| Poltergeist anchor | center `400,150`, size 171 (spans `x 314.5..485.5`, `y 64.5..235.5`, overlapping the roof; see the sigil table below) |
+| Poltergeist anchor | center `252,126`, size 150 (spans `x 177..327`, `y 51..201`, above the left wing roof and clear of the attic window `x 380..420, y 92..132`; see the sigil table below) |
 
-**Poltergeist and sigil geometry (R2).** The old anchor `400,110` with a 270-unit sigil put the sigil top at `y = -25`. The new numbers:
+**Poltergeist and sigil geometry (R2, revised by C6).** The R2 anchor `400,150` covered the attic window of the taller tower. The current numbers:
 
 | Item | Value |
 |---|---|
-| Poltergeist | center `400,150`, size 171 (radius 85.5); at the pulse peak (×1.08) radius 92.3, so `x 307.7..492.3`, `y 57.7..242.3` |
-| Sigil circle | diameter 262 (radius 131), ratio `262 / 171 = 1.53` (≥ 1.5) |
-| Sigil vertical extent | `150 ± (131 + stroke/2 + glow pad) = 150 ± (131 + 2 + 8) = 9..291` (margin 9 above the ViewBox top) |
-| Sigil horizontal extent | `400 ± (141 + shake 6) = 253..547` |
-| Roof and chimney | roof apex at `y 60`, so the pulsing body just covers the apex (partial overlap, as `visual-language.md` asks). The chimney moves from `x 520` to a box `x 555..595, y 105..165` on the right roof slope (the roof line there is at `y 161`), so it clears the sigil (max `x 547`, clearance 8) and the body (max `x 492.3`, clearance 62.7) |
-| House layout | unchanged: walls `y 190..400`; the body bottom (235.5) overlaps the roof eaves by 45 units only; ghost lane 2 (`cy 200`) is unchanged |
-| On screen at 1280px | Poltergeist 120px, sigil 184px |
+| Poltergeist | center `252,126`, size 150 (radius 75); at the pulse peak (×1.08) radius 81, so `x 171..333`, `y 45..207` (the first window below starts at `y 223` with its frame) |
+| Sigil circle | diameter 226 (radius 113), ratio `226 / 150 = 1.507` (≥ 1.5) |
+| Sigil vertical extent | `126 ± (113 + stroke/2 + glow pad) = 126 ± (113 + 2 + 8) = 3..249` (margin 3 above the ViewBox top) |
+| Sigil horizontal extent | `252 ± (123 + shake 6) = 123..381` |
+| Roof and chimney | the body overlaps the left hip roof (ridge `y 170`) partly; the chimney box `x 555..595` is far from the sigil (max `x 381`) |
+| House layout | tower and wings as in the zones table; the attic window keeps a clearance of more than the pulse radius from the body (tested) |
+| On screen at 1280px | Poltergeist 105px, sigil 159px |
 
 The ring is drawn at 60% opacity over the roof and the upper windows. It carries no text and the windows beneath stay visible, so it hides no information. Because the ring is a stroke drawn in front of the roof, it may cross roof and window art but never the chimney box, which `validateSceneConfig` checks (Requirement 15.7).
 
-**Zombies.** Slot width `ZOMBIE_SLOT_UNITS = 680 / 6 ≈ 113`. For `n` drawn zombies sorted as above, slot `i` has center `x = 60 + (6 − n)·slot/2 + (i + 0.5)·slot`, so the row stays centered. Height is `lerp(46, 114, clamp(cost / income / ZOMBIE_FULL_RATIO, 0, 1))` (0 when income is 0, so the zombie is the smallest). Width is 0.625 of height, always below the slot width, so slot boxes never overlap (Property 7). The box bottom is the baseline `515`; the tallest zombie (114) tops out at `y 401`, inside the basement band. Posture is a total map `often → upright`, `rarely → leaning`, `never → slumped`; badge `flame`, `hourglass`, `skull`. Tilt is `lerp(−5, 5, unitFromId(id, "tilt"))`.
+**Zombies.** Slot width `ZOMBIE_SLOT_UNITS = 680 / 6 ≈ 113`. For `n` drawn zombies sorted as above, slot `i` has center `x = 60 + (6 − n)·slot/2 + (i + 0.5)·slot`, so the row stays centered. Height is `lerp(66, 88, clamp(cost / income / ZOMBIE_FULL_RATIO, 0, 1))` (0 when income is 0, so the zombie is the smallest). Width is 0.625 of height, always below the slot width, so slot boxes never overlap (Property 7). The box bottom is the baseline `515`; the tallest zombie (88) tops out at `y 427`, and its usage badge (`badgeCenter`, 18 units, 3 above the head) spans `y 406..424`, inside the basement band (Property 4). Posture is a total map `often → upright`, `rarely → leaning`, `never → slumped`; badge `flame`, `hourglass`, `skull`. Tilt is `lerp(−5, 5, unitFromId(id, "tilt"))`.
 
 When another zombie is added or canceled, ranks shift and the row re-centers. The Scene tweens `transform` between old and new slots over 300ms (CSS transition, none under Reduced_Motion). This is acceptable because a zombie's identity is its `data-part="zombie:<id>"` key, not its slot.
 
@@ -367,7 +380,7 @@ When another zombie is added or canceled, ranks shift and the row re-centers. Th
 | 1 | 400 | 300 | 280 | 110 |
 | 2 | 400 | 200 | 340 | 90 |
 
-`lane = floor(unitFromId(id, "lane") × 3)`, `phase = 2π·unitFromId(id, "ghostPhase")`, `rest = point at phase`. Size is `lerp(34, 80, clamp(amount / SMALL_EXPENSE_THRESHOLD_CENTS, 0, 1))`. The extreme of each lane plus half the largest ghost stays inside the ViewBox (lane 2: `x 400 ± 340 ± 40 = 20..780`). A ghost keeps the same `phase` in every model that contains it, because it depends on `transactionId` only (Property 2).
+`lane = floor(unitFromId(id, "lane") × 3)`, `preferred = 2π·unitFromId(id, "ghostPhase")`. Drawn ghosts are placed in id order: a ghost takes the first of `preferred + k·2π/24` (`k = 0..23`) whose rest point is at least 48 units from every ghost already placed; when no step is free (a crowded lane) it takes the step with the largest clearance, the earliest on ties. `rest = point at phase`; AmbientMotion starts the orbit from the same phase (C2). Size is `lerp(34, 80, clamp(amount / SMALL_EXPENSE_THRESHOLD_CENTS, 0, 1))`. The extreme of each lane plus half the largest ghost stays inside the ViewBox (lane 2: `x 400 ± 340 ± 40 = 20..780`). A ghost keeps its lane and bob period in every model; its phase is its preferred phase when drawn alone, and drawn ghosts with larger ids never move it (Property 2). Rests are spread unless a lane is crowded (Property 20).
 
 **Tombstones.** Slot width is the same 113 units, centers from the left of the graveyard band, newest first at the left. Box 64 by 56, baseline `y 585`.
 
@@ -467,8 +480,9 @@ Source of truth for Requirement 6; text follows `visual-language.md`.
 | fireflies | yes | no | no | no | no |
 | shadowPass | no | no | yes | yes | no |
 | darkness | 0 | 0.05 | 0.15 | 0.35 | 0.5 |
+| wonk | 0.04 | 0.25 | 0.5 | 0.75 | 1 |
 
-"Severity" is the ordinal of each field (`crackCount`, `stainCount`, `plasterHole`, boarded plus broken, `roof`, `moss`, `garden`, `lantern`, `tree`, `fence`, `structure`, `fog`, `bats`, `darkness`). `fireflies` and `shadowPass` are ambient flags excluded from the monotone set. The property checks that every ordinal is non-decreasing as the level worsens and that each pair of levels differs in at least one feature (Property 9).
+"Severity" is the ordinal of each field (`crackCount`, `stainCount`, `plasterHole`, boarded plus broken, `roof`, `moss`, `garden`, `lantern`, `tree`, `fence`, `structure`, `fog`, `bats`, `darkness`, `wonk`). `fireflies` and `shadowPass` are ambient flags excluded from the monotone set. The property checks that every ordinal is non-decreasing as the level worsens and that each pair of levels differs in at least one feature (Property 9).
 
 Level 5 darkness (0.5, so the silhouette stays readable) is an SVG `mask` overlay, with no outline around the house: the walls stay slightly lighter than the sky (no dark veil), and a faint `SCENE_MOON` edge (1.5 units, 28% opacity) follows only the top edges of the collapsed roof, gable and chimney, keeping the -2° lean. The windows layer is drawn above the darkness overlay so lit windows stay the brightest element; windows that give no light are dimmed by `1 − darkness`. With `lighting = poltergeistGlow` the mask has a radial hole at the Poltergeist center, so its glow is the only light; with `moonlight` the mask has a faint `--text-tertiary` moon glow at 30% opacity.
 
@@ -486,7 +500,7 @@ One `<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden=
 | 6 | `windows` | `window:0..5`: candle glow, boards, broken glass | `windows[]` |
 | 7 | `basement` | cutaway, `zombie:<id>`, `zombie-overflow` anchor | `zombies[]` |
 | 8 | `graveyard` | `tombstone:<id>` | `tombstones[]` |
-| 9 | `ghosts` | `ghost:<id>` | `ghosts[]` |
+| 9 | `ghosts` | `ghost:<id>`; drawn after `windows` (C7), so no ghost hides behind a window | `ghosts[]` |
 | 10 | `poltergeist` | body, `sigil` ellipse (hidden when awake), glow | `poltergeist` |
 | 11 | `atmosphere-front` | front fog | features |
 | 12 | `darkness` | level-5 mask overlay, `incoming-level` slot | `lighting`, `darkness` |
@@ -785,10 +799,10 @@ At 1024 the plan card is 354px wide (314px inner), which keeps action titles on 
 | Moment | Element | Units | On screen |
 |---|---|---|---|
 | Cancel Wraithcast | shovel | 180 tall | 127px (Scene height 422 → quarter 105px) |
-| | sinking zombie badge | 24 × 1.4 scale | 24px |
+| | sinking zombie badge | 18 × 1.4 scale | 18px |
 | | tombstone label | HTML overlay | 12px |
 | | bonk beat | held 300ms | visible for 9 frames at 30fps |
-| Cut Coffee (Poltergeist bound) | sigil circle | 262 diameter | 184px; Poltergeist 171 → 120px; ratio 1.53 |
+| Cut Coffee (Poltergeist bound) | sigil circle | 226 diameter | 159px; Poltergeist 150 → 105px; ratio 1.507 |
 | | closing beat | held 300ms | |
 | $300 extra payment | flame / orb | HTML layer | 32px / 28px |
 | | window flare | opacity 0.380 → peak 0.785 (held 300ms) → 0.435 | swing 0.405, well above `MIN_VISIBLE_WINDOW_DELTA` (0.15); the brightness step itself is 0.045 |
@@ -849,7 +863,7 @@ Reflection on the prework: the items on determinism and permutation invariance a
 
 ### Property 2: Stable ghost phase
 
-*For any* Scene_Input and any ghost id present in two models built from inputs that both contain it (with different companions, counts or income), the ghost's `phase`, `lane` and `bobPeriodMs` are equal in both models.
+*For any* Scene_Input and any ghost id present in two models built from inputs that both contain it (with different companions, counts or income), the ghost's `lane` and `bobPeriodMs` are equal in both models, and its `phase` is its preferred phase `2π·unitFromId(id, "ghostPhase")` plus a whole number of steps of `2π / GHOST_PHASE_STEPS`. A ghost drawn alone is exactly at its preferred phase, and adding drawn ghosts whose ids are larger never changes the phase of a drawn ghost.
 
 **Validates: Requirements 3.4, 9.4**
 
@@ -861,13 +875,13 @@ Reflection on the prework: the items on determinism and permutation invariance a
 
 ### Property 4: Everything stays inside the ViewBox
 
-*For any* valid Scene_Input, every drawn window, zombie, tombstone and Poltergeist box, every ghost orbit extreme at any phase (extended by half the ghost size), and every overflow anchor lies inside `0..800` by `0..600`. The sigil ellipse (diameter, stroke, glow padding and shake offset) lies inside the ViewBox and does not intersect the chimney box. For every Moment request shape (cancel at every drawn zombie slot and at the overflow marker, payment with and without an origin, every ordered pair of levels, sigil, exorcism complete), every sampled Moment art extent returned by `getMomentExtents` (shovel arc samples with their bound circle, the scaled sinking zombie, the bat path samples, the orb endpoint and flame fallback, the crack flash, the shutter and the candles) lies inside the ViewBox, and every extent that has a clip region has the clip inside the ViewBox and its final box inside the clip.
+*For any* valid Scene_Input, every drawn window, zombie, tombstone and Poltergeist box, every ghost orbit extreme at any phase (extended by half the ghost size), and every overflow anchor lies inside `0..800` by `0..600`; each zombie's usage badge is centered above its box, ends above the box top and starts inside the basement band. The sigil ellipse (diameter, stroke, glow padding and shake offset) lies inside the ViewBox and does not intersect the chimney box. For every Moment request shape (cancel at every drawn zombie slot and at the overflow marker, payment with and without an origin, every ordered pair of levels, sigil, exorcism complete), every sampled Moment art extent returned by `getMomentExtents` (shovel arc samples with their bound circle, the scaled sinking zombie, the bat path samples, the orb endpoint and flame fallback, the crack flash, the shutter and the candles) lies inside the ViewBox, and every extent that has a clip region has the clip inside the ViewBox and its final box inside the clip.
 
 **Validates: Requirements 3.8, 12.18, 15.7**
 
 ### Property 5: Caps and conservation
 
-*For any* valid Scene_Input and each kind (zombies, ghosts, tombstones), the number drawn is at most the cap, and `totals` equal the true row counts of the input. For zombies and tombstones, and for ghosts without a Poltergeist, drawn plus `overflow` equals `totals`. While a Poltergeist exists, the drawn ghost count is 0, the ghost `overflow` is 0 (so drawn plus overflow does not equal the total), and `totals.ghosts` still equals `houseState.ghosts.length`.
+*For any* valid Scene_Input and each kind (zombies, ghosts, tombstones), the number drawn is at most the cap, and `totals` equal the true row counts of the input. For zombies and tombstones, and for ghosts without a Poltergeist, drawn plus `overflow` equals `totals`. While a Poltergeist exists, the drawn ghost count is 0, the ghost `overflow` is 0 (so drawn plus overflow does not equal the total), and `totals.ghosts` equals `houseState.ghosts.length` plus the Poltergeist's sanitized `transactionCount`.
 
 **Validates: Requirements 4.1, 4.2, 4.8, 9.1, 9.2, 21.6**
 
@@ -909,7 +923,7 @@ Reflection on the prework: the items on determinism and permutation invariance a
 
 ### Property 12: Scene summary states the true figures
 
-*For any* valid Scene_Input, the summary starts with `Level <n>, <name>.`, contains the true zombie, ghost and tombstone totals with correct singular and plural forms (`no zombies`, `no ghosts`, `no tombstones` for zero), contains `Poltergeist awake` or `Poltergeist bound` exactly when the Poltergeist exists in that state, and contains no Poltergeist clause when it is null.
+*For any* valid Scene_Input, the summary starts with `Level <n>, <name>.`, contains the true zombie, ghost (including the ghosts merged into the Poltergeist) and tombstone totals with correct singular and plural forms (`no zombies`, `no ghosts`, `no tombstones` for zero), contains `Poltergeist awake` or `Poltergeist bound` exactly when the Poltergeist exists in that state, and contains no Poltergeist clause when it is null.
 
 **Validates: Requirements 4.8, 8.6, 10.6, 19.2**
 
@@ -954,6 +968,12 @@ Reflection on the prework: the items on determinism and permutation invariance a
 *For any* previous opacity and live opacity in 0 to 1 and any boost in the range above 0 up to 1, `getFlareSteps` returns `from` in 0 to 1, `peak` equal to `min(1, live + boost)` (so `peak ≤ 1` and `peak ≥ live`), and `final` equal to `live`.
 
 **Validates: Requirements 14.3, 14.6**
+
+### Property 20: Ghost rests are spread unless the lane is crowded
+
+*For any* set of drawn ghosts (ids from a shared prefix and a counter, as the demo and the app produce them, or uuids), every two rest points are at least `GHOST_MIN_REST_DISTANCE` apart, except when the ghost with the larger id is crowded: every candidate rest of it (its preferred phase plus each whole step on its own lane) is closer than the minimum to a drawn ghost with a smaller id. The level-2 demo ghosts, an example rather than a property, use more than one lane.
+
+**Validates: Requirements 3.4, 9.4, 9.7**
 
 ## Error Handling
 

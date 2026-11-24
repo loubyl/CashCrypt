@@ -13,18 +13,20 @@ import type { Box, LevelFeatures, WindowShape, WindowState } from "./types";
 export type WindowSlot = { index: number; shape: WindowShape; box: Box };
 
 /**
- * Fixed layout in ViewBox units (800 by 600). Indices 0 to 2 are the upper
- * floor, 3 and 4 the ground floor flanking the door (door x 370..430), 5 the
- * round attic window. All boxes sit inside the walls (x 200..600, y 190..400)
- * or the roof gable, and clear of the chimney box.
+ * Fixed layout in ViewBox units (800 by 600). The house is a tall central tower
+ * (x 338..462, walls from y 154, gable apex y 28) between two lower wings
+ * (x 200..338 and 462..600, walls from y 212). Indices 0 and 2 are the upper wing
+ * windows, 1 the upper tower window above the porch, 3 and 4 the ground-floor wing
+ * windows, 5 the round attic window inside the gable. All boxes sit inside their wall
+ * or the gable, and clear of the chimney box and the Poltergeist.
  */
 export const WINDOW_LAYOUT: readonly WindowSlot[] = [
-  { index: 0, shape: "arched", box: { x: 244, y: 215, w: 56, h: 60 } },
-  { index: 1, shape: "arched", box: { x: 372, y: 215, w: 56, h: 60 } },
-  { index: 2, shape: "arched", box: { x: 500, y: 215, w: 56, h: 60 } },
-  { index: 3, shape: "square", box: { x: 250, y: 310, w: 56, h: 60 } },
-  { index: 4, shape: "square", box: { x: 494, y: 310, w: 56, h: 60 } },
-  { index: 5, shape: "round", box: { x: 380, y: 146, w: 40, h: 40 } },
+  { index: 0, shape: "arched", box: { x: 241, y: 228, w: 56, h: 60 } },
+  { index: 1, shape: "arched", box: { x: 372, y: 176, w: 56, h: 62 } },
+  { index: 2, shape: "arched", box: { x: 503, y: 228, w: 56, h: 60 } },
+  { index: 3, shape: "square", box: { x: 241, y: 316, w: 56, h: 58 } },
+  { index: 4, shape: "square", box: { x: 503, y: 316, w: 56, h: 58 } },
+  { index: 5, shape: "round", box: { x: 380, y: 92, w: 40, h: 40 } },
 ];
 
 const UNIT_MIN = 0;

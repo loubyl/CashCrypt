@@ -18,6 +18,10 @@ import {
   ZOMBIE_TILT_DEG,
   GHOST_BOB_PERIOD_MAX_MS,
   GHOST_BOB_PERIOD_MIN_MS,
+  GHOST_MIN_REST_DISTANCE,
+  GHOST_PHASE_STEPS,
+  BADGE_SIZE,
+  ZOMBIE_BADGE_GAP,
 } from "./config";
 import type { SceneConfig } from "./config";
 import { unitFromId } from "./hash";
@@ -123,6 +127,10 @@ export function layoutZombies(
         h: height,
       },
       heightUnits: height,
+      badgeCenter: {
+        x: centerX,
+        y: config.ZOMBIE_BASELINE_Y - height - ZOMBIE_BADGE_GAP - BADGE_SIZE * HALF,
+      },
       tiltDeg: lerp(-ZOMBIE_TILT_DEG, ZOMBIE_TILT_DEG, unitFromId(id, SALT_TILT)),
       swayPhase: FULL_TURN_RADIANS * unitFromId(id, SALT_SWAY_PHASE),
       swayPeriodMs: lerp(
@@ -146,6 +154,65 @@ export function getLanePoint(
   };
 }
 
+/** Lane of a ghost, from its id only. */
+export function getGhostLane(id: string, laneCount: number): GhostLane {
+  return Math.min(laneCount - UNIT_MAX, Math.floor(unitFromId(id, SALT_LANE) * laneCount)) as GhostLane;
+}
+
+/** Preferred phase of a ghost, from its id only (Requirement 3.4). */
+export function getPreferredGhostPhase(id: string): number {
+  return FULL_TURN_RADIANS * unitFromId(id, SALT_GHOST_PHASE);
+}
+
+/** Candidate phases of a ghost: its preferred phase, then forward in whole steps, in [0, 2π). */
+export function getGhostPhaseCandidates(id: string): number[] {
+  const preferred = getPreferredGhostPhase(id);
+  const step = FULL_TURN_RADIANS / GHOST_PHASE_STEPS;
+  return Array.from({ length: GHOST_PHASE_STEPS }, (_, k) => (preferred + k * step) % FULL_TURN_RADIANS);
+}
+
+function distance(a: Point, b: Point): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+/** Smallest distance from `point` to any placed rest (Infinity when none). */
+function clearance(point: Point, placed: readonly Point[]): number {
+  return placed.reduce((min, other) => Math.min(min, distance(point, other)), Number.POSITIVE_INFINITY);
+}
+
+/**
+ * Picks the phase of each drawn ghost. Ghosts are placed in id order, so a ghost depends only
+ * on its own id and the drawn ghosts with smaller ids. The first candidate whose rest point is
+ * at least GHOST_MIN_REST_DISTANCE from every placed rest wins. When none is (the lane is
+ * crowded), the candidate with the largest clearance wins, the earliest on ties.
+ */
+function placeGhostPhases(
+  ghosts: readonly { id: string; orbit: SceneGhost["orbit"] }[],
+): Map<string, number> {
+  const phases = new Map<string, number>();
+  const placed: Point[] = [];
+  const byId = [...ghosts].sort((a, b) => compareIds(a.id, b.id));
+  for (const ghost of byId) {
+    const candidates = getGhostPhaseCandidates(ghost.id);
+    let best = candidates[SLOT_FIRST];
+    let bestClearance = Number.NEGATIVE_INFINITY;
+    for (const phase of candidates) {
+      const gap = clearance(getLanePoint(ghost.orbit, phase), placed);
+      if (gap >= GHOST_MIN_REST_DISTANCE) {
+        best = phase;
+        break;
+      }
+      if (gap > bestClearance) {
+        best = phase;
+        bestClearance = gap;
+      }
+    }
+    phases.set(ghost.id, best);
+    placed.push(getLanePoint(ghost.orbit, best));
+  }
+  return phases;
+}
+
 /**
  * Ghosts sorted by amount descending, then id; the first `cap` are drawn.
  * While a Poltergeist exists the ghosts have merged into it: none are drawn
@@ -160,16 +227,14 @@ export function layoutGhosts(
   const sorted = [...ghosts].sort(
     (a, b) => nonNegative(b.amount) - nonNegative(a.amount) || compareIds(a.transactionId, b.transactionId),
   );
-  const visible = sorted.slice(SLOT_FIRST, config.MAX_VISIBLE_GHOSTS);
-  const laneCount = config.GHOST_LANES.length;
-  const drawn = visible.map((ghost) => {
+  const visible = sorted.slice(SLOT_FIRST, config.MAX_VISIBLE_GHOSTS).map((ghost) => {
     const id = ghost.transactionId;
-    const lane = Math.min(
-      laneCount - UNIT_MAX,
-      Math.floor(unitFromId(id, SALT_LANE) * laneCount),
-    ) as GhostLane;
-    const orbit = { ...config.GHOST_LANES[lane] };
-    const phase = FULL_TURN_RADIANS * unitFromId(id, SALT_GHOST_PHASE);
+    const lane = getGhostLane(id, config.GHOST_LANES.length);
+    return { ghost, id, lane, orbit: { ...config.GHOST_LANES[lane] } };
+  });
+  const phases = placeGhostPhases(visible);
+  const drawn = visible.map(({ ghost, id, lane, orbit }) => {
+    const phase = phases.get(id) ?? getPreferredGhostPhase(id);
     const fullness = clamp(
       nonNegative(ghost.amount) / SMALL_EXPENSE_THRESHOLD_CENTS,
       UNIT_MIN,

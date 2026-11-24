@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import { buildSceneModel } from "@/lib/scene";
-import { sceneInputArb } from "../arbitraries";
+import { expectedGhostTotal, sceneInputArb } from "../arbitraries";
 
 const NUM_RUNS = 200;
 
@@ -19,7 +19,7 @@ describe("Property 12: scene summary states the true figures", () => {
       fc.property(sceneInputArb, (input) => {
         const model = buildSceneModel(input);
         const zombies = input.houseState.zombies.length;
-        const ghosts = input.houseState.ghosts.length;
+        const ghosts = expectedGhostTotal(input);
         const tombstones = input.graveyard.length;
         const prefix = `Level ${input.houseState.decayLevel}, ${model.levelName}. `;
         expect(model.summary.startsWith(prefix)).toBe(true);

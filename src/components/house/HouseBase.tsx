@@ -17,6 +17,7 @@ import {
   SCENE_TEAL,
   SCENE_TEAL_LIGHT,
   SCENE_WALL,
+  SCENE_WALL_LIGHT,
   SCENE_WALL_SHADE,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
@@ -26,11 +27,15 @@ import {
   BAT_PATH,
   REDUCED_MOTION_HIDE_CLASS,
   BATS,
-  BRICK_HEIGHT,
   BRICK_RADIUS,
+  BRICK_TILT_DEG,
   BRICKS,
   BUSHES,
   CHIMNEY_BODY,
+  EAVES,
+  FENCE_MISSING,
+  FENCE_PICKET,
+  FENCE_POSTS,
   FIREFLIES,
   FOG_BACK_BARS,
   FOG_BAR_HEIGHT,
@@ -39,6 +44,9 @@ import {
   FOG_MOUND_STEP_OPACITY,
   FOG_MOUNDS,
   FOG_OPACITY,
+  FOUNDATION_H,
+  FOUNDATION_STONES,
+  FOUNDATION_Y,
   GABLE_ROOF,
   GABLE_WALL,
   GABLE_WALL_COLLAPSED,
@@ -50,21 +58,37 @@ import {
   RIGHT_HIP,
   RIGHT_HIP_COLLAPSED,
   RIGHT_HIP_PARTIAL,
+  SHINGLE_OPACITY,
+  SMOKE_PUFFS,
+  SMOKE_PUFFS_BY_LEVEL,
   STARS,
   STUMP_LEFT,
   STUMP_RIGHT,
   TINT_OVERLAY_OPACITY,
   TOKEN,
+  TOWER,
+  TOWER_CENTER_X,
   TREE_LEFT_X,
+  TREE_LIMBS,
+  TREE_LIMBS_TWISTED,
   TREE_RIGHT_X,
+  TREE_TRUNK,
+  TREE_TRUNK_TWISTED,
   TUFT_PATH,
   TUFTS,
   WALL_DARK_VEIL,
   WALL_LIGHT_VEIL,
   WALLS,
+  WING_LEFT,
+  WING_RIGHT,
+  WONK_MAX,
   getStructureTransform,
+  signedUnit,
+  taperedPath,
+  wonkOffset,
+  wonkyWallPoints,
 } from "./houseGeometry";
-import type { SceneFilterIds } from "./houseGeometry";
+import type { Limb, SceneFilterIds } from "./houseGeometry";
 
 export type HouseBaseProps = {
   model: SceneModel;
@@ -82,7 +106,6 @@ const GRASS_TUFT_COUNT: Readonly<Record<GardenState, number>> = {
   bare: 3,
   scorched: 0,
 };
-const TREE_BRANCHES = "M2 340 L-30 310 M1 318 L30 290 M-1 300 L-20 270 M0 292 L12 262";
 const SOIL_LINE_OPACITY = 0.7;
 const BLOCK_ROWS: readonly number[] = [430, 460, 490];
 const BLOCK_TICKS: readonly (readonly number[])[] = [
@@ -200,29 +223,27 @@ function renderBackAtmosphere(features: LevelFeatures): ReactNode {
   );
 }
 
+/** Canopy lumps of the full and thin trees (local space, trunk base at x 0). */
 const CANOPY_FULL: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: 0, cy: 270, r: 44 },
-  { cx: -36, cy: 300, r: 32 },
-  { cx: 36, cy: 300, r: 32 },
-  { cx: 0, cy: 316, r: 26 },
+  { cx: -2, cy: 262, r: 40 },
+  { cx: -38, cy: 290, r: 30 },
+  { cx: 34, cy: 286, r: 32 },
+  { cx: -16, cy: 236, r: 26 },
+  { cx: 20, cy: 244, r: 24 },
+  { cx: 2, cy: 306, r: 24 },
 ];
 const CANOPY_THIN: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: -30, cy: 310, r: 15 },
-  { cx: 30, cy: 290, r: 15 },
-  { cx: -20, cy: 270, r: 13 },
-  { cx: 12, cy: 262, r: 14 },
+  { cx: -44, cy: 292, r: 15 },
+  { cx: 44, cy: 276, r: 15 },
+  { cx: -24, cy: 250, r: 13 },
+  { cx: 26, cy: 238, r: 12 },
 ];
 const CANOPY_LIGHT_OPACITY = 0.35;
 const THIN_CANOPY_OPACITY = 0.9;
-const TWISTED_TRUNK = "M0 400 C-16 372 14 342 -8 312 C-20 292 6 272 -2 246";
-const TWISTED_BRANCHES = "M-6 316 L-38 300 L-52 270 M-4 296 L26 288 L40 258 M2 270 L-22 250 M-2 250 L18 232";
-const TRUNK_WIDTH = 9;
-const BRANCH_WIDTH = 5;
-const FULL_TRUNK_WIDTH = 12;
 
-function renderCanopy(circles: readonly { cx: number; cy: number; r: number }[], opacity?: number): ReactNode {
+function renderCanopy(circles: readonly { cx: number; cy: number; r: number }[], fill: string, opacity?: number): ReactNode {
   return (
-    <g fill={SCENE_TEAL} opacity={opacity}>
+    <g fill={fill} opacity={opacity}>
       {circles.map((c) => (
         <circle key={`${c.cx}-${c.cy}`} cx={c.cx} cy={c.cy} r={c.r} />
       ))}
@@ -230,37 +251,52 @@ function renderCanopy(circles: readonly { cx: number; cy: number; r: number }[],
   );
 }
 
+function renderLimbs(limbs: readonly Limb[], fill: string): ReactNode {
+  return limbs.map((limb) => (
+    <path
+      key={`${limb.start.x}-${limb.start.y}-${limb.end.x}`}
+      d={taperedPath(limb.start, limb.control, limb.end, limb.w0, limb.w1)}
+      fill={fill}
+    />
+  ));
+}
+
 function renderTreeBody(tree: TreeState): ReactNode {
+  const fill = tree === "charred" ? SCENE_CHAR : SCENE_TEAL;
+  const trunk = tree === "twisted" || tree === "charred" ? TREE_TRUNK_TWISTED : TREE_TRUNK;
+  const trunkPath = taperedPath(trunk.start, trunk.control, trunk.end, trunk.w0, trunk.w1);
   switch (tree) {
     case "full":
       return (
         <>
-          <path d="M0 400 L0 310" strokeWidth={FULL_TRUNK_WIDTH} />
-          {renderCanopy(CANOPY_FULL)}
-          <circle cx={-14} cy={262} r={24} fill={SCENE_TEAL_LIGHT} opacity={CANOPY_LIGHT_OPACITY} stroke="none" />
+          <path d={trunkPath} fill={fill} />
+          {renderCanopy(CANOPY_FULL, SCENE_TEAL)}
+          <circle cx={-18} cy={244} r={22} fill={SCENE_TEAL_LIGHT} opacity={CANOPY_LIGHT_OPACITY} />
         </>
       );
     case "thin":
       return (
         <>
-          <path d="M0 400 L4 330 L-2 290" strokeWidth={TRUNK_WIDTH} />
-          <path d={TREE_BRANCHES} strokeWidth={BRANCH_WIDTH} />
-          {renderCanopy(CANOPY_THIN, THIN_CANOPY_OPACITY)}
+          <path d={trunkPath} fill={fill} />
+          {renderLimbs(TREE_LIMBS, fill)}
+          {renderCanopy(CANOPY_THIN, SCENE_TEAL, THIN_CANOPY_OPACITY)}
         </>
       );
-    case "twisted":
+    case "bare":
       return (
         <>
-          <path d={TWISTED_TRUNK} strokeWidth={TRUNK_WIDTH + 1} />
-          <path d={TWISTED_BRANCHES} strokeWidth={BRANCH_WIDTH} strokeLinejoin="round" />
+          <path d={trunkPath} fill={fill} />
+          {renderLimbs(TREE_LIMBS, fill)}
         </>
       );
     default:
       return (
         <>
-          <path d="M0 400 L4 330 L-2 290" strokeWidth={TRUNK_WIDTH} />
-          <path d={TREE_BRANCHES} strokeWidth={BRANCH_WIDTH} />
-          {tree === "charred" ? <path d="M3 330 L6 366" stroke={SCENE_EMBER} strokeWidth={3} /> : null}
+          <path d={trunkPath} fill={fill} />
+          {renderLimbs(TREE_LIMBS_TWISTED, fill)}
+          {tree === "charred" ? (
+            <path d="M2 336 L6 352 L3 368" stroke={SCENE_EMBER} strokeWidth={2.5} strokeLinecap="round" fill="none" />
+          ) : null}
         </>
       );
   }
@@ -268,10 +304,9 @@ function renderTreeBody(tree: TreeState): ReactNode {
 
 /** One tree on each side at every level; the state sets how much of it is left. */
 function renderTrees(features: LevelFeatures): ReactNode {
-  const stroke = features.tree === "charred" ? SCENE_CHAR : SCENE_TEAL;
   const transforms = [`translate(${TREE_LEFT_X} 0)`, `translate(${TREE_RIGHT_X} 0) scale(-1 1)`];
   return (
-    <g data-part="tree" data-tree={features.tree} stroke={stroke} strokeLinecap="round" fill="none">
+    <g data-part="tree" data-tree={features.tree}>
       {transforms.map((transform) => (
         <g key={transform} transform={transform}>
           {renderTreeBody(features.tree)}
@@ -281,36 +316,45 @@ function renderTrees(features: LevelFeatures): ReactNode {
   );
 }
 
-const FENCE_POSTS = [630, 650, 670, 690, 710, 730] as const;
-const FENCE_MISSING = [650, 710] as const;
-const FENCE_TILTED = 690;
-const FENCE_TILT_DEG = 18;
+const FENCE_RAIL_HEIGHT = 4;
+const FENCE_RAIL_TOP = 374;
+const FENCE_RAIL_BOTTOM = 388;
+const FENCE_BROKEN_TILT_INDEX = 4;
+const FENCE_BROKEN_TILT_DEG = 18;
 
+/** Pointed pickets whose height and lean grow uneven with the level's wonk. */
 function renderFence(features: LevelFeatures): ReactNode {
   const broken = features.fence === "broken";
-  const posts = broken ? FENCE_POSTS.filter((x) => !(FENCE_MISSING as readonly number[]).includes(x)) : FENCE_POSTS;
+  const posts = broken ? FENCE_POSTS.filter((x) => !FENCE_MISSING.includes(x)) : FENCE_POSTS;
+  const first = FENCE_POSTS[0];
+  const last = FENCE_POSTS[FENCE_POSTS.length - 1] + FENCE_PICKET.w;
   return (
     <g data-part="fence" fill={SCENE_TEAL_LIGHT}>
-      {posts.map((x) => (
-        <rect
-          key={x}
-          x={x}
-          y={368}
-          width={6}
-          height={32}
-          transform={broken && x === FENCE_TILTED ? `rotate(${FENCE_TILT_DEG} ${x} ${GROUND_Y})` : undefined}
-        />
-      ))}
+      {posts.map((x, index) => {
+        const height = FENCE_PICKET.h + wonkOffset(`picket:${x}:h`, features.wonk, WONK_MAX.picketHeight);
+        const lean =
+          wonkOffset(`picket:${x}:r`, features.wonk, WONK_MAX.picketRotateDeg) +
+          (broken && index === FENCE_BROKEN_TILT_INDEX ? FENCE_BROKEN_TILT_DEG : 0);
+        const top = GROUND_Y - height;
+        const half = FENCE_PICKET.w / 2;
+        return (
+          <polygon
+            key={x}
+            points={`${x},${GROUND_Y} ${x},${top} ${x + half},${top - FENCE_PICKET.tip} ${x + FENCE_PICKET.w},${top} ${x + FENCE_PICKET.w},${GROUND_Y}`}
+            transform={lean !== 0 ? `rotate(${lean.toFixed(2)} ${x + half} ${GROUND_Y})` : undefined}
+          />
+        );
+      })}
       {broken ? (
         <>
-          <rect x={628} y={376} width={40} height={4} />
-          <rect x={700} y={376} width={36} height={4} />
-          <rect x={628} y={388} width={40} height={4} />
+          <rect x={first - 2} y={FENCE_RAIL_TOP} width={44} height={FENCE_RAIL_HEIGHT} transform="rotate(3 624 376)" />
+          <rect x={694} y={FENCE_RAIL_TOP + 2} width={42} height={FENCE_RAIL_HEIGHT} transform="rotate(-6 694 378)" />
+          <rect x={first - 2} y={FENCE_RAIL_BOTTOM} width={48} height={FENCE_RAIL_HEIGHT} />
         </>
       ) : (
         <>
-          <rect x={628} y={376} width={108} height={4} />
-          <rect x={628} y={388} width={108} height={4} />
+          <rect x={first - 2} y={FENCE_RAIL_TOP} width={last - first + 4} height={FENCE_RAIL_HEIGHT} />
+          <rect x={first - 2} y={FENCE_RAIL_BOTTOM} width={last - first + 4} height={FENCE_RAIL_HEIGHT} />
         </>
       )}
     </g>
@@ -352,44 +396,75 @@ function renderGroundCover(features: LevelFeatures): ReactNode {
   );
 }
 
-function renderRoof(features: LevelFeatures): ReactNode {
-  const roof = features.roof;
+/** Rotation of a roof part about a pivot, scaled by the level's wonk. */
+function wonkRotate(key: string, wonk: number, maxDeg: number, pivot: { x: number; y: number }): string | undefined {
+  const angle = wonkOffset(key, wonk, maxDeg);
+  return angle === 0 ? undefined : `rotate(${angle.toFixed(2)} ${pivot.x} ${pivot.y})`;
+}
+
+const EAVE_TRIM_HEIGHT = 5;
+const EAVE_SHADOW_HEIGHT = 12;
+const EAVE_SHADOW_OPACITY = 0.35;
+const GABLE_SHADOW_HEIGHT = 10;
+const MISSING_SHINGLE_OPACITY = 0.6;
+
+function renderRoof(features: LevelFeatures, filterIds: SceneFilterIds): ReactNode {
+  const { roof, wonk } = features;
+  const shingles = `url(#${filterIds.shingles})`;
+  const leftHipTransform = [
+    roof === "sagging" ? "rotate(-4 342 170)" : "",
+    wonkRotate("hip:left", wonk, WONK_MAX.hipRotateDeg, { x: 342, y: 216 }) ?? "",
+  ].join(" ").trim() || undefined;
+  const rightHipTransform = wonkRotate("hip:right", wonk, WONK_MAX.hipRotateDeg, { x: 458, y: 216 });
+  const gableTransform = wonkRotate("gable", wonk, WONK_MAX.gableRotateDeg, { x: TOWER_CENTER_X, y: 158 });
   if (roof === "collapsed") {
     return (
       <g data-part="roof" fill={SCENE_TEAL}>
-        <polygon points={LEFT_HIP_COLLAPSED} />
-        <polygon points={RIGHT_HIP_COLLAPSED} />
-        <polygon points={STUMP_LEFT} />
-        <polygon points={STUMP_RIGHT} />
-        <path d="M330 150 L372 100 M470 160 L430 110" stroke={SCENE_TEAL_LIGHT} strokeWidth={4} strokeLinecap="round" fill="none" />
+        <polygon points={LEFT_HIP_COLLAPSED} transform={leftHipTransform} />
+        <polygon points={RIGHT_HIP_COLLAPSED} transform={rightHipTransform} />
+        <g transform={gableTransform}>
+          <polygon points={STUMP_LEFT} />
+          <polygon points={STUMP_RIGHT} />
+        </g>
+        <path d="M354 108 L380 76 M446 114 L424 84" stroke={SCENE_TEAL_LIGHT} strokeWidth={4} strokeLinecap="round" fill="none" />
       </g>
     );
   }
   return (
     <g data-part="roof" fill={SCENE_TEAL}>
-      <polygon points={GABLE_ROOF} />
-      <polygon points={LEFT_HIP} transform={roof === "sagging" ? "rotate(-4 318 164)" : undefined} />
+      <g transform={leftHipTransform}>
+        <polygon points={LEFT_HIP} />
+        <polygon points={LEFT_HIP} fill={shingles} opacity={SHINGLE_OPACITY} />
+        <rect x={184} y={EAVES[0].y} width={EAVES[0].x2 - EAVES[0].x1} height={EAVE_TRIM_HEIGHT} fill={SCENE_TEAL_LIGHT} />
+      </g>
       {roof === "partialCollapse" ? (
-        <>
-          <polygon points="616,204 584,190 540,190 504,204" fill={TOKEN.void} opacity={0.85} />
+        <g transform={rightHipTransform}>
+          <polygon points="616,216 586,200 540,200 458,216" fill={TOKEN.void} opacity={0.85} />
           <polygon points={RIGHT_HIP_PARTIAL} />
-        </>
+          <polygon points={RIGHT_HIP_PARTIAL} fill={shingles} opacity={SHINGLE_OPACITY} />
+        </g>
       ) : (
-        <polygon points={RIGHT_HIP} />
+        <g transform={rightHipTransform}>
+          <polygon points={RIGHT_HIP} />
+          <polygon points={RIGHT_HIP} fill={shingles} opacity={SHINGLE_OPACITY} />
+          <rect x={EAVES[1].x1} y={EAVES[1].y} width={EAVES[1].x2 - EAVES[1].x1} height={EAVE_TRIM_HEIGHT} fill={SCENE_TEAL_LIGHT} />
+        </g>
       )}
-      <rect x={184} y={200} width={112} height={5} fill={SCENE_TEAL_LIGHT} />
-      {roof === "partialCollapse" ? null : <rect x={504} y={200} width={112} height={5} fill={SCENE_TEAL_LIGHT} />}
+      <g transform={gableTransform}>
+        <polygon points={GABLE_ROOF} />
+        <polygon points={GABLE_ROOF} fill={shingles} opacity={SHINGLE_OPACITY} />
+      </g>
       {roof === "missingShingles" ? (
-        <g fill={TOKEN.void} opacity={0.6}>
-          <rect x={240} y={172} width={18} height={10} />
-          <rect x={530} y={174} width={18} height={10} />
-          <rect x={268} y={186} width={14} height={8} />
+        <g fill={TOKEN.void} opacity={MISSING_SHINGLE_OPACITY}>
+          <rect x={240} y={180} width={18} height={10} />
+          <rect x={530} y={182} width={18} height={10} />
+          <rect x={272} y={196} width={14} height={8} />
         </g>
       ) : null}
       {features.moss ? (
         <g fill={SCENE_TEAL_LIGHT}>
-          <ellipse cx={262} cy={168} rx={24} ry={4} />
-          <ellipse cx={520} cy={168} rx={20} ry={4} />
+          <ellipse cx={262} cy={176} rx={24} ry={4} />
+          <ellipse cx={520} cy={176} rx={20} ry={4} />
         </g>
       ) : null}
     </g>
@@ -416,41 +491,98 @@ function renderLantern(features: LevelFeatures, filterIds: SceneFilterIds): Reac
   );
 }
 
-function renderWallShapes(fill: string, collapsed: boolean, opacity?: number): ReactNode {
+const MOON_EDGE_OPACITY = 0.18;
+const MOON_EDGE_WIDTH = 2;
+
+/** Shadow band under an eave: a dark strip on the wall just below the roof line. */
+function renderEaveShadows(collapsed: boolean): ReactNode {
   return (
-    <g fill={fill} opacity={opacity}>
-      <polygon points={collapsed ? GABLE_WALL_COLLAPSED : GABLE_WALL} />
-      <rect x={WALLS.x} y={WALLS.y} width={WALLS.w} height={WALLS.h} />
+    <g data-part="eave-shadows" fill={TOKEN.void} opacity={EAVE_SHADOW_OPACITY}>
+      {EAVES.map((eave) => (
+        <rect
+          key={eave.x1}
+          x={Math.max(eave.x1, WALLS.x)}
+          y={eave.y + EAVE_TRIM_HEIGHT}
+          width={Math.min(eave.x2, WALLS.x + WALLS.w) - Math.max(eave.x1, WALLS.x)}
+          height={EAVE_SHADOW_HEIGHT}
+        />
+      ))}
+      {collapsed ? null : <rect x={TOWER.x} y={TOWER.y} width={TOWER.w} height={GABLE_SHADOW_HEIGHT} />}
     </g>
   );
 }
 
-/** Slate walls with a subtle level tint, level veil, shaded faces and brick accents. */
-function renderWalls(level: DecayLevel, collapsed: boolean): ReactNode {
+/** Slate wings and a lighter tower, with a level tint, eave shadows, a dark stone base and a moonlit left edge. */
+function renderWalls(level: DecayLevel, features: LevelFeatures): ReactNode {
+  const collapsed = features.roof === "collapsed";
   const lightVeil = WALL_LIGHT_VEIL[level];
   const darkVeil = WALL_DARK_VEIL[level];
+  const { wonk } = features;
+  const wingLeft = wonkyWallPoints(WING_LEFT, "wing:left", wonk);
+  const wingRight = wonkyWallPoints(WING_RIGHT, "wing:right", wonk);
+  const tower = wonkyWallPoints(TOWER, "tower", wonk);
+  const gable = collapsed ? GABLE_WALL_COLLAPSED : GABLE_WALL;
+  const shapes = (fill: string, opacity?: number) => (
+    <g fill={fill} opacity={opacity}>
+      <polygon points={wingLeft} />
+      <polygon points={wingRight} />
+      <polygon points={tower} />
+      <polygon points={gable} />
+    </g>
+  );
   return (
     <g data-part="wall-surface">
-      {renderWallShapes(SCENE_WALL, collapsed)}
-      {collapsed ? null : <polygon points="400,84 480,196 400,196" fill={SCENE_WALL_SHADE} />}
-      <rect x={WALLS.x + WALLS.w * 0.7} y={WALLS.y} width={WALLS.w * 0.3} height={WALLS.h} fill={SCENE_WALL_SHADE} />
-      <rect x={WALLS.x} y={284} width={WALLS.w} height={5} fill={SCENE_WALL_SHADE} />
-      {renderWallShapes(DECAY_TINTS[level], collapsed, TINT_OVERLAY_OPACITY)}
-      {lightVeil ? renderWallShapes(TOKEN.ink, collapsed, lightVeil) : null}
-      {darkVeil ? renderWallShapes(TOKEN.void, collapsed, darkVeil) : null}
+      <polygon points={wingLeft} fill={SCENE_WALL} />
+      <polygon points={wingRight} fill={SCENE_WALL_SHADE} />
+      <polygon points={tower} fill={SCENE_WALL_LIGHT} />
+      <polygon points={gable} fill={SCENE_WALL_LIGHT} />
+      {collapsed ? null : <polygon points={`${TOWER_CENTER_X},58 458,154 ${TOWER_CENTER_X},154`} fill={SCENE_WALL} />}
+      <rect x={TOWER.x + TOWER.w * 0.7} y={TOWER.y} width={TOWER.w * 0.3} height={TOWER.h} fill={SCENE_WALL} opacity={0.45} />
+      {shapes(DECAY_TINTS[level], TINT_OVERLAY_OPACITY)}
+      {lightVeil ? shapes(TOKEN.ink, lightVeil) : null}
+      {darkVeil ? shapes(TOKEN.void, darkVeil) : null}
+      {renderEaveShadows(collapsed)}
       <g data-part="bricks" fill={SCENE_BRICK}>
         {BRICKS.map((brick) => (
-          <rect key={`${brick.x}-${brick.y}`} x={brick.x} y={brick.y} width={brick.w} height={BRICK_HEIGHT} rx={BRICK_RADIUS} />
+          <rect
+            key={`${brick.x}-${brick.y}`}
+            x={brick.x}
+            y={brick.y}
+            width={brick.w}
+            height={brick.h}
+            rx={BRICK_RADIUS}
+            transform={`rotate(${(signedUnit(`brick:${brick.x}:${brick.y}`) * BRICK_TILT_DEG).toFixed(2)} ${brick.x + brick.w / 2} ${brick.y + brick.h / 2})`}
+          />
         ))}
+      </g>
+      <g data-part="foundation">
+        <rect x={WALLS.x - 4} y={FOUNDATION_Y - 4} width={WALLS.w + 8} height={GROUND_Y - FOUNDATION_Y + 4} fill={SCENE_BRICK} />
+        <g fill={SCENE_WALL_SHADE}>
+          {FOUNDATION_STONES.map((stone) => (
+            <rect key={stone.x} x={stone.x + 1} y={FOUNDATION_Y} width={stone.w - 2} height={FOUNDATION_H} rx={3} />
+          ))}
+        </g>
+      </g>
+      <g data-part="moonlit-edge" stroke={SCENE_MOON} strokeWidth={MOON_EDGE_WIDTH} opacity={MOON_EDGE_OPACITY} fill="none" strokeLinecap="round">
+        <path d={`M${WING_LEFT.x + 1} ${WING_LEFT.y + 6} V${FOUNDATION_Y - 4}`} />
+        <path d={`M${TOWER.x + 1} ${TOWER.y + 4} V${WING_LEFT.y - 2}`} />
+        {collapsed ? null : <path d={`M343 152 L${TOWER_CENTER_X - 2} 62`} />}
       </g>
     </g>
   );
 }
 
+const DOOR_PLANKS: readonly number[] = [385, 400, 415];
+
 function renderDoor(): ReactNode {
   return (
     <g data-part="door">
       <path d="M370 400 V344 A30 30 0 0 1 430 344 V400 Z" fill={TOKEN.void} opacity={0.85} />
+      <g stroke={SCENE_WALL_SHADE} strokeWidth={1.5} opacity={0.45}>
+        {DOOR_PLANKS.map((x) => (
+          <path key={x} d={`M${x} ${x === 400 ? 318 : 324} V396`} />
+        ))}
+      </g>
       <circle cx={420} cy={372} r={3.5} fill={DECAY_TINTS[2]} />
       <rect x={354} y={326} width={6} height={74} fill={SCENE_TEAL} />
       <rect x={440} y={326} width={6} height={74} fill={SCENE_TEAL} />
@@ -461,22 +593,39 @@ function renderDoor(): ReactNode {
   );
 }
 
+const SMOKE_FILL = SCENE_BAT;
+
+function renderChimney(model: SceneModel): ReactNode {
+  const { features, level } = model;
+  const baseX = CHIMNEY_BODY.x + CHIMNEY_BODY.w / 2;
+  const tilt = wonkOffset("chimney", features.wonk, WONK_MAX.chimneyRotateDeg);
+  const puffs = SMOKE_PUFFS.slice(0, SMOKE_PUFFS_BY_LEVEL[level] ?? 0);
+  return (
+    <g data-part="chimney" transform={`rotate(${tilt.toFixed(2)} ${baseX} ${CHIMNEY_BODY.y + CHIMNEY_BODY.h})`}>
+      <g data-part="smoke" fill={SMOKE_FILL}>
+        {puffs.map((puff) => (
+          <circle key={puff.dy} cx={baseX + puff.dx} cy={CHIMNEY_BODY.y + puff.dy} r={puff.r} opacity={puff.opacity} />
+        ))}
+      </g>
+      <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} fill={SCENE_WALL} />
+      <rect x={baseX} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w / 2} height={CHIMNEY_BODY.h} fill={SCENE_WALL_SHADE} />
+      <rect x={CHIMNEY_BODY.x + 6} y={CHIMNEY_BODY.y + 18} width={14} height={6} rx={2} fill={SCENE_BRICK} />
+      <rect x={CHIMNEY_BODY.x + 20} y={CHIMNEY_BODY.y + 34} width={12} height={6} rx={2} fill={SCENE_BRICK} />
+      <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} fill={DECAY_TINTS[level]} opacity={TINT_OVERLAY_OPACITY} />
+      <rect x={CHIMNEY_BODY.x - 3} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w + 6} height={8} rx={2} fill={SCENE_TEAL_LIGHT} />
+    </g>
+  );
+}
+
 function renderHouse(model: SceneModel, filterIds: SceneFilterIds): ReactNode {
   const { features, level } = model;
-  const collapsed = features.roof === "collapsed";
   return (
     <g data-part="house" transform={getStructureTransform(features)}>
-      <g data-part="chimney">
-        <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} fill={SCENE_WALL} />
-        <rect x={CHIMNEY_BODY.x + CHIMNEY_BODY.w / 2} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w / 2} height={CHIMNEY_BODY.h} fill={SCENE_WALL_SHADE} />
-        <rect x={CHIMNEY_BODY.x} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w} height={CHIMNEY_BODY.h} fill={DECAY_TINTS[level]} opacity={TINT_OVERLAY_OPACITY} />
-        <rect x={CHIMNEY_BODY.x - 3} y={CHIMNEY_BODY.y} width={CHIMNEY_BODY.w + 6} height={8} rx={2} fill={SCENE_TEAL_LIGHT} />
-      </g>
-      {renderWalls(level, collapsed)}
-      <rect x={WALLS.x - 4} y={GROUND_Y - 12} width={WALLS.w + 8} height={12} fill={SCENE_TEAL_LIGHT} />
+      {renderChimney(model)}
+      {renderWalls(level, features)}
       {renderDoor()}
       {renderLantern(features, filterIds)}
-      {renderRoof(features)}
+      {renderRoof(features, filterIds)}
     </g>
   );
 }

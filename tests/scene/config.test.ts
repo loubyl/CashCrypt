@@ -126,7 +126,8 @@ describe("validateSceneConfig, one failing example per rule", () => {
   });
 
   it("reports a sigil that intersects the chimney", () => {
-    expect(problemsOf({ CHIMNEY_BOX: { x: 500, y: 105, w: 40, h: 60 } }).join("\n")).toContain("chimney");
+    // The sigil spans x 123..381 and y 3..249; a chimney moved onto the left wing roof crosses it.
+    expect(problemsOf({ CHIMNEY_BOX: { x: 300, y: 105, w: 40, h: 60 } }).join("\n")).toContain("chimney");
   });
 
   it("reports a moment art box outside the ViewBox", () => {
@@ -179,11 +180,11 @@ describe("sigil geometry", () => {
     SIGIL_SHAKE,
   );
 
-  it("spans y 9 to 291 and x 253 to 547", () => {
-    expect(extent.top).toBe(9);
-    expect(extent.bottom).toBe(291);
-    expect(extent.left).toBe(253);
-    expect(extent.right).toBe(547);
+  it("spans y 3 to 249 and x 123 to 381", () => {
+    expect(extent.top).toBe(3);
+    expect(extent.bottom).toBe(249);
+    expect(extent.left).toBe(123);
+    expect(extent.right).toBe(381);
   });
 
   it("lies inside the ViewBox", () => {

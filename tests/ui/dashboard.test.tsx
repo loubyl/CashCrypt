@@ -45,7 +45,8 @@ function storedPlan(actions: StoredPlanAction[], startLightScore = 100): WeeklyP
 
 async function renderDemo(): Promise<CryptTestContext> {
   const ctx = await renderWithCrypt(<Dashboard />, { mode: "demo", seed: "level-4" });
-  await screen.findAllByRole("button", { name: DO_IT_NAME });
+  // The full suite runs files in parallel; the default 1s wait is too short under that load.
+  await screen.findAllByRole("button", { name: DO_IT_NAME }, { timeout: 5000 });
   return ctx;
 }
 

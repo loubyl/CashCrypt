@@ -216,7 +216,8 @@ Conventions that apply to every task:
     - Ambient motion: sway, orbit, bob, pulse, fog, fireflies and bats look calm. With reduced motion on, none of them move, fog, fireflies and bats are hidden, and everything is still legible. Scrolling the Scene off screen pauses the loops.
     - Creatures are not clickable and show no tooltips.
   - Apply any art changes the user requests before continuing.
-  - _Requirements: 4.3, 8.2, 9.2, 10.2, 20.2, 24.9_
+  - Review round 1 (applied, waiting for the user's second look): hash avalanche and ghost spreading (Property 20), true ghost total with the merged ghosts, spirit Poltergeist beside the tower, larger zombies with the badge above the head, ghosts with eyes and tail drawn above the windows, tower proportions, volume and texture, `wonk` per level (design revision 3, C1 to C8). Grain overlay skipped (C8).
+  - _Requirements: 3.4, 4.3, 6.8, 8.2, 9.2, 9.6, 9.7, 10.2, 19.2, 20.2, 24.9_
 
 - [ ] 9. Phase C: pure moment infrastructure
   - [ ] 9.1 Create `src/lib/moments/types.ts` and `requests.ts`

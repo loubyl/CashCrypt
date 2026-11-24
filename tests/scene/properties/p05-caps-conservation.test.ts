@@ -15,6 +15,7 @@ import {
   poltergeistArb,
   sceneInputArb,
   MAX_GHOSTS,
+  expectedGhostTotal,
 } from "../arbitraries";
 
 const NUM_RUNS = 200;
@@ -75,7 +76,7 @@ describe("Property 5: caps and conservation", () => {
       fc.property(anySceneInputArb, (input) => {
         const { totals } = buildSceneModel(input);
         expect(totals.zombies).toBe(input.houseState.zombies.length);
-        expect(totals.ghosts).toBe(input.houseState.ghosts.length);
+        expect(totals.ghosts).toBe(expectedGhostTotal(input));
         expect(totals.tombstones).toBe(input.graveyard.length);
       }),
       { numRuns: NUM_RUNS },
@@ -83,14 +84,14 @@ describe("Property 5: caps and conservation", () => {
   });
 
   // **Validates: Requirements 4.1, 4.2, 4.8, 9.1, 9.2, 21.6**
-  it("draws no ghosts and reports no ghost overflow while a Poltergeist exists, keeping the ghost total", () => {
+  it("draws no ghosts and reports no ghost overflow while a Poltergeist exists, and counts the merged ghosts in the total", () => {
     fc.assert(
       fc.property(anySceneInputArb, (input) => {
         fc.pre(input.houseState.poltergeist !== null);
         const model = buildSceneModel(input);
         expect(model.ghosts).toHaveLength(0);
         expect(model.overflow.ghosts).toBe(0);
-        expect(model.totals.ghosts).toBe(input.houseState.ghosts.length);
+        expect(model.totals.ghosts).toBe(expectedGhostTotal(input));
       }),
       { numRuns: NUM_RUNS },
     );
@@ -105,7 +106,7 @@ describe("Property 5: caps and conservation", () => {
         const model = buildSceneModel(input);
         expect(model.ghosts).toHaveLength(0);
         expect(model.overflow.ghosts).toBe(0);
-        expect(model.totals.ghosts).toBe(input.houseState.ghosts.length);
+        expect(model.totals.ghosts).toBe(expectedGhostTotal(input));
       }),
       { numRuns: NUM_RUNS },
     );

@@ -6,17 +6,30 @@ export type GhostSwarmProps = {
   ghosts: readonly SceneGhost[];
 };
 
-/** Local ovoid, centered on the origin and scaled by the ghost size. */
+/** Local figure, centered on the origin and scaled by the ghost size. */
 const WIDTH_RATIO = 0.8;
-const BODY_OPACITY = 0.75;
-const HALO_OPACITY = 0.2;
-const HALO_SCALE = 1.25;
-const EYE_OFFSET = 0.16;
+const BODY_OPACITY = 0.9;
+const HALO_OPACITY = 0.25;
+const HALO_SCALE = 1.22;
+const RIM_OPACITY = 0.45;
+const RIM_WIDTH = 1.2;
+const EYE_OFFSET = 0.15;
 const EYE_Y = -0.12;
-const EYE_RADIUS = 0.06;
-/** Ovoid with a wavy hem, in a unit box (-0.5..0.5 on x, -0.5..0.5 on y). */
+const EYE_RX = 0.085;
+const EYE_RY = 0.12;
+const SHINE_RADIUS = 0.028;
+const MOUTH = { cy: 0.07, rx: 0.05, ry: 0.065 } as const;
+
+/**
+ * Dome head with a wavy hem that flows into a tail curling to the right, in a unit box
+ * (-0.5..0.5 on x and y). Distinct from the Poltergeist: small, smooth, two round eyes.
+ */
 const GHOST_PATH =
-  "M0 -0.5 C0.28 -0.5 0.5 -0.28 0.5 0 V0.4 L0.33 0.3 L0.17 0.5 L0 0.3 L-0.17 0.5 L-0.33 0.3 L-0.5 0.4 V0 C-0.5 -0.28 -0.28 -0.5 0 -0.5Z";
+  "M0 -0.5 C0.30 -0.5 0.46 -0.26 0.46 0.02 C0.46 0.18 0.44 0.28 0.40 0.34 " +
+  "C0.44 0.42 0.52 0.44 0.56 0.40 C0.52 0.52 0.36 0.54 0.28 0.46 " +
+  "C0.20 0.52 0.12 0.40 0.04 0.46 C-0.04 0.52 -0.12 0.40 -0.20 0.46 " +
+  "C-0.28 0.52 -0.36 0.42 -0.42 0.34 C-0.46 0.24 -0.46 0.14 -0.46 0.02 " +
+  "C-0.46 -0.26 -0.30 -0.5 0 -0.5Z";
 
 type GhostFigureProps = { ghost: SceneGhost };
 
@@ -41,8 +54,21 @@ function GhostFigureBase({ ghost }: GhostFigureProps) {
             <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={HALO_OPACITY} />
           </g>
           <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={BODY_OPACITY} />
-          <ellipse cx={-EYE_OFFSET} cy={EYE_Y} rx={EYE_RADIUS} ry={EYE_RADIUS * WIDTH_RATIO} fill={TOKEN.void} />
-          <ellipse cx={EYE_OFFSET} cy={EYE_Y} rx={EYE_RADIUS} ry={EYE_RADIUS * WIDTH_RATIO} fill={TOKEN.void} />
+          <path
+            d={GHOST_PATH}
+            fill="none"
+            stroke={TOKEN.ink}
+            strokeWidth={RIM_WIDTH}
+            vectorEffect="non-scaling-stroke"
+            opacity={RIM_OPACITY}
+          />
+          {[-EYE_OFFSET, EYE_OFFSET].map((cx) => (
+            <g key={cx}>
+              <ellipse cx={cx} cy={EYE_Y} rx={EYE_RX} ry={EYE_RY} fill={TOKEN.void} />
+              <circle cx={cx + EYE_RX * 0.35} cy={EYE_Y - EYE_RY * 0.4} r={SHINE_RADIUS} fill={TOKEN.ink} />
+            </g>
+          ))}
+          <ellipse cx={0} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={TOKEN.void} />
         </g>
       </g>
     </g>
