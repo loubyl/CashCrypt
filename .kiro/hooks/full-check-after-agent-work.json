@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Full check after agent work",
+      "trigger": "Stop",
+      "description": "When the agent finishes a turn that changed code or root config, run the full test suite, typecheck and lint, and report a one-line summary or the failures.",
+      "action": {
+        "type": "agent",
+        "prompt": "The agent turn just ended. Decide whether to run the checks from the files this turn created, modified or deleted. RUN them if any changed file is under src/ or tests/, or is one of these root config files: package.json, package-lock.json, tsconfig.json, vitest.config.ts, eslint.config.mjs (or any other eslint config), next.config.ts. SKIP them (reply with nothing) if every changed file is documentation or Kiro config: *.md, anything under .kiro/, or anything under docs/. Also skip if this turn changed no files, or if this turn was itself a run of this hook, to avoid a loop. If the turn mixes both kinds of files, run them. When running: from the workspace root, run `npm test`, `npx tsc --noEmit`, `npm run lint` in this order, without stopping at the first failure. Run the whole suite, not only the files touched in this turn. Report: if all three pass, exactly one line, for example \"Full check passed: tests, typecheck, lint.\" If anything fails, report only the failing test names (with file) and the error messages, plus the tsc or lint errors with file and line. Do not fix anything and do not add other commentary. Reply in Spanish."
+      }
+    }
+  ]
+}
