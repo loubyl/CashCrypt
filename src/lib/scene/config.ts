@@ -146,6 +146,29 @@ export const CANDLE_BOX: Readonly<{ w: number; h: number }> = { w: 24, h: 80 };
 export const CANDLE_ROW_ORIGIN: Readonly<Point> = { x: 60, y: 40 };
 export const CANDLE_SPACING = 60;
 export const SHUTTER_WIDTH = 24;
+/** Shovel arc: sample count, lift of the control point above the higher end, strike height above a zombie. */
+export const SHOVEL_ARC_SAMPLES = 33;
+export const SHOVEL_CONTROL_LIFT = 40;
+export const SHOVEL_STRIKE_OFFSET = 60;
+/** The tombstone starts this far below its final box, hidden by TOMBSTONE_CLIP. */
+export const TOMBSTONE_RISE_OFFSET = 56;
+/** Bat flight (dawn): control point, sample count and the share of the path where it fades out. */
+export const BAT_CONTROL: Readonly<Point> = { x: 650, y: 30 };
+export const BAT_PATH_SAMPLES = 17;
+export const BAT_FADE_START = 0.7;
+/** Smallest Scene width on screen (px), used to convert HTML-layer art (px) to ViewBox units. */
+export const MIN_SCENE_WIDTH_PX = 288;
+/** The wall area where the crack flash is drawn, and the crack's stroke width. */
+export const WALL_BOX: Readonly<Box> = { x: 200, y: 190, w: 400, h: 210 };
+export const CRACK_FLASH_STROKE = 3;
+/** One crack polyline across the walls (ViewBox units, inside WALL_BOX inset by the stroke). */
+export const CRACK_FLASH_POINTS: readonly Point[] = [
+  { x: 330, y: 215 },
+  { x: 350, y: 255 },
+  { x: 325, y: 290 },
+  { x: 355, y: 330 },
+  { x: 335, y: 375 },
+];
 /** Screen pixels of art drawn in the HTML Moment_Layer. */
 export const FLAME_PX = 32;
 export const ORB_PX = 28;
@@ -444,6 +467,9 @@ export type SceneConfig = {
   CANDLE_ROW_ORIGIN: Readonly<Point>;
   CANDLE_SPACING: number;
   SHUTTER_WIDTH: number;
+  SHOVEL_ARC_SAMPLES: number;
+  BAT_PATH_SAMPLES: number;
+  MIN_SCENE_WIDTH_PX: number;
   FLAME_PX: number;
   ORB_PX: number;
   MOMENT_DURATION_MS: Readonly<Record<MomentDurationKey, number>>;
@@ -525,6 +551,9 @@ export const SCENE_CONFIG: SceneConfig = {
   CANDLE_ROW_ORIGIN,
   CANDLE_SPACING,
   SHUTTER_WIDTH,
+  SHOVEL_ARC_SAMPLES,
+  BAT_PATH_SAMPLES,
+  MIN_SCENE_WIDTH_PX,
   FLAME_PX,
   ORB_PX,
   MOMENT_DURATION_MS,
@@ -831,7 +860,7 @@ function checkMomentArt(c: Obj, problems: string[]): void {
       problems.push(`${key} must be a point inside the ViewBox`);
     }
   }
-  for (const key of ["SHOVEL_HEIGHT", "SHOVEL_BOUND_RADIUS", "BAT_HALF_SIZE", "ZOMBIE_SINK_SCALE", "SHUTTER_WIDTH", "CANDLE_SPACING", "FLAME_PX", "ORB_PX"]) {
+  for (const key of ["SHOVEL_HEIGHT", "SHOVEL_BOUND_RADIUS", "BAT_HALF_SIZE", "ZOMBIE_SINK_SCALE", "SHUTTER_WIDTH", "CANDLE_SPACING", "FLAME_PX", "ORB_PX", "SHOVEL_ARC_SAMPLES", "BAT_PATH_SAMPLES", "MIN_SCENE_WIDTH_PX"]) {
     const value = c[key];
     if (!isNum(value) || value <= 0) problems.push(`${key} must be a positive finite number`);
   }

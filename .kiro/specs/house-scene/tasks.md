@@ -220,54 +220,54 @@ Conventions that apply to every task:
   - Approved by the user after round 1, with one tweak: ghost bodies at 85% opacity (eyes solid) so window light shows through.
   - _Requirements: 3.4, 4.3, 6.8, 8.2, 9.2, 9.6, 9.7, 10.2, 19.2, 20.2, 24.9_
 
-- [ ] 9. Phase C: pure moment infrastructure
-  - [ ] 9.1 Create `src/lib/moments/types.ts` and `requests.ts`
+- [x] 9. Phase C: pure moment infrastructure
+  - [x] 9.1 Create `src/lib/moments/types.ts` and `requests.ts`
     - Types: `RectLike`, `MomentRequest`, `ActionOutcome`, `ActionContext`. Pure `planMoments(outcome, ctx)` (own request, then `exorcismComplete`) and a pure level step `planLevelMoment(cursor, live)` that returns one `level` request only when the levels differ.
     - _Requirements: 12.1, 12.3, 12.5, 13.1, 13.2, 13.5, 14.1, 14.2, 14.7, 15.1, 15.2, 15.6, 16.1, 16.4, 16.6, 17.1, 17.7_
 
-  - [ ] 9.2 Create `src/lib/moments/queue.ts`
+  - [x] 9.2 Create `src/lib/moments/queue.ts`
     - `createMomentQueue(options)` with FIFO order, `gapMs`, pending limit, level merging (dropping a merged request whose `from` equals `to`), drop when no target or `shouldDrop`, hard cap, `skipAll`, `destroy`, exactly-once settlement of every `enqueue` promise, `onIdle`. No React or DOM imports, `setTimeout` timers.
     - _Requirements: 1.1, 12.4, 12.6, 12.9, 12.10, 12.11, 12.12, 12.13, 15.6_
 
-  - [ ] 9.3 Create `src/lib/moments/hold.ts`
+  - [x] 9.3 Create `src/lib/moments/hold.ts`
     - Pure `holdReducer` with `begin` (freeze only when no hold is active, never replace an existing frozen model), `settled`, `queueBusy`, `queueIdle`, and the release rule (`awaiting === 0` and queue idle).
     - _Requirements: 12.8, 12.16, 12.19_
 
-  - [ ] 9.4 Create `src/lib/scene/momentGeometry.ts`
+  - [x] 9.4 Create `src/lib/scene/momentGeometry.ts`
     - Pure helpers: `shovelArc`, sinking zombie box and clip, tombstone rise box and clip, `batPath`, orb endpoint and flame fallback, crack flash, shutter box, candle boxes, and `getMomentExtents(model, request)`.
     - _Requirements: 12.18, 13.7, 14.4, 14.5, 18.2, 18.3_
 
-  - [ ] 9.5 Write property test for request planning
+  - [x] 9.5 Write property test for request planning
     - **Property 16: Request planning follows the action outcome**
     - File: `tests/moments/properties/p16-request-planning.test.ts`.
     - **Validates: Requirements 12.1, 12.3, 12.5, 13.1, 13.2, 13.5, 14.1, 14.2, 15.1, 15.2, 17.1, 17.7**
 
-  - [ ] 9.6 Write property test for the level request
+  - [x] 9.6 Write property test for the level request
     - **Property 17: Level request only when the level changed**
     - File: `tests/moments/properties/p17-level-request.test.ts`.
     - **Validates: Requirements 16.1, 16.4, 16.6**
 
-  - [ ] 9.7 Write property test for queue order, gap and pending limit
+  - [x] 9.7 Write property test for queue order, gap and pending limit
     - **Property 14: Queue order, no overlap, gap and pending limit**
     - File: `tests/moments/properties/p14-queue-order.test.ts`, with fake timers and a command language (`enqueue`, `advance`, `skipAll`, `unmount`, `resolvePlay`, `rejectPlay`, `neverResolve`).
     - **Validates: Requirements 12.4, 12.6, 18.6**
 
-  - [ ] 9.8 Write property test for exactly-once settlement
+  - [x] 9.8 Write property test for exactly-once settlement
     - **Property 15: Queue settles every promise exactly once**
     - File: `tests/moments/properties/p15-queue-settle.test.ts`.
     - **Validates: Requirements 12.9, 12.10, 12.11, 12.12, 12.13, 15.6**
 
-  - [ ] 9.9 Write property test for the hold
+  - [x] 9.9 Write property test for the hold
     - **Property 18: The hold keeps the first frozen model**
     - File: `tests/moments/properties/p18-hold.test.ts`. Mutation check (R3): make `begin` replace an existing frozen model with the live one and confirm the test fails with a counterexample, then restore.
     - **Validates: Requirements 12.19**
 
-  - [ ] 9.10 Extend the bounds property with Moment art geometry
+  - [x] 9.10 Extend the bounds property with Moment art geometry
     - **Property 4: Everything stays inside the ViewBox** (Moment art part): sample `getMomentExtents` for every request shape (cancel at every drawn slot and at the overflow marker, payment with and without origin, every ordered pair of levels, sigil, exorcism complete); every extent is inside the ViewBox or has a clip inside it with the final box inside the clip. Mutation check (R2): move the Poltergeist center back to `y 110` and confirm the sigil check fails.
     - File: `tests/scene/properties/p04-viewbox-bounds.test.ts` (extend) or `p04b-moment-art-bounds.test.ts`.
     - **Validates: Requirements 12.18, 15.7**
 
-  - [ ] 9.11 Write example tests for queue, requests and geometry
+  - [x] 9.11 Write example tests for queue, requests and geometry
     - `tests/moments/queue.test.ts` (gap length, skip, hard cap, merge when `from === to`), `tests/moments/requests.test.ts`, `tests/scene/momentGeometry.test.ts` (shipped arc, bat and candle numbers, one failing example per bounds rule).
     - _Requirements: 12.4, 12.6, 12.12, 12.18, 24.6_
 

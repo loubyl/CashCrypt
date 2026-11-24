@@ -23,6 +23,22 @@
     "6.11 Write property test for Poltergeist, bound state and posture": {
       "status": "passed",
       "lastRunTimestamp": 1795499813354
+    },
+    "9.6 Write property test for the level request": {
+      "status": "passed",
+      "lastRunTimestamp": 1795514478663
+    },
+    "9.5 Write property test for request planning": {
+      "status": "passed",
+      "lastRunTimestamp": 1795514494857
+    },
+    "9.9 Write property test for the hold": {
+      "status": "passed",
+      "lastRunTimestamp": 1795514501814
+    },
+    "9.8 Write property test for exactly-once settlement": {
+      "status": "passed",
+      "lastRunTimestamp": 1795514517744
     }
   },
   "executionHistory": {
@@ -486,6 +502,155 @@
         "executionId": "b0002b81-37fb-407c-a145-a6a3dac3876f",
         "chatSessionId": "sess_9ca3d7bc-c5b6-4c36-abee-570158e932fc",
         "timestamp": 1795503414681
+      }
+    ],
+    "9.1 Create `src/lib/moments/types.ts` and `requests.ts`": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513785981
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513986430
+      }
+    ],
+    "9.3 Create `src/lib/moments/hold.ts`": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513786109
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513987026
+      }
+    ],
+    "9.2 Create `src/lib/moments/queue.ts`": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513988425
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514450352
+      },
+      {
+        "executionId": "3de6b0f6-a2ee-43b9-962a-a150c847af35",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795515370256
+      },
+      {
+        "executionId": "3de6b0f6-a2ee-43b9-962a-a150c847af35",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795515920549
+      }
+    ],
+    "9.4 Create `src/lib/scene/momentGeometry.ts`": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795513988784
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514450493
+      }
+    ],
+    "9.5 Write property test for request planning": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514455538
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514607830
+      }
+    ],
+    "9.6 Write property test for the level request": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514455592
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514608594
+      }
+    ],
+    "9.7 Write property test for queue order, gap and pending limit": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514455854
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514609638
+      }
+    ],
+    "9.8 Write property test for exactly-once settlement": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514456901
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514610430
+      }
+    ],
+    "9.9 Write property test for the hold": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514457624
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514611238
+      }
+    ],
+    "9.10 Extend the bounds property with Moment art geometry": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514612020
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514813244
+      }
+    ],
+    "9.11 Write example tests for queue, requests and geometry": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514612862
+      },
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514812542
+      }
+    ],
+    "9. Phase C: pure moment infrastructure": [
+      {
+        "executionId": "c2eab189-bf07-487b-a42e-160949876992",
+        "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
+        "timestamp": 1795514813312
       }
     ]
   }

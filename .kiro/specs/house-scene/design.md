@@ -587,7 +587,8 @@ export type MomentQueueOptions = {
   isTargetMounted: () => boolean;
   shouldDrop?: (request: MomentRequest) => boolean;   // e.g. sigil with no Poltergeist
   gapMs: number; hardCapMs: number; maxPending: number;
-  onIdle?: () => void;
+  onBusy?: () => void;   // idle -> busy on an enqueue; the observer maps it to `queueBusy`
+  onIdle?: () => void;   // every return to idle, including a lone dropped request; maps to `queueIdle`
 };
 
 export type MomentQueue = {
@@ -607,7 +608,7 @@ No React, no DOM types except `AbortSignal` (a Web standard also present in Node
 stateDiagram-v2
   [*] --> idle
   idle --> playing: enqueue (target mounted, not dropped)
-  idle --> idle: enqueue dropped (no target / shouldDrop)
+  idle --> idle: enqueue dropped (no target / shouldDrop); onBusy then onIdle fire so a hold is released
   playing --> gap: play resolved, pending > 0
   playing --> idle: play resolved, pending = 0 (onIdle)
   playing --> idle: skipAll / hard cap with pending = 0
@@ -624,6 +625,7 @@ Rules:
 - **Drop**: checked at dequeue. `!isTargetMounted()` or `shouldDrop(request)` resolves `"dropped"` and the queue continues (Requirement 12.11, 15.6). A dropped request is never replayed.
 - **Hard cap**: each play is raced with a `hardCapMs` timer; on expiry the queue aborts the signal, settles the entry as `"skipped"` and moves on (Requirement 12.12).
 - **Skip**: `skipAll()` aborts the current signal, resolves every pending entry `"skipped"`, clears the gap timer, goes idle and calls `onIdle` once (Requirement 12.9, 12.10).
+- **Busy/idle pairing**: an enqueue while idle calls `onBusy` first. Every return to idle calls `onIdle`, including when every request is dropped at dequeue, so `onBusy` and `onIdle` strictly alternate and a hold started by `begin()` is never stuck. `enqueue` after `destroy` resolves `"dropped"` with no callbacks (the host is unmounted).
 - **Exactly once**: every entry has a `settled` flag; the promise returned by `enqueue` resolves on the first of completed, skipped or dropped, and later events (a late `play` resolution after abort) are ignored (Requirement 12.13). If `play` rejects, the entry settles `"skipped"` and the queue continues.
 
 `playMoment(request, target, signal)` in `momentLoader.ts` is the `play` option: under Reduced_Motion it resolves after `REDUCED_MOTION_FADE_MS` without importing GSAP; otherwise it `import()`s the moment module, awaits its `prepare` step if any, and calls `playXMoment(target, options)`. If the import rejects it resolves, which ends the Moment at its End_State (see Error handling).
