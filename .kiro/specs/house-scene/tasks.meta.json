@@ -729,6 +729,25 @@
         "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
         "timestamp": 1795517829203
       }
+    ],
+    "11.1 Create `MomentArt.tsx` (shovel, tombstone) and `ShovelMoment.ts`; register in `momentLoader.ts`": [
+      {
+        "executionId": "f2fceacd-c101-4c67-bab0-1549ecb650f9",
+        "chatSessionId": "sess_e4af4386-4708-4245-8005-02d96a53f26e",
+        "timestamp": 1795519849338
+      },
+      {
+        "executionId": "f2fceacd-c101-4c67-bab0-1549ecb650f9",
+        "chatSessionId": "sess_e4af4386-4708-4245-8005-02d96a53f26e",
+        "timestamp": 1795520554843
+      }
+    ],
+    "11. Phase D: cancel-subscription moment": [
+      {
+        "executionId": "f2fceacd-c101-4c67-bab0-1549ecb650f9",
+        "chatSessionId": "sess_e4af4386-4708-4245-8005-02d96a53f26e",
+        "timestamp": 1795520554895
+      }
     ]
   }
 }

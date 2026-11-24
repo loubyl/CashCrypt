@@ -294,8 +294,8 @@ Conventions that apply to every task:
     - Requests for each trigger (cancel, payment with extra principal, Poltergeist tick, third completion, level change) and none for no-op cases, page load, demo load, reset and Skip_Week; the level cursor prevents a duplicate level Moment; nothing is frozen under reduced motion.
     - _Requirements: 12.1, 12.2, 12.3, 16.6, 24.7_
 
-- [ ] 11. Phase D: cancel-subscription moment
-  - [ ] 11.1 Create `MomentArt.tsx` (shovel, tombstone) and `ShovelMoment.ts`; register in `momentLoader.ts`
+- [x] 11. Phase D: cancel-subscription moment
+  - [x] 11.1 Create `MomentArt.tsx` (shovel, tombstone) and `ShovelMoment.ts`; register in `momentLoader.ts`
     - `playShovelMoment(target, options)`: shovel arc from `momentGeometry`, bonk beat held 300 ms with the subscription name, zombie wobble and sink under the clip, tombstone rise with `R.I.P. $X/mo`. `target = "overflow"` aims at the `+N` marker and reduces N. Timeline created inside `gsap.context`, only `transform` and `opacity`, abort jumps to the end, cleanup registered. Reduced motion: 150 ms fade, no GSAP import. Cartoon art, no gore.
     - _Requirements: 1.8, 12.14, 12.15, 13.3, 13.4, 13.5, 13.6, 13.7, 18.2, 18.5, 20.3, 23.1, 23.3_
 

@@ -23,10 +23,12 @@ export type MomentPlayer = (target: MomentTarget, options: MomentOptions) => Pro
 type MomentKind = MomentRequest["kind"];
 
 /**
- * Request kind to dynamic import of its `playXMoment` function. Empty until the
- * Moment files exist; each entry is `() => import("./XMoment").then((m) => m.playXMoment)`.
+ * Request kind to dynamic import of its `playXMoment` function. A kind with no entry
+ * yet ends at its End_State; each entry is `() => import("./XMoment").then((m) => m.playXMoment)`.
  */
-const MOMENT_IMPORTS: Partial<Record<MomentKind, () => Promise<MomentPlayer>>> = {};
+const MOMENT_IMPORTS: Partial<Record<MomentKind, () => Promise<MomentPlayer>>> = {
+  cancel: () => import("./ShovelMoment").then((module) => module.playShovelMoment),
+};
 
 /** The duration key of a request. Better levels have a lower number. */
 export function getDurationKey(request: MomentRequest): MomentDurationKey {
