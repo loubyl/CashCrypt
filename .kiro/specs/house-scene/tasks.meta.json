@@ -652,6 +652,83 @@
         "chatSessionId": "sess_8a548eb6-8a4e-4912-b8d3-a0e1b1a74ec1",
         "timestamp": 1795514813312
       }
+    ],
+    "10.1 Create `src/hooks/useActionObserver.ts` and wire the action hooks": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795516264273
+      },
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795516364504
+      }
+    ],
+    "10.2 Create `MomentHost.tsx` and `momentLoader.ts`": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795516365302
+      },
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795516757821
+      },
+      {
+        "executionId": "819384f2-ea7d-4e2b-852a-6f3dd1dec0aa",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795519470167
+      },
+      {
+        "executionId": "819384f2-ea7d-4e2b-852a-6f3dd1dec0aa",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795519593278
+      }
+    ],
+    "10.3 Wrap the Dashboard in `MomentHost`": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795516758310
+      },
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517163511
+      }
+    ],
+    "10.4 Write tests for the observer and `MomentHost` with a fake `play`": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517162924
+      },
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517332287
+      }
+    ],
+    "10.5 Write host tests for request triggers": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517332939
+      },
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517829140
+      }
+    ],
+    "10. Phase C: observer, hold and `MomentHost` wiring": [
+      {
+        "executionId": "af6e0352-4dff-4a5b-8ca4-bd002f1ffd59",
+        "chatSessionId": "sess_21ceb26f-953c-4d34-8f25-a75618c86829",
+        "timestamp": 1795517829203
+      }
     ]
   }
 }

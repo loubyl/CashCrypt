@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { observeAction, useActionObserver } from "@/hooks/useActionObserver";
 import { useCrypt } from "@/hooks/useCrypt";
 import { toMutationError, type MutationResult } from "@/hooks/useCryptActions";
 import { useNow } from "@/hooks/useNow";
@@ -48,20 +49,27 @@ export function useExorcismPlan(): ExorcismPlanState {
     });
   }, [db, now, stored]);
 
+  const observer = useActionObserver();
   const toggleAction = useCallback(
-    async (actionId: string, next: boolean): Promise<MutationResult<void>> => {
-      if (!db || now === null || weekKey === null) {
-        return { ok: false, error: { kind: "unknown", message: NOT_READY_MESSAGE } };
-      }
-      try {
-        if (next) await completePlanAction(db, weekKey, actionId, { now });
-        else await uncompletePlanAction(db, weekKey, actionId);
-        return { ok: true, value: undefined };
-      } catch (error) {
-        return { ok: false, error: toMutationError(error) };
-      }
-    },
-    [db, now, weekKey],
+    (actionId: string, next: boolean): Promise<MutationResult<void>> =>
+      observeAction(
+        observer,
+        { kind: "planToggle", actionId, next },
+        async (): Promise<MutationResult<void>> => {
+          if (!db || now === null || weekKey === null) {
+            return { ok: false, error: { kind: "unknown", message: NOT_READY_MESSAGE } };
+          }
+          try {
+            if (next) await completePlanAction(db, weekKey, actionId, { now });
+            else await uncompletePlanAction(db, weekKey, actionId);
+            return { ok: true, value: undefined };
+          } catch (error) {
+            return { ok: false, error: toMutationError(error) };
+          }
+        },
+        () => ({ kind: "planToggle", actionId, next }),
+      ),
+    [db, now, weekKey, observer],
   );
 
   const plan = stored ?? null;

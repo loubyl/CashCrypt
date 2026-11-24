@@ -271,26 +271,26 @@ Conventions that apply to every task:
     - `tests/moments/queue.test.ts` (gap length, skip, hard cap, merge when `from === to`), `tests/moments/requests.test.ts`, `tests/scene/momentGeometry.test.ts` (shipped arc, bat and candle numbers, one failing example per bounds rule).
     - _Requirements: 12.4, 12.6, 12.12, 12.18, 24.6_
 
-- [ ] 10. Phase C: observer, hold and `MomentHost` wiring
-  - [ ] 10.1 Create `src/hooks/useActionObserver.ts` and wire the action hooks
+- [x] 10. Phase C: observer, hold and `MomentHost` wiring
+  - [x] 10.1 Create `src/hooks/useActionObserver.ts` and wire the action hooks
     - `ActionObserver` interface (`begin`, `resolve`, `fail`) and `ActionObserverContext`. Wrap `logPayment` and `cancelSubscription` in `useCryptActions`, and `toggleAction` in `useExorcismPlan`, with `begin` before the mutation and `resolve` or `fail` after. Map `CancelOutcome` and `LogPaymentOutcome` to `ActionOutcome`. With no provider, behavior is unchanged.
     - _Requirements: 1.4, 12.1, 12.3, 12.17, 13.1, 13.2, 14.1, 14.2, 15.1, 17.1_
 
-  - [ ] 10.2 Create `MomentHost.tsx` and `momentLoader.ts`
+  - [x] 10.2 Create `MomentHost.tsx` and `momentLoader.ts`
     - `MomentHost` implements the observer: builds `ActionContext` from live data at `begin`, captures the submit control rect for payments, drives `holdReducer` (no freeze under reduced motion), calls `planMoments`, waits for settle (`SETTLE_TIMEOUT_MS`), appends the level request using the level cursor, owns the queue, the Moment_Layer (`aria-hidden`, `pointer-events: none`), `pointerdown`, `keydown` and `visibilitychange` skip listeners (never stop the event), target-mounted tracking and `destroy` on unmount. `HouseScene` renders the frozen model while held and runs cleanups in a layout effect on release.
     - `momentLoader.ts` maps request kinds to `() => import(...)` entries (empty for now, a no-op `play` that resolves after the reduced-motion fade or immediately), and handles import failure by resolving.
     - _Requirements: 1.5, 12.2, 12.4, 12.7, 12.8, 12.9, 12.10, 12.11, 12.15, 12.16, 12.19, 16.5, 16.7, 19.5, 20.1, 20.3_
 
-  - [ ] 10.3 Wrap the Dashboard in `MomentHost`
+  - [x] 10.3 Wrap the Dashboard in `MomentHost`
     - Place `MomentHost` around the Scene, the plan card and the sheets so portal sheets keep the context. Only the Dashboard provides the observer, so `/subscriptions` and `/exorcism` create no request.
     - _Requirements: 12.17, 22.7_
 
-  - [ ] 10.4 Write tests for the observer and `MomentHost` with a fake `play`
+  - [x] 10.4 Write tests for the observer and `MomentHost` with a fake `play`
     - Hook tests: `begin`, `resolve` and `fail` order, unchanged behavior with no provider, no observer on `/subscriptions` and `/exorcism`.
     - Host tests: hold keeps the pre-action model until idle and is released after the queue is idle; a second `begin` during a hold keeps the first frozen model; the Moment_Layer is `aria-hidden`; skip on `pointerdown` and `keydown` finishes everything without stopping the event; unmount drops pending requests.
     - _Requirements: 12.1, 12.3, 12.9, 12.17, 12.19, 24.7_
 
-  - [ ] 10.5 Write host tests for request triggers
+  - [x] 10.5 Write host tests for request triggers
     - Requests for each trigger (cancel, payment with extra principal, Poltergeist tick, third completion, level change) and none for no-op cases, page load, demo load, reset and Skip_Week; the level cursor prevents a duplicate level Moment; nothing is frozen under reduced motion.
     - _Requirements: 12.1, 12.2, 12.3, 16.6, 24.7_
 

@@ -1,6 +1,13 @@
 "use client";
 import { useCallback, useMemo } from "react";
 import { useCrypt } from "@/hooks/useCrypt";
+import {
+  mapCancelOutcome,
+  mapPaymentOutcome,
+  observeAction,
+  useActionObserver,
+  type ActionObserver,
+} from "@/hooks/useActionObserver";
 import { useNow } from "@/hooks/useNow";
 import { DbNotFoundError, DbValidationError } from "@/lib/db/errors";
 import {
@@ -89,7 +96,11 @@ function notReady<T>(): Promise<MutationResult<T>> {
   return Promise.resolve({ ok: false, error: { kind: "unknown", message: NOT_READY_MESSAGE } });
 }
 
-function bindActions(db: CryptDb, now: LocalDate | null): CryptActions {
+function bindActions(
+  db: CryptDb,
+  now: LocalDate | null,
+  observer: ActionObserver | null,
+): CryptActions {
   const withNow = <T>(task: (today: LocalDate) => Promise<T>): Promise<MutationResult<T>> =>
     now === null ? notReady<T>() : run(() => task(now));
   return {
@@ -102,9 +113,19 @@ function bindActions(db: CryptDb, now: LocalDate | null): CryptActions {
     addTransaction: (input) =>
       withNow((today) => addTransaction(db, input, { now: today })),
     logPayment: (debtId, amountCents) =>
-      withNow((today) => logPayment(db, debtId, amountCents, { now: today })),
+      observeAction(
+        observer,
+        { kind: "payment", debtId },
+        () => withNow((today) => logPayment(db, debtId, amountCents, { now: today })),
+        mapPaymentOutcome,
+      ),
     cancelSubscription: (id) =>
-      withNow((today) => cancelSubscription(db, id, { now: today })),
+      observeAction(
+        observer,
+        { kind: "cancel", subscriptionId: id },
+        () => withNow((today) => cancelSubscription(db, id, { now: today })),
+        (outcome) => mapCancelOutcome(id, outcome),
+      ),
     reactivateSubscription: (id) =>
       withNow((today) => reactivateSubscription(db, id, { now: today })),
     deleteDebt: (id) => run(() => deleteDebt(db, id)),
@@ -136,9 +157,10 @@ function createNotReadyActions(): CryptActions {
 export function useCryptActions(): CryptActions {
   const { db } = useCrypt();
   const now = useNow();
+  const observer = useActionObserver();
   return useMemo(
-    () => (db ? bindActions(db, now) : createNotReadyActions()),
-    [db, now],
+    () => (db ? bindActions(db, now, observer) : createNotReadyActions()),
+    [db, now, observer],
   );
 }
 

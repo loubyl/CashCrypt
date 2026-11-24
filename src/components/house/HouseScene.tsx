@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useId, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import { useElementWidth } from "@/hooks/useElementWidth";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
 import { SCENE_TEAL_LIGHT, VIEWBOX_HEIGHT, VIEWBOX_WIDTH } from "@/lib/scene";
@@ -17,7 +17,12 @@ import { WindowsLayer } from "./WindowsLayer";
 import { ZombieBasement } from "./ZombieBasement";
 
 export type HouseSceneProps = {
+  /** What is drawn: the live model, or the frozen one while a Moment hold is active. */
   model: SceneModel;
+  /** True while `model` is the frozen model of a hold. */
+  held?: boolean;
+  /** Called in a layout effect when the hold is released, in the same commit as the live model. */
+  onRelease?: () => void;
   /** Layout utilities only. */
   className?: string;
 };
@@ -40,8 +45,13 @@ function getAmbientSignature(model: SceneModel): string {
 }
 
 /** Static haunted house: one SVG painted from the scene model, with no animation library. */
-export function HouseScene({ model, className }: HouseSceneProps) {
+export function HouseScene({ model, held = false, onRelease, className }: HouseSceneProps) {
   const filterIds = makeFilterIds(useId());
+  const wasHeldRef = useRef(false);
+  useLayoutEffect(() => {
+    if (wasHeldRef.current && !held) onRelease?.();
+    wasHeldRef.current = held;
+  }, [held, onRelease]);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneWidthPx = useElementWidth(containerRef);
   const reduced = useReducedMotionPreference();
