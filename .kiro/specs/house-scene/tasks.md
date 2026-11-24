@@ -108,8 +108,8 @@ Conventions that apply to every task:
   - Record any art or layout changes the user requests and apply them before continuing.
   - _Requirements: 5.3, 6.1, 18.1, 22.8, 22.9, 24.9_
 
-- [ ] 5. Phase B: dependencies
-  - [ ] 5.1 Add `gsap` and `@gsap/react` to `package.json` dependencies
+- [x] 5. Phase B: dependencies
+  - [x] 5.1 Add `gsap` and `@gsap/react` to `package.json` dependencies
     - Install with `npm install gsap @gsap/react`. Confirm `gsap/DrawSVGPlugin` and `gsap/MotionPathPlugin` resolve and typecheck. Import no `MorphSVGPlugin`.
     - _Requirements: 1.6_
 

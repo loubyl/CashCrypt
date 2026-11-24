@@ -214,6 +214,25 @@
         "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
         "timestamp": 1795497897688
       }
+    ],
+    "5.1 Add `gsap` and `@gsap/react` to `package.json` dependencies": [
+      {
+        "executionId": "a986a2f9-bf40-4b33-b5b1-61686e8ab3a7",
+        "chatSessionId": "sess_5aaa6d28-bc23-40fd-908b-42ba95922f39",
+        "timestamp": 1795499096267
+      },
+      {
+        "executionId": "a986a2f9-bf40-4b33-b5b1-61686e8ab3a7",
+        "chatSessionId": "sess_5aaa6d28-bc23-40fd-908b-42ba95922f39",
+        "timestamp": 1795499136167
+      }
+    ],
+    "5. Phase B: dependencies": [
+      {
+        "executionId": "a986a2f9-bf40-4b33-b5b1-61686e8ab3a7",
+        "chatSessionId": "sess_5aaa6d28-bc23-40fd-908b-42ba95922f39",
+        "timestamp": 1795499136224
+      }
     ]
   }
 }
