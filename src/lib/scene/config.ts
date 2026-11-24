@@ -196,6 +196,12 @@ export const DECAY_TINTS: Readonly<Record<DecayLevel, string>> = {
 };
 export const ZOMBIE_BODY = "#4A6B3A";
 export const ZOMBIE_CLOTHING = "#2E4A24";
+/** Roof and tree color (style reference: house-reference-1.jpg). */
+export const SCENE_TEAL = "#29464A";
+/** Ground line and trim color. */
+export const SCENE_TEAL_LIGHT = "#395F60";
+/** Fog bars, always drawn at low opacity. */
+export const SCENE_FOG = "#B7D4CF";
 
 // ---------------------------------------------------------------------------
 // Feature table (see design "Decay levels")
@@ -381,6 +387,9 @@ export type SceneConfig = {
   DECAY_TINTS: Readonly<Record<DecayLevel, string>>;
   ZOMBIE_BODY: string;
   ZOMBIE_CLOTHING: string;
+  SCENE_TEAL: string;
+  SCENE_TEAL_LIGHT: string;
+  SCENE_FOG: string;
   LEVEL_FEATURES: Readonly<Record<DecayLevel, LevelFeatures>>;
 };
 
@@ -447,6 +456,9 @@ export const SCENE_CONFIG: SceneConfig = {
   DECAY_TINTS,
   ZOMBIE_BODY,
   ZOMBIE_CLOTHING,
+  SCENE_TEAL,
+  SCENE_TEAL_LIGHT,
+  SCENE_FOG,
   LEVEL_FEATURES,
 };
 
@@ -739,7 +751,7 @@ function checkLabelsAndColors(c: Obj, problems: string[]): void {
       problems.push(`DECAY_TINTS[${level}] must be a #RRGGBB color`);
     }
   }
-  for (const key of ["ZOMBIE_BODY", "ZOMBIE_CLOTHING"]) {
+  for (const key of ["ZOMBIE_BODY", "ZOMBIE_CLOTHING", "SCENE_TEAL", "SCENE_TEAL_LIGHT", "SCENE_FOG"]) {
     const value = c[key];
     if (typeof value !== "string" || !HEX_COLOR.test(value)) problems.push(`${key} must be a #RRGGBB color`);
   }

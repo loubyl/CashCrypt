@@ -147,6 +147,61 @@
         "chatSessionId": "sess_b11be48b-8add-4edf-8fdc-07abc9af2d32",
         "timestamp": 1795494779380
       }
+    ],
+    "3.1 Create the static SVG layers in `src/components/house/`": [
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495008737
+      },
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495277038
+      }
+    ],
+    "3.2 Create `src/hooks/useSceneModel.ts`": [
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495277616
+      },
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495501804
+      }
+    ],
+    "3.3 Mount the Scene in the Dashboard with the new layout": [
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495502429
+      },
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495762933
+      }
+    ],
+    "3.4 Write component tests for the static Scene and Dashboard layout": [
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495763474
+      },
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495946051
+      }
+    ],
+    "3. Phase A: static house on the Dashboard": [
+      {
+        "executionId": "a1948b8f-4b7c-4ff0-9d0e-72e2baae060e",
+        "chatSessionId": "sess_f6bb6b64-1862-4f7e-9310-0d41ea734272",
+        "timestamp": 1795495946116
+      }
     ]
   }
 }

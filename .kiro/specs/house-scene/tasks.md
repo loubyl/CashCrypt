@@ -75,24 +75,24 @@ Conventions that apply to every task:
     - File: `tests/scene/properties/p11-level-lighting.test.ts`.
     - **Validates: Requirements 3.7, 6.4, 6.5**
 
-- [ ] 3. Phase A: static house on the Dashboard
-  - [ ] 3.1 Create the static SVG layers in `src/components/house/`
+- [x] 3. Phase A: static house on the Dashboard
+  - [x] 3.1 Create the static SVG layers in `src/components/house/`
     - `HouseBase.tsx`, `DecayLayer.tsx`, `WindowsLayer.tsx` and `HouseScene.tsx` (no GSAP, no labels, no ambient motion). One `<svg>` with `viewBox="0 0 800 600"` and `preserveAspectRatio="xMidYMid meet"`, container `role="img"` with `aria-label` from the summary, `aspect-ratio: 4 / 3`, SVG `aria-hidden`.
     - Draw the five levels from the feature table, level tints, window states with distinct shapes for boarded and broken, level-5 darkness with the Poltergeist-glow or moonlight mask, the chimney box position, and the wordmark-font nameplate if drawn. Original art, design-system tokens through CSS variables, scene-only colors from the config.
     - Layers carry `data-part` keys. Level changes without an action apply at once.
     - Style: follow `design.md` → Style reference and `references/house-reference-1.jpg` for shapes and mood only (flat vector, no outlines, tall gable, round attic window, chimney, porch roof, lantern, bare trees, fence, fog bars, moon). Layout follows the design zones (basement band `x 60..740`, graveyard band at the bottom), not the image. Sky, basement, window light and moon use existing tokens, walls, tombstones and chimney use `DECAY_TINTS`. Add only `SCENE_TEAL` (`#29464A`), `SCENE_TEAL_LIGHT` (`#395F60`) and `SCENE_FOG` (`#B7D4CF`) as scene-only constants in `src/lib/scene/config.ts` (the only file allowed hex values); no inline hex in components.
     - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 6.4, 6.5, 6.6, 6.7, 7.1, 7.3, 7.8, 19.1, 19.6, 19.8, 21.1, 21.7, 23.1, 23.2, 23.3_
 
-  - [ ] 3.2 Create `src/hooks/useSceneModel.ts`
+  - [x] 3.2 Create `src/hooks/useSceneModel.ts`
     - Combine `useHouseState` and `useExorcismPlan`. Build `SceneInput` (income cents, graveyard from inactive subscriptions with `canceledOn` using `normalizeSubscription`, Bound_Flag from the stored plan) and memoize the model. Return `{ status: "loading" }` or `{ status: "ready", model, houseState, boundFlag }`.
     - _Requirements: 1.4, 10.5, 11.5, 22.2_
 
-  - [ ] 3.3 Mount the Scene in the Dashboard with the new layout
+  - [x] 3.3 Mount the Scene in the Dashboard with the new layout
     - In `Dashboard.tsx`, render `HouseScene` instead of `ScenePlaceholder` (the placeholder file stays until phase E). Use the two-column layout of the design (`lg:grid-cols-2`, `xl:grid-cols-[7fr_5fr]`, `contents` wrappers below 1024px) and the new DOM order (Scene, score card, banner, plan card, demo controls). Loading shows a skeleton with the Scene aspect ratio and `aria-busy="true"`. Keep the `aria-live` level announcement, one `hero` number and at most one primary Button.
     - Update the existing Dashboard tests that assert the old order or placeholder text so they pass.
     - _Requirements: 5.2, 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.8, 22.9, 22.10_
 
-  - [ ] 3.4 Write component tests for the static Scene and Dashboard layout
+  - [x] 3.4 Write component tests for the static Scene and Dashboard layout
     - Exactly one `role="img"` whose `aria-label` equals the summary and updates on data change; SVG `aria-hidden`; no focusable element or handler; the `<svg>` is not remounted on a model change; two-column classes at the desktop breakpoint and single column below it; Scene shown in "empty real crypt", "demo level 4" and "loading" (with `aria-busy`).
     - _Requirements: 19.1, 19.3, 19.6, 21.7, 22.5, 22.11, 24.7, 24.8_
 

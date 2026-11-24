@@ -63,7 +63,7 @@ beforeEach(() => resetNavigationMock());
 afterEach(() => cleanup());
 
 describe("Dashboard on the level 4 demo", () => {
-  it("shows the light score, breakdown, Poltergeist banner, placeholder and live region", async () => {
+  it("shows the light score, breakdown, Poltergeist banner, scene and live region", async () => {
     await renderDemo();
     expect(screen.getByText("Light score", { selector: "p" })).toBeTruthy();
     expect(screen.getByText(L4_SCORE_TEXT)).toBeTruthy();
@@ -75,11 +75,30 @@ describe("Dashboard on the level 4 demo", () => {
     expect(meter.getAttribute("aria-valuetext")).toBe("Light score 32 of 100");
     expect(screen.getByText(POLTERGEIST_TEXT)).toBeTruthy();
     expect(screen.getByText("Poltergeist")).toBeTruthy();
-    expect(screen.getByText("House scene arrives in the next update")).toBeTruthy();
-    expect(screen.getByText("Level 4 — Crumbling")).toBeTruthy();
+    expect(screen.getByRole("img", { name: "Level 4, Crumbling." })).toBeTruthy();
+    expect(screen.queryByText("House scene arrives in the next update")).toBeNull();
     const live = screen.getByText("House is now Crumbling — light score 32");
     expect(live.getAttribute("aria-live")).toBe("polite");
     expect(live.className).toContain("sr-only");
+  });
+
+  it("orders Scene, score card, banner, plan card, demo controls and applies the two-column classes", async () => {
+    const { container } = await renderDemo();
+    const grid = container.querySelector("main > div.lg\\:grid") as HTMLElement;
+    expect(grid.className).toContain("lg:grid-cols-2");
+    expect(grid.className).toContain("xl:grid-cols-[7fr_5fr]");
+    expect(grid.className).toContain("flex-col");
+    for (const column of Array.from(grid.children)) expect(column.className).toContain("contents");
+    const scene = screen.getByRole("img", { name: "Level 4, Crumbling." });
+    const score = screen.getByText("Light score", { selector: "p" });
+    const banner = screen.getByText(POLTERGEIST_TEXT);
+    const plan = screen.getByRole("heading", { name: "This week's exorcism" });
+    const demo = screen.getByRole("button", { name: "Skip to next week" });
+    const ordered = [scene, score, banner, plan, demo];
+    ordered.slice(1).forEach((node, index) => {
+      const previous = ordered[index] as HTMLElement;
+      expect(previous.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
   });
 
   it("shows the plan card with three rows and no delta at the start of the week", async () => {
