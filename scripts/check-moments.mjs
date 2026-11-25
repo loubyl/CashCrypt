@@ -142,6 +142,9 @@ function installSampler(sampleMs) {
   setInterval(() => {
     const layer = document.querySelector('[data-part="moment-layer"]');
     const part = (name) => layer?.querySelector(`[data-moment="${name}"]`) ?? null;
+    const scene = document.querySelector('[data-part="scene"]');
+    const incoming = scene?.querySelector('[data-part="incoming-level"]') ?? null;
+    const oldDecay = scene?.querySelector(':scope > svg > [data-part="decay"]') ?? null;
     const lit = [...document.querySelectorAll('[data-part="scene"] [data-state="lit"]')];
     const lightOf = (w) => Number(getComputedStyle(w.querySelector('[data-part="light"]')).opacity);
     window.__samples.push({
@@ -162,6 +165,13 @@ function installSampler(sampleMs) {
       tombstones: document.querySelectorAll('[data-part="scene"] [data-part="tombstone"]').length,
       lightMax: lit.length ? Math.max(...lit.map(lightOf)) : null,
       level: document.querySelector('[data-part="scene"]')?.getAttribute("data-level") ?? null,
+      incomingPresent: Boolean(incoming),
+      incomingOpacity: incoming ? opacityOf(incoming) : null,
+      incomingCracks: incoming ? incoming.querySelectorAll('[data-part^="crack:"]').length : null,
+      oldDecayOpacity: opacityOf(oldDecay),
+      oldCracks: oldDecay ? oldDecay.querySelectorAll('[data-part^="crack:"]').length : null,
+      frontFogOpacity: opacityOf(document.querySelector('[data-part="scene"] [data-part="atmosphere-front"]')),
+      bat: rectOf(part("bat")),
     });
   }, sampleMs);
 }
@@ -320,10 +330,58 @@ function assertSigil({ samples }) {
   );
 }
 
+async function runLevel(page) {
+  await cancelWraithcast(page);
+  await sleep(SETTLE_MS * 2);
+  const coffee = await page.evaluateHandle(
+    () =>
+      [...document.querySelectorAll('[role="checkbox"], input[type="checkbox"]')].find((el) =>
+        /coffee|small expenses/i.test(el.closest("[data-plan-action]")?.textContent ?? ""),
+      ) ?? null,
+  );
+  if (!coffee.asElement()) throw new Error("Coffee action checkbox not found");
+  await coffee.asElement().click();
+  await sleep(SETTLE_MS * 2);
+  await clickByText(page, "button", "Do it:");
+  await hasButton(page, "Save payment");
+  await sleep(600);
+  await page.evaluate(installSampler, SAMPLE_MS);
+  await clickByText(page, "button", "Save payment");
+  await sleep(MAX_MOMENT_MS + 2000);
+  return { samples: await page.evaluate(() => window.__samples) };
+}
+
+function assertLevel({ samples }) {
+  const withIncoming = samples.filter((s) => s.incomingPresent);
+  const t0 = withIncoming[0]?.t ?? null;
+  console.log("level: t(ms)  dataLevel  incomingOpacity  oldDecayOpacity  oldCracks  incomingCracks  frontFog  bat  layerChildren");
+  for (const s of samples.filter((x) => x.layerChildren > 0 || x.incomingPresent || x.t >= (t0 ?? 0) - 300)) {
+    if (t0 !== null && s.t > t0 + 3000) break;
+    console.log(
+      `  ${String(s.t).padStart(5)}  L${s.level}  in=${fmt(s.incomingOpacity)}  oldDecay=${fmt(s.oldDecayOpacity)}  cracks ${s.oldCracks}/${s.incomingCracks}  fog=${fmt(s.frontFogOpacity)}  bat=${s.bat ? "y" : "-"}  children=${s.layerChildren}`,
+    );
+  }
+  check(withIncoming.length > 0, "level: incoming-level layer was rendered during the Moment");
+  const final = samples.at(-1);
+  check(final.level === "3", `level: scene ends at level 3 (${final.level})`);
+  check(!final.incomingPresent && final.layerChildren === 0, "level: incoming layer and Moment art removed at the end");
+  const firstFade = withIncoming.find((s) => s.incomingOpacity > 0.05);
+  const fullIn = withIncoming.find((s) => s.incomingOpacity >= 0.95);
+  const levelChange = samples.find((s) => s.level === "3");
+  if (t0 !== null) {
+    console.log(
+      `level: incoming present at ${t0}, starts fading at ${firstFade?.t ?? "-"}, fully in at ${fullIn?.t ?? "-"}, data-level 3 at ${levelChange?.t ?? "-"}`,
+    );
+    check(Boolean(firstFade) && Boolean(fullIn) && fullIn.t - firstFade.t >= 200, "level: house cross-fades old to new level (not a pop)");
+    check(Boolean(firstFade) && firstFade.t - t0 >= 400, "level: old level features stay until the midpoint");
+  }
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
   { name: "sigil", run: runSigil, assert: assertSigil },
+  { name: "level", run: runLevel, assert: assertLevel },
 ];
 
 // ---------------------------------------------------------------------------------------------

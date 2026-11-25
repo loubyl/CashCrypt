@@ -503,7 +503,7 @@ One `<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" aria-hidden=
 | 9 | `ghosts` | `ghost:<id>`; drawn after `windows` (C7), so no ghost hides behind a window | `ghosts[]` |
 | 10 | `poltergeist` | body, `sigil` ellipse (hidden when awake), glow | `poltergeist` |
 | 11 | `atmosphere-front` | front fog | features |
-| 12 | `darkness` | level-5 mask overlay, `incoming-level` slot | `lighting`, `darkness` |
+| 12 | `darkness` | level-5 mask overlay | `lighting`, `darkness` |
 
 Window halos, the moon halo and the lantern glow use SVG blur filters defined once in `<defs>` (ids from `useId`); creature glows use the same approach. In z-order the `windows` layer is drawn after the `darkness` layer. Level tints come from `DECAY_TINTS`; all other fills are design-system tokens through CSS variables (`var(--accent-candle)` and so on), so no new hex values appear in `house/`.
 
@@ -516,7 +516,6 @@ export type HouseSceneProps = {
   model: SceneModel;          // what is drawn (live, or the frozen model during a Moment)
   summary: string;            // always the live summary
   motionEnabled: boolean;     // false under Reduced_Motion
-  incomingLevel?: DecayLevel; // set by MomentHost while a level-change Moment prepares
   className?: string;         // layout only
 };
 ```
@@ -628,7 +627,7 @@ Rules:
 - **Busy/idle pairing**: an enqueue while idle calls `onBusy` first. Every return to idle calls `onIdle`, including when every request is dropped at dequeue, so `onBusy` and `onIdle` strictly alternate and a hold started by `begin()` is never stuck. `enqueue` after `destroy` resolves `"dropped"` with no callbacks (the host is unmounted).
 - **Exactly once**: every entry has a `settled` flag; the promise returned by `enqueue` resolves on the first of completed, skipped or dropped, and later events (a late `play` resolution after abort) are ignored (Requirement 12.13). If `play` rejects, the entry settles `"skipped"` and the queue continues.
 
-`playMoment(request, target, signal)` in `momentLoader.ts` is the `play` option: under Reduced_Motion it resolves after `REDUCED_MOTION_FADE_MS` without importing GSAP; otherwise it `import()`s the moment module, awaits its `prepare` step if any, and calls `playXMoment(target, options)`. If the import rejects it resolves, which ends the Moment at its End_State (see Error handling).
+`playMoment(request, target, signal)` in `momentLoader.ts` is the `play` option: under Reduced_Motion it resolves after `REDUCED_MOTION_FADE_MS` without importing GSAP; otherwise it `import()`s the moment module and calls `playXMoment(target, options)`. If the import rejects it resolves, which ends the Moment at its End_State (see Error handling).
 
 ### `playXMoment` contract (`src/components/moments/`)
 
@@ -654,7 +653,7 @@ Each function creates a `gsap.context(() => { … }, target.scene)` and one `gsa
 | Cancel (1400ms) | `ShovelMoment.ts` | shovel swoops in on a quadratic arc from `SHOVEL_START` to the strike point (positions from `momentGeometry.ts`; `MotionPathPlugin`, `power2.inOut`, 0–500ms) → bonk beat held 300ms with the subscription name next to the zombie → zombie wobbles and sinks (`translateY`, `opacity`, under `ZOMBIE_SINK_CLIP`) → tombstone rises under `TOMBSTONE_CLIP` with `R.I.P. $X/mo` → end. `target = "overflow"` aims the shovel at the `+N` marker and tweens its text down by one. | shovel 180 units tall = 126px (≥ quarter of Scene height 105px); sinking zombie scaled ×1.4 so the 24-unit badge reads 24px; tombstone label 12px in the overlay |
 | Payment (1200ms) | `CandleOrbMoment.ts` | 0–250 flame flickers at `origin` (or bottom-center of the layer when `origin` is null) → 250–650 orb travels a curved `MotionPathPlugin` path to the window target (`power2.inOut`) → 650–750 lit windows rise from the frozen opacity to the flare peak `min(1, live + PAYMENT_FLARE_BOOST)` (`power2.out`) → 750–1050 **flare beat**: peak held 300ms (`MOMENT_BEAT_MIN_MS`) while one crack flashes in `--accent-ecto` (skipped if `hasCrack` is false) → 1050–1200 windows settle to the live opacity (`power2.inOut`). A skip jumps the timeline to its end, which is the live value. Reduced_Motion: no flare, 150ms fade to the live value | flame 32px, orb 28px (both ≥ 24px) in the layer, outside the SVG so it is not clipped; demo peak 0.785 vs 0.380 before |
 | Sigil (1200ms) | `SigilMoment.ts` | 0–600 `<ellipse class="sigil">` (radii 131) draws with `DrawSVGPlugin` (`drawSVG: "0% → 100%"`) → 600–900 closing beat held 300ms → 900–1000 Poltergeist shakes once (`x` ±`SIGIL_SHAKE` = 6 units) → 1000–1200 settles bound (opacity 0.55, rotation and pulse stop) with one `--text-primary` flash at 40% opacity | circle diameter 262 units vs Poltergeist 171 units = 1.53× (≥ 1.5×); extent `x 253..547`, `y 9..291` (inside the ViewBox) |
-| Level change (1600 better, 1000 worse) | `LevelChangeMoment.ts` | better (dawn): background warms one step, fog thins, one bat flies away; worse (creak): one crack draws across the wall, one shutter swings once. A `prepare` step makes `MomentHost` render the incoming level layer in `incoming-level` (opacity 0) and wait one frame; the Moment cross-fades old to new. | transition step at the midpoint; the new level is in the DOM when it ends |
+| Level change (1600 better, 1000 worse) | `LevelChangeMoment.ts` | better (dawn): background warms one step, fog thins, one bat flies away; worse (creak): one crack draws across the wall, one shutter swings once. The Moment owns its prepare step (`prepareIncomingLevel`): it renders `HouseBase` and `DecayLayer` of the live model through its own React root (`createRoot` + `flushSync`) into a hidden `<g data-part="incoming-level">` (opacity 0) inserted in the Scene SVG right after the old decay layer, below the creatures, then waits one frame (`requestAnimationFrame`, 50ms timeout fallback, immediate on abort). `HouseScene` and `MomentHost` know nothing about it (no `incomingLevel` prop). The old level stays untouched underneath; the incoming layer covers it with an opacity tween. Dawn: fog thins to 0.35 over the first part, the incoming layer fades in over the second half from the midpoint. Creak: the incoming layer appears over the last `CREAK_FADE_OUT_S`. The cleanup unmounts the root and removes the slot. If the Scene has no decay layer or filter ids, prepare returns null and the new level appears when the hold releases. | transition step at the midpoint; the new level is in the DOM when it ends. Measured with the `level` case of `scripts/check-moments.mjs` (level-4 demo: cancel Wraithcast, tick Coffee, pay $300 extra, against a local build): the incoming layer appears at opacity 0 with the old level still showing (3 cracks, `data-level` 4); front fog reaches its 0.35 floor; the layer is 0.012 at +0.9s after start, 0.554 at about +1.2s, 0.995 at about +1.5s; at the hold release the live level 3 (2 cracks) replaces it with no visible jump. The old decay layer stays at opacity 1 throughout; the house cross-fades, it does not pop |
 | Weekly plan completed (1200ms) | `ThreeCandlesMoment.ts` | three candles above the Scene light one after another (≈ 250ms apart, flame scale and opacity) → hold → fade out; the completion card text is independent and already visible (Requirement 17.5) | no leftover elements: the candles live in the layer and are removed by the cleanup |
 
 #### Moment art geometry (`src/lib/scene/momentGeometry.ts`, R2)
@@ -824,7 +823,7 @@ No Dexie change and nothing new is persisted (Requirement 11.5). The graveyard i
 | `SceneConfig` | `src/lib/scene/config.ts` | Immutable constants plus `validateSceneConfig` |
 | `MomentRequest`, `ActionOutcome`, `ActionContext` | `src/lib/moments/types.ts` | Plain data; `RectLike` is a structural copy of the DOM rect (no DOM type) |
 | `ActionObserver` | `src/hooks/useActionObserver.ts` | Interface plus context, no state |
-| Hold state | `HoldState<SceneModel>` reduced by `holdReducer` in `src/lib/moments/hold.ts`, held in `MomentHost` | `{ frozen, awaiting, queueIdle }` plus `incomingLevel` and the level cursor; never persisted |
+| Hold state | `HoldState<SceneModel>` reduced by `holdReducer` in `src/lib/moments/hold.ts`, held in `MomentHost` | `{ frozen, awaiting, queueIdle }` plus the level cursor; never persisted |
 
 ### Additive changes to existing code
 

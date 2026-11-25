@@ -840,6 +840,37 @@
         "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
         "timestamp": 1795587451132
       }
+    ],
+    "14.1 Create `LevelChangeMoment.ts`; register in `momentLoader.ts`": [
+      {
+        "executionId": "5e6fbb8a-ece1-4149-b718-f571cd79e53f",
+        "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
+        "timestamp": 1795588383294
+      },
+      {
+        "executionId": "5e6fbb8a-ece1-4149-b718-f571cd79e53f",
+        "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
+        "timestamp": 1795589031038
+      }
+    ],
+    "14. Phase D: level-change moment": [
+      {
+        "executionId": "5e6fbb8a-ece1-4149-b718-f571cd79e53f",
+        "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
+        "timestamp": 1795589031101
+      }
+    ],
+    "14.2 Write component tests for the level-change moment": [
+      {
+        "executionId": "5ede08b7-2431-475c-8eca-a049e66fbac2",
+        "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
+        "timestamp": 1795589124718
+      },
+      {
+        "executionId": "5ede08b7-2431-475c-8eca-a049e66fbac2",
+        "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
+        "timestamp": 1795589577578
+      }
     ]
   }
 }

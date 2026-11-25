@@ -321,12 +321,12 @@ Conventions that apply to every task:
     - Circle diameter at least 1.5 times the Poltergeist size, `DrawSVGPlugin` used, bound state at the end, request dropped when the Poltergeist is null, no `MorphSVGPlugin` import.
     - _Requirements: 1.6, 15.3, 15.6, 18.3_
 
-- [ ] 14. Phase D: level-change moment
-  - [ ] 14.1 Create `LevelChangeMoment.ts`; register in `momentLoader.ts`
+- [x] 14. Phase D: level-change moment
+  - [x] 14.1 Create `LevelChangeMoment.ts`; register in `momentLoader.ts`
     - `playLevelChangeMoment`: better level plays dawn (1600 ms: background warms, fog thins, one bat flies away along `batPath`), worse level plays creak (1000 ms: one crack draws, one shutter swings). A `prepare` step renders the incoming level layer in `incoming-level` and waits one frame. Old features show until the midpoint; new features show at the end or on skip. No announcement is added (the Dashboard `aria-live` region owns it).
     - _Requirements: 6.7, 12.14, 16.2, 16.3, 16.4, 16.5, 16.7, 20.3_
 
-  - [ ]* 14.2 Write component tests for the level-change moment
+  - [x]* 14.2 Write component tests for the level-change moment
     - Better versus worse sequences chosen by direction, a multi-step change plays one Moment ending at the new level, skip shows the new level, no extra `aria-live` text.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.7_
 

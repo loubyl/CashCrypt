@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import {
   DECAY_TINTS,
   MIN_LABEL_PX,
+  SCENE_BAT,
   SCENE_DIRT,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
@@ -9,6 +11,7 @@ import {
   SCENE_SHOVEL_STEEL_SHADE,
   SCENE_SHOVEL_WOOD,
   SCENE_STONE,
+  SCENE_TEAL,
   SCENE_WALL,
   SHOVEL_VIEW_H,
   SHOVEL_VIEW_W,
@@ -61,6 +64,9 @@ export const ART_PART = {
   crack: "crack-flash",
   sigil: "sigil",
   sigilFlash: "sigil-flash",
+  bat: "bat",
+  creakCrack: "creak-crack",
+  shutter: "shutter",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
@@ -345,5 +351,93 @@ export function SigilArt({ leftPx, topPx, widthPx, cx, cy, r, stroke, flashR }: 
       />
       <ellipse data-moment={ART_PART.sigilFlash} cx={cx} cy={cy} rx={flashR} ry={flashR} fill={INK_COLOR} style={{ opacity: 0 }} />
     </svg>
+  );
+}
+
+// Level-change Moment art: a bat for dawn, a drawn crack and a swinging shutter for creak. Drawn in ViewBox units, hidden at first.
+const BAT_BODY_PATH = "M0 -3 C3 -3 4 1 0 5 C-4 1 -3 -3 0 -3 Z";
+const BAT_WINGS_PATH = "M0 -1 C-6 -9 -14 -8 -19 -2 C-15 -3 -12 -1 -10 3 C-8 0 -5 0 -3 3 C-2 1 -1 1 0 3 C1 1 2 1 3 3 C5 0 8 0 10 3 C12 -1 15 -3 19 -2 C14 -8 6 -9 0 -1 Z";
+const BAT_EAR_PATH = "M-3 -3 L-4 -7 L-1 -4 M3 -3 L4 -7 L1 -4";
+const BAT_EAR_STROKE = 1.2;
+const CREAK_CRACK_COLOR = "var(--surface-void)";
+const SHUTTER_SLAT_COUNT = 3;
+const SHUTTER_SLAT_STROKE = 1.2;
+const SHUTTER_SLAT_OPACITY = 0.5;
+
+type SceneOverlayProps = { leftPx: number; topPx: number; widthPx: number };
+
+function SceneOverlay({ leftPx, topPx, widthPx, children }: SceneOverlayProps & { children: ReactNode }) {
+  return (
+    <svg
+      viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+      width={widthPx}
+      height={(widthPx * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute block"
+      style={{ left: leftPx, top: topPx }}
+    >
+      {children}
+    </svg>
+  );
+}
+
+export type BatArtProps = SceneOverlayProps;
+
+/** One small cartoon bat, centered on its own origin; GSAP moves it along the flight samples. Starts hidden. */
+export function BatArt({ leftPx, topPx, widthPx }: BatArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      <g data-moment={ART_PART.bat} style={{ opacity: 0 }}>
+        <path d={BAT_WINGS_PATH} fill={SCENE_BAT} />
+        <path d={BAT_BODY_PATH} fill={SCENE_BAT} />
+        <path d={BAT_EAR_PATH} fill="none" stroke={SCENE_BAT} strokeWidth={BAT_EAR_STROKE} strokeLinecap="round" />
+      </g>
+    </SceneOverlay>
+  );
+}
+
+export type CreakArtProps = SceneOverlayProps & {
+  crackPoints: readonly { x: number; y: number }[];
+  crackStroke: number;
+  /** Shutter slab in ViewBox units, hinged on `hingeX`. */
+  shutter: { x: number; y: number; w: number; h: number; hingeX: number } | null;
+};
+
+/** A crack across the wall (a polyline for DrawSVG) and one shutter next to a window. Starts hidden. */
+export function CreakArt({ leftPx, topPx, widthPx, crackPoints, crackStroke, shutter }: CreakArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      <polyline
+        data-moment={ART_PART.creakCrack}
+        points={crackPoints.map((p) => `${p.x},${p.y}`).join(" ")}
+        fill="none"
+        stroke={CREAK_CRACK_COLOR}
+        strokeWidth={crackStroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ opacity: 0 }}
+      />
+      {shutter ? (
+        <g data-moment={ART_PART.shutter} style={{ opacity: 0 }}>
+          <rect x={shutter.x} y={shutter.y} width={shutter.w} height={shutter.h} rx={2} fill={SCENE_TEAL} />
+          {Array.from({ length: SHUTTER_SLAT_COUNT }, (_, i) => {
+            const y = shutter.y + (shutter.h * (i + 1)) / (SHUTTER_SLAT_COUNT + 1);
+            return (
+              <line
+                key={y}
+                x1={shutter.x + 2}
+                y1={y}
+                x2={shutter.x + shutter.w - 2}
+                y2={y}
+                stroke={SCENE_BAT}
+                strokeWidth={SHUTTER_SLAT_STROKE}
+                opacity={SHUTTER_SLAT_OPACITY}
+              />
+            );
+          })}
+        </g>
+      ) : null}
+    </SceneOverlay>
   );
 }
