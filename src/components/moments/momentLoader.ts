@@ -29,6 +29,7 @@ type MomentKind = MomentRequest["kind"];
 const MOMENT_IMPORTS: Partial<Record<MomentKind, () => Promise<MomentPlayer>>> = {
   cancel: () => import("./ShovelMoment").then((module) => module.playShovelMoment),
   payment: () => import("./CandleOrbMoment").then((module) => module.playCandleOrbMoment),
+  sigil: () => import("./SigilMoment").then((module) => module.playSigilMoment),
 };
 
 /** The duration key of a request. Better levels have a lower number. */

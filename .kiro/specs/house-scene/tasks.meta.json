@@ -809,6 +809,37 @@
         "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
         "timestamp": 1795576547000
       }
+    ],
+    "13.1 Add sigil art to `MomentArt.tsx`; create `SigilMoment.ts`; register in `momentLoader.ts`": [
+      {
+        "executionId": "bfb872cd-c3e2-49b8-9677-4f2e072be0d7",
+        "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
+        "timestamp": 1795586444230
+      },
+      {
+        "executionId": "bfb872cd-c3e2-49b8-9677-4f2e072be0d7",
+        "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
+        "timestamp": 1795586703905
+      }
+    ],
+    "13. Phase D: Poltergeist sigil moment": [
+      {
+        "executionId": "bfb872cd-c3e2-49b8-9677-4f2e072be0d7",
+        "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
+        "timestamp": 1795586703977
+      }
+    ],
+    "13.2 Write component tests for the sigil moment": [
+      {
+        "executionId": "399b1d69-baae-4fb8-8b8f-c46ac038a384",
+        "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
+        "timestamp": 1795586870512
+      },
+      {
+        "executionId": "399b1d69-baae-4fb8-8b8f-c46ac038a384",
+        "chatSessionId": "sess_e8745495-98de-4fd9-b0bb-bfa4e44a0e44",
+        "timestamp": 1795587451132
+      }
     ]
   }
 }

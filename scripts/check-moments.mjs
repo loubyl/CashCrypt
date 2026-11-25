@@ -15,7 +15,7 @@
 //   VIEWPORT          WIDTHxHEIGHT (default 1280x900)
 //   RAF_THROTTLE_MS   makes animation frames arrive this far apart (default 0); use 700 to emulate a
 //                     slow or background tab, where GSAP lag smoothing would stretch a Moment
-//   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment")
+//   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment,sigil")
 //
 // Each check runs in a fresh browser context (empty IndexedDB) and loads the demo crypt at level 4.
 // Every check also fails if anything wrote to the clipboard (navigator.clipboard, execCommand, "copy" event).
@@ -43,6 +43,9 @@ const FAST_FRAME_MAX_MS = 200; // above this, short beats can fall between two f
 const PAYMENT_MAX_ON_SCREEN_MS = 3200; // sampler starts ~0.2 s before the click; the Moment lasts ~2 s
 const SHOVEL_MAX_SPAN_MS = 2600; // art on screen: cancel Moment 1.4 s plus the wait for the tombstone
 const SHOVEL_MIN_TRAVEL_PX = 100;
+const SIGIL_MAX_SPAN_MS = 2200; // art on screen: sigil Moment 1.2 s plus sampler and unmount slack
+const SIGIL_DRAWN_MIN = 0.98;
+const SIGIL_BOUND_OPACITY = 0.5; // Poltergeist.tsx BOUND_OPACITY
 const LIVE_EPSILON = 0.002;
 const THROTTLED = RAF_THROTTLE_MS > FAST_FRAME_MAX_MS;
 
@@ -118,6 +121,13 @@ function installSampler(sampleMs) {
     return { left: r.left, top: r.top, width: r.width, height: r.height, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
   };
   const opacityOf = (el) => (el ? Number(getComputedStyle(el).opacity) : Number.NaN);
+  // Share of the sigil ring's outline that is drawn (DrawSVGPlugin sets the dash array and offset).
+  const sigilDrawn = (el) => {
+    if (!el) return null;
+    const total = el.getTotalLength();
+    const dash = parseFloat(el.style.strokeDasharray || getComputedStyle(el).strokeDasharray);
+    return total > 0 && Number.isFinite(dash) ? Math.min(1, dash / total) : null;
+  };
   window.__saveRect = null;
   document.addEventListener(
     "click",
@@ -144,6 +154,10 @@ function installSampler(sampleMs) {
       shovel: rectOf(part("shovel")),
       shovelOpacity: opacityOf(part("shovel")),
       tombstoneArtOpacity: opacityOf(part("tombstone")),
+      sigilOpacity: opacityOf(part("sigil")),
+      sigilDrawn: sigilDrawn(part("sigil")),
+      polterBodyOpacity: opacityOf(document.querySelector('[data-part="scene"] [data-part="poltergeist-body"]')),
+      polterState: document.querySelector('[data-part="scene"] [data-part="poltergeist"]')?.getAttribute("data-state") ?? null,
       zombies: document.querySelectorAll('[data-part="scene"] [data-part="zombie"]').length,
       tombstones: document.querySelectorAll('[data-part="scene"] [data-part="tombstone"]').length,
       lightMax: lit.length ? Math.max(...lit.map(lightOf)) : null,
@@ -271,9 +285,45 @@ function assertPayment({ samples, saveRect, frozenBefore, scene }) {
   check(final.lightMax !== null && final.lightMax >= (frozenBefore ?? 0) - LIVE_EPSILON, "payment: live light is not below the frozen light after a payment");
 }
 
+async function runSigil(page) {
+  await page.evaluate(installSampler, SAMPLE_MS);
+  const coffee = await page.evaluateHandle(
+    () =>
+      [...document.querySelectorAll('[role="checkbox"], input[type="checkbox"]')].find((el) =>
+        /coffee/i.test(el.closest("[data-plan-action]")?.textContent ?? ""),
+      ) ?? null,
+  );
+  if (!coffee.asElement()) throw new Error("Cut Coffee action checkbox not found");
+  await coffee.asElement().click();
+  await sleep(MAX_MOMENT_MS);
+  return { samples: await page.evaluate(() => window.__samples) };
+}
+
+function assertSigil({ samples }) {
+  const during = samples.filter((s) => s.layerChildren > 0);
+  check(during.length > 0, "sigil: Moment layer got children during the Moment");
+  if (during.length === 0) return;
+  const span = during.at(-1).t - during[0].t;
+  const peakDrawn = Math.max(...during.map((s) => s.sigilDrawn ?? 0));
+  const final = samples.at(-1);
+  const bodyFinal = final.polterBodyOpacity;
+  console.log(
+    `sigil: on screen ${span} ms, peak stroke drawn ${fmt(peakDrawn)}, Poltergeist body opacity at end ${fmt(bodyFinal)}, state ${final.polterState}`,
+  );
+  check(span <= SIGIL_MAX_SPAN_MS, `sigil: Moment art is on screen for ${span} ms (max ${SIGIL_MAX_SPAN_MS})`);
+  check(peakDrawn >= SIGIL_DRAWN_MIN, `sigil: ring stroke is fully drawn (peak ${fmt(peakDrawn)}, min ${SIGIL_DRAWN_MIN})`);
+  check(final.layerChildren === 0, "sigil: Moment art removed at the end");
+  check(final.polterState === "bound", `sigil: Poltergeist is still present and bound (${final.polterState})`);
+  check(
+    Math.abs(bodyFinal - SIGIL_BOUND_OPACITY) < LIVE_EPSILON,
+    `sigil: Poltergeist body ends at the bound opacity (${fmt(bodyFinal)}, expected ${SIGIL_BOUND_OPACITY})`,
+  );
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
+  { name: "sigil", run: runSigil, assert: assertSigil },
 ];
 
 // ---------------------------------------------------------------------------------------------

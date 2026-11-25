@@ -59,6 +59,8 @@ export const ART_PART = {
   flame: "flame",
   orb: "orb",
   crack: "crack-flash",
+  sigil: "sigil",
+  sigilFlash: "sigil-flash",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
@@ -293,6 +295,55 @@ export function CrackFlashArt({ leftPx, topPx, widthPx, points, stroke }: CrackF
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+// Sigil Moment art: a spirit-colored ring drawn around the Poltergeist and a brief white flash. Starts hidden.
+const SPIRIT_COLOR = "var(--accent-spirit)";
+const INK_COLOR = "var(--text-primary)";
+
+export type SigilArtProps = {
+  leftPx: number;
+  topPx: number;
+  widthPx: number;
+  /** Ring center and radius, in ViewBox units. */
+  cx: number;
+  cy: number;
+  r: number;
+  stroke: number;
+  /** Radius of the flash disc over the Poltergeist, in ViewBox units. */
+  flashR: number;
+};
+
+/**
+ * The sigil: one `<ellipse>` with equal radii (DrawSVGPlugin does not draw a `<circle>`), drawn in ViewBox
+ * units over the Scene, plus a flash disc. The Moment_Layer is outside the Scene SVG, so the ring is not clipped.
+ */
+export function SigilArt({ leftPx, topPx, widthPx, cx, cy, r, stroke, flashR }: SigilArtProps) {
+  return (
+    <svg
+      viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+      width={widthPx}
+      height={(widthPx * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute block"
+      style={{ left: leftPx, top: topPx }}
+    >
+      <ellipse
+        data-moment={ART_PART.sigil}
+        cx={cx}
+        cy={cy}
+        rx={r}
+        ry={r}
+        fill="none"
+        stroke={SPIRIT_COLOR}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        style={{ opacity: 0 }}
+      />
+      <ellipse data-moment={ART_PART.sigilFlash} cx={cx} cy={cy} rx={flashR} ry={flashR} fill={INK_COLOR} style={{ opacity: 0 }} />
     </svg>
   );
 }

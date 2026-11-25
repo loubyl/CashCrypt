@@ -312,12 +312,12 @@ Conventions that apply to every task:
     - GSAP mock: recorded steps are `from`, `peak`, `final`; peak at most 1 and at least the live opacity; hold lasts `MOMENT_BEAT_MIN_MS`; abort leaves the live opacity; no flare under reduced motion; crack flash omitted when no crack. Mutation check (R1): remove the flare and confirm the test fails.
     - _Requirements: 14.3, 14.6, 14.7, 18.4, 20.3_
 
-- [ ] 13. Phase D: Poltergeist sigil moment
-  - [ ] 13.1 Add sigil art to `MomentArt.tsx`; create `SigilMoment.ts`; register in `momentLoader.ts`
+- [x] 13. Phase D: Poltergeist sigil moment
+  - [x] 13.1 Add sigil art to `MomentArt.tsx`; create `SigilMoment.ts`; register in `momentLoader.ts`
     - `playSigilMoment`: `<ellipse>` sigil drawn with `DrawSVGPlugin` (imported from `gsap/DrawSVGPlugin`), closing beat held 300 ms, one shake of `SIGIL_SHAKE`, settle into the bound state with a brief `--text-primary` flash. Never splits or removes the Poltergeist. Diameter at least 1.5 times the Poltergeist width. The queue drops the request when the Poltergeist is null (`shouldDrop`).
     - _Requirements: 1.6, 10.2, 15.3, 15.4, 15.5, 15.6, 15.7, 18.3, 18.5, 20.3_
 
-  - [ ]* 13.2 Write component tests for the sigil moment
+  - [x]* 13.2 Write component tests for the sigil moment
     - Circle diameter at least 1.5 times the Poltergeist size, `DrawSVGPlugin` used, bound state at the end, request dropped when the Poltergeist is null, no `MorphSVGPlugin` import.
     - _Requirements: 1.6, 15.3, 15.6, 18.3_
 
