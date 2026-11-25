@@ -1,7 +1,9 @@
 // Example tests for Moment request planning (house-scene task 9.11). Requirements: 12.4, 12.6.
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createMomentQueue } from "@/lib/moments/queue";
 import { planLevelMoment, planMoments } from "@/lib/moments/requests";
-import type { ActionContext, ActionOutcome } from "@/lib/moments/types";
+import { MOMENT_GAP_MS, MOMENT_HARD_CAP_MS, MOMENT_QUEUE_MAX_PENDING } from "@/lib/scene/config";
+import type { ActionContext, ActionOutcome, MomentRequest } from "@/lib/moments/types";
 
 const ORIGIN = { left: 1, top: 2, width: 3, height: 4 };
 
@@ -156,5 +158,77 @@ describe("planMoments for the level-4 demo week-1 plan", () => {
     const whole = [...cancel, ...sigil, ...payment].map((r) => r.kind);
     expect(whole).toEqual(["cancel", "sigil", "payment", "exorcismComplete"]);
     expect(whole).not.toContain("level");
+  });
+});
+
+// Task 16.2. Requirements: 12.5, 18.6, 18.7.
+describe("level-4 demo flow through the Moment queue", () => {
+  const PLAY_MS = 700;
+  const WRAITHCAST = "sub-wraithcast";
+  const CUT_COFFEE = "reduce-Coffee";
+  const PAY_SCARLET = "pay-scarlet-moth";
+  const CANCEL_WRAITHCAST = "cancel-wraithcast";
+  const plan = [
+    { id: CANCEL_WRAITHCAST, kind: "cancel_subscription" },
+    { id: CUT_COFFEE, kind: "reduce_small_expenses" },
+    { id: PAY_SCARLET, kind: "extra_payment" },
+  ];
+  const ctx = (doneIds: readonly string[]): ActionContext =>
+    context({
+      drawnZombieIds: [WRAITHCAST],
+      subscriptionNames: { [WRAITHCAST]: "Wraithcast" },
+      planActions: plan.map((a) => ({ ...a, done: doneIds.includes(a.id) })),
+    });
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("plays cancel, sigil, payment, exorcism complete and level 4 to 3 in order, without overlap and one gap apart", async () => {
+    const plays: { kind: MomentRequest["kind"]; start: number; end: number }[] = [];
+    let active = 0;
+    let maxActive = 0;
+    const queue = createMomentQueue({
+      play: async (request) => {
+        const start = Date.now();
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        await new Promise<void>((resolve) => setTimeout(resolve, PLAY_MS));
+        active -= 1;
+        plays.push({ kind: request.kind, start, end: Date.now() });
+      },
+      isTargetMounted: () => true,
+      gapMs: MOMENT_GAP_MS,
+      hardCapMs: MOMENT_HARD_CAP_MS,
+      maxPending: MOMENT_QUEUE_MAX_PENDING,
+    });
+
+    const cancel = planMoments(
+      cancelOutcome({ subscriptionId: WRAITHCAST, monthlySavedCents: 12_000, completedActionId: CANCEL_WRAITHCAST }),
+      ctx([]),
+    );
+    const sigil = planMoments({ kind: "planToggle", actionId: CUT_COFFEE, next: true }, ctx([CANCEL_WRAITHCAST]));
+    const payment = planMoments(
+      { kind: "payment", extraPrincipalCents: 30_000, completedActionId: PAY_SCARLET, origin: ORIGIN },
+      ctx([CANCEL_WRAITHCAST, CUT_COFFEE]),
+    );
+    const outcomes = [...cancel, ...sigil, ...payment].map((request) => queue.enqueue(request));
+    // The level request is appended once live data settles on level 3.
+    const level = planLevelMoment(4, 3);
+    expect(level).not.toBeNull();
+    outcomes.push(queue.enqueue(level as MomentRequest));
+
+    await vi.advanceTimersByTimeAsync(5 * PLAY_MS + 4 * MOMENT_GAP_MS);
+
+    await expect(Promise.all(outcomes)).resolves.toEqual(Array(5).fill("completed"));
+    expect(plays.map((p) => p.kind)).toEqual(["cancel", "sigil", "payment", "exorcismComplete", "level"]);
+    expect(maxActive).toBe(1);
+    for (let i = 1; i < plays.length; i += 1) {
+      expect(plays[i].start - plays[i - 1].end).toBe(MOMENT_GAP_MS);
+    }
+    expect(queue.state).toBe("idle");
   });
 });

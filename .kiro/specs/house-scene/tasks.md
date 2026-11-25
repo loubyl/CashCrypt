@@ -339,12 +339,12 @@ Conventions that apply to every task:
     - Three candles light in order, no leftover element after end or skip, completion card text present immediately, no request from other screens.
     - _Requirements: 17.2, 17.4, 17.5, 17.6_
 
-- [ ] 16. Phase D: demo flow verification
+- [x] 16. Phase D: demo flow verification
   - [ ]* 16.1 Write the demo-path test with the real mutations
     - `tests/scene/demoPath.test.ts` (fake-indexeddb, as in `tests/demo/calibration.test.ts`): cancel Wraithcast, tick Coffee, $300 extra payment. Assert light 32.74, 37.95, 38.95, 43.49, levels 4, 4, 4, 3, window opacity 0.262, 0.361, 0.380, 0.435, and flare peak minus previous opacity at least `MIN_VISIBLE_WINDOW_DELTA`.
     - _Requirements: 7.6, 14.3, 18.4, 18.7_
 
-  - [ ] 16.2 Write the demo flow request-order test
+  - [x] 16.2 Write the demo flow request-order test
     - `tests/moments/requests.test.ts` (extend): the same three actions produce, in order, cancel, then sigil, then payment, exorcism complete and level 4 to 3, played without overlap and separated by `MOMENT_GAP_MS`.
     - _Requirements: 12.5, 18.6, 18.7_
 
