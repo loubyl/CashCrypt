@@ -330,8 +330,8 @@ Conventions that apply to every task:
     - Better versus worse sequences chosen by direction, a multi-step change plays one Moment ending at the new level, skip shows the new level, no extra `aria-live` text.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.7_
 
-- [ ] 15. Phase D: exorcism-complete moment
-  - [ ] 15.1 Add candle art to `MomentArt.tsx`; create `ThreeCandlesMoment.ts`; register in `momentLoader.ts`
+- [x] 15. Phase D: exorcism-complete moment
+  - [x] 15.1 Add candle art to `MomentArt.tsx`; create `ThreeCandlesMoment.ts`; register in `momentLoader.ts`
     - `playThreeCandlesMoment`: three candles above the Scene light one after another, hold, fade out. Candle boxes come from `momentGeometry`. The completion card text is independent and never delayed or hidden. Cleanup leaves no element.
     - _Requirements: 17.2, 17.3, 17.5, 17.6, 20.3_
 

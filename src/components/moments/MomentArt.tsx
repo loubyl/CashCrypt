@@ -67,6 +67,8 @@ export const ART_PART = {
   bat: "bat",
   creakCrack: "creak-crack",
   shutter: "shutter",
+  candle: "candle",
+  candleFlame: "candle-flame",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
@@ -438,6 +440,55 @@ export function CreakArt({ leftPx, topPx, widthPx, crackPoints, crackStroke, shu
           })}
         </g>
       ) : null}
+    </SceneOverlay>
+  );
+}
+
+// Three-candles Moment art: three wax candles with a flame each, drawn in ViewBox units. Starts hidden.
+const CANDLE_WAX_WIDTH_SHARE = 0.7;
+const CANDLE_WAX_HEIGHT_SHARE = 0.6;
+const CANDLE_WAX_RADIUS = 3;
+const CANDLE_FLAME_HEIGHT_SHARE = 0.34;
+const CANDLE_FLAME_WIDTH_SHARE = 0.55;
+const CANDLE_HALO_OPACITY = 0.3;
+const CANDLE_HALO_RADIUS_SHARE = 0.9;
+const CANDLE_WICK_WIDTH = 2;
+const CANDLE_WICK_HEIGHT = 5;
+const CANDLE_WICK_OPACITY = 0.8;
+const HALF_SHARE = 0.5;
+
+export type CandleBox = { x: number; y: number; w: number; h: number };
+export type CandlesArtProps = SceneOverlayProps & { boxes: readonly CandleBox[] };
+
+/** Three cartoon candles in their boxes; the wax and each flame start hidden and the Moment lights them in turn. */
+export function CandlesArt({ leftPx, topPx, widthPx, boxes }: CandlesArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      {boxes.map((box) => {
+        const waxW = box.w * CANDLE_WAX_WIDTH_SHARE;
+        const waxH = box.h * CANDLE_WAX_HEIGHT_SHARE;
+        const waxX = box.x + (box.w - waxW) * HALF_SHARE;
+        const waxY = box.y + box.h - waxH;
+        const flameH = box.h * CANDLE_FLAME_HEIGHT_SHARE;
+        const flameW = box.w * CANDLE_FLAME_WIDTH_SHARE;
+        const flameCx = box.x + box.w * HALF_SHARE;
+        const flameBottom = waxY - CANDLE_WICK_HEIGHT;
+        const flameTop = flameBottom - flameH;
+        const flameMid = flameTop + flameH * HALF_SHARE;
+        return (
+          <g key={box.x}>
+            <g data-moment={ART_PART.candle} style={{ opacity: 0 }}>
+              <rect x={waxX} y={waxY} width={waxW} height={waxH} rx={CANDLE_WAX_RADIUS} fill={DECAY_TINTS[1]} />
+              <rect x={flameCx - CANDLE_WICK_WIDTH * HALF_SHARE} y={flameBottom} width={CANDLE_WICK_WIDTH} height={CANDLE_WICK_HEIGHT} fill={SCENE_WALL} opacity={CANDLE_WICK_OPACITY} />
+            </g>
+            <g data-moment={ART_PART.candleFlame} style={{ opacity: 0 }}>
+              <circle cx={flameCx} cy={flameMid} r={box.w * CANDLE_HALO_RADIUS_SHARE} fill={CANDLE_COLOR} opacity={CANDLE_HALO_OPACITY} />
+              <ellipse cx={flameCx} cy={flameMid} rx={flameW * HALF_SHARE} ry={flameH * HALF_SHARE} fill={CANDLE_COLOR} />
+              <ellipse cx={flameCx} cy={flameMid + flameH * HALF_SHARE * HALF_SHARE} rx={flameW * HALF_SHARE * HALF_SHARE} ry={flameH * HALF_SHARE * HALF_SHARE * 1.2} fill={DECAY_TINTS[2]} />
+            </g>
+          </g>
+        );
+      })}
     </SceneOverlay>
   );
 }

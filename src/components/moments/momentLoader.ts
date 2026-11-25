@@ -31,6 +31,7 @@ const MOMENT_IMPORTS: Partial<Record<MomentKind, () => Promise<MomentPlayer>>> =
   payment: () => import("./CandleOrbMoment").then((module) => module.playCandleOrbMoment),
   sigil: () => import("./SigilMoment").then((module) => module.playSigilMoment),
   level: () => import("./LevelChangeMoment").then((module) => module.playLevelChangeMoment),
+  exorcismComplete: () => import("./ThreeCandlesMoment").then((module) => module.playThreeCandlesMoment),
 };
 
 /** The duration key of a request. Better levels have a lower number. */

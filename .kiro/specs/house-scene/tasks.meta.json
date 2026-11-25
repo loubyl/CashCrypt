@@ -871,6 +871,35 @@
         "chatSessionId": "sess_7baacbcf-7cc2-47df-896c-7832c1cfbe5f",
         "timestamp": 1795589577578
       }
+    ],
+    "15.1 Add candle art to `MomentArt.tsx`; create `ThreeCandlesMoment.ts`; register in `momentLoader.ts`": [
+      {
+        "executionId": "a75a7aef-131e-42fb-8e02-ff902c1880ef",
+        "chatSessionId": "sess_04e56470-17f2-40e2-81b9-1539465675e0",
+        "timestamp": 1795589807814
+      },
+      {
+        "executionId": "a75a7aef-131e-42fb-8e02-ff902c1880ef",
+        "chatSessionId": "sess_04e56470-17f2-40e2-81b9-1539465675e0",
+        "timestamp": 1795589972240
+      },
+      {
+        "executionId": "31b1fd7b-2238-49a9-8984-5c9ef4be3114",
+        "chatSessionId": "sess_04e56470-17f2-40e2-81b9-1539465675e0",
+        "timestamp": 1795590192559
+      },
+      {
+        "executionId": "31b1fd7b-2238-49a9-8984-5c9ef4be3114",
+        "chatSessionId": "sess_04e56470-17f2-40e2-81b9-1539465675e0",
+        "timestamp": 1795593945718
+      }
+    ],
+    "15. Phase D: exorcism-complete moment": [
+      {
+        "executionId": "a75a7aef-131e-42fb-8e02-ff902c1880ef",
+        "chatSessionId": "sess_04e56470-17f2-40e2-81b9-1539465675e0",
+        "timestamp": 1795589972317
+      }
     ]
   }
 }

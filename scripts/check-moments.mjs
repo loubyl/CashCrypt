@@ -15,7 +15,8 @@
 //   VIEWPORT          WIDTHxHEIGHT (default 1280x900)
 //   RAF_THROTTLE_MS   makes animation frames arrive this far apart (default 0); use 700 to emulate a
 //                     slow or background tab, where GSAP lag smoothing would stretch a Moment
-//   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment,sigil")
+//   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment,sigil";
+//                     "fullDemo" runs the whole level-4 flow and checks the order, gaps and overlap of the Moments)
 //
 // Each check runs in a fresh browser context (empty IndexedDB) and loads the demo crypt at level 4.
 // Every check also fails if anything wrote to the clipboard (navigator.clipboard, execCommand, "copy" event).
@@ -23,7 +24,7 @@
 // To add a Moment: write an async `run(page)` that drives the UI and returns its sampled data, then
 // add { name, run, assert } to MOMENT_CHECKS.
 import { createRequire } from "node:module";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 const CHROME_PATH = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -48,6 +49,31 @@ const SIGIL_DRAWN_MIN = 0.98;
 const SIGIL_BOUND_OPACITY = 0.5; // Poltergeist.tsx BOUND_OPACITY
 const LIVE_EPSILON = 0.002;
 const THROTTLED = RAF_THROTTLE_MS > FAST_FRAME_MAX_MS;
+const CANDLE_COUNT = 3;
+const CANDLES_MAX_SPAN_MS = 2400; // candles on screen: Moment 1.2 s plus sampler and unmount slack
+const CANDLE_LIT = 0.5; // a flame counts as lit above this opacity
+const CANDLE_ORDER_MIN_GAP_MS = 20; // consecutive flames must not light at the same sample
+// Measured gap = next start (up to one sample late) minus last visible sample (up to one sample early).
+const GAP_BELOW_MS = SAMPLE_MS; // sampling jitter below MOMENT_GAP_MS
+const GAP_ABOVE_MS = 2 * SAMPLE_MS + 100 + RAF_THROTTLE_MS; // two samples, scheduling slack, one slow frame
+
+/** Reads MOMENT_GAP_MS from the scene config (the script cannot import TypeScript). */
+function readMomentGapMs() {
+  const source = readFileSync(new URL("../src/lib/scene/config.ts", import.meta.url), "utf8");
+  const match = source.match(/export const MOMENT_GAP_MS\s*=\s*(\d+)/);
+  if (!match) throw new Error("MOMENT_GAP_MS not found in src/lib/scene/config.ts");
+  return Number(match[1]);
+}
+const MOMENT_GAP_MS = readMomentGapMs();
+
+/** Which Moment owns each art part in the Moment layer. */
+const PART_OWNER = {
+  shovel: "cancel", "name-label": "cancel", "tombstone-clip": "cancel", tombstone: "cancel", "dirt-puff": "cancel",
+  flame: "payment", orb: "payment", "crack-flash": "payment",
+  sigil: "sigil", "sigil-flash": "sigil",
+  candle: "exorcismComplete", "candle-flame": "exorcismComplete",
+  bat: "level", "creak-crack": "level", shutter: "level",
+};
 
 function loadPuppeteer() {
   for (const base of [import.meta.url, `file://${PUPPETEER_DIR}/`]) {
@@ -139,6 +165,7 @@ function installSampler(sampleMs) {
   );
   window.__samples = [];
   const t0 = performance.now();
+  window.__samplerT0 = t0;
   setInterval(() => {
     const layer = document.querySelector('[data-part="moment-layer"]');
     const part = (name) => layer?.querySelector(`[data-moment="${name}"]`) ?? null;
@@ -172,6 +199,11 @@ function installSampler(sampleMs) {
       oldCracks: oldDecay ? oldDecay.querySelectorAll('[data-part^="crack:"]').length : null,
       frontFogOpacity: opacityOf(document.querySelector('[data-part="scene"] [data-part="atmosphere-front"]')),
       bat: rectOf(part("bat")),
+      parts: layer ? [...new Set([...layer.querySelectorAll("[data-moment]")].map((el) => el.getAttribute("data-moment")))] : [],
+      visibleParts: layer
+        ? [...new Set([...layer.querySelectorAll("[data-moment]")].filter((el) => opacityOf(el) > 0.02).map((el) => el.getAttribute("data-moment")))]
+        : [],
+      candles: layer ? [...layer.querySelectorAll('[data-moment="candle-flame"]')].map((el) => ({ opacity: opacityOf(el), rect: rectOf(el) })) : [],
     });
   }, sampleMs);
 }
@@ -247,6 +279,9 @@ async function runPayment(page) {
   });
   await clickByText(page, "button", "Save payment");
   await sleep(MAX_MOMENT_MS);
+  // The art stays until the queue drains (candles and level Moments follow); slow frames stretch that.
+  await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch((e) => console.log('drain wait:', e.message));
+  await sleep(SAMPLE_MS * 3); // let the sampler record the empty layer
   const { samples, saveRect } = await page.evaluate(() => ({ samples: window.__samples, saveRect: window.__saveRect }));
   return { samples, saveRect, frozenBefore, scene: await sceneRect(page) };
 }
@@ -284,10 +319,12 @@ function assertPayment({ samples, saveRect, frozenBefore, scene }) {
       `payment: window light flares above both the frozen and the live value (frozen ${fmt(frozenBefore)}, peak ${fmt(peak)}, live ${fmt(final.lightMax)})`,
     );
   }
-  const last = during.at(-1);
-  check(last.t <= PAYMENT_MAX_ON_SCREEN_MS, `payment: Moment art is gone by ${PAYMENT_MAX_ON_SCREEN_MS} ms (last seen at ${last.t} ms)`);
+  // The art stays in the DOM until the hold is released (after later queued Moments), so measure visibility.
+  const visible = during.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "payment"));
+  const last = visible.at(-1) ?? during.at(-1);
+  check(last.t <= PAYMENT_MAX_ON_SCREEN_MS, `payment: Moment art is gone by ${PAYMENT_MAX_ON_SCREEN_MS} ms (last visible at ${last.t} ms)`);
   const stable = samples.slice(-3).map((s) => s.lightMax);
-  check(final.layerChildren === 0, "payment: Moment art removed at the end");
+  check(final.layerChildren === 0, `payment: Moment art removed at the end (children ${final.layerChildren} at ${final.t} ms)`);
   check(
     stable.every((v) => v !== null && Math.abs(v - stable[0]) < LIVE_EPSILON),
     `payment: window light settles on a steady live value (${fmt(final.lightMax)})`,
@@ -372,9 +409,133 @@ function assertLevel({ samples }) {
     console.log(
       `level: incoming present at ${t0}, starts fading at ${firstFade?.t ?? "-"}, fully in at ${fullIn?.t ?? "-"}, data-level 3 at ${levelChange?.t ?? "-"}`,
     );
-    check(Boolean(firstFade) && Boolean(fullIn) && fullIn.t - firstFade.t >= 200, "level: house cross-fades old to new level (not a pop)");
+    if (!THROTTLED) check(Boolean(firstFade) && Boolean(fullIn) && fullIn.t - firstFade.t >= 200, "level: house cross-fades old to new level (not a pop)");
     check(Boolean(firstFade) && firstFade.t - t0 >= 400, "level: old level features stay until the midpoint");
   }
+}
+
+
+const runExorcismComplete = (page) => runPlanFlow(page);
+
+/** Level-4 flow: cancel Wraithcast, tick the coffee action, then the $300 payment completes 3 of 3 actions. */
+async function runPlanFlow(page, { sampleFromStart = false } = {}) {
+  if (sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS);
+  await cancelWraithcast(page);
+  await sleep(SETTLE_MS * 2);
+  const coffee = await page.evaluateHandle(
+    () =>
+      [...document.querySelectorAll('[role="checkbox"], input[type="checkbox"]')].find((el) =>
+        /coffee|small expenses/i.test(el.closest("[data-plan-action]")?.textContent ?? ""),
+      ) ?? null,
+  );
+  if (!coffee.asElement()) throw new Error("Coffee action checkbox not found");
+  await coffee.asElement().click();
+  await sleep(SETTLE_MS * 2);
+  await clickByText(page, "button", "Do it:");
+  await hasButton(page, "Save payment");
+  await sleep(600);
+  if (!sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS);
+  const saveClickT = await page.evaluate(() => performance.now());
+  await clickByText(page, "button", "Save payment");
+  await sleep(MAX_MOMENT_MS * 2 + 2000);
+  const { samples, t0 } = await page.evaluate(() => ({ samples: window.__samples, t0: window.__samplerT0 }));
+  return { samples, scene: await sceneRect(page), saveClickT: Math.round(saveClickT - t0) };
+}
+
+function assertExorcismComplete({ samples, scene }) {
+  const during = samples.filter((s) => s.parts.includes("candle-flame"));
+  check(during.length > 0, "exorcismComplete: candles appeared in the Moment layer");
+  if (during.length === 0) return;
+  const visibleCandles = during.filter((s) => s.visibleParts.includes("candle-flame") || s.visibleParts.includes("candle"));
+  const span = (visibleCandles.at(-1) ?? during.at(-1)).t - during[0].t;
+  check(span <= CANDLES_MAX_SPAN_MS, `exorcismComplete: candles are visible for ${span} ms (max ${CANDLES_MAX_SPAN_MS})`);
+  const count = Math.max(...during.map((s) => s.candles.length));
+  check(count === CANDLE_COUNT, `exorcismComplete: ${count} candles drawn (expected ${CANDLE_COUNT})`);
+  const first = during[0].candles.map((c) => c.rect).filter(Boolean);
+  const inUpperScene =
+    first.length === CANDLE_COUNT &&
+    first.every(
+      (r) => r.cx >= scene.left && r.cx <= scene.left + scene.width && r.cy >= scene.top && r.cy <= scene.top + scene.height / 2,
+    );
+  check(inUpperScene, "exorcismComplete: candles sit in the upper half of the scene");
+  // First sample at which each flame is lit; the flames must light one after another, left to right.
+  const litAt = Array.from({ length: CANDLE_COUNT }, (_, i) => during.find((s) => (s.candles[i]?.opacity ?? 0) > CANDLE_LIT)?.t ?? null);
+  console.log(`exorcismComplete: flame ${litAt.map((t, i) => `#${i + 1} lit at ${t ?? "-"}`).join(", ")} ms`);
+  if (!THROTTLED) check(litAt.every((t) => t !== null), "exorcismComplete: all three flames light");
+  if (!THROTTLED) {
+    const ordered = litAt.every((t, i) => i === 0 || (t !== null && litAt[i - 1] !== null && t - litAt[i - 1] >= CANDLE_ORDER_MIN_GAP_MS));
+    check(ordered, "exorcismComplete: flames light one after another in order (staggered)");
+    // Opacity rises in order at every sample: a later flame is never brighter than an earlier one.
+    const monotone = during.every((s) => s.candles.every((c, i) => i === 0 || c.opacity <= s.candles[i - 1].opacity + LIVE_EPSILON));
+    check(monotone, "exorcismComplete: flame opacity never rises ahead of the previous flame");
+  } else {
+    // With frames this far apart a step can fall between two frames (the Moment still ends on schedule),
+    // so only the order is asserted: a flame never lights before the one on its left.
+    const inOrder = litAt.every((t, i) => t === null || i === 0 || (litAt[i - 1] !== null && t >= litAt[i - 1]));
+    check(inOrder, "exorcismComplete: flames never light out of order (slow frames)");
+  }
+  const final = samples.at(-1);
+  check(final.layerChildren === 0 && final.candles.length === 0, "exorcismComplete: no candles left behind (Moment layer empty at the end)");
+}
+
+const MOMENT_ORDER = ["payment", "exorcismComplete", "level"];
+
+async function runFullDemo(page) {
+  return runPlanFlow(page, { sampleFromStart: true });
+}
+
+const ownersOf = (parts) => new Set(parts.map((p) => PART_OWNER[p]).filter(Boolean));
+
+/**
+ * Per Moment: start = first sample with its art in the layer (the art is rendered when the Moment starts),
+ * end = last sample with that art visible (opacity > 0). The art stays in the DOM until the hold is
+ * released (design D9), so DOM presence alone says nothing about when a Moment ended.
+ * The level Moment also counts the incoming-level layer as its art.
+ */
+function momentSpans(samples, afterT) {
+  const spans = new Map();
+  const touch = (owner, t, visible) => {
+    const span = spans.get(owner) ?? { start: t, end: null };
+    if (visible) span.end = t;
+    spans.set(owner, span);
+  };
+  for (const s of samples) {
+    if (s.t < afterT) continue;
+    for (const owner of ownersOf(s.parts)) touch(owner, s.t, false);
+    for (const owner of ownersOf(s.visibleParts)) touch(owner, s.t, true);
+    if (s.incomingPresent) touch("level", s.t, s.incomingOpacity < 0.98);
+  }
+  for (const span of spans.values()) span.end ??= span.start;
+  return spans;
+}
+
+function assertFullDemo({ samples, saveClickT }) {
+  // Only the Moments after the payment; cancel and sigil happened earlier.
+  const spans = momentSpans(samples, saveClickT);
+  const seen = [...spans.entries()].sort((a, b) => a[1].start - b[1].start);
+  const order = seen.map(([name]) => name);
+  console.log(`fullDemo: MOMENT_GAP_MS=${MOMENT_GAP_MS}, allowed ${MOMENT_GAP_MS - GAP_BELOW_MS}..${MOMENT_GAP_MS + GAP_ABOVE_MS} ms, sampler ${SAMPLE_MS} ms`);
+  console.log("fullDemo: Moment            start(ms)   end(ms)   gap since previous end(ms)");
+  let prevEnd = null;
+  const gaps = [];
+  for (const [name, span] of seen) {
+    const gap = prevEnd === null ? null : span.start - prevEnd;
+    if (gap !== null) gaps.push({ name, gap });
+    console.log(`fullDemo: ${name.padEnd(17)} ${String(span.start).padStart(8)}  ${String(span.end).padStart(8)}   ${gap === null ? "-" : gap}`);
+    prevEnd = span.end;
+  }
+  check(JSON.stringify(order) === JSON.stringify(MOMENT_ORDER), `fullDemo: order after the payment is ${MOMENT_ORDER.join(" -> ")} (${order.join(" -> ") || "none"})`);
+  for (const { name, gap } of gaps) {
+    check(
+      gap >= MOMENT_GAP_MS - GAP_BELOW_MS && gap <= MOMENT_GAP_MS + GAP_ABOVE_MS,
+      `fullDemo: gap before ${name} is ${gap} ms (MOMENT_GAP_MS ${MOMENT_GAP_MS}, allowed -${GAP_BELOW_MS}/+${GAP_ABOVE_MS})`,
+    );
+  }
+  const overlapping = samples.filter((s) => s.t >= saveClickT && ownersOf(s.visibleParts).size > 1);
+  check(overlapping.length === 0, `fullDemo: the Moment layer never shows two Moments at once (${overlapping.length} sample(s) with two)`);
+  const final = samples.at(-1);
+  check(final.layerChildren === 0, "fullDemo: Moment layer empty at the end");
+  check(final.level === "3", `fullDemo: scene ends at level 3 (${final.level})`);
 }
 
 const MOMENT_CHECKS = [
@@ -382,6 +543,8 @@ const MOMENT_CHECKS = [
   { name: "payment", run: runPayment, assert: assertPayment },
   { name: "sigil", run: runSigil, assert: assertSigil },
   { name: "level", run: runLevel, assert: assertLevel },
+  { name: "exorcismComplete", run: runExorcismComplete, assert: assertExorcismComplete },
+  { name: "fullDemo", run: runFullDemo, assert: assertFullDemo },
 ];
 
 // ---------------------------------------------------------------------------------------------
