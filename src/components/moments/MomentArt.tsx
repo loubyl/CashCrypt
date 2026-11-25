@@ -1,6 +1,9 @@
 import {
+  DECAY_TINTS,
   MIN_LABEL_PX,
   SCENE_DIRT,
+  VIEWBOX_HEIGHT,
+  VIEWBOX_WIDTH,
   SCENE_SHOVEL_OUTLINE,
   SCENE_SHOVEL_STEEL,
   SCENE_SHOVEL_STEEL_SHADE,
@@ -53,6 +56,9 @@ export const ART_PART = {
   tombstoneClip: "tombstone-clip",
   tombstone: "tombstone",
   dirtPuff: "dirt-puff",
+  flame: "flame",
+  orb: "orb",
+  crack: "crack-flash",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
@@ -199,5 +205,94 @@ export function TombstoneArt({ clip, box, labelWidthPx, labelTopPx, ripText }: T
         </div>
       </div>
     </div>
+  );
+}
+
+// Payment Moment art: a candle flame, a light orb and a crack that seals. Drawn in screen pixels, hidden at first.
+const FLAME_VIEW = 32;
+const FLAME_OUTER_PATH = "M16 2 C22 10 27 15 27 21 C27 27 22 31 16 31 C10 31 5 27 5 21 C5 15 10 10 16 2 Z";
+const FLAME_INNER_PATH = "M16 14 C19 18 21 21 21 24 C21 27 19 29 16 29 C13 29 11 27 11 24 C11 21 13 18 16 14 Z";
+const ORB_VIEW = 28;
+const ORB_CENTER = ORB_VIEW / 2;
+const ORB_HALO_R = 13;
+const ORB_HALO_OPACITY = 0.35;
+const ORB_BODY_R = 8;
+const ORB_CORE_R = 4;
+const CANDLE_COLOR = "var(--accent-candle)";
+const ECTO_COLOR = "var(--accent-ecto)";
+
+export type FlameArtProps = { leftPx: number; topPx: number; sizePx: number };
+
+/** Small rounded candle flame; `leftPx` and `topPx` are its top-left corner. Starts hidden. */
+export function FlameArt({ leftPx, topPx, sizePx }: FlameArtProps) {
+  return (
+    <svg
+      data-moment={ART_PART.flame}
+      viewBox={`0 0 ${FLAME_VIEW} ${FLAME_VIEW}`}
+      width={sizePx}
+      height={sizePx}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute block"
+      style={{ left: leftPx, top: topPx, opacity: 0 }}
+    >
+      <path d={FLAME_OUTER_PATH} fill={CANDLE_COLOR} />
+      <path d={FLAME_INNER_PATH} fill={DECAY_TINTS[1]} />
+    </svg>
+  );
+}
+
+export type OrbArtProps = { sizePx: number };
+
+/** Round ball of candlelight with a soft halo; GSAP moves it along the path from the origin. Starts hidden. */
+export function OrbArt({ sizePx }: OrbArtProps) {
+  return (
+    <svg
+      data-moment={ART_PART.orb}
+      viewBox={`0 0 ${ORB_VIEW} ${ORB_VIEW}`}
+      width={sizePx}
+      height={sizePx}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute left-0 top-0 block"
+      style={{ opacity: 0 }}
+    >
+      <circle cx={ORB_CENTER} cy={ORB_CENTER} r={ORB_HALO_R} fill={CANDLE_COLOR} opacity={ORB_HALO_OPACITY} />
+      <circle cx={ORB_CENTER} cy={ORB_CENTER} r={ORB_BODY_R} fill={CANDLE_COLOR} />
+      <circle cx={ORB_CENTER} cy={ORB_CENTER} r={ORB_CORE_R} fill={DECAY_TINTS[1]} />
+    </svg>
+  );
+}
+
+export type CrackFlashArtProps = {
+  leftPx: number;
+  topPx: number;
+  widthPx: number;
+  points: readonly { x: number; y: number }[];
+  stroke: number;
+};
+
+/** The crack flash in --accent-ecto, drawn over the walls in ViewBox units. Starts hidden. */
+export function CrackFlashArt({ leftPx, topPx, widthPx, points, stroke }: CrackFlashArtProps) {
+  return (
+    <svg
+      data-moment={ART_PART.crack}
+      viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+      width={widthPx}
+      height={(widthPx * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute block"
+      style={{ left: leftPx, top: topPx, opacity: 0 }}
+    >
+      <polyline
+        points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+        fill="none"
+        stroke={ECTO_COLOR}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

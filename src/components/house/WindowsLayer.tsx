@@ -11,10 +11,10 @@ export type WindowsLayerProps = {
 
 /** Model opacity (0..1) maps linearly to halo strength and pane brightness, so even 0.26 reads as lit. */
 const HALO_PAD = 8;
-const HALO_MIN = 0.25;
-const HALO_RANGE = 0.6;
-const PANE_MIN = 0.6;
-const PANE_RANGE = 0.4;
+export const HALO_MIN = 0.25;
+export const HALO_RANGE = 0.6;
+export const PANE_MIN = 0.6;
+export const PANE_RANGE = 0.4;
 const FRAME_PAD = 5;
 const FRAME_EDGE_PAD = 1.5;
 const INNER_SHADOW_WIDTH = 3.5;

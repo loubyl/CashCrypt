@@ -303,12 +303,12 @@ Conventions that apply to every task:
     - With a GSAP mock: timeline created only inside the play function, beat of at least `MOMENT_BEAT_MIN_MS`, abort lands on the end state, reduced motion creates no timeline, overflow target path.
     - _Requirements: 13.3, 13.5, 18.5, 20.3, 24.7_
 
-- [ ] 12. Phase D: extra-payment moment with flare
-  - [ ] 12.1 Add flame and orb art to `MomentArt.tsx`; create `CandleOrbMoment.ts`; register in `momentLoader.ts`
+- [x] 12. Phase D: extra-payment moment with flare
+  - [x] 12.1 Add flame and orb art to `MomentArt.tsx`; create `CandleOrbMoment.ts`; register in `momentLoader.ts`
     - `playCandleOrbMoment`: flame flickers at the captured origin (bottom-center fallback), orb travels a curved `MotionPathPlugin` path in the Moment_Layer outside the SVG, lit windows rise to the flare peak from `getFlareSteps`, hold 300 ms with one `--accent-ecto` crack flash (omitted when `hasCrack` is false), settle to the live opacity. Flame and orb at least 24 px. End state equals the live model. Reduced motion: no flare, 150 ms fade.
     - _Requirements: 12.14, 14.1, 14.3, 14.4, 14.5, 14.6, 14.7, 18.4, 18.5, 20.3_
 
-  - [ ]* 12.2 Write component tests for the payment moment
+  - [x]* 12.2 Write component tests for the payment moment
     - GSAP mock: recorded steps are `from`, `peak`, `final`; peak at most 1 and at least the live opacity; hold lasts `MOMENT_BEAT_MIN_MS`; abort leaves the live opacity; no flare under reduced motion; crack flash omitted when no crack. Mutation check (R1): remove the flare and confirm the test fails.
     - _Requirements: 14.3, 14.6, 14.7, 18.4, 20.3_
 

@@ -758,6 +758,37 @@
         "chatSessionId": "sess_e4af4386-4708-4245-8005-02d96a53f26e",
         "timestamp": 1795520554895
       }
+    ],
+    "12.1 Add flame and orb art to `MomentArt.tsx`; create `CandleOrbMoment.ts`; register in `momentLoader.ts`": [
+      {
+        "executionId": "71ae36b1-3249-4842-90e4-f260fc6fa078",
+        "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
+        "timestamp": 1795575216072
+      },
+      {
+        "executionId": "71ae36b1-3249-4842-90e4-f260fc6fa078",
+        "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
+        "timestamp": 1795575350147
+      }
+    ],
+    "12. Phase D: extra-payment moment with flare": [
+      {
+        "executionId": "71ae36b1-3249-4842-90e4-f260fc6fa078",
+        "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
+        "timestamp": 1795575350211
+      }
+    ],
+    "12.2 Write component tests for the payment moment": [
+      {
+        "executionId": "71ae36b1-3249-4842-90e4-f260fc6fa078",
+        "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
+        "timestamp": 1795575350876
+      },
+      {
+        "executionId": "71ae36b1-3249-4842-90e4-f260fc6fa078",
+        "chatSessionId": "sess_258cab2f-f611-4e17-8b7b-7da1f96f83e6",
+        "timestamp": 1795576547000
+      }
     ]
   }
 }
