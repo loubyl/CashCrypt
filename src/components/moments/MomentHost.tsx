@@ -64,6 +64,9 @@ type TicketEntry = {
 };
 
 const SCENE_SELECTOR = '[data-part="scene"]';
+const SUBMIT_CONTROL_SELECTOR = 'button[type="submit"], input[type="submit"]';
+/** A submit rect older than this is not the control that started the action. */
+const SUBMIT_ORIGIN_MAX_AGE_MS = 1500;
 const NO_AWAITING = 0;
 // z-50 matches the ToastRegion and sits above the sheets (z-40) and the TabBar (z-30).
 // The layer ignores pointer events, so sharing the toast level blocks nothing.
@@ -84,6 +87,14 @@ function toRectLike(element: Element | null): RectLike | null {
   if (!element) return null;
   const rect = element.getBoundingClientRect();
   return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+}
+
+type SubmitOrigin = { rect: RectLike; at: number };
+
+/** The control that submitted a form: the event's submitter, else the form's first submit control. */
+function getSubmitControl(event: SubmitEvent): Element | null {
+  if (event.submitter) return event.submitter;
+  return event.target instanceof Element ? event.target.querySelector(SUBMIT_CONTROL_SELECTOR) : null;
 }
 
 function buildContext(live: MomentHostLive): ActionContext {
@@ -121,6 +132,7 @@ export function MomentHost({ live, children }: MomentHostProps) {
   const cursorRef = useRef(live.model.level);
   const mountedRef = useRef(false);
   const dispatchRef = useRef(dispatch);
+  const submitOriginRef = useRef<SubmitOrigin | null>(null);
 
   useLayoutEffect(() => {
     liveRef.current = live;
@@ -152,6 +164,18 @@ export function MomentHost({ live, children }: MomentHostProps) {
   useLayoutEffect(() => {
     if (released) runCleanups();
   }, [released, runCleanups]);
+
+  // The flame starts at the control that submitted the form. Its rect is read in the capture phase of
+  // the `submit` event, before any handler runs, because by `begin` the sheet may already be closing,
+  // the button may be disabled or moved, and with Enter in a field the focused element is the field.
+  useEffect(() => {
+    const remember = (event: SubmitEvent): void => {
+      const rect = toRectLike(getSubmitControl(event));
+      submitOriginRef.current = rect ? { rect, at: performance.now() } : null;
+    };
+    document.addEventListener("submit", remember, true);
+    return () => document.removeEventListener("submit", remember, true);
+  }, []);
 
   // Queue lifecycle and target-mounted tracking.
   useLayoutEffect(() => {
@@ -252,6 +276,13 @@ export function MomentHost({ live, children }: MomentHostProps) {
       finishTicket(id);
     };
 
+    const takePaymentOrigin = (): RectLike | null => {
+      const submitted = submitOriginRef.current;
+      submitOriginRef.current = null;
+      if (submitted && performance.now() - submitted.at <= SUBMIT_ORIGIN_MAX_AGE_MS) return submitted.rect;
+      return toRectLike(document.activeElement);
+    };
+
     return {
       begin(action: ObservedAction): ActionTicket {
         const id = nextTicketRef.current + 1;
@@ -262,7 +293,7 @@ export function MomentHost({ live, children }: MomentHostProps) {
         awaitingRef.current += 1;
         tickets.set(id, {
           ctx: buildContext(current),
-          origin: action.kind === "payment" ? toRectLike(document.activeElement) : null,
+          origin: action.kind === "payment" ? takePaymentOrigin() : null,
           version: versionRef.current,
           epoch: epochRef.current,
         });

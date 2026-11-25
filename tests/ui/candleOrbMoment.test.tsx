@@ -11,11 +11,16 @@ import type { SceneModel } from "@/lib/scene";
 type Vars = Record<string, unknown>;
 type Tween = { method: "to" | "fromTo" | "set"; target: unknown; from: Vars | null; vars: Vars; position: number };
 
+const RECORDED_DURATION_S = 2;
+
 const rec = vi.hoisted(() => ({
   tweens: [] as Tween[],
   timelines: 0,
   modules: 0,
   onComplete: null as (() => void) | null,
+  paused: false,
+  times: [] as number[],
+  tickers: [] as Array<() => void>,
 }));
 
 vi.mock("gsap", () => {
@@ -41,6 +46,15 @@ vi.mock("gsap", () => {
         push({ method: "set", target, from: null, vars, position });
         return api;
       },
+      pause: () => {
+        rec.paused = true;
+        return api;
+      },
+      time: (seconds: number) => {
+        rec.times.push(seconds);
+        return api;
+      },
+      duration: () => RECORDED_DURATION_S,
       // Jump to the end: apply the last opacity of every element, in timeline order.
       progress: () => {
         [...own]
@@ -58,6 +72,10 @@ vi.mock("gsap", () => {
   const gsap = {
     timeline,
     set: () => undefined,
+    ticker: {
+      add: (callback: () => void) => void rec.tickers.push(callback),
+      remove: (callback: () => void) => void (rec.tickers = rec.tickers.filter((entry) => entry !== callback)),
+    },
     registerPlugin: () => undefined,
     context: () => ({ add: (fn: () => void) => fn(), revert: () => undefined }),
   };
@@ -153,6 +171,9 @@ beforeEach(() => {
   rec.timelines = 0;
   rec.modules = 0;
   rec.onComplete = null;
+  rec.paused = false;
+  rec.times = [];
+  rec.tickers = [];
   vi.resetModules();
 });
 
@@ -218,6 +239,47 @@ describe("payment moment flare", () => {
       expect(Number((light as HTMLElement).style.opacity)).toBeCloseTo(paneOf(live), 9);
       expect(Number((glows.get(index) as HTMLElement).style.opacity)).toBeCloseTo(haloOf(live), 9);
     }
+  });
+});
+
+describe("payment moment clock", () => {
+  const MS_PER_S = 1000;
+  const SLOW_FRAME_MS = 1500;
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("sets the timeline to the wall-clock time on every frame, however far apart the frames are", async () => {
+    const play = await loadPlayer();
+    const { target } = buildHarness();
+    const now = vi.spyOn(performance, "now");
+    now.mockReturnValue(1000);
+    const done = play(target, options(true));
+    await vi.waitFor(() => expect(rec.timelines).toBe(1));
+
+    expect(rec.paused).toBe(true);
+    expect(rec.tickers).toHaveLength(1);
+    now.mockReturnValue(1000 + SLOW_FRAME_MS);
+    rec.tickers[0]?.();
+
+    expect(rec.times.at(-1)).toBeCloseTo(SLOW_FRAME_MS / MS_PER_S, 9);
+    rec.onComplete?.();
+    await done;
+    expect(rec.tickers).toHaveLength(0);
+  });
+
+  it("stops the frame driver once the wall clock passes the timeline duration", async () => {
+    const play = await loadPlayer();
+    const { target } = buildHarness();
+    const now = vi.spyOn(performance, "now");
+    now.mockReturnValue(0);
+    const done = play(target, options(true));
+    await vi.waitFor(() => expect(rec.timelines).toBe(1));
+    now.mockReturnValue((RECORDED_DURATION_S + 1) * MS_PER_S);
+    rec.tickers[0]?.();
+
+    expect(rec.tickers).toHaveLength(0);
+    rec.onComplete?.();
+    await done;
   });
 });
 

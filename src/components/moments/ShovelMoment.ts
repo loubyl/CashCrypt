@@ -22,6 +22,7 @@ import {
   shovelArc,
 } from "@/lib/scene/momentGeometry";
 import type { MomentOptions, MomentTarget } from "./momentLoader";
+import { driveOnWallClock } from "./driveOnWallClock";
 import { ART_PART, DirtPuffArt, NameLabel, SHOVEL_ASPECT, ShovelArt, TombstoneArt } from "./MomentArt";
 
 type CancelRequest = Extract<MomentOptions["request"], { kind: "cancel" }>;
@@ -345,11 +346,14 @@ export async function playShovelMoment(target: MomentTarget, options: MomentOpti
 
   return new Promise<void>((resolve) => {
     let timeline: gsap.core.Timeline | null = null;
+    let stopDriver: () => void = () => undefined;
     const finish = (): void => {
+      stopDriver();
       signal.removeEventListener("abort", onAbort);
       resolve();
     };
     const onAbort = (): void => {
+      stopDriver();
       timeline?.progress(1, false);
       finish();
     };
@@ -404,6 +408,9 @@ export async function playShovelMoment(target: MomentTarget, options: MomentOpti
         // bounce.out lands on the final position and rebounds only back toward the ground, so the slab never leaves its clip.
         tl.to(tombstone, { y: 0, duration: Math.max(endS - tombstoneAt, TOMBSTONE_FADE_IN_S), ease: TOMBSTONE_BOUNCE_EASE }, tombstoneAt);
       }
+
+      // Play by the wall clock so a slow frame rate cannot stretch the Moment (see driveOnWallClock).
+      stopDriver = driveOnWallClock(gsap, tl);
     });
 
     if (signal.aborted) {

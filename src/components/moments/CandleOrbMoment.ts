@@ -7,6 +7,7 @@ import type { Point, SceneModel } from "@/lib/scene";
 import { getCrackFlash, getFlameFallbackPoint, getOrbEndpoint } from "@/lib/scene/momentGeometry";
 import { HALO_MIN, HALO_RANGE, PANE_MIN, PANE_RANGE } from "@/components/house/WindowsLayer";
 import type { MomentOptions, MomentTarget } from "./momentLoader";
+import { driveOnWallClock } from "./driveOnWallClock";
 import { ART_PART, CrackFlashArt, FlameArt, OrbArt } from "./MomentArt";
 
 const MS_PER_S = 1000;
@@ -46,7 +47,7 @@ function toPx(geometry: Geometry, point: Point): Point {
   return { x: geometry.originX + point.x * geometry.scale, y: geometry.originY + point.y * geometry.scale };
 }
 
-type LitWindow = {
+export type LitWindow = {
   glow: Element | null;
   light: Element | null;
   from: number;
@@ -62,7 +63,7 @@ function readDrawnOpacity(light: Element | null, fallback: number): number {
 }
 
 /** The lit windows drawn in the Scene that are also lit in the live model, with their flare steps. */
-function planLitWindows(scene: HTMLElement, live: SceneModel): LitWindow[] {
+export function planLitWindows(scene: HTMLElement, live: SceneModel): LitWindow[] {
   const planned: LitWindow[] = [];
   for (const window of live.windows) {
     if (window.state !== "lit") continue;
@@ -178,11 +179,14 @@ export async function playCandleOrbMoment(target: MomentTarget, options: MomentO
 
   return new Promise<void>((resolve) => {
     let timeline: gsap.core.Timeline | null = null;
+    let stopDriver: () => void = () => undefined;
     const finish = (): void => {
+      stopDriver();
       signal.removeEventListener("abort", onAbort);
       resolve();
     };
     const onAbort = (): void => {
+      stopDriver();
       timeline?.progress(1, false);
       finish();
     };
@@ -226,6 +230,8 @@ export async function playCandleOrbMoment(target: MomentTarget, options: MomentO
 
       // Keep the timeline at least as long as the Moment duration.
       tl.set({}, {}, Math.max(durationMs / MS_PER_S, holdEndAt + FLARE_SETTLE_S));
+      // Play by the wall clock so a slow frame rate cannot stretch the Moment (see driveOnWallClock).
+      stopDriver = driveOnWallClock(gsap, tl);
     });
 
     if (signal.aborted) {
