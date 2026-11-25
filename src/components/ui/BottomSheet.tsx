@@ -253,6 +253,7 @@ export function BottomSheet({ open, onClose, title, className, children }: Botto
         <motion.div
           key="bottom-sheet"
           ref={layerRef}
+          data-part="bottom-sheet"
           className={layerClasses}
           data-reduced-motion={reduced ? "true" : "false"}
           variants={layerVariants}

@@ -1,18 +1,42 @@
 import {
   MIN_LABEL_PX,
-  SCENE_EMBER,
-  SCENE_MOON,
+  SCENE_DIRT,
+  SCENE_SHOVEL_OUTLINE,
+  SCENE_SHOVEL_STEEL,
+  SCENE_SHOVEL_STEEL_SHADE,
+  SCENE_SHOVEL_WOOD,
   SCENE_STONE,
   SCENE_WALL,
-  SCENE_WALL_LIGHT,
+  SHOVEL_VIEW_H,
+  SHOVEL_VIEW_W,
 } from "@/lib/scene";
 
 // Static Moment art. It never imports GSAP: ShovelMoment mounts it in the Moment_Layer and animates it.
 // Every piece renders hidden (opacity 0); the timeline reveals it. Original, rounded, cartoon art.
 
-/** Local drawing space of the shovel (a 40 by 120 figure, blade down). */
-const SHOVEL_VIEW_W = 40;
-const SHOVEL_VIEW_H = 120;
+/** Height over width of the shovel drawing (the drawing space is SHOVEL_VIEW_W by SHOVEL_VIEW_H, blade down). */
+export const SHOVEL_ASPECT = SHOVEL_VIEW_H / SHOVEL_VIEW_W;
+// Shovel drawing details, in its drawing space.
+const SHOVEL_AXIS_X = 24;
+const SHOVEL_OUTLINE_W = 8;
+const SHOVEL_WOOD_W = 4.5;
+const SHOVEL_PART_OUTLINE_W = 2.2;
+const SHOVEL_SHADE_OPACITY = 0.55;
+const D_GRIP_PATH = "M13 22 V11 Q13 5 19 5 H29 Q35 5 35 11 V22";
+const D_GRIP_BAR_PATH = "M13 22 H35";
+const BLADE_PATH = "M10 72 H38 L39 92 C39 104 31 112 24 118 C17 112 9 104 9 92 Z";
+const BLADE_SHADE_PATH = "M24 74 V116 C31 110 39 104 39 92 L38 74 Z";
+const TREAD = { x: 6, y: 67, w: 36, h: 8, r: 3 } as const;
+const SOCKET = { x: 19, y: 62, w: 10, h: 12, r: 2 } as const;
+/** Local drawing space of the dirt puff. */
+const PUFF_VIEW_W = 60;
+const PUFF_VIEW_H = 30;
+const PUFF_BLOBS = [
+  { cx: 14, cy: 20, r: 9 },
+  { cx: 30, cy: 14, r: 12 },
+  { cx: 46, cy: 20, r: 9 },
+  { cx: 30, cy: 22, r: 9 },
+] as const;
 /** Local drawing space of the tombstone (the same 64 by 56 figure as the Scene tombstone). */
 const TOMBSTONE_VIEW_W = 64;
 const TOMBSTONE_VIEW_H = 56;
@@ -28,11 +52,15 @@ export const ART_PART = {
   name: "name-label",
   tombstoneClip: "tombstone-clip",
   tombstone: "tombstone",
+  dirtPuff: "dirt-puff",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
 
-/** Cartoon shovel: wooden D-grip and shaft, rounded pale blade. Blade points down. */
+/**
+ * Cartoon digging shovel with a dark outline: wooden D-grip and shaft, steel socket, a flat tread
+ * (the step for the foot) and a pointed steel blade. The blade tip is at the bottom center.
+ */
 export function ShovelArt({ widthPx, heightPx }: ShovelArtProps) {
   return (
     <svg
@@ -45,10 +73,46 @@ export function ShovelArt({ widthPx, heightPx }: ShovelArtProps) {
       className="absolute left-0 top-0 block"
       style={{ opacity: 0 }}
     >
-      <path d="M12 8 H28 A4 4 0 0 1 32 12 V14 A4 4 0 0 1 28 18 H12" fill="none" stroke={SCENE_WALL_LIGHT} strokeWidth={5} strokeLinecap="round" />
-      <rect x={17.5} y={8} width={5} height={60} rx={2.5} fill={SCENE_EMBER} />
-      <path d="M20 58 C8 58 4 72 6 88 C8 104 16 114 20 116 C24 114 32 104 34 88 C36 72 32 58 20 58Z" fill={SCENE_MOON} />
-      <path d="M20 62 C12 64 10 74 11 86 C12 98 16 106 20 110" fill="none" stroke={SCENE_WALL_LIGHT} strokeWidth={2} strokeLinecap="round" opacity={0.5} />
+      <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <g stroke={SCENE_SHOVEL_OUTLINE} strokeWidth={SHOVEL_OUTLINE_W}>
+          <path d={D_GRIP_PATH} />
+          <path d={D_GRIP_BAR_PATH} />
+          <line x1={SHOVEL_AXIS_X} y1={22} x2={SHOVEL_AXIS_X} y2={66} />
+        </g>
+        <g stroke={SCENE_SHOVEL_WOOD} strokeWidth={SHOVEL_WOOD_W}>
+          <path d={D_GRIP_PATH} />
+          <path d={D_GRIP_BAR_PATH} />
+          <line x1={SHOVEL_AXIS_X} y1={22} x2={SHOVEL_AXIS_X} y2={66} />
+        </g>
+      </g>
+      <g stroke={SCENE_SHOVEL_OUTLINE} strokeWidth={SHOVEL_PART_OUTLINE_W} strokeLinejoin="round">
+        <path d={BLADE_PATH} fill={SCENE_SHOVEL_STEEL} />
+        <path d={BLADE_SHADE_PATH} fill={SCENE_SHOVEL_STEEL_SHADE} stroke="none" opacity={SHOVEL_SHADE_OPACITY} />
+        <rect x={TREAD.x} y={TREAD.y} width={TREAD.w} height={TREAD.h} rx={TREAD.r} fill={SCENE_SHOVEL_STEEL_SHADE} />
+        <rect x={SOCKET.x} y={SOCKET.y} width={SOCKET.w} height={SOCKET.h} rx={SOCKET.r} fill={SCENE_SHOVEL_STEEL} />
+      </g>
+    </svg>
+  );
+}
+
+export type DirtPuffArtProps = { leftPx: number; topPx: number; widthPx: number };
+
+/** A small round cloud of soil that bursts where the zombie goes under. Starts hidden. */
+export function DirtPuffArt({ leftPx, topPx, widthPx }: DirtPuffArtProps) {
+  return (
+    <svg
+      data-moment={ART_PART.dirtPuff}
+      viewBox={`0 0 ${PUFF_VIEW_W} ${PUFF_VIEW_H}`}
+      width={widthPx}
+      height={(widthPx * PUFF_VIEW_H) / PUFF_VIEW_W}
+      aria-hidden="true"
+      focusable="false"
+      className="absolute block"
+      style={{ left: leftPx, top: topPx, opacity: 0 }}
+    >
+      {PUFF_BLOBS.map((blob) => (
+        <circle key={`${blob.cx}-${blob.cy}`} cx={blob.cx} cy={blob.cy} r={blob.r} fill={SCENE_DIRT} />
+      ))}
     </svg>
   );
 }

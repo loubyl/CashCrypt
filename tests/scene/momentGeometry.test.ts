@@ -1,11 +1,19 @@
 // Example tests for the Moment art geometry (house-scene task 9.11). Requirements: 12.18, 24.6.
 import { describe, expect, it } from "vitest";
-import { SCENE_CONFIG, VIEWBOX_HEIGHT, VIEWBOX_WIDTH, buildSceneModel } from "@/lib/scene";
+import {
+  SCENE_CONFIG,
+  SHOVEL_VIEW_H,
+  SHOVEL_VIEW_W,
+  VIEWBOX_HEIGHT,
+  VIEWBOX_WIDTH,
+  buildSceneModel,
+} from "@/lib/scene";
 import type { Box, SceneModel } from "@/lib/scene";
 import {
   batPath,
   getCandleBoxes,
   getMomentExtents,
+  getShovelStrikePoint,
   getSinkingZombieBox,
   getTombstoneRiseBoxes,
   shovelArc,
@@ -52,24 +60,38 @@ describe("shipped shovel arc", () => {
   const arc = shovelArc(strike);
 
   it("starts at the configured start point and ends at the strike point", () => {
-    expect(arc.start).toEqual({ x: 700, y: 140 });
+    expect(arc.start).toEqual({ x: 660, y: 160 });
     expect(arc.end).toEqual(strike);
     expect(arc.samples[0]).toEqual(arc.start);
     expect(arc.samples[arc.samples.length - 1]).toEqual(arc.end);
   });
 
-  it("has 33 samples and a bound radius of 100", () => {
+  it("has 33 samples and a bound radius of 120", () => {
     expect(arc.samples).toHaveLength(33);
-    expect(arc.boundRadius).toBe(100);
+    expect(arc.boundRadius).toBe(120);
   });
 
-  it("lifts the control point 40 units above the higher end and centers it between them", () => {
-    expect(arc.control).toEqual({ x: 550, y: 100 });
+  it("lifts the control point 40 units above the higher end (kept inside the bound radius)", () => {
+    expect(arc.control).toEqual({ x: 530, y: 120 });
   });
 
   it("clamps a strike point near the edge so the bound circle stays inside the ViewBox", () => {
     const clamped = shovelArc({ x: 5, y: 590 });
-    expect(clamped.end).toEqual({ x: 100, y: 500 });
+    expect(clamped.end).toEqual({ x: 120, y: 480 });
+  });
+
+  it("draws the shovel at least a quarter of the Scene height and inside its bound circle", () => {
+    expect(SCENE_CONFIG.SHOVEL_HEIGHT).toBeGreaterThanOrEqual(VIEWBOX_HEIGHT / 4);
+    const halfWidth = (SCENE_CONFIG.SHOVEL_HEIGHT * SHOVEL_VIEW_W) / SHOVEL_VIEW_H / 2;
+    const halfDiagonal = Math.hypot(SCENE_CONFIG.SHOVEL_HEIGHT / 2, halfWidth);
+    expect(halfDiagonal).toBeLessThanOrEqual(SCENE_CONFIG.SHOVEL_BOUND_RADIUS);
+  });
+
+  it("puts the blade tip on the top of the zombie at the strike point", () => {
+    const zombie = model.zombies[0];
+    const request = { kind: "cancel", subscriptionId: "s1", name: "StreamMax", monthlyCents: 2299, target: "zombie" } as const;
+    const end = shovelArc(getShovelStrikePoint(model, request)).end;
+    expect(end.y + SCENE_CONFIG.SHOVEL_HEIGHT / 2).toBeCloseTo(zombie.box.y);
   });
 });
 

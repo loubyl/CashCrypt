@@ -22,7 +22,7 @@ import {
   shovelArc,
 } from "@/lib/scene/momentGeometry";
 import type { MomentOptions, MomentTarget } from "./momentLoader";
-import { ART_PART, NameLabel, ShovelArt, TombstoneArt } from "./MomentArt";
+import { ART_PART, DirtPuffArt, NameLabel, SHOVEL_ASPECT, ShovelArt, TombstoneArt } from "./MomentArt";
 
 type CancelRequest = Extract<MomentOptions["request"], { kind: "cancel" }>;
 
@@ -31,8 +31,7 @@ const HALF = 0.5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const SINK_CLIP_ID = "moment-sink-clip";
 
-// Shape of the shovel figure (a 40 by 120 drawing) and of the swing.
-const SHOVEL_ASPECT = 3;
+// The swing of the shovel (its drawing shape lives in MomentArt).
 const SHOVEL_START_TILT_DEG = 70;
 const SHOVEL_BONK_TILT_DEG = -16;
 const SHOVEL_FADE_IN_S = 0.08;
@@ -49,6 +48,18 @@ const WOBBLE_DEG = 6;
 const WOBBLE_STEPS_S = [0.07, 0.1, 0.07] as const;
 const SINK_SCALE_SHARE = 0.4;
 const SINK_ZONE_PAD = 4;
+
+// Dirt puff at the zombie's feet while it sinks (transform and opacity only).
+const PUFF_ASPECT = 0.5;
+const PUFF_WIDTH_SHARE = 1.1;
+const PUFF_BASE_LIFT_SHARE = 0.7;
+const PUFF_START_SCALE = 0.5;
+const PUFF_PEAK_SCALE = 1.1;
+const PUFF_END_SCALE = 1.5;
+const PUFF_PEAK_OPACITY = 0.85;
+const PUFF_RISE_PX = 14;
+const PUFF_GROW_SHARE = 0.35;
+const TOMBSTONE_BOUNCE_EASE = "bounce.out";
 
 // Layout of the overlay pieces.
 const NAME_GAP_UNITS = 6;
@@ -196,6 +207,7 @@ function buildArt(
   geometry: Geometry,
   tombstone: SceneTombstone | null,
   nameAnchor: ArtPlan["nameAnchor"],
+  sink: SinkSetup | null,
 ): { element: ReactElement; shovelSize: { w: number; h: number } } {
   const heightPx = SHOVEL_HEIGHT * geometry.scale;
   const shovelSize = { w: heightPx / SHOVEL_ASPECT, h: heightPx };
@@ -209,6 +221,19 @@ function buildArt(
       alignEnd: nameAnchor.alignEnd,
     }),
   ];
+  if (sink) {
+    const widthPx = sink.box.w * geometry.scale * PUFF_WIDTH_SHARE;
+    const base = toPx(geometry, { x: sink.box.x + sink.box.w * HALF, y: sink.box.y + sink.box.h });
+    const heightPx = widthPx * PUFF_ASPECT;
+    children.push(
+      createElement(DirtPuffArt, {
+        key: "puff",
+        widthPx,
+        leftPx: base.x - widthPx * HALF,
+        topPx: base.y - heightPx * PUFF_BASE_LIFT_SHARE,
+      }),
+    );
+  }
   if (tombstone) {
     const clip = getTombstoneClip();
     const clipOrigin = toPx(geometry, { x: clip.x, y: clip.y });
@@ -254,7 +279,7 @@ export async function playShovelMoment(target: MomentTarget, options: MomentOpti
   const sink = request.target === "zombie" ? planSink(target.scene, request.subscriptionId) : null;
   const marker = sink ? null : findOverflowMarker(target.scene);
   const nameAnchor = pickNameAnchor(geometry, sink, marker, layerRect.top, layerRect.left);
-  const art = buildArt(request, geometry, tombstoneDraft, nameAnchor);
+  const art = buildArt(request, geometry, tombstoneDraft, nameAnchor, sink);
 
   const container = target.layer.ownerDocument.createElement("div");
   container.style.position = "absolute";
@@ -286,6 +311,7 @@ export async function playShovelMoment(target: MomentTarget, options: MomentOpti
   const shovel = queryArt<SVGElement>(container, ART_PART.shovel);
   const nameLabel = queryArt<HTMLElement>(container, ART_PART.name);
   const tombstone = queryArt<HTMLElement>(container, ART_PART.tombstone);
+  const puff = queryArt<SVGElement>(container, ART_PART.dirtPuff);
 
   const arc = shovelArc(
     sink
@@ -359,12 +385,24 @@ export async function playShovelMoment(target: MomentTarget, options: MomentOpti
         tl.to(sink.element, { y: sink.sinkDistance, opacity: 0, duration: sinkS, ease: "power2.in" }, sinkAt);
       }
 
+      if (puff) {
+        const growS = sinkS * PUFF_GROW_SHARE;
+        gsap.set(puff, { opacity: 0, scale: PUFF_START_SCALE, transformOrigin: "50% 100%" });
+        tl.to(puff, { opacity: PUFF_PEAK_OPACITY, scale: PUFF_PEAK_SCALE, duration: growS, ease: "power2.out" }, sinkAt);
+        tl.to(
+          puff,
+          { opacity: 0, y: -PUFF_RISE_PX, scale: PUFF_END_SCALE, duration: sinkS - growS, ease: "power1.in" },
+          sinkAt + growS,
+        );
+      }
+
       if (marker) tl.call(decrementMarker, [], sinkAt);
 
       if (tombstone) {
         gsap.set(tombstone, { y: riseDistancePx, opacity: 0 });
         tl.to(tombstone, { opacity: 1, duration: TOMBSTONE_FADE_IN_S, ease: "none" }, tombstoneAt);
-        tl.to(tombstone, { y: 0, duration: Math.max(endS - tombstoneAt, TOMBSTONE_FADE_IN_S), ease: "power2.out" }, tombstoneAt);
+        // bounce.out lands on the final position and rebounds only back toward the ground, so the slab never leaves its clip.
+        tl.to(tombstone, { y: 0, duration: Math.max(endS - tombstoneAt, TOMBSTONE_FADE_IN_S), ease: TOMBSTONE_BOUNCE_EASE }, tombstoneAt);
       }
     });
 

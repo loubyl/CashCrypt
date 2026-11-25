@@ -133,9 +133,14 @@ export const GHOST_LANES: readonly GhostLaneConfig[] = [
 // Moment art (ViewBox units unless noted)
 // ---------------------------------------------------------------------------
 
-export const SHOVEL_HEIGHT = 180;
-export const SHOVEL_BOUND_RADIUS = 100;
-export const SHOVEL_START: Readonly<Point> = { x: 700, y: 140 };
+/** Shovel height: 220 of 600 units is 36.7% of the Scene height (Requirement 18.2 asks for at least 25%). */
+export const SHOVEL_HEIGHT = 220;
+/** Drawing space of the shovel art (width by height); the aspect ratio follows from it. */
+export const SHOVEL_VIEW_W = 48;
+export const SHOVEL_VIEW_H = 120;
+/** At least the distance from the shovel center to its farthest corner (half of 220 by 88 is about 118.5). */
+export const SHOVEL_BOUND_RADIUS = 120;
+export const SHOVEL_START: Readonly<Point> = { x: 660, y: 160 };
 export const BAT_HALF_SIZE = 20;
 export const BAT_START: Readonly<Point> = { x: 520, y: 70 };
 export const BAT_END: Readonly<Point> = { x: 750, y: 40 };
@@ -149,7 +154,11 @@ export const SHUTTER_WIDTH = 24;
 /** Shovel arc: sample count, lift of the control point above the higher end, strike height above a zombie. */
 export const SHOVEL_ARC_SAMPLES = 33;
 export const SHOVEL_CONTROL_LIFT = 40;
-export const SHOVEL_STRIKE_OFFSET = 60;
+/**
+ * The shovel rotates about its center and the blade tip is at the bottom, so a center half a
+ * shovel height above the target puts the tip on the target at the bonk beat.
+ */
+export const SHOVEL_STRIKE_OFFSET = SHOVEL_HEIGHT * HALF;
 /** The tombstone starts this far below its final box, hidden by TOMBSTONE_CLIP. */
 export const TOMBSTONE_RISE_OFFSET = 56;
 /** Bat flight (dawn): control point, sample count and the share of the path where it fades out. */
@@ -239,6 +248,11 @@ export const MOMENT_BEAT_MIN_MS = 300;
 export const MOMENT_QUEUE_MAX_PENDING = 4;
 export const REDUCED_MOTION_FADE_MS = 150;
 export const SETTLE_TIMEOUT_MS = 800;
+/**
+ * Longest a Moment waits for an open or closing bottom sheet to leave the document. The sheet
+ * exit takes 280ms (SHEET_DURATION_S), so this leaves room for one slow frame and never hangs.
+ */
+export const SHEET_CLOSE_WAIT_MAX_MS = 600;
 
 // ---------------------------------------------------------------------------
 // Labels
@@ -292,6 +306,13 @@ export const SCENE_CHAR = "#2E2829";
 export const SCENE_EMBER = "#5A2E24";
 /** Bats at levels 4 and 5: lighter than the overlay surface so they read against the sky. */
 export const SCENE_BAT = "#4A4A56";
+/** Cancel Moment shovel: steel blade (light and shade), wooden handle and the dark outline. */
+export const SCENE_SHOVEL_STEEL = "#A9B6BF";
+export const SCENE_SHOVEL_STEEL_SHADE = "#76858F";
+export const SCENE_SHOVEL_WOOD = "#9A6A3F";
+export const SCENE_SHOVEL_OUTLINE = "#15151B";
+/** Soil kicked up when the zombie sinks. */
+export const SCENE_DIRT = "#5B4636";
 
 // ---------------------------------------------------------------------------
 // Feature table (see design "Decay levels")

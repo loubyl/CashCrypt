@@ -26,10 +26,12 @@ import {
   MOMENT_HARD_CAP_MS,
   MOMENT_QUEUE_MAX_PENDING,
   SETTLE_TIMEOUT_MS,
+  SHEET_CLOSE_WAIT_MAX_MS,
 } from "@/lib/scene";
 import type { SceneModel } from "@/lib/scene";
 import { playMoment } from "./momentLoader";
 import type { MomentTarget } from "./momentLoader";
+import { isSheetPresent, waitForSheetsClosed } from "./sheetGate";
 
 /** Live data the host reads at `begin` and at settle. */
 export type MomentHostLive = {
@@ -169,7 +171,11 @@ export function MomentHost({ live, children }: MomentHostProps) {
             cleanups.push(cleanup);
           },
         };
-        return playMoment(request, target, signal, reducedRef.current === true);
+        const start = (): Promise<void> => playMoment(request, target, signal, reducedRef.current === true);
+        const doc = layer.ownerDocument;
+        if (!isSheetPresent(doc)) return start();
+        // A bottom sheet is open or closing: let it leave first so the Moment never plays under its scrim.
+        return waitForSheetsClosed(doc, signal, SHEET_CLOSE_WAIT_MAX_MS).then(() => (signal.aborted ? undefined : start()));
       },
       isTargetMounted: () => mountedRef.current && layerRef.current !== null && getScene() !== null,
       shouldDrop: (request) => request.kind === "sigil" && liveRef.current.model.poltergeist === null,

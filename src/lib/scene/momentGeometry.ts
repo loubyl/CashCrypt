@@ -76,6 +76,11 @@ function clampShovelPoint(p: Point, config: SceneConfig): Point {
   };
 }
 
+/** Shovel center for a blade tip on `target`: half a shovel height above it. */
+function liftStrike(target: Point): Point {
+  return { x: target.x, y: target.y - SHOVEL_STRIKE_OFFSET };
+}
+
 /** The strike point of a cancel: above the zombie, or on the zombie overflow marker. */
 export function getShovelStrikePoint(
   model: SceneModel,
@@ -86,7 +91,7 @@ export function getShovelStrikePoint(
     request.target === "zombie" ? model.zombies.find((z) => z.id === request.subscriptionId) : undefined;
   const raw = zombie
     ? { x: zombie.box.x + zombie.box.w * HALF, y: zombie.box.y - SHOVEL_STRIKE_OFFSET }
-    : getOverflowAnchors(config).zombies;
+    : liftStrike(getOverflowAnchors(config).zombies);
   return clampShovelPoint(raw, config);
 }
 
