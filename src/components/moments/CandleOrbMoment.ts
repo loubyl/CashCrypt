@@ -81,7 +81,7 @@ export function planLitWindows(scene: HTMLElement, live: SceneModel): LitWindow[
 const paneOpacity = (opacity: number): number => PANE_MIN + PANE_RANGE * opacity;
 const haloOpacity = (opacity: number): number => HALO_MIN + HALO_RANGE * opacity;
 
-/** Flame start (art center) in layer pixels: left edge of the submit control, or the Scene bottom center. */
+/** Flame start (art center) in layer pixels: center of the submit control, or the Scene bottom center. */
 function planStart(
   request: Extract<MomentOptions["request"], { kind: "payment" }>,
   geometry: Geometry,
@@ -89,7 +89,7 @@ function planStart(
   flamePx: number,
 ): { flameLeft: number; flameTop: number; center: Point } {
   if (request.origin) {
-    const left = request.origin.left - layerRect.left;
+    const left = request.origin.left + request.origin.width * HALF - layerRect.left - flamePx * HALF;
     const top = request.origin.top + request.origin.height * HALF - layerRect.top - flamePx * HALF;
     return { flameLeft: left, flameTop: top, center: { x: left + flamePx * HALF, y: top + flamePx * HALF } };
   }

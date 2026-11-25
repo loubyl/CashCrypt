@@ -53,6 +53,24 @@ const CANDLE_COUNT = 3;
 const CANDLES_MAX_SPAN_MS = 2400; // candles on screen: Moment 1.2 s plus sampler and unmount slack
 const CANDLE_LIT = 0.5; // a flame counts as lit above this opacity
 const CANDLE_ORDER_MIN_GAP_MS = 20; // consecutive flames must not light at the same sample
+const OVERLAP_SLACK_PX = 0.5; // sub-pixel rounding of getBoundingClientRect
+const RIP_TEXT = "R.I.P. $120/mo"; // Wraithcast, formatCentsShort (Requirement 11.2)
+/**
+ * Scene parts the three candles must not overlap ([name, selector inside the Scene]). Tree and bat
+ * groups are read per child, so each tree and each bat (at its current circling position) is one box.
+ */
+const DRAWN_PART_SELECTORS = [
+  ["moon", '[data-part="moon"]'],
+  ["poltergeist", '[data-part="poltergeist"]'],
+  ["chimney", '[data-part="chimney"]'],
+  ["house", '[data-part="house"]'],
+  ["tree", '[data-part="tree"] > g'],
+  ["fence", '[data-part="fence"]'],
+  ["bat", '[data-part="bats"] > g'],
+  ["ground-cover", '[data-part="ground-cover"]'],
+  ["zombies", '[data-part="zombies"]'],
+  ["graveyard", '[data-part="graveyard"]'],
+];
 // Measured gap = next start (up to one sample late) minus last visible sample (up to one sample early).
 const GAP_BELOW_MS = SAMPLE_MS; // sampling jitter below MOMENT_GAP_MS
 const GAP_ABOVE_MS = 2 * SAMPLE_MS + 100 + RAF_THROTTLE_MS; // two samples, scheduling slack, one slow frame
@@ -85,6 +103,15 @@ function loadPuppeteer() {
   }
   throw new Error(`puppeteer-core not found. Run \`npm i --prefix ${PUPPETEER_DIR} puppeteer-core\``);
 }
+
+const overlapPx = (a, b) =>
+  Math.min(a.left + a.width, b.left + b.width) - Math.max(a.left, b.left) > OVERLAP_SLACK_PX &&
+  Math.min(a.top + a.height, b.top + b.height) - Math.max(a.top, b.top) > OVERLAP_SLACK_PX;
+const insideRect = (r, outer) =>
+  r.left >= outer.left - OVERLAP_SLACK_PX &&
+  r.top >= outer.top - OVERLAP_SLACK_PX &&
+  r.left + r.width <= outer.left + outer.width + OVERLAP_SLACK_PX &&
+  r.top + r.height <= outer.top + outer.height + OVERLAP_SLACK_PX;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const fmt = (n) => (n === null || n === undefined || Number.isNaN(n) ? "  -  " : n.toFixed(3));
@@ -140,7 +167,7 @@ function installPageHooks(throttleMs) {
 }
 
 /** Installed in the page: samples the Moment layer and the Scene every sampleMs. */
-function installSampler(sampleMs) {
+function installSampler(sampleMs, DRAWN_PART_SELECTORS) {
   const rectOf = (el) => {
     if (!el) return null;
     const r = el.getBoundingClientRect();
@@ -204,6 +231,15 @@ function installSampler(sampleMs) {
         ? [...new Set([...layer.querySelectorAll("[data-moment]")].filter((el) => opacityOf(el) > 0.02).map((el) => el.getAttribute("data-moment")))]
         : [],
       candles: layer ? [...layer.querySelectorAll('[data-moment="candle-flame"]')].map((el) => ({ opacity: opacityOf(el), rect: rectOf(el) })) : [],
+      candleWax: layer ? [...layer.querySelectorAll('[data-moment="candle"]')].map((el) => ({ opacity: opacityOf(el), rect: rectOf(el) })) : [],
+      // Drawn Scene parts the candles must not cover; only read while candles are in the layer.
+      drawnParts:
+        layer?.querySelector('[data-moment="candle"]') && scene
+          ? DRAWN_PART_SELECTORS.flatMap(([name, selector]) =>
+              [...scene.querySelectorAll(selector)].map((el, i) => ({ name: `${name}${i ? ` ${i}` : ""}`, rect: rectOf(el) })),
+            ).filter((part) => part.rect && part.rect.width > 0 && part.rect.height > 0)
+          : [],
+      riseLabel: rectOf(layer?.querySelector('[data-moment="tombstone"] > div') ?? null),
     });
   }, sampleMs);
 }
@@ -232,13 +268,35 @@ const sceneRect = (page) =>
 // ---------------------------------------------------------------------------------------------
 
 async function runShovel(page) {
-  await page.evaluate(installSampler, SAMPLE_MS);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   await cancelWraithcast(page);
   await sleep(MAX_MOMENT_MS);
-  return { samples: await page.evaluate(() => window.__samples) };
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-part="scene"] [data-part="tombstone-label"]')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { text: el.textContent ?? "", rect: { left: r.left, top: r.top, width: r.width, height: r.height } };
+    }),
+  );
+  return { samples: await page.evaluate(() => window.__samples), labels, scene: await sceneRect(page) };
 }
 
-function assertShovel({ samples }) {
+function assertShovel({ samples, labels, scene }) {
+  // Tombstone labels (Requirement 5.7): inside the Scene, short amount (Requirement 11.2).
+  check(labels.length > 0, `shovel: tombstone labels are shown at this Scene width (${scene.width.toFixed(0)} px)`);
+  for (const label of labels) {
+    const r = label.rect;
+    check(
+      insideRect(r, scene),
+      `shovel: tombstone label "${label.text}" is inside the scene (bottom ${(r.top + r.height - scene.top).toFixed(1)} of ${scene.height.toFixed(1)} px)`,
+    );
+  }
+  check(labels.some((l) => l.text.includes(RIP_TEXT)), `shovel: a tombstone label reads "${RIP_TEXT}" (${labels.map((l) => l.text).join(" | ")})`);
+  // While rising, the label is hidden under the tombstone clip; once risen it must be inside the Scene.
+  const risen = samples.map((s) => s.riseLabel).filter(Boolean).at(-1);
+  check(
+    Boolean(risen) && insideRect(risen, scene),
+    `shovel: the risen tombstone label of the Moment is inside the scene${risen ? ` (bottom ${(risen.top + risen.height - scene.top).toFixed(1)} of ${scene.height.toFixed(1)} px)` : ""}`,
+  );
   const during = samples.filter((s) => s.layerChildren > 0);
   check(during.length > 0, "shovel: Moment layer got children during the Moment");
   if (during.length === 0) return;
@@ -272,7 +330,7 @@ async function runPayment(page) {
   await clickByText(page, "button", "Do it:");
   await hasButton(page, "Save payment");
   await sleep(600);
-  await page.evaluate(installSampler, SAMPLE_MS);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   const frozenBefore = await page.evaluate(() => {
     const w = document.querySelector('[data-part="scene"] [data-state="lit"] [data-part="light"]');
     return w ? Number(getComputedStyle(w).opacity) : null;
@@ -296,13 +354,13 @@ function assertPayment({ samples, saveRect, frozenBefore, scene }) {
   if (!THROTTLED) {
     check(
       Boolean(firstFlame) &&
-        Math.abs(firstFlame.flame.cx - saveRect.left) <= FLAME_NEAR_PX + saveRect.width / 2 &&
+        Math.abs(firstFlame.flame.cx - saveRect.cx) <= FLAME_NEAR_PX &&
         Math.abs(firstFlame.flame.cy - saveRect.cy) <= FLAME_NEAR_PX,
-      `payment: flame starts near the Save payment button (${firstFlame ? `${firstFlame.flame.cx.toFixed(0)},${firstFlame.flame.cy.toFixed(0)}` : "no flame"})`,
+      `payment: flame starts at the center of the Save payment button (${firstFlame ? `${firstFlame.flame.cx.toFixed(0)},${firstFlame.flame.cy.toFixed(0)}` : "no flame"})`,
     );
   }
   const orbPoints = during.filter((s) => s.orb && s.orbOpacity > 0.05).map((s) => s.orb);
-  const from = THROTTLED ? { cx: saveRect.left, cy: saveRect.cy } : orbPoints[0];
+  const from = THROTTLED ? { cx: saveRect.cx, cy: saveRect.cy } : orbPoints[0];
   const travel = orbPoints.length > 0 && from ? Math.max(...orbPoints.map((p) => Math.hypot(p.cx - from.cx, p.cy - from.cy))) : 0;
   check(travel >= ORB_MIN_TRAVEL_PX, `payment: orb travels ${travel.toFixed(0)} px away from its start (min ${ORB_MIN_TRAVEL_PX})`);
   const lastOrb = orbPoints.at(-1);
@@ -333,7 +391,7 @@ function assertPayment({ samples, saveRect, frozenBefore, scene }) {
 }
 
 async function runSigil(page) {
-  await page.evaluate(installSampler, SAMPLE_MS);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   const coffee = await page.evaluateHandle(
     () =>
       [...document.querySelectorAll('[role="checkbox"], input[type="checkbox"]')].find((el) =>
@@ -382,7 +440,7 @@ async function runLevel(page) {
   await clickByText(page, "button", "Do it:");
   await hasButton(page, "Save payment");
   await sleep(600);
-  await page.evaluate(installSampler, SAMPLE_MS);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   await clickByText(page, "button", "Save payment");
   await sleep(MAX_MOMENT_MS + 2000);
   return { samples: await page.evaluate(() => window.__samples) };
@@ -419,7 +477,7 @@ const runExorcismComplete = (page) => runPlanFlow(page);
 
 /** Level-4 flow: cancel Wraithcast, tick the coffee action, then the $300 payment completes 3 of 3 actions. */
 async function runPlanFlow(page, { sampleFromStart = false } = {}) {
-  if (sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS);
+  if (sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   await cancelWraithcast(page);
   await sleep(SETTLE_MS * 2);
   const coffee = await page.evaluateHandle(
@@ -434,7 +492,7 @@ async function runPlanFlow(page, { sampleFromStart = false } = {}) {
   await clickByText(page, "button", "Do it:");
   await hasButton(page, "Save payment");
   await sleep(600);
-  if (!sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS);
+  if (!sampleFromStart) await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   const saveClickT = await page.evaluate(() => performance.now());
   await clickByText(page, "button", "Save payment");
   await sleep(MAX_MOMENT_MS * 2 + 2000);
@@ -451,13 +509,20 @@ function assertExorcismComplete({ samples, scene }) {
   check(span <= CANDLES_MAX_SPAN_MS, `exorcismComplete: candles are visible for ${span} ms (max ${CANDLES_MAX_SPAN_MS})`);
   const count = Math.max(...during.map((s) => s.candles.length));
   check(count === CANDLE_COUNT, `exorcismComplete: ${count} candles drawn (expected ${CANDLE_COUNT})`);
-  const first = during[0].candles.map((c) => c.rect).filter(Boolean);
-  const inUpperScene =
-    first.length === CANDLE_COUNT &&
-    first.every(
-      (r) => r.cx >= scene.left && r.cx <= scene.left + scene.width && r.cy >= scene.top && r.cy <= scene.top + scene.height / 2,
-    );
-  check(inUpperScene, "exorcismComplete: candles sit in the upper half of the scene");
+  // Wax (with its holder) and flame boxes of every candle, at every sample where they are drawn.
+  const candleBoxes = (s) => [...s.candleWax, ...s.candles].map((c) => c.rect).filter(Boolean);
+  const outside = during.flatMap((s) => candleBoxes(s).filter((r) => !insideRect(r, scene)));
+  check(
+    during.every((s) => candleBoxes(s).length === CANDLE_COUNT * 2) && outside.length === 0,
+    `exorcismComplete: every candle and flame stays inside the scene (${outside.length} box(es) outside)`,
+  );
+  const hits = new Set();
+  for (const s of during) {
+    for (const box of candleBoxes(s)) for (const part of s.drawnParts) if (overlapPx(box, part.rect)) hits.add(part.name);
+  }
+  const partNames = new Set(during.flatMap((s) => s.drawnParts.map((p) => p.name)));
+  check(partNames.has("moon") && partNames.has("poltergeist"), `exorcismComplete: moon and Poltergeist were measured (${[...partNames].join(", ")})`);
+  check(hits.size === 0, `exorcismComplete: candles overlap no drawn scene part${hits.size ? ` (overlap: ${[...hits].join(", ")})` : ""}`);
   // First sample at which each flame is lit; the flames must light one after another, left to right.
   const litAt = Array.from({ length: CANDLE_COUNT }, (_, i) => during.find((s) => (s.candles[i]?.opacity ?? 0) > CANDLE_LIT)?.t ?? null);
   console.log(`exorcismComplete: flame ${litAt.map((t, i) => `#${i + 1} lit at ${t ?? "-"}`).join(", ")} ms`);

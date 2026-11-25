@@ -22,6 +22,10 @@ const SHEET_HIDDEN_OFFSET = "100%";
 const INERT_ATTRIBUTE = "inert";
 const INERT_EXEMPT_ATTRIBUTE = "data-inert-exempt";
 const SCROLL_LOCK_ATTRIBUTE = "data-scroll-locked";
+// The page was scroll-locked while the sheet was open, so it is still where the user left it.
+// Returning focus must not scroll it: a trigger that sat partly below the fold (a plan "Do it"
+// button) used to pull the page up by the hidden part, cutting off the page heading.
+const RETURN_FOCUS_OPTIONS: FocusOptions = { preventScroll: true };
 const ESCAPE_KEY = "Escape";
 const TAB_KEY = "Tab";
 const NO_INDEX = -1;
@@ -195,7 +199,7 @@ export function BottomSheet({ open, onClose, title, className, children }: Botto
     }
     returnFocusRef.current = null;
     if (target.isConnected) {
-      target.focus();
+      target.focus(RETURN_FOCUS_OPTIONS);
     }
   }, [active]);
 
@@ -203,7 +207,7 @@ export function BottomSheet({ open, onClose, title, className, children }: Botto
   useLayoutEffect(
     () => () => {
       if (returnFocusRef.current?.isConnected) {
-        returnFocusRef.current.focus();
+        returnFocusRef.current.focus(RETURN_FOCUS_OPTIONS);
       }
     },
     [],

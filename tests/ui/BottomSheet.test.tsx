@@ -84,6 +84,18 @@ describe("BottomSheet", () => {
     expect(trigger).toHaveFocus();
   });
 
+  it("returns focus to the trigger without scrolling the page", async () => {
+    // A plan "Do it" trigger partly below the fold used to pull the page up by its hidden part on close.
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Open sheet" });
+    const user = await openSheet();
+    const focusSpy = vi.spyOn(trigger, "focus");
+    await user.keyboard("{Escape}");
+    expect(focusSpy).toHaveBeenCalled();
+    for (const call of focusSpy.mock.calls) expect(call[0]).toEqual({ preventScroll: true });
+    expect(trigger).toHaveFocus();
+  });
+
   it("wraps Tab from the last focusable element to the first", async () => {
     render(<Harness />);
     const user = await openSheet();

@@ -147,9 +147,15 @@ export const BAT_END: Readonly<Point> = { x: 750, y: 40 };
 export const ZOMBIE_SINK_SCALE = 1.4;
 export const ZOMBIE_SINK_CLIP: Readonly<Box> = { x: 60, y: 340, w: 680, h: 180 };
 export const TOMBSTONE_CLIP: Readonly<Box> = { x: 60, y: 520, w: 680, h: 70 };
-export const CANDLE_BOX: Readonly<{ w: number; h: number }> = { w: 24, h: 80 };
-export const CANDLE_ROW_ORIGIN: Readonly<Point> = { x: 60, y: 40 };
-export const CANDLE_SPACING = 60;
+export const CANDLE_BOX: Readonly<{ w: number; h: number }> = { w: 24, h: 48 };
+/**
+ * Candle row in the empty night sky right of the house: x 640..744, y 160..208. It sits below the
+ * lowest circling bat (y 156 at most), above the right tree (y 210 at least), right of the roof,
+ * chimney and smoke (x 618 at most), and far from the moon and the Poltergeist with its sigil.
+ * tests/scene/momentGeometry.test.ts checks the bounds and every overlap.
+ */
+export const CANDLE_ROW_ORIGIN: Readonly<Point> = { x: 640, y: 160 };
+export const CANDLE_SPACING = 40;
 export const SHUTTER_WIDTH = 24;
 /** Shovel arc: sample count, lift of the control point above the higher end, strike height above a zombie. */
 export const SHOVEL_ARC_SAMPLES = 33;
@@ -261,6 +267,11 @@ export const SHEET_CLOSE_WAIT_MAX_MS = 600;
 export const MIN_SCENE_WIDTH_DESKTOP_PX = 480;
 export const MIN_LABEL_PX = 12;
 export const TOMBSTONE_LABEL_MIN_SLOT_PX = 64;
+/** Label line height in px, and the lines of a tombstone label: the name, then "R.I.P. $X/mo" (each truncated). */
+export const LABEL_LINE_HEIGHT_PX = MIN_LABEL_PX + 2;
+export const TOMBSTONE_LABEL_MAX_LINES = 2;
+/** Label width in tombstone slots: a little wider than one slot so "R.I.P. $120/mo" fits on one line at 1280px. */
+export const TOMBSTONE_LABEL_WIDTH_SLOTS = 1.2;
 export const TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX = Math.ceil(
   (TOMBSTONE_LABEL_MIN_SLOT_PX * VIEWBOX_WIDTH) / TOMBSTONE_SLOT_UNITS,
 );

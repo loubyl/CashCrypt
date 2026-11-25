@@ -1,24 +1,45 @@
 // Example tests for the Moment art geometry (house-scene task 9.11). Requirements: 12.18, 24.6.
 import { describe, expect, it } from "vitest";
 import {
+  BAT_CIRCLE_RADIUS_X,
+  BAT_CIRCLE_RADIUS_Y,
+  GHOST_OVERFLOW_ANCHOR,
   SCENE_CONFIG,
   SHOVEL_VIEW_H,
   SHOVEL_VIEW_W,
+  TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
   buildSceneModel,
+  getTombstoneLabelBox,
 } from "@/lib/scene";
-import type { Box, SceneModel } from "@/lib/scene";
+import type { Box, SceneInput, SceneModel } from "@/lib/scene";
 import {
   batPath,
   getCandleBoxes,
   getMomentExtents,
   getShovelStrikePoint,
+  getSigilBox,
   getSinkingZombieBox,
   getTombstoneRiseBoxes,
   shovelArc,
 } from "@/lib/scene/momentGeometry";
 import type { MomentExtent } from "@/lib/scene/momentGeometry";
+import {
+  BATS,
+  CHIMNEY_BODY,
+  FENCE_PICKET,
+  FENCE_POSTS,
+  GROUND_Y,
+  MOON,
+  MOON_BLUR,
+  MOON_HALO_RADIUS,
+  SMOKE_PUFFS,
+  STARS,
+  TREE_LEFT_X,
+  TREE_RIGHT_X,
+  WONK_MAX,
+} from "@/components/house/houseGeometry";
 
 const VIEWBOX: Box = { x: 0, y: 0, w: VIEWBOX_WIDTH, h: VIEWBOX_HEIGHT };
 
@@ -43,7 +64,69 @@ function boundsProblems(extent: MomentExtent): string[] {
   return problems;
 }
 
-const model: SceneModel = buildSceneModel({
+function overlaps(a: Box, b: Box): boolean {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function circleBox(cx: number, cy: number, r: number): Box {
+  return { x: cx - r, y: cy - r, w: r * 2, h: r * 2 };
+}
+
+/** Local x range and top of a tree (trunk, limbs and canopy at their widest level), in tree space. */
+const TREE_LOCAL = { left: -78, right: 68, top: 208 } as const;
+/** Bat art in its local space (BAT_PATH spans x -16..16, y -12..6). */
+const BAT_LOCAL = { left: -16, right: 16, top: -12, bottom: 6 } as const;
+/** Three blur deviations around the moon halo still show some glow. */
+const BLUR_REACH = 3;
+const STAR_RADIUS = 1.6;
+
+/**
+ * Boxes of everything the Scene draws outside the moving ghosts (ViewBox units), at the widest
+ * level: moon with its blurred halo, Poltergeist with its glow and bound sigil, house with roofs,
+ * chimney and smoke, both trees, the fence, the lantern, stars, the circling bats and the "+N"
+ * ghost marker.
+ */
+function drawnSceneBoxes(): { name: string; box: Box }[] {
+  const polt = SCENE_CONFIG.POLTERGEIST_CENTER;
+  const chimneyTop = CHIMNEY_BODY.y;
+  const smoke = SMOKE_PUFFS.map((p) =>
+    circleBox(CHIMNEY_BODY.x + CHIMNEY_BODY.w / 2 + p.dx + WONK_MAX.chimneyRotateDeg, chimneyTop + p.dy, p.r),
+  );
+  const tree = (x: number, mirrored: boolean): Box => ({
+    x: mirrored ? x - TREE_LOCAL.right : x + TREE_LOCAL.left,
+    y: TREE_LOCAL.top,
+    w: TREE_LOCAL.right - TREE_LOCAL.left,
+    h: GROUND_Y - TREE_LOCAL.top,
+  });
+  const fenceLeft = FENCE_POSTS[0] - 2;
+  const fenceRight = FENCE_POSTS[FENCE_POSTS.length - 1] + FENCE_PICKET.w + 2;
+  const fenceTop = GROUND_Y - FENCE_PICKET.h - FENCE_PICKET.tip - WONK_MAX.picketHeight;
+  return [
+    { name: "moon", box: circleBox(MOON.cx, MOON.cy, MOON_HALO_RADIUS + MOON_BLUR * BLUR_REACH) },
+    { name: "poltergeist", box: circleBox(polt.x, polt.y, (SCENE_CONFIG.POLTERGEIST_SIZE / 2) * 1.1) },
+    { name: "poltergeist sigil", box: getSigilBox(model) },
+    { name: "house", box: { x: 184, y: 28, w: 616 - 184, h: GROUND_Y - 28 } },
+    { name: "chimney", box: { x: CHIMNEY_BODY.x - 3, y: CHIMNEY_BODY.y, w: CHIMNEY_BODY.w + 6, h: CHIMNEY_BODY.h } },
+    ...smoke.map((box, i) => ({ name: `smoke ${i}`, box })),
+    { name: "left tree", box: tree(TREE_LEFT_X, false) },
+    { name: "right tree", box: tree(TREE_RIGHT_X, true) },
+    { name: "fence", box: { x: fenceLeft, y: fenceTop, w: fenceRight - fenceLeft, h: GROUND_Y - fenceTop } },
+    ...STARS.map((s, i) => ({ name: `star ${i}`, box: circleBox(s.x, s.y, STAR_RADIUS) })),
+    ...BATS.map((b, i) => ({
+      name: `bat ${i}`,
+      // The ambient loop moves a bat up to BAT_CIRCLE_RADIUS_X sideways and BAT_CIRCLE_RADIUS_Y / 2 up.
+      box: {
+        x: b.x + BAT_LOCAL.left - BAT_CIRCLE_RADIUS_X,
+        y: b.y + BAT_LOCAL.top - BAT_CIRCLE_RADIUS_Y / 2,
+        w: BAT_LOCAL.right - BAT_LOCAL.left + BAT_CIRCLE_RADIUS_X * 2,
+        h: BAT_LOCAL.bottom - BAT_LOCAL.top + BAT_CIRCLE_RADIUS_Y / 2,
+      },
+    })),
+    { name: "ghost marker", box: { x: GHOST_OVERFLOW_ANCHOR.x - 40, y: 0, w: 40, h: GHOST_OVERFLOW_ANCHOR.y } },
+  ];
+}
+
+const input: SceneInput = {
   houseState: {
     lightScore: 30, baseScore: 30, momentum: 0, decayLevel: 4, windowBrightness: 0.3, levelProgress: 0.5,
     zombies: [{ subscriptionId: "s1", name: "StreamMax", monthlyCost: 2299, usage: "never" }],
@@ -53,7 +136,8 @@ const model: SceneModel = buildSceneModel({
   monthlyIncomeCents: 300000,
   graveyard: [{ subscriptionId: "s1", name: "StreamMax", monthlyCostCents: 2299, canceledOn: "2025-01-01" }],
   bound: false,
-});
+};
+const model: SceneModel = buildSceneModel(input);
 
 describe("shipped shovel arc", () => {
   const strike = { x: 400, y: 300 };
@@ -121,12 +205,51 @@ describe("shipped bat path", () => {
 });
 
 describe("shipped candle row", () => {
-  it("has three 24 by 80 candles, 60 units apart, starting at (60, 40)", () => {
+  it("has three 24 by 48 candles, 40 units apart, starting at (640, 160)", () => {
     expect(getCandleBoxes()).toEqual([
-      { x: 60, y: 40, w: 24, h: 80 },
-      { x: 120, y: 40, w: 24, h: 80 },
-      { x: 180, y: 40, w: 24, h: 80 },
+      { x: 640, y: 160, w: 24, h: 48 },
+      { x: 680, y: 160, w: 24, h: 48 },
+      { x: 720, y: 160, w: 24, h: 48 },
     ]);
+  });
+
+  it("keeps every candle inside the ViewBox", () => {
+    for (const box of getCandleBoxes()) expect(inside(box, VIEWBOX)).toBe(true);
+  });
+
+  it("keeps every candle clear of the moon, the Poltergeist, the house and every other drawn part", () => {
+    const problems = getCandleBoxes().flatMap((box, i) =>
+      drawnSceneBoxes()
+        .filter((part) => overlaps(box, part.box))
+        .map((part) => `candle ${i} overlaps ${part.name}`),
+    );
+    expect(problems).toEqual([]);
+  });
+
+  it("reports a candle row placed over the moon (the old top-left row)", () => {
+    const oldRow = getCandleBoxes({ ...SCENE_CONFIG, CANDLE_ROW_ORIGIN: { x: 60, y: 40 }, CANDLE_BOX: { w: 24, h: 80 }, CANDLE_SPACING: 60 });
+    const hit = new Set(oldRow.flatMap((box) => drawnSceneBoxes().filter((p) => overlaps(box, p.box)).map((p) => p.name)));
+    expect(hit.has("moon")).toBe(true);
+    expect(hit.has("poltergeist sigil")).toBe(true);
+  });
+});
+
+describe("tombstone label", () => {
+  it("reads R.I.P. with the short amount, without .00 for whole dollars", () => {
+    const whole = buildSceneModel({
+      ...input,
+      graveyard: [{ subscriptionId: "s9", name: "Wraithcast", monthlyCostCents: 12000, canceledOn: "2025-01-01" }],
+    });
+    expect(whole.tombstones[0].ripText).toBe("R.I.P. $120/mo");
+    expect(model.tombstones[0].ripText).toBe("R.I.P. $22.99/mo");
+  });
+
+  it("ends on the bottom of the graveyard band, inside the Scene, at the smallest width that shows labels", () => {
+    const tombstone = model.tombstones[0];
+    const box = getTombstoneLabelBox(tombstone, TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX);
+    expect(box.y + box.h).toBeCloseTo(SCENE_CONFIG.GRAVEYARD_BAND.y + SCENE_CONFIG.GRAVEYARD_BAND.h);
+    expect(box.x + box.w / 2).toBeCloseTo(tombstone.box.x + tombstone.box.w / 2);
+    expect(inside(box, VIEWBOX)).toBe(true);
   });
 });
 

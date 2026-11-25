@@ -31,6 +31,12 @@ const EXORCISM_PATH = "/exorcism";
 const SKELETON_LINES = 4;
 const SCENE_ASPECT_RATIO = "4 / 3";
 const COLUMN_CLASSES = "contents lg:flex lg:flex-col lg:gap-3";
+// minmax(0, …) tracks: a bare `7fr 5fr` track has an automatic minimum (its min-content), so the
+// column widths followed the plan text and the 4:3 Scene grew or shrank whenever a plan row changed
+// (ticking an action resized the Scene by about 48px and shifted the page). `grid-cols-2` already
+// uses minmax(0, 1fr).
+const GRID_CLASSES =
+  "flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]";
 const DELTA_SIGN_PATTERN = /^[+−]/;
 
 export function Dashboard() {
@@ -87,7 +93,7 @@ export function Dashboard() {
       <MomentHost live={live}>
         {({ model, held, onRelease }) => (
           <>
-          <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start xl:grid-cols-[7fr_5fr]">
+          <div className={GRID_CLASSES}>
             <div className={COLUMN_CLASSES}>
               <HouseScene model={model} held={held} onRelease={onRelease} />
               <Card>

@@ -348,7 +348,7 @@ Conventions that apply to every task:
     - `tests/moments/requests.test.ts` (extend): the same three actions produce, in order, cancel, then sigil, then payment, exorcism complete and level 4 to 3, played without overlap and separated by `MOMENT_GAP_MS`.
     - _Requirements: 12.5, 18.6, 18.7_
 
-- [ ] 17. MANUAL CHECKPOINT 3: full level-4 demo at 1280 by 720 (user review in the browser)
+- [x] 17. MANUAL CHECKPOINT 3: full level-4 demo at 1280 by 720 (user review in the browser)
   - **Executor: STOP here. Do not start phase E until the user confirms.** Ask the user to open the browser at 1280 by 720, load the default Demo Crypt (level 4) and run the flow:
     - **First viewport:** the whole Scene and the heading plus three actions of "This week's exorcism" are visible without scrolling.
     - **Cancel Wraithcast:** the shovel swoops in on an arc and is at least a quarter of the Scene height tall. The bonk is held long enough to see. The zombie sinks, its usage badge is readable, and the tombstone rises labeled "R.I.P. $X/mo" at 12px or more. The toast and the score update at once, without waiting for the animation. The zombie is gone and the tombstone stays.

@@ -919,6 +919,18 @@
         "chatSessionId": "sess_eda6e8f5-344a-4bf1-a0a2-52409038cad8",
         "timestamp": 1795594343042
       }
+    ],
+    "17. MANUAL CHECKPOINT 3: full level-4 demo at 1280 by 720 (user review in the browser)": [
+      {
+        "executionId": "43505a8d-6961-4762-8b66-237b7f0ff650",
+        "chatSessionId": "sess_eda6e8f5-344a-4bf1-a0a2-52409038cad8",
+        "timestamp": 1795595127861
+      },
+      {
+        "executionId": "43505a8d-6961-4762-8b66-237b7f0ff650",
+        "chatSessionId": "sess_eda6e8f5-344a-4bf1-a0a2-52409038cad8",
+        "timestamp": 1795602425695
+      }
     ]
   }
 }

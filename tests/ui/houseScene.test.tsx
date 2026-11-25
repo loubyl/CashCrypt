@@ -150,7 +150,7 @@ describe("Dashboard scene states", () => {
     // Prefixed classes switch to two columns at lg (1024px) and a 7fr/5fr split at xl.
     expect(classes).toContain("lg:grid");
     expect(classes).toContain("lg:grid-cols-2");
-    expect(classes).toContain("xl:grid-cols-[7fr_5fr]");
+    expect(classes).toContain("xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]");
     // Below lg the two column wrappers dissolve so the order is a single stack.
     for (const column of Array.from(grid.children)) {
       expect(column.className.split(/\s+/)).toContain("contents");

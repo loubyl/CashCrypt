@@ -181,6 +181,23 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
+describe("payment moment flame origin", () => {
+  it("centers the flame on the Save payment control, horizontally and vertically", async () => {
+    const play = await loadPlayer();
+    const { target } = buildHarness();
+    const origin = { left: 252, top: 474, width: 200, height: 52 };
+    const done = play(target, { ...options(false), request: { kind: "payment", origin, hasCrack: false } });
+    await vi.waitFor(() => expect(rec.timelines).toBe(1));
+    const flame = target.layer.querySelector<SVGElement>('[data-moment="flame"]');
+    const size = Number(flame?.getAttribute("width"));
+    // jsdom lays nothing out, so the layer rect is at (0, 0) and the flame center is the control center.
+    expect(parseFloat(flame?.style.left ?? "") + size / 2).toBeCloseTo(origin.left + origin.width / 2);
+    expect(parseFloat(flame?.style.top ?? "") + size / 2).toBeCloseTo(origin.top + origin.height / 2);
+    rec.onComplete?.();
+    await done;
+  });
+});
+
 describe("payment moment flare", () => {
   it("records the flare steps from, peak and final for every lit window pane", async () => {
     const play = await loadPlayer();

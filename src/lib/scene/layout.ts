@@ -5,7 +5,7 @@
 
 import type { Ghost, Poltergeist, Zombie } from "@/lib/haunting";
 import { SMALL_EXPENSE_THRESHOLD_CENTS } from "@/lib/haunting/config";
-import { formatCentsPerMonth } from "@/lib/utils/cents";
+import { formatCentsShort } from "@/lib/utils/cents";
 import {
   FULL_TURN_RADIANS,
   GHOST_OVERFLOW_ANCHOR,
@@ -22,10 +22,14 @@ import {
   GHOST_PHASE_STEPS,
   BADGE_SIZE,
   ZOMBIE_BADGE_GAP,
+  LABEL_LINE_HEIGHT_PX,
+  TOMBSTONE_LABEL_MAX_LINES,
+  TOMBSTONE_LABEL_WIDTH_SLOTS,
 } from "./config";
 import type { SceneConfig } from "./config";
 import { unitFromId } from "./hash";
 import type {
+  Box,
   GhostLane,
   GraveyardEntry,
   Point,
@@ -41,6 +45,7 @@ import type {
 const UNIT_MIN = 0;
 const UNIT_MAX = 1;
 const RIP_PREFIX = "R.I.P. ";
+const PER_MONTH_SUFFIX = "/mo";
 const SALT_TILT = "tilt";
 const SALT_SWAY_PHASE = "swayPhase";
 const SALT_SWAY_PERIOD = "swayPeriod";
@@ -275,7 +280,7 @@ export function layoutTombstones(
         h: config.TOMBSTONE_BOX_HEIGHT,
       },
       name: entry.name,
-      ripText: `${RIP_PREFIX}${formatCentsPerMonth(nonNegative(entry.monthlyCostCents))}`,
+      ripText: `${RIP_PREFIX}${formatCentsShort(nonNegative(entry.monthlyCostCents))}${PER_MONTH_SUFFIX}`,
     };
   });
   return { drawn, overflow: sorted.length - visible.length };
@@ -294,5 +299,28 @@ export function layoutPoltergeist(
     center,
     sizeUnits: config.POLTERGEIST_SIZE,
     sigil: { cx: center.x, cy: center.y, r: config.SIGIL_DIAMETER * HALF },
+  };
+}
+
+/**
+ * Box of a tombstone label in ViewBox units at a measured Scene width (px). The label is
+ * TOMBSTONE_LABEL_WIDTH_SLOTS slots wide, centered on its tombstone. Its bottom sits on the bottom of
+ * the graveyard band and it grows upward by at most TOMBSTONE_LABEL_MAX_LINES lines, so it never runs
+ * below the Scene and the top of the slab stays visible above it.
+ */
+export function getTombstoneLabelBox(
+  tombstone: SceneTombstone,
+  sceneWidthPx: number,
+  config: SceneConfig = SCENE_CONFIG,
+): Box {
+  const unitsPerPx = config.VIEWBOX_WIDTH / Math.max(sceneWidthPx, UNIT_MAX);
+  const width = (config.GRAVEYARD_BAND.w / config.MAX_VISIBLE_TOMBSTONES) * TOMBSTONE_LABEL_WIDTH_SLOTS;
+  const height = TOMBSTONE_LABEL_MAX_LINES * LABEL_LINE_HEIGHT_PX * unitsPerPx;
+  const bottom = config.GRAVEYARD_BAND.y + config.GRAVEYARD_BAND.h;
+  return {
+    x: tombstone.box.x + tombstone.box.w * HALF - width * HALF,
+    y: bottom - height,
+    w: width,
+    h: height,
   };
 }

@@ -8,6 +8,7 @@ import {
   MOMENT_BEAT_MIN_MS,
   SHOVEL_HEIGHT,
   SHOVEL_STRIKE_OFFSET,
+  TOMBSTONE_LABEL_WIDTH_SLOTS,
   TOMBSTONE_SLOT_UNITS,
   VIEWBOX_WIDTH,
   ZOMBIE_SINK_CLIP,
@@ -65,7 +66,6 @@ const TOMBSTONE_BOUNCE_EASE = "bounce.out";
 // Layout of the overlay pieces.
 const NAME_GAP_UNITS = 6;
 const NAME_LABEL_RISE_PX = 22;
-const TOMBSTONE_LABEL_TOP_UNITS = 22;
 
 // Waiting for the live model to show the new tombstone (the data settles shortly after the click).
 const TOMBSTONE_POLL_MS = 50;
@@ -248,8 +248,7 @@ function buildArt(
           widthPx: tombstone.box.w * geometry.scale,
           heightPx: tombstone.box.h * geometry.scale,
         },
-        labelWidthPx: TOMBSTONE_SLOT_UNITS * geometry.scale,
-        labelTopPx: TOMBSTONE_LABEL_TOP_UNITS * geometry.scale,
+        labelWidthPx: TOMBSTONE_SLOT_UNITS * TOMBSTONE_LABEL_WIDTH_SLOTS * geometry.scale,
         ripText: `R.I.P. ${formatCentsShort(request.monthlyCents)}/mo`,
       }),
     );

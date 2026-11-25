@@ -87,7 +87,7 @@ describe("Dashboard on the level 4 demo", () => {
     const { container } = await renderDemo();
     const grid = container.querySelector("main > div.lg\\:grid") as HTMLElement;
     expect(grid.className).toContain("lg:grid-cols-2");
-    expect(grid.className).toContain("xl:grid-cols-[7fr_5fr]");
+    expect(grid.className).toContain("xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]");
     expect(grid.className).toContain("flex-col");
     for (const column of Array.from(grid.children)) expect(column.className).toContain("contents");
     const scene = screen.getByRole("img", { name: /^Level 4, Crumbling\./ });

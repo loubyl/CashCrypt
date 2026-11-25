@@ -1,10 +1,11 @@
 import {
+  LABEL_LINE_HEIGHT_PX,
   MIN_LABEL_PX,
   TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX,
-  TOMBSTONE_SLOT_UNITS,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
   getOverflowAnchors,
+  getTombstoneLabelBox,
 } from "@/lib/scene";
 import type { Point, SceneModel } from "@/lib/scene";
 
@@ -15,9 +16,6 @@ export type SceneLabelsProps = {
 };
 
 const PERCENT = 100;
-/** Tombstone label starts this far below the top of its box (ViewBox units), under the engraved cross. */
-const TOMBSTONE_LABEL_TOP_OFFSET = 22;
-const LABEL_LINE_HEIGHT_PX = MIN_LABEL_PX + 2;
 
 function toPercentX(x: number): string {
   return `${(x / VIEWBOX_WIDTH) * PERCENT}%`;
@@ -56,7 +54,8 @@ function OverflowMarker({ kind, count, anchor }: OverflowMarkerProps) {
  */
 export function SceneLabels({ model, sceneWidthPx }: SceneLabelsProps) {
   const anchors = getOverflowAnchors();
-  const showTombstoneLabels = sceneWidthPx !== null && sceneWidthPx >= TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX;
+  const labelSceneWidthPx =
+    sceneWidthPx !== null && sceneWidthPx >= TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX ? sceneWidthPx : null;
 
   return (
     <div aria-hidden="true" data-part="labels" className="pointer-events-none absolute inset-0">
@@ -69,24 +68,30 @@ export function SceneLabels({ model, sceneWidthPx }: SceneLabelsProps) {
       {model.overflow.tombstones > 0 ? (
         <OverflowMarker kind="tombstones" count={model.overflow.tombstones} anchor={anchors.tombstones} />
       ) : null}
-      {showTombstoneLabels
-        ? model.tombstones.map((tombstone) => (
-            <div
-              key={tombstone.id}
-              data-part="tombstone-label"
-              data-id={tombstone.id}
-              className="absolute text-center text-ink"
-              style={{
-                ...textStyle,
-                left: toPercentX(tombstone.box.x + tombstone.box.w / 2 - TOMBSTONE_SLOT_UNITS / 2),
-                top: toPercentY(tombstone.box.y + TOMBSTONE_LABEL_TOP_OFFSET),
-                width: toPercentX(TOMBSTONE_SLOT_UNITS),
-              }}
-            >
-              <div className="truncate font-medium">{tombstone.name}</div>
-              <div className="text-ink-secondary">{tombstone.ripText}</div>
-            </div>
-          ))
+      {labelSceneWidthPx !== null
+        ? model.tombstones.map((tombstone) => {
+            // Bottom-anchored on the tombstone and capped at TOMBSTONE_LABEL_MAX_LINES lines, so the
+            // label grows upward and never runs below the Scene (Requirement 5.7).
+            const box = getTombstoneLabelBox(tombstone, labelSceneWidthPx);
+            return (
+              <div
+                key={tombstone.id}
+                data-part="tombstone-label"
+                data-id={tombstone.id}
+                className="absolute overflow-hidden text-center text-ink"
+                style={{
+                  ...textStyle,
+                  left: toPercentX(box.x),
+                  bottom: toPercentY(VIEWBOX_HEIGHT - (box.y + box.h)),
+                  width: toPercentX(box.w),
+                  maxHeight: toPercentY(box.h),
+                }}
+              >
+                <div className="truncate font-medium">{tombstone.name}</div>
+                <div className="truncate text-ink-secondary">{tombstone.ripText}</div>
+              </div>
+            );
+          })
         : null}
     </div>
   );

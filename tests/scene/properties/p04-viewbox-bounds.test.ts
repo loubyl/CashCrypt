@@ -12,17 +12,21 @@ import {
   SIGIL_GLOW_PAD,
   SIGIL_SHAKE,
   SIGIL_STROKE,
+  TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
   buildSceneModel,
   getLanePoint,
   getOverflowAnchors,
   getSigilExtent,
+  getTombstoneLabelBox,
 } from "@/lib/scene";
 import type { Box, Point } from "@/lib/scene";
 import { anySceneInputArb } from "../arbitraries";
 
 const NUM_RUNS = 200;
+/** Widest Scene the label check samples (px); labels only show from TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX. */
+const MAX_SCENE_WIDTH_PX = 4000;
 const HALF = 0.5;
 const PHASE_SAMPLES = 64;
 const FULL_TURN = 2 * Math.PI;
@@ -46,9 +50,9 @@ function squareAround(p: Point, size: number): Box {
 }
 
 describe("Property 4: everything stays inside the ViewBox (model part)", () => {
-  it("keeps windows, zombies, tombstones, Poltergeist, ghost orbits, anchors and sigil inside", () => {
+  it("keeps windows, zombies, tombstones and their labels, Poltergeist, ghost orbits, anchors and sigil inside", () => {
     fc.assert(
-      fc.property(anySceneInputArb, (input) => {
+      fc.property(anySceneInputArb, fc.integer({ min: TOMBSTONE_LABEL_MIN_SCENE_WIDTH_PX, max: MAX_SCENE_WIDTH_PX }), (input, sceneWidthPx) => {
         const model = buildSceneModel(input);
 
         for (const w of model.windows) expect(boxInside(w.box)).toBe(true);
@@ -60,7 +64,11 @@ describe("Property 4: everything stays inside the ViewBox (model part)", () => {
           expect(z.badgeCenter.y + BADGE_SIZE / 2).toBeLessThanOrEqual(z.box.y);
           expect(z.badgeCenter.x).toBeCloseTo(z.box.x + z.box.w / 2, 9);
         }
-        for (const t of model.tombstones) expect(boxInside(t.box)).toBe(true);
+        for (const t of model.tombstones) {
+          expect(boxInside(t.box)).toBe(true);
+          // The HTML label (name and "R.I.P. $X/mo") at the largest size it can take stays inside too.
+          expect(boxInside(getTombstoneLabelBox(t, sceneWidthPx))).toBe(true);
+        }
 
         const anchors = getOverflowAnchors();
         for (const anchor of [anchors.zombies, anchors.ghosts, anchors.tombstones]) {
