@@ -42,6 +42,8 @@ Demo scenarios used by the browser checks (planner output at the scenario's star
 - **Checkbox that does nothing visible (Requirement 7).** `ExorcismPlanAction.handleToggle` always calls `completePlanAction`. By design (`app-screens` Requirement 8.5) that changes no Subscription or Debt row, so `planMoments` makes no cancel or payment request and the Scene has nothing truthful to show.
 - **Invisible new ghost (Requirement 4).** `addTransaction` is not observed by `MomentHost`, and while the Poltergeist exists the Scene draws no Ghost figures (`house-scene` Requirement 9.2), so the data change has no visible trace.
 
+- **Header wider than 320px (Requirement 16).** In `AppShell` the header is a flex row with the wordmark and `DemoChip` in one inner group (`gap-3`) and the settings `NavLink` on the right. `DemoChip` renders "Demo mode · <date>" in a `Chip`, which does not wrap, so the three items add up to about 400px. The overflow makes the page wider than the viewport. Mobile browsers then zoom out to the page width, and the fixed `TabBar` (100% of the layout viewport) becomes 400px wide. Task 1 adds a `noHorizontalScroll` browser case first, and it fails on the current header.
+
 ### Key design decisions
 
 | # | Decision | Reason |
@@ -58,6 +60,7 @@ Demo scenarios used by the browser checks (planner output at the scenario's star
 | D10 | The Landing preview is built by a pure `buildLandingPreview()` in `src/lib/demo/preview.ts` from `buildScenario("level-4", PREVIEW_DATE)`. `HouseScene` gets an `ambient` prop so the Landing can turn the loops off. | No Crypt is opened, no clock is read, no GSAP module is requested, and the server and the client render the same markup (Requirement 9.3 to 9.5). |
 | D11 | Initial focus order in `BottomSheet`: an element marked `data-initial-focus`, else the first Field, else the first focusable element as today. A pre-filled Field gets its value selected. | One rule in the primitive fixes every form sheet. The marker covers the Log payment Debt picker, which has no Field. |
 | D12 | A control that is waiting for its own save is marked `aria-disabled="true"` and `aria-busy="true"` and guarded in its handler, never `disabled`. | It keeps focus where the user put it (Requirement 15). `Button`'s `loading` state already works this way, so the rule extends the primitive's own pattern to the checkbox, the QuickAction and the demo controls. |
+| D13 | The demo badge shortens below `sm`: the visible text is "Demo" with the flask icon, and the date stays in a visually hidden span (and in the chip's `title`), shown inline from `sm` up ("Demo mode · <date>"). The header group is allowed to shrink (`min-w-0`) and the settings link keeps its 44px target (`shrink-0`). | The badge stays readable and keeps the date for assistive technology, and the header at 768px and wider is unchanged. Wrapping alone would make the header taller on every phone. Hiding the date visually only below `sm` is the smallest change that fits. |
 
 ### Known limits accepted
 
@@ -542,6 +545,21 @@ FOR ALL plans of three actions and rows: when some not-done action has a Do it t
 - **Property 4 (ViewBox bounds)** samples `getMomentExtents` for the new request shapes too: feed and appear at every Decay_Level, arrival at every drawn ghost slot and at the overflow marker, flicker with and without lit windows.
 - **Property 13 (config validation)** covers the four new duration keys.
 
+### Header at 320px (Requirement 16, D13)
+
+```tsx
+// DemoChip.tsx
+<Chip tone="warning" icon={FlaskConical} className="self-start" title={label}>
+  <span aria-hidden="true" className="sm:hidden">Demo</span>
+  <span className="sr-only sm:not-sr-only">{now ? `Demo mode · ${now}` : "Demo mode"}</span>
+</Chip>
+```
+
+- Layout widths at 320px (page padding 16 each side leaves 288px): wordmark about 100px, gap 12, badge "Demo" with icon about 70px, gap 12, settings link 44px. That is about 238px, which fits with room to spare.
+- `AppShell` header: the inner group gets `min-w-0` and the `NavLink` wrapper `shrink-0`. Only layout utilities are used, so the className scan passes. If `Chip` needs a `title` prop, it is added to the primitive; the final markup is decided in task 1.9 after reading `Chip`.
+- Screen readers read the full "Demo mode · <date>" text in both cases, because the `sr-only` span is in the accessibility tree and the short visible "Demo" is `aria-hidden`.
+- A jsdom test cannot measure layout, so the guard is the browser case `noHorizontalScroll`, which also covers every other element that might overflow at 320px.
+
 ## Error Handling
 
 | Situation | Behavior |
@@ -592,6 +610,7 @@ The five properties above, plus the extended `house-scene` Properties 4 and 13.
 | `ghostArrival` | Demo controls "Level 2", wait for `data-level="2"`, add a $3 "Gum" expense | the arrival art goes from opacity ≤ 0.05 to ≥ 0.95; beat visible ≥ 300 ms (unless throttled); one new drawn ghost id after the release; its rect center within 6px of the art's last visible rect; layer empty at the end |
 | `candleFlicker` | "Level 1", tick the "emergency fund" checkbox on the Dashboard | `lightMax` dips to ≤ 0.5 × its value before (dip ratio 0.35 with slack) and settles steady at a value ≥ the value before; no layer art left; toast "Action completed · Light +1.0" |
 | `checkboxCancel` | level-4: tick the Wraithcast checkbox | a dialog with "Cancel subscription" opens and the checkbox is still unchecked; after confirming, the `shovel` assertions pass on the samples, the checkbox ends checked, and the toast reads "+$120/mo saved · Light +5.2" |
+| `noHorizontalScroll` | Dashboard in demo mode at `setViewport(w, 640)` for w in 320, 768, 1280 and 1920, Guide dismissed and shown | `document.documentElement.scrollWidth <= clientWidth` at every width; at 320 also the header's right edge ≤ 320 and the `TabBar` width equals the viewport width |
 | `guide` | level-4 at `setViewport(1280, 720)` before dismissing | the Scene's bottom ≤ 720 and the Guide_Step's bottom ≤ 720 |
 | `checkboxFocus` | level-4: focus the "Cut Coffee" checkbox with `element.focus()`, press Space, sample `document.activeElement` and the `disabled` attribute every 5 ms for 500 ms | the checkbox is never `disabled`, `document.activeElement` is the checkbox at every sample and at the end, and the checkbox ends checked (this is the regression guard jsdom cannot provide) |
 
@@ -626,7 +645,7 @@ Run the level-4 flow at 1280 by 720 and 375 by 667, with and without reduced mot
 
 ## Delivery phasing
 
-1. **Bugs first.** Initial focus in sheets and checkbox focus loss, each with a failing test first, the fix and a mutation check, then the pending-control audit.
+1. **Bugs first.** Initial focus in sheets, checkbox focus loss and the 320px header overflow, each with a failing test first, the fix and a mutation check, then the pending-control audit.
 2. **Measured light, toasts and highlight.** `readHouseReading`, `measured` and `serialize`, `getLightClause`, `useActionToast`, the Toast changes, every call site, the highlight service and Properties 1 to 3.
 3. **Checkbox behavior.** Ticking an action with a Do it target opens its sheet.
 4. **Moments.** Types, planning and Property 4, config and geometry, the three `playXMoment` files, the banner pulse, clock tests and browser checks.

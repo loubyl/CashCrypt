@@ -9,7 +9,7 @@ This feature closes those gaps. It delivers:
 1. **Light effect in toasts and a "View" action** (Requirements 1 to 3): every success toast of a Mutation states its effect on the light, or says why the light does not move, and, when the changed row lives on another Screen, offers "View", which opens that Screen and highlights the row.
 2. **Scene reaction to a new small expense** (Requirement 4): the Poltergeist is fed visibly, or the new Ghost arrives visibly, on the Dashboard.
 3. **Guide** (Requirement 5): a dismissible "How your crypt works" card, shown on entering the demo with a first step, and reopened from a "How it works" control in both Crypts.
-4. **Two focus bugs**: initial focus in sheets (Requirement 6), and focus lost to `<body>` when a control is disabled while it saves (Requirement 15).
+4. **Three bugs**: initial focus in sheets (Requirement 6), focus lost to `<body>` when a control is disabled while it saves (Requirement 15), and horizontal overflow at 320px in the app header (Requirement 16).
 5. **Plan checkbox behavior** (Requirements 7 and 8): ticking an action with a "Do it" target opens the same sheet as "Do it"; ticking other actions plays a reaction.
 6. **Landing preview** (Requirement 9) and **three quick actions** (Requirement 10).
 7. **Shared Moment, accessibility, documentation and test rules** (Requirements 11 to 14).
@@ -271,6 +271,7 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 6. THE Test_Suite SHALL include a test that the Dashboard renders exactly three QuickActions in the order of Requirement 10.
 7. WHEN a test is added for a bug fix (the Add expense initial focus, the checkbox focus loss of Requirement 15 and the checkbox that recorded nothing), THE task summary SHALL report the mutation check required by `conventions.md`: the bug reintroduced, the test failing, the fix restored.
 8. THE `scripts/check-moments.mjs` browser script SHALL gain one case per new Moment (Poltergeist_Feed_Moment, Ghost_Arrival_Moment, Candle_Flicker_Moment), one case for the plan checkbox that opens the cancel sheet, and one case that ticks a plan checkbox with Space and asserts that focus stays on it, because jsdom does not blur a focused element when it becomes disabled. Every existing case SHALL keep passing.
+   - It SHALL also gain the `noHorizontalScroll` case of Requirement 16.4.
 9. THE Test_Suite SHALL record, as a manual checklist in the task summary, a browser check of the level-4 demo flow at 1280 by 720 and at 375 by 667 with and without Reduced_Motion, covering every toast, "View", the Guide, the three new Moments and the Landing.
 10. THE Test_Suite SHALL keep `npm test`, `npm run lint` and `npm run typecheck` passing, with plain English test descriptions and no snapshot tests for pure functions.
 
@@ -287,3 +288,18 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 5. THE App SHALL apply the same pattern (focusable, `aria-disabled`, handler guard) to every other control that can hold focus at the moment it becomes unavailable: the "Reset demo" and "Skip to next week" Buttons while a demo action runs, and the "Log payment" QuickAction, which becomes unavailable when a payment from its own sheet pays off the last Debt and would otherwise receive the sheet's returned focus while disabled.
 6. THE App SHALL keep the `disabled` attribute on controls that cannot hold focus when they become unavailable, and SHALL remove a `disabled` binding that can never take effect (the Do_It_Button is never rendered while its row is saving).
 7. THE Button primitive's `loading` state SHALL stay as it is (`aria-disabled` and `aria-busy`, no `disabled`), since it already keeps focus, and every sheet submit Button SHALL keep using `loading` rather than `disabled` while it saves.
+
+### Requirement 16: No horizontal overflow at 320px
+
+**User Story:** As a user on a 320px-wide phone, I want the whole app to fit the screen width, so that the browser does not zoom the page out and the bottom navigation stays at its normal size.
+
+Found on the deployed app at 320 by 640 in demo mode: the header (wordmark, "Demo mode · <date>" badge and settings link) is 400px wide. The page is wider than the viewport, mobile browsers zoom out to fit 400px, and the fixed bottom nav becomes 400px wide too. Viewports of 768, 1280 and 1920 have no horizontal scroll.
+
+#### Acceptance Criteria
+
+1. AT a viewport width of 320px, in the Demo_Crypt and in the Real_Crypt, no element of the Dashboard SHALL be wider than the viewport, and `document.documentElement.scrollWidth` SHALL be at most `document.documentElement.clientWidth`.
+2. THE app header (wordmark, demo badge and settings link) SHALL fit within 320px without clipping any of them, by shortening the badge, moving its date to a second line or hiding the date below the `sm` breakpoint, or by allowing the header to wrap.
+3. THE demo badge SHALL stay readable (text of at least 12px, with the "Demo" word and its icon visible at every width from 320px), and the settings link SHALL keep a touch target of at least 44 by 44px. WHERE the date is hidden or moved, it SHALL stay available to assistive technology (visible text or an accessible name that includes it).
+4. THE `scripts/check-moments.mjs` browser script SHALL include a `noHorizontalScroll` case that opens the Dashboard in demo mode at viewport widths 320, 768, 1280 and 1920 and asserts `document.documentElement.scrollWidth <= document.documentElement.clientWidth` at each.
+5. THE fix SHALL keep the header layout at 768px and wider unchanged, and SHALL pass the className layout-only, token and hex scans.
+6. WHEN a test is added for this bug fix, THE task summary SHALL report the mutation check required by `conventions.md`: the browser case failing on the current header (header 400px wide at 320px), the fix applied, the case passing.

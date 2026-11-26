@@ -4,7 +4,7 @@
 
 The plan follows the design's delivery phasing. The language is TypeScript.
 
-1. The two focus bugs, each test-first, then the pending-control audit.
+1. The two focus bugs and the 320px header overflow, each test-first, then the pending-control audit.
 2. Measured light, toasts and the row highlight.
 3. The plan checkbox that opens the Do it sheet.
 4. The three new Moments.
@@ -27,7 +27,7 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Focus bugs and the pending-control audit
+- [ ] 1. Focus bugs, header overflow and the pending-control audit
   - [ ] 1.1 Write the failing initial-focus test
     - `tests/ui/sheetInitialFocus.test.tsx`: open the Add expense sheet from the Dashboard, type `8` with `userEvent.keyboard` and no click, and expect the "Amount" Field to contain "8" and `document.activeElement` to be that input. Also record what Enter does in that state, and state the observed behavior in the task summary, so the review's report is confirmed or corrected.
     - Run it on the current code and confirm it fails (focus is on the Close button).
@@ -84,6 +84,18 @@ Conventions that apply to every task:
     - In `scripts/check-moments.mjs`, add the `checkboxFocus` case of the design. It focuses the "Cut Coffee" checkbox, presses Space, and samples `document.activeElement` and the `disabled` attribute every 5 ms for 500 ms. It asserts the checkbox is never disabled, keeps focus at every sample and ends checked.
     - Mutation check in the browser: build with `disabled={busy}` temporarily restored and confirm the case fails, then restore the fix, rebuild and confirm it passes. Report both runs in the summary.
     - _Requirements: 15.3, 14.8_
+
+  - [ ] 1.8 Add the failing `noHorizontalScroll` browser case
+    - In `scripts/check-moments.mjs`, add a `noHorizontalScroll` case: open the Dashboard in demo mode and, for each width in 320, 768, 1280 and 1920 (height 640), assert `document.documentElement.scrollWidth <= document.documentElement.clientWidth`. At 320, also report the header's width and the `TabBar` width.
+    - Run it on the current code and confirm it fails at 320 (header 400px wide) and passes at 768, 1280 and 1920. Report the numbers in the summary.
+    - _Requirements: 16.1, 16.4, 16.6, 14.8_
+
+  - [ ] 1.9 Let the header fit at 320px
+    - Read `Chip`, `DemoChip`, `AppShell` and `NavLink` first. Implement D13: the badge shows "Demo" with its icon below `sm` and the full "Demo mode · <date>" from `sm` up, the date stays available to assistive technology, the header group can shrink (`min-w-0`) and the settings link keeps at least 44 by 44px (`shrink-0`). Use layout utilities only in `className`. Keep the header unchanged at 768px and wider.
+    - Check the Real_Crypt header at 320px as well (no badge), and the pages other than the Dashboard (`/transactions`, `/subscriptions`, `/debts`, `/exorcism`, `/settings`) for overflow at 320px. If another element overflows, fix it in this task and name it in the summary.
+    - jsdom tests in `tests/ui/demoChip.test.tsx`: the chip's accessible text contains "Demo mode" and the date; the short "Demo" text is present; the settings link has its accessible name.
+    - Mutation check: restore the old header and chip, confirm the 1.8 case fails at 320, restore the fix and confirm it passes at all four widths, at `RAF_THROTTLE_MS=0` and `700`.
+    - _Requirements: 16.1, 16.2, 16.3, 16.5, 16.6_
 
 - [ ] 2. Measured light, toasts and the row highlight
   - [ ] 2.1 Create `src/lib/utils/lightClause.ts`
@@ -372,7 +384,7 @@ Conventions that apply to every task:
   - Run `scripts/check-moments.mjs` (every case) at `RAF_THROTTLE_MS=0` and `700` against a local build and report the results.
   - Record in the task summary:
     - the manual checklist of Requirement 14.9: the level-4 flow at 1280 by 720 and at 375 by 667, with and without reduced motion, covering every toast, "View", the Guide in both Crypts, the three new Moments, the checkbox flow, the focus fixes and the Landing at both sizes;
-    - the mutation checks of tasks 1.3, 1.5, 1.6 and 3.2.
+    - the mutation checks of tasks 1.3, 1.5, 1.6, 1.9 and 3.2.
   - Ask the user if questions arise.
   - _Requirements: 14.9, 14.10_
 
