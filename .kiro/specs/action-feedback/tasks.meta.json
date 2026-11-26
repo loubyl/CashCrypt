@@ -115,6 +115,30 @@
         "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
         "timestamp": 1795662291682
       }
+    ],
+    "1.10 Fix the risen tombstone label leaving the Scene under a throttled frame rate": [
+      {
+        "executionId": "c6b13493-c47e-47ca-9dff-4c16b3dadfa9",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795663890980
+      },
+      {
+        "executionId": "c6b13493-c47e-47ca-9dff-4c16b3dadfa9",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795665013859
+      }
+    ],
+    "1.11 Keep the TabBar labels apart at 320px": [
+      {
+        "executionId": "86806558-9c8d-441a-bee3-b73884667a96",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795665192056
+      },
+      {
+        "executionId": "86806558-9c8d-441a-bee3-b73884667a96",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795666793646
+      }
     ]
   }
 }

@@ -63,7 +63,7 @@ const BASE_CLASSES =
   "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 const VARIANT_CLASSES: Record<NavLinkVariant, string> = {
-  tab: "flex-1 flex-col gap-1 py-2 text-caption",
+  tab: "flex-1 basis-0 flex-col gap-1 py-2 text-caption max-[359px]:tracking-tighter",
   sidebar: "w-full justify-start gap-3 px-4 text-body-lg",
   icon: "",
 };

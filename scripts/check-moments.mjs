@@ -239,7 +239,17 @@ function installSampler(sampleMs, DRAWN_PART_SELECTORS) {
               [...scene.querySelectorAll(selector)].map((el, i) => ({ name: `${name}${i ? ` ${i}` : ""}`, rect: rectOf(el) })),
             ).filter((part) => part.rect && part.rect.width > 0 && part.rect.height > 0)
           : [],
-      riseLabel: rectOf(layer?.querySelector('[data-moment="tombstone"] > div') ?? null),
+      // The label rides on the tombstone, which is translated down (and clipped) until the rise ends. A
+      // sample can land mid-rise (frames 700 ms apart), so report the label at its risen position: the
+      // rect minus the tombstone's offset from its clip, which is 0 once the rise is over.
+      riseLabel: (() => {
+        const slab = layer?.querySelector('[data-moment="tombstone"]') ?? null;
+        const clip = slab?.parentElement ?? null;
+        const rect = rectOf(slab?.querySelector(":scope > div") ?? null);
+        if (!rect || !slab || !clip) return rect;
+        const offset = slab.getBoundingClientRect().top - clip.getBoundingClientRect().top;
+        return { ...rect, top: rect.top - offset, cy: rect.cy - offset };
+      })(),
     });
   }, sampleMs);
 }
@@ -706,6 +716,79 @@ function assertNoHorizontalScroll({ results }) {
   }
 }
 
+const TAB_LABEL_WIDTHS = [320, 375, 768, 1280, 1920];
+const TAB_LABEL_MIN_GAP_PX = 4;
+const TAB_LABEL_WIDTH_TOLERANCE_PX = 1;
+const TAB_MIN_HEIGHT_PX = 44;
+const TAB_COUNT = 5;
+
+/** Measures every TabBar label (the text range, not the whole tab) at several widths. */
+async function runTabBarLabels(page) {
+  const results = [];
+  for (const width of TAB_LABEL_WIDTHS) {
+    await page.setViewport({ width, height: OVERFLOW_HEIGHT });
+    await sleep(OVERFLOW_SETTLE_MS);
+    results.push(
+      await page.evaluate((viewportWidth) => {
+        // The Sidebar also has aria-label "Main"; the TabBar is the fixed one.
+        const nav = [...document.querySelectorAll('nav[aria-label="Main"]')].find((n) => getComputedStyle(n).position === "fixed");
+        const shown = Boolean(nav) && getComputedStyle(nav).display !== "none" && nav.getBoundingClientRect().height > 0;
+        const tabs = shown ? [...nav.querySelectorAll("a")] : [];
+        return {
+          width: viewportWidth,
+          shown,
+          tabs: tabs.map((a) => {
+            const span = a.querySelector("span");
+            const range = document.createRange();
+            range.selectNodeContents(span);
+            const text = range.getBoundingClientRect();
+            const tab = a.getBoundingClientRect();
+            return {
+              label: span.textContent,
+              left: text.left,
+              right: text.right,
+              tabWidth: tab.width,
+              tabHeight: tab.height,
+              scrollWidth: span.scrollWidth,
+              clientWidth: span.clientWidth,
+            };
+          }),
+        };
+      }, width),
+    );
+  }
+  return { results };
+}
+
+function assertTabBarLabels({ results }) {
+  for (const r of results) {
+    if (r.width >= 1024) {
+      check(!r.shown, `tabBarLabels: at ${r.width} px the TabBar is hidden (Sidebar takes over)`);
+      continue;
+    }
+    check(r.shown && r.tabs.length === TAB_COUNT, `tabBarLabels: at ${r.width} px the TabBar shows ${TAB_COUNT} tabs (${r.tabs.length})`);
+    const gaps = r.tabs.slice(1).map((t, i) => t.left - r.tabs[i].right);
+    const widths = r.tabs.map((t) => t.tabWidth);
+    console.log(
+      `tabBarLabels: at ${r.width} px gaps [${gaps.map((g) => g.toFixed(1)).join(", ")}], tab widths [${widths.map((w) => w.toFixed(1)).join(", ")}]`,
+    );
+    gaps.forEach((gap, i) =>
+      check(
+        gap >= TAB_LABEL_MIN_GAP_PX,
+        `tabBarLabels: at ${r.width} px gap ${r.tabs[i].label} to ${r.tabs[i + 1].label} is ${gap.toFixed(1)} px (min ${TAB_LABEL_MIN_GAP_PX})`,
+      ),
+    );
+    check(
+      Math.max(...widths) - Math.min(...widths) <= TAB_LABEL_WIDTH_TOLERANCE_PX,
+      `tabBarLabels: at ${r.width} px the tabs have equal widths (within ${TAB_LABEL_WIDTH_TOLERANCE_PX} px)`,
+    );
+    r.tabs.forEach((t) => {
+      check(t.scrollWidth <= t.clientWidth, `tabBarLabels: at ${r.width} px "${t.label}" is fully visible (scrollWidth ${t.scrollWidth}, clientWidth ${t.clientWidth})`);
+      check(t.tabHeight >= TAB_MIN_HEIGHT_PX, `tabBarLabels: at ${r.width} px the "${t.label}" tab is ${t.tabHeight} px high (min ${TAB_MIN_HEIGHT_PX})`);
+    });
+  }
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
@@ -715,6 +798,7 @@ const MOMENT_CHECKS = [
   { name: "fullDemo", run: runFullDemo, assert: assertFullDemo },
   { name: "checkboxFocus", run: runCheckboxFocus, assert: assertCheckboxFocus },
   { name: "noHorizontalScroll", run: runNoHorizontalScroll, assert: assertNoHorizontalScroll },
+  { name: "tabBarLabels", run: runTabBarLabels, assert: assertTabBarLabels },
 ];
 
 // ---------------------------------------------------------------------------------------------

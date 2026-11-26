@@ -97,6 +97,20 @@ Conventions that apply to every task:
     - Mutation check: restore the old header and chip, confirm the 1.8 case fails at 320, restore the fix and confirm it passes at all four widths, at `RAF_THROTTLE_MS=0` and `700`.
     - _Requirements: 16.1, 16.2, 16.3, 16.5, 16.6_
 
+  - [x] 1.10 Fix the risen tombstone label leaving the Scene under a throttled frame rate
+    - `shovel` fails at `RAF_THROTTLE_MS=700` (1280x900, production build): "the risen tombstone label of the Moment is inside the scene (bottom 454.1 of 421.7 px)". It passes at `RAF_THROTTLE_MS=0`, and the final tombstone label is inside the Scene in both modes (bottom 414.7 of 421.7 px). The failure also occurs on commit 98d2fd4, before task 1 (identical 454.1), so it is not caused by 1.1 to 1.9.
+    - Find why the Moment's rising label (`riseLabel` in the sampler) is last measured about 32px lower than the final label when frames arrive 700 ms apart (likely a sample taken before the rise tween reaches its end position, or the label drawn outside its clip). Fix the Moment or its art so the risen label ends inside the Scene, or correct the check if it samples a mid-tween frame that is not the risen state; say which in the summary.
+    - Verify: `shovel` passes at `RAF_THROTTLE_MS=0` and `700`, and every other case in `scripts/check-moments.mjs` still passes in both modes.
+    - _Requirements: 14.8_
+
+  - [x] 1.11 Keep the TabBar labels apart at 320px
+    - Reported on the deployed app at 320px: the "Exorcism" label ends at 111px and the "Subscriptions" label starts at 111px, so they touch (the tabs are 51 to 78px wide). At 375px they fit.
+    - In `TabBar.tsx` make the five tabs equal width (for example `flex-1 basis-0 min-w-0`) and keep at least 4px between neighboring labels at 320px, with a smaller label size or tighter tracking below 360px. No truncation (every label shows whole) and no ellipsis. Keep the 44px minimum touch target and the layout at 360px and wider unchanged. Use layout and text-size utilities only, and keep the token, hex and className scans passing.
+    - Browser check: extend `noHorizontalScroll` in `scripts/check-moments.mjs` (or add a `tabBarLabels` case) so that at 320px it measures every TabBar label with `getBoundingClientRect()` and asserts the gap between each label and the next is at least 4px, the five tab widths are equal (within 1px), every label is fully visible (`scrollWidth <= clientWidth`) and every tab is at least 44px high. Run it on the current code first and confirm it fails at 320px (Exorcism and Subscriptions touching), and report the numbers.
+    - Tests in `tests/ui/tabBar.test.tsx`: every tab keeps its accessible name and visible label; the tabs share the same width classes.
+    - Mutation check: restore the old `TabBar` classes, confirm the browser case fails at 320px, restore the fix and confirm it passes at 320, 375, 768, 1280 and 1920, at `RAF_THROTTLE_MS=0` and `700`.
+    - _Requirements: 16.1, 16.5, 16.6_
+
 - [ ] 2. Measured light, toasts and the row highlight
   - [ ] 2.1 Create `src/lib/utils/lightClause.ts`
     - Add `getLightClause`, `joinToastText`, `LIGHT_NOISE_EPSILON`, `LIGHT_FULL_SCORE`, `CLAUSE_SEPARATOR`, `MINUS_SIGN`, `GHOST_EXPENSE_CLAUSE` and `EXPENSE_CLAUSE`, as in the design's clause table. No React, Dexie, Next.js or clock.
@@ -393,3 +407,23 @@ Conventions that apply to every task:
 - **Optional tasks:** tasks marked `*` (2.7 and 2.11) are visual duplicates of the manual checks and may be skipped. Every other test task is required, including all five properties, the extended `house-scene` Properties 4, 13 and 16, the bug tests with their mutation checks, and the browser checks.
 - **Checkpoints:** tasks 6 and 10 are checkpoints. Task 6 needs the user's review on the deployed app at 1280 by 720 before the Landing work starts.
 - **Traceability:** each task lists the requirements it covers. Property tasks name the numbered properties of `design.md`.
+
+## Task Dependency Graph
+
+```json
+{
+  "waves": [
+    { "id": 0, "tasks": ["1.1", "1.4", "1.8", "2.1", "2.3", "2.6", "2.8", "4.1", "4.3", "5.1"] },
+    { "id": 1, "tasks": ["1.2", "1.5", "1.9", "2.2", "2.4", "2.5", "2.7", "2.9", "4.2", "4.4", "5.2"] },
+    { "id": 2, "tasks": ["1.3", "1.6", "1.7", "1.10", "2.10", "2.12", "4.5", "4.6", "4.7", "4.8", "5.3"] },
+    { "id": 3, "tasks": ["1.11", "2.11", "2.13", "4.9", "5.4"] },
+    { "id": 4, "tasks": ["2.14", "3.1", "4.10", "5.5"] },
+    { "id": 5, "tasks": ["3.2", "3.3"] },
+    { "id": 6, "tasks": ["6"] },
+    { "id": 7, "tasks": ["7.1", "7.2", "8.1"] },
+    { "id": 8, "tasks": ["7.3"] },
+    { "id": 9, "tasks": ["9.1", "9.2", "9.3"] },
+    { "id": 10, "tasks": ["10"] }
+  ]
+}
+```
