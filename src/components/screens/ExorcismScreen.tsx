@@ -15,7 +15,7 @@ import { formatWeekResult } from "@/lib/utils/scoreView";
 const PAGE_TITLE = "Exorcism";
 const FREED_LABEL = "Money freed this week";
 const PER_MONTH_SUFFIX = "/mo";
-const EXPLANATION = "Tap Do it to make the change here, or tick an action you did somewhere else.";
+const EXPLANATION = "Ticking a cancel or a payment opens its sheet, so the change is recorded here.";
 const COMPLETE_MESSAGE = "Exorcism complete. The lights flicker back on.";
 const SKELETON_LINES = 4;
 const ICON_SIZE_PX = 22;

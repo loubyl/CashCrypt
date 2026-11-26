@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type ChangeEvent } from "react";
+import { forwardRef, useId, type ChangeEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { HIGHLIGHT_TAG_TEXT, type HighlightTag } from "@/lib/utils/destinations";
@@ -45,16 +45,19 @@ export type ExorcismActionRowProps = {
   pending?: boolean;
   /** Marks the row as just added or changed: a visible tag after the title and a fading candle-tint background. */
   highlight?: HighlightTag;
+  /** Accessible description of the checkbox, rendered as visually hidden text and linked with aria-describedby. */
+  description?: string;
   /** Layout utilities only (margin, width, grid placement). Never colors or spacing. */
   className?: LayoutClassName;
 };
 
 export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowProps>(
   function ExorcismActionRow(
-    { id, title, subtitle, impactText, done, onToggle, disabled = false, pending = false, highlight, className },
+    { id, title, subtitle, impactText, done, onToggle, disabled = false, pending = false, highlight, description, className },
     ref,
   ) {
     const reduced = useReducedMotion();
+    const descriptionId = useId();
     const fillDurationS = reduced ? REDUCED_FADE_MAX_S : TAB_DURATION_S;
     const rowColor = done ? "text-ink-tertiary" : "text-ink";
     const impactColor = done ? "text-ink-tertiary" : "text-ecto";
@@ -83,6 +86,7 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
             disabled={disabled}
             aria-disabled={pending ? true : undefined}
             aria-busy={pending ? true : undefined}
+            aria-describedby={description ? descriptionId : undefined}
             onChange={handleChange}
             aria-label={`Mark "${title}" as done`}
             className={CHECKBOX_CLASSES}
@@ -98,6 +102,11 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
             <Check size={CHECK_ICON_SIZE_PX} strokeWidth={CHECK_ICON_STROKE_WIDTH} aria-hidden="true" />
           </motion.span>
         </label>
+        {description ? (
+          <span id={descriptionId} className="sr-only">
+            {description}
+          </span>
+        ) : null}
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-center gap-2">
             <span className={`line-clamp-2 min-w-0 text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>

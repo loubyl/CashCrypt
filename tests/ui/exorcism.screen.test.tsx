@@ -32,7 +32,7 @@ const NOW = "2025-06-02";
 const COMPLETE_MESSAGE = "Exorcism complete. The lights flicker back on.";
 const ERROR_MESSAGE = "Could not save that action. Try again.";
 const DO_IT_NAME = /^Do it:/;
-const EXPLANATION = "Tap Do it to make the change here, or tick an action you did somewhere else.";
+const EXPLANATION = "Ticking a cancel or a payment opens its sheet, so the change is recorded here.";
 const LEVEL_NAMES = ["", "Pristine", "Uneasy", "Haunted", "Crumbling", "Condemned"];
 
 const SUB: SubscriptionRow = {
@@ -107,6 +107,8 @@ async function renderScreen(actions: StoredPlanAction[], extra: RealSeed = {}) {
   return ctx;
 }
 
+// Rows that no longer exist, so no action has a Do it target and a tick completes it directly.
+const NO_TARGETS: RealSeed = { subscriptions: [], debts: [] };
 const checkboxFor = (title: string) => screen.getByRole("checkbox", { name: `Mark "${title}" as done` });
 
 beforeEach(() => {
@@ -118,7 +120,7 @@ afterEach(() => cleanup());
 describe("Exorcism screen completion", () => {
   it("shows the result Card with the score change and level, announced politely, and hides the hint", async () => {
     const user = userEvent.setup();
-    const ctx = await renderScreen([CANCEL, PAY, FALLBACK]);
+    const ctx = await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     expect(screen.getByText(EXPLANATION)).toBeTruthy();
     // The polite live region exists before the Card appears, so its content is announced.
     const regions = Array.from(document.querySelectorAll('[role="status"][aria-live="polite"]'));
@@ -138,7 +140,7 @@ describe("Exorcism screen completion", () => {
 
   it("replaces a done action's instruction with its completion date", async () => {
     const user = userEvent.setup();
-    await renderScreen([CANCEL, PAY, FALLBACK]);
+    await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     expect(screen.getByText(CANCEL.subtitle)).toBeTruthy();
     await user.click(checkboxFor(CANCEL.title));
     await waitFor(() => expect(screen.queryByText(CANCEL.subtitle)).toBeNull());
@@ -157,7 +159,7 @@ describe("Exorcism screen", () => {
 
   it("updates the progress line and money freed after ticking an action", async () => {
     const user = userEvent.setup();
-    await renderScreen([CANCEL, PAY, FALLBACK]);
+    await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     expect(screen.getByText(/0 of 3 done/)).toBeTruthy();
     expect(screen.getByText("$0/mo")).toBeTruthy();
     expect(screen.getByText("of $22/mo possible")).toBeTruthy();
@@ -171,7 +173,7 @@ describe("Exorcism screen", () => {
 
   it("shows the completion message when all three actions are done", async () => {
     const user = userEvent.setup();
-    await renderScreen([CANCEL, PAY, FALLBACK]);
+    await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     for (const action of [CANCEL, PAY, FALLBACK]) {
       await user.click(checkboxFor(action.title));
     }
@@ -182,7 +184,7 @@ describe("Exorcism screen", () => {
 
   it("shows an error toast and leaves the row unchanged when saving fails", async () => {
     const user = userEvent.setup();
-    await renderScreen([CANCEL, PAY, FALLBACK]);
+    await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     control.fail = true;
     await user.click(checkboxFor(CANCEL.title));
     expect(await screen.findByText(ERROR_MESSAGE)).toBeTruthy();
@@ -194,7 +196,7 @@ describe("Exorcism screen", () => {
 
   it("marks the row busy without disabling it while the action is saving", async () => {
     const user = userEvent.setup();
-    await renderScreen([CANCEL, PAY, FALLBACK]);
+    await renderScreen([CANCEL, PAY, FALLBACK], NO_TARGETS);
     let release: () => void = () => undefined;
     control.gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -217,16 +219,15 @@ describe("Exorcism screen", () => {
     expect(screen.queryByRole("button", { name: DO_IT_NAME })).toBeNull();
   });
 
-  it("keeps the checkbox usable on an action that has Do it", async () => {
+  it("opens the payment sheet from the checkbox of an action that has Do it and leaves it unchecked", async () => {
     const user = userEvent.setup();
     await renderScreen([CANCEL, PAY, FALLBACK]);
     expect(screen.getByRole("button", { name: `Do it: ${PAY.title}` })).toBeTruthy();
     await user.click(checkboxFor(PAY.title));
-    await screen.findByText(/1 of 3 done/);
-    expect((checkboxFor(PAY.title) as HTMLInputElement).checked).toBe(true);
-    expect(screen.queryByRole("button", { name: `Do it: ${PAY.title}` })).toBeNull();
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+    expect((checkboxFor(PAY.title) as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByText(/0 of 3 done/)).toBeTruthy();
   });
-
   it("cancels a subscription from Do it, completes the action and shows one toast", async () => {
     const user = userEvent.setup();
     const ctx = await renderScreen([CANCEL, PAY, FALLBACK]);

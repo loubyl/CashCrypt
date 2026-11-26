@@ -14,6 +14,8 @@ import type { StoredPlanAction } from "@/types/finance";
 
 const TOGGLE_ERROR_MESSAGE = "Could not save that action. Try again.";
 const DO_IT_LABEL = "Do it";
+const CANCEL_DESCRIPTION = "Opens the cancel confirmation";
+const PAY_DESCRIPTION = "Opens the payment sheet";
 // Aligns the Do it button with the text column: 44px checkbox target plus the 12px row gap.
 const DO_IT_WRAPPER_CLASSES = "-mt-1 mb-2 pl-14";
 
@@ -22,6 +24,10 @@ export function getPlanRowId(actionId: string): string {
   return getRowDomId("plan", actionId);
 }
 
+function getCheckboxDescription(target: DoItTarget | null): string | undefined {
+  if (target === null) return undefined;
+  return target.kind === "cancel" ? CANCEL_DESCRIPTION : PAY_DESCRIPTION;
+}
 export type ExorcismPlanActionProps = {
   action: StoredPlanAction;
   /** Marks the row as just added or changed. */
@@ -47,6 +53,11 @@ export function ExorcismPlanAction({
 
   const handleToggle = async (next: boolean) => {
     if (busy) return;
+    // Record the change through its sheet; Auto_Completion marks the action done afterwards.
+    if (next && doItTarget !== null) {
+      onDoIt(action, doItTarget);
+      return;
+    }
     setBusy(true);
     const result = await toggleAction(action.id, next);
     setBusy(false);
@@ -74,6 +85,7 @@ export function ExorcismPlanAction({
         done={action.done}
         pending={busy}
         highlight={highlight}
+        description={getCheckboxDescription(doItTarget)}
         onToggle={handleToggle}
       />
       {doItTarget !== null ? (

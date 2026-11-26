@@ -201,7 +201,7 @@ Conventions that apply to every task:
     - _Requirements: 1.2 to 1.11, 3.1 to 3.9, 14.3_
 
 - [ ] 3. Plan checkbox opens the Do it sheet
-  - [ ] 3.1 Implement the checkbox flow
+  - [x] 3.1 Implement the checkbox flow
     - `ExorcismPlanAction.handleToggle`: when `next` is true and `doItTarget` is not null, call `onDoIt(action, doItTarget)` and return.
     - Add a `description` prop to `ExorcismActionRow` (a visually hidden span linked with `aria-describedby`). Pass "Opens the cancel confirmation" or "Opens the payment sheet" while the target qualifies.
     - Change `ExorcismScreen.EXPLANATION` to "Ticking a cancel or a payment opens its sheet, so the change is recorded here."
@@ -413,11 +413,11 @@ Conventions that apply to every task:
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["1.1", "1.4", "1.8", "2.1", "2.3", "2.6", "2.8", "4.1", "4.3", "5.1"] },
+    { "id": 0, "tasks": ["1.1", "1.4", "1.8", "2.1", "2.3", "2.6", "2.8", "3.1", "4.1", "4.3", "5.1"] },
     { "id": 1, "tasks": ["1.2", "1.5", "1.9", "2.2", "2.4", "2.5", "2.7", "2.9", "4.2", "4.4", "5.2"] },
     { "id": 2, "tasks": ["1.3", "1.6", "1.7", "1.10", "2.10", "2.12", "4.5", "4.6", "4.7", "4.8", "5.3"] },
     { "id": 3, "tasks": ["1.11", "2.11", "2.13", "4.9", "5.4"] },
-    { "id": 4, "tasks": ["2.14", "3.1", "4.10", "5.5"] },
+    { "id": 4, "tasks": ["2.14", "4.10", "5.5"] },
     { "id": 5, "tasks": ["3.2", "3.3"] },
     { "id": 6, "tasks": ["6"] },
     { "id": 7, "tasks": ["7.1", "7.2", "8.1"] },
