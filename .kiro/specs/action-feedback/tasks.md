@@ -295,6 +295,11 @@ Conventions that apply to every task:
     - Tests: `tests/feedback/lightClause.test.ts` (stage and the three clauses), `tests/feedback/properties/p06-ghost-toast.test.ts` (**Property 6**), `tests/utils/listViews` and `tests/db/readHouseReading.test.ts` for `centsToWake`, `tests/ui/actionToasts.test.tsx` and the other toast tests (awake, woke, asleep, income too low), and a Dashboard test where toast and Moment agree.
     - `scripts/check-moments.mjs`: `feed` keeps its toast, `ghostArrival` asserts the level-2 toast and that `$Y` matches the Transactions page. Run every case at `RAF_THROTTLE_MS=0` and `700`.
     - _Requirements: 2.6, 4.1, 4.5, 14.8_
+  - [x] 4.12 Make the "art starts hidden" browser check deterministic
+    - `ghostArrival: art starts hidden` failed in 2 of 4 full runs at `RAF_THROTTLE_MS=0` (min opacity 0.057), because the first 10 ms sample can land a frame after the fade starts.
+    - In `runGhostArrival` (`scripts/check-moments.mjs`), install a `MutationObserver` on the Moment layer before the action. In its callback, read `getComputedStyle(node).opacity` of every added `[data-moment="ghost-arrival"]` node (or one inside an added node). The check uses the first recorded value and keeps the limit ≤ 0.05 (`ARRIVAL_HIDDEN_MAX`). The 10 ms sampler stays for the log only.
+    - Run the full script 5 times at `RAF_THROTTLE_MS=0` and twice at `700`, and report the pass counts.
+    - _Requirements: 14.8_
 - [ ] 5. Guide
   - [ ] 5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`
     - Tests in `tests/feedback/guideStep.test.ts`: the level-4 start reads "Press Do it on Cancel Wraithcast and watch the zombie get buried"; the payment text; the tick text; the done text.
@@ -432,7 +437,7 @@ Conventions that apply to every task:
     { "id": 7, "tasks": ["4.5", "4.6", "4.7", "4.8", "5.3"] },
     { "id": 8, "tasks": ["4.9", "5.4"] },
     { "id": 9, "tasks": ["4.10", "5.5"] },
-    { "id": 10, "tasks": ["4.11"] },
+    { "id": 10, "tasks": ["4.11", "4.12"] },
     { "id": 11, "tasks": ["6"] },
     { "id": 12, "tasks": ["7.1", "7.2", "8.1"] },
     { "id": 13, "tasks": ["7.3"] },

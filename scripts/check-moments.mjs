@@ -980,13 +980,35 @@ async function runGhostArrival(page) {
       if (art) window.__arrivalOpacity.push(Number(getComputedStyle(art).opacity));
     }, everyMs);
   }, FLICKER_SAMPLE_MS);
+  // The art's opacity at the moment its node enters the Moment layer, read in the same MutationObserver
+  // callback. The 10 ms sampler above can land a frame after the fade starts, so it cannot prove this.
+  await page.evaluate(() => {
+    window.__arrivalAddedOpacity = [];
+    const layer = document.querySelector('[data-part="moment-layer"]');
+    const selector = '[data-moment="ghost-arrival"]';
+    const seen = new WeakSet(); // the container and its child are both added nodes holding the same art
+    new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          const arts = node.matches(selector) ? [node] : [...node.querySelectorAll(selector)];
+          for (const art of arts) {
+            if (seen.has(art)) continue;
+            seen.add(art);
+            window.__arrivalAddedOpacity.push(Number(getComputedStyle(art).opacity));
+          }
+        }
+      }
+    }).observe(layer, { childList: true, subtree: true });
+  });
   await typeExpense(page, "3", "Gum");
   await sleep(MAX_MOMENT_MS);
   await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
   await sleep(SAMPLE_MS * 3);
   const samples = await page.evaluate(() => window.__samples);
   const fastOpacity = await page.evaluate(() => window.__arrivalOpacity);
-  return { samples, fastOpacity, transactionsPage: await readTransactionsSummary(page) };
+  const addedOpacity = await page.evaluate(() => window.__arrivalAddedOpacity);
+  return { samples, fastOpacity, addedOpacity, transactionsPage: await readTransactionsSummary(page) };
 }
 /** Opens Transactions through the visible Main nav link and reads the page's total and threshold. */
 async function readTransactionsSummary(page) {
@@ -1007,7 +1029,7 @@ async function readTransactionsSummary(page) {
   });
 }
 
-function assertGhostArrival({ samples, fastOpacity, transactionsPage }) {
+function assertGhostArrival({ samples, fastOpacity, addedOpacity, transactionsPage }) {
   const toast = samples.map((s) => s.toastText).find((t) => ARRIVAL_TOAST_PATTERN.test(t));
   check(Boolean(toast), `ghostArrival: toast names what wakes the Poltergeist (${samples.map((s) => s.toastText).find((t) => t.includes("Ghost added")) ?? "none"})`);
   check(!samples.some((s) => /feeds the Poltergeist|woke the Poltergeist/.test(s.toastText)), "ghostArrival: toast never says it feeds or woke a Poltergeist that is not there");
@@ -1025,13 +1047,14 @@ function assertGhostArrival({ samples, fastOpacity, transactionsPage }) {
   check(during.length > 0, "ghostArrival: arrival art appeared in the Moment layer");
   const arrivals = samples.filter((s) => s.arrival);
   const minOpacity = fastOpacity.length ? Math.min(...fastOpacity) : null;
+  const addedAt = addedOpacity.length ? addedOpacity[0] : null;
   const shown = arrivals.filter((s) => s.arrivalOpacity >= ARRIVAL_SHOWN_MIN);
   const beat = shown.length ? shown.at(-1).t - shown[0].t + SAMPLE_MS : 0;
   const visible = samples.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "ghostArrival"));
   const span = visible.length && during.length ? visible.at(-1).t - during[0].t : 0;
-  console.log(`ghostArrival: art opacity min ${fmt(minOpacity)}, max ${fmt(Math.max(...arrivals.map((s) => s.arrivalOpacity), 0))}, full-opacity beat ${beat} ms, art span ${span} ms`);
+  console.log(`ghostArrival: art opacity when added ${fmt(addedAt)} (${addedOpacity.length} node(s)), sampled min ${fmt(minOpacity)}, max ${fmt(Math.max(...arrivals.map((s) => s.arrivalOpacity), 0))}, full-opacity beat ${beat} ms, art span ${span} ms`);
   if (!THROTTLED) {
-    check(minOpacity !== null && minOpacity <= ARRIVAL_HIDDEN_MAX, `ghostArrival: art starts hidden (min opacity ${fmt(minOpacity)})`);
+    check(addedAt !== null && addedAt <= ARRIVAL_HIDDEN_MAX, `ghostArrival: art starts hidden (opacity ${fmt(addedAt)} when added to the Moment layer)`);
     check(shown.length > 0, "ghostArrival: art reaches full opacity");
     check(beat >= ARRIVAL_BEAT_MIN_MS, `ghostArrival: art stays fully visible ${beat} ms (min ${ARRIVAL_BEAT_MIN_MS})`);
   }
