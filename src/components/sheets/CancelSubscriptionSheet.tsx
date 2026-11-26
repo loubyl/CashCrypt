@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { formatCentsShort } from "@/lib/utils/cents";
 
@@ -32,6 +33,7 @@ export function CancelSubscriptionSheet({
 }: CancelSubscriptionSheetProps) {
   const { cancelSubscription } = useCryptActions();
   const toast = useToast();
+  const showToast = useActionToast();
   const [submitting, setSubmitting] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -47,7 +49,12 @@ export function CancelSubscriptionSheet({
       return;
     }
     const saved = result.value.changed ? result.value.monthlySavedCents : monthlyCents;
-    toast.show({ tone: "success", message: `+${formatCentsShort(saved)}/mo saved` });
+    showToast({
+      tone: "success",
+      base: `+${formatCentsShort(saved)}/mo saved`,
+      effect: { kind: "light", change: result.change },
+      destination: { list: "graveyard", rowId: subscriptionId, tag: "new" },
+    });
     onCanceled?.();
     onClose();
   };

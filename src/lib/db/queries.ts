@@ -1,4 +1,5 @@
 // Read-only queries over the crypt database. Only src/lib/db imports dexie.
+import { computeHouseState } from "@/lib/haunting";
 import { isInWindow } from "@/lib/haunting/dates";
 import type {
   CryptRows,
@@ -8,6 +9,7 @@ import type {
   WeeklyPlanRow,
 } from "@/types/finance";
 import { PROFILE_ID, type CryptDb, type ProfileRecord } from "./schema";
+import { toFinancialSnapshot } from "./snapshotAdapter";
 
 /** Date descending, then id ascending (code-point order, not locale order). */
 function compareTransactions(a: TransactionRow, b: TransactionRow): number {
@@ -57,6 +59,15 @@ export function readAllRows(db: CryptDb): Promise<CryptRows> {
       };
     },
   );
+}
+
+export type HouseReading = { lightScore: number; poltergeist: boolean };
+
+/** Reads every table in one read-only transaction and runs the engine on it. */
+export async function readHouseReading(db: CryptDb, now: LocalDate): Promise<HouseReading> {
+  const rows = await readAllRows(db);
+  const houseState = computeHouseState(toFinancialSnapshot(rows, now));
+  return { lightScore: houseState.lightScore, poltergeist: houseState.poltergeist !== null };
 }
 
 /**

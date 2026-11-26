@@ -3,7 +3,7 @@ import { Flame } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { Skeleton } from "@/components/common/Skeleton";
-import { ExorcismPlan } from "@/components/exorcism/ExorcismPlan";
+import { ExorcismPlan, EXORCISM_PLAN_HEADING_ID } from "@/components/exorcism/ExorcismPlan";
 import { Card } from "@/components/ui/Card";
 import { useExorcismPlan } from "@/hooks/useExorcismPlan";
 import { useHouseState } from "@/hooks/useHouseState";
@@ -40,6 +40,7 @@ export function ExorcismScreen() {
     <main className="flex flex-col gap-3">
       <PageHeader
         title={PAGE_TITLE}
+        headingId={EXORCISM_PLAN_HEADING_ID}
         description={`${formatWeekRange(weekKey)} · ${summary.doneCount} of ${summary.total} done`}
       />
       <Card>

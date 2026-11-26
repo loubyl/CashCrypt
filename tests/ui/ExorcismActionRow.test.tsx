@@ -155,3 +155,19 @@ describe("ExorcismActionRow", () => {
     });
   });
 });
+
+describe("ExorcismActionRow highlight", () => {
+  it("shows the tag text only when highlight is set", () => {
+    const { unmount } = renderRow();
+    expect(screen.queryByText("Updated")).not.toBeInTheDocument();
+    unmount();
+    renderRow({ highlight: "updated" });
+    expect(screen.getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("sets no fade duration under reduced motion", () => {
+    setReducedMotion(true);
+    const { container } = renderRow({ highlight: "new" });
+    expect(container.querySelector("[data-row-highlight-fill]")).toHaveAttribute("data-fade-s", "0");
+  });
+});

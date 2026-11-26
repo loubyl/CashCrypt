@@ -29,7 +29,8 @@ export type ActionOutcome =
       completedActionId: string | null;
       origin: RectLike | null;
     }
-  | { kind: "planToggle"; actionId: string; next: boolean };
+  | { kind: "planToggle"; actionId: string; next: boolean; lightDelta: number }
+  | { kind: "expense"; transactionId: string; small: boolean; poltergeistAfter: boolean };
 
 /** One plan action as seen at `begin()`. */
 export type PlanActionView = { id: string; kind: string; done: boolean };

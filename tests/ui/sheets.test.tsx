@@ -163,7 +163,7 @@ describe("LogPaymentSheet", () => {
     expect(await screen.findByText("$30 goes above your minimum")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: SAVE_PAYMENT_LABEL }));
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
-    expect(await screen.findByText("Payment saved. $80 off your balance.")).toBeTruthy();
+    expect(await screen.findByText(/^Payment\ saved\.\ \$80\ off\ your\ balance( · .+)?$/)).toBeTruthy();
     const debt = await ctx.realDb.debts.get(CARD.id);
     expect(debt?.balanceCents).toBe(192_000);
     const events = await ctx.realDb.events.toArray();
@@ -260,7 +260,7 @@ describe("CancelSubscriptionSheet", () => {
     expect(screen.getByRole("button", { name: KEEP_LABEL }).getAttribute("data-variant")).toBe("secondary");
     expect(dialog.querySelector('button[data-variant="danger"]')).toBeNull();
     await user.click(confirm as HTMLButtonElement);
-    expect(await screen.findByText("+$120/mo saved")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$120\/mo\ saved( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect((await ctx.realDb.subscriptions.get(SUB.id))?.active).toBe(false);
     const events = await ctx.realDb.events.toArray();
@@ -282,7 +282,7 @@ describe("AddExpenseSheet", () => {
     await user.type(await screen.findByLabelText(AMOUNT_LABEL), "4.50");
     await user.type(screen.getByLabelText(DESCRIPTION_LABEL), "Latte");
     await user.click(screen.getByRole("button", { name: SAVE_EXPENSE_LABEL }));
-    expect(await screen.findByText("Ghost added: $4.50")).toBeTruthy();
+    expect(await screen.findByText("Ghost added: $4.50 · feeds the Poltergeist, doesn't dim the light")).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     const rows = await ctx.realDb.transactions.toArray();
     expect(rows).toHaveLength(1);
@@ -330,6 +330,6 @@ describe("Cents formatting in the Cancel sheet", () => {
     await openSheet(user);
     expect(await screen.findByText("Cancel Gloom Gazette — saves $15.49/mo")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: CANCEL_LABEL }));
-    expect(await screen.findByText("+$15.49/mo saved")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$15\.49\/mo\ saved( · .+)?$/)).toBeTruthy();
   });
 });

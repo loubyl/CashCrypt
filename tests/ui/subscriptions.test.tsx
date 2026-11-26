@@ -107,7 +107,7 @@ describe("Subscriptions screen add flow", () => {
     await user.type(within(dialog).getByLabelText("Name"), "Spooky Music");
     await user.type(within(dialog).getByLabelText("Amount"), "9.99");
     await user.click(within(dialog).getByRole("button", { name: "Save subscription" }));
-    expect(await screen.findByText("Zombie added: Spooky Music, $9.99/mo")).toBeTruthy();
+    expect(await screen.findByText(/^Zombie\ added:\ Spooky\ Music,\ \$9\.99\/mo( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect(await screen.findByText("Often used")).toBeTruthy();
     const rows = await ctx.realDb.subscriptions.toArray();
@@ -163,7 +163,7 @@ describe("Subscriptions screen cancel and graveyard", () => {
     const confirm = await screen.findByRole(DIALOG_ROLE, { name: "Cancel subscription" });
     expect(within(confirm).getByText("Cancel Wraithcast — saves $120/mo")).toBeTruthy();
     await user.click(within(confirm).getByRole("button", { name: "Cancel subscription" }));
-    expect(await screen.findByText("+$120/mo saved")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$120\/mo\ saved( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect(await screen.findByText(/^R\.I\.P\. \$120\/mo/)).toBeTruthy();
     expect(screen.getByText("No zombies in the basement. Suspiciously quiet.")).toBeTruthy();
@@ -176,7 +176,7 @@ describe("Subscriptions screen cancel and graveyard", () => {
     await user.click(screen.getByText("Bone Daily"));
     const dialog = await screen.findByRole(DIALOG_ROLE, { name: "Bone Daily" });
     await user.click(within(dialog).getByRole("button", { name: "Bring it back" }));
-    expect(await screen.findByText("Bone Daily is back: $8/mo returns")).toBeTruthy();
+    expect(await screen.findByText(/^Bone\ Daily\ is\ back:\ \$8\/mo\ returns( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect((await ctx.realDb.subscriptions.get(OLD.id))?.active).toBe(true);
     expect(await screen.findByText("No tombstones yet. Suspiciously quiet.")).toBeTruthy();

@@ -13,6 +13,9 @@ vi.mock("framer-motion", async (importOriginal) => {
   return { ...actual, useReducedMotion: () => isReducedMotion() };
 });
 
+// Components that show action toasts use the router. A test that needs its own mock declares it.
+vi.mock("next/navigation", async () => (await import("./helpers/crypt")).createNavigationMock());
+
 afterEach(() => {
   // Globals are off, so Testing Library does not register cleanup on its own.
   cleanup();

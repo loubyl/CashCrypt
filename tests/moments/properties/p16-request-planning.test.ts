@@ -56,6 +56,7 @@ const outcomeArb: fc.Arbitrary<ActionOutcome> = fc.oneof(
     kind: fc.constant("planToggle" as const),
     actionId: fc.constantFrom(...IDS),
     next: fc.boolean(),
+    lightDelta: fc.constant(0),
   }),
 );
 
@@ -74,6 +75,7 @@ function expectedOwn(outcome: ActionOutcome, ctx: ActionContext): MomentRequest 
     if (outcome.extraPrincipalCents <= 0) return null;
     return { kind: "payment", origin: outcome.origin, hasCrack: ctx.crackCount > 0 };
   }
+  if (outcome.kind === "expense") return null;
   const action = ctx.planActions.find((a) => a.id === outcome.actionId);
   const isSigil =
     outcome.next && ctx.poltergeistPresent && action !== undefined && !action.done && action.kind === REDUCE;
@@ -81,7 +83,14 @@ function expectedOwn(outcome: ActionOutcome, ctx: ActionContext): MomentRequest 
 }
 
 function expectedCompletes(outcome: ActionOutcome, ctx: ActionContext): boolean {
-  const id = outcome.kind === "planToggle" ? (outcome.next ? outcome.actionId : null) : outcome.completedActionId;
+  const id =
+    outcome.kind === "planToggle"
+      ? outcome.next
+        ? outcome.actionId
+        : null
+      : outcome.kind === "expense"
+        ? null
+        : outcome.completedActionId;
   if (id === null) return false;
   const action = ctx.planActions.find((a) => a.id === id);
   if (!action || action.done) return false;
@@ -118,7 +127,7 @@ describe("Property 16: Request planning follows the action outcome", () => {
         const none: ActionOutcome[] = [
           { kind: "cancel", subscriptionId: id, changed: false, monthlySavedCents: 100, completedActionId: null },
           { kind: "payment", extraPrincipalCents: 0, completedActionId: null, origin: null },
-          { kind: "planToggle", actionId: id, next: false },
+          { kind: "planToggle", actionId: id, next: false, lightDelta: 0 },
         ];
         for (const outcome of none) expect(planMoments(outcome, ctx)).toEqual([]);
       }),
@@ -174,13 +183,13 @@ describe("Property 16: Request planning follows the action outcome", () => {
       subscriptionNames: {},
       planActions: actions,
     };
-    const tick: ActionOutcome = { kind: "planToggle", actionId: "c", next: true };
+    const tick: ActionOutcome = { kind: "planToggle", actionId: "c", next: true, lightDelta: 0 };
     expect(planMoments(tick, ctx)).toEqual([{ kind: "exorcismComplete" }]);
     const untickedCtx: ActionContext = {
       ...ctx,
       planActions: actions.map((a) => ({ ...a, done: a.id === "c" ? true : a.id === "a" })),
     };
-    expect(planMoments({ kind: "planToggle", actionId: "b", next: true }, untickedCtx)).toEqual([
+    expect(planMoments({ kind: "planToggle", actionId: "b", next: true, lightDelta: 0 }, untickedCtx)).toEqual([
       { kind: "exorcismComplete" },
     ]);
   });

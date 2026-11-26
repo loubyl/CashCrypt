@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Ghost } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
+import { setReducedMotion } from "./helpers/motion";
 import { ListRow } from "@/components/ui/ListRow";
 
 const MINUS_SIGN = "\u2212";
@@ -106,5 +107,27 @@ describe("ListRow", () => {
     render(<ListRow icon={Ghost} title="Coffee" href="/x" onClick={onClick} disabled />);
     await user.click(screen.getByRole("link", { name: "Coffee" }));
     expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
+describe("ListRow highlight", () => {
+  it("shows the tag text only when highlight is set", () => {
+    const { rerender } = render(<ListRow icon={Ghost} title="Row" />);
+    expect(screen.queryByText("New")).not.toBeInTheDocument();
+    rerender(<ListRow icon={Ghost} title="Row" highlight="new" />);
+    expect(screen.getByText("New")).toBeInTheDocument();
+    rerender(<ListRow icon={Ghost} title="Row" highlight="updated" />);
+    expect(screen.getByText("Updated")).toBeInTheDocument();
+  });
+
+  it("sets no fade duration under reduced motion", () => {
+    setReducedMotion(true);
+    const { container } = render(<ListRow icon={Ghost} title="Row" highlight="new" />);
+    expect(container.querySelector("[data-row-highlight-fill]")).toHaveAttribute("data-fade-s", "0");
+  });
+
+  it("fades over the highlight time without reduced motion", () => {
+    const { container } = render(<ListRow icon={Ghost} title="Row" highlight="new" />);
+    expect(container.querySelector("[data-row-highlight-fill]")).toHaveAttribute("data-fade-s", "4");
   });
 });

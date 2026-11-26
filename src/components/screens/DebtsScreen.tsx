@@ -13,7 +13,8 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
-import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
+import { useRowHighlight } from "@/components/feedback/RowHighlightProvider";
 import { useFocusFirstInvalid } from "@/components/sheets/useFocusFirstInvalid";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
@@ -25,6 +26,7 @@ import {
   formatCentsShort,
   parseMoneyToCents,
 } from "@/lib/utils/cents";
+import { getRowDomId } from "@/lib/utils/destinations";
 import { sortDebtsByBalance } from "@/lib/utils/listViews";
 import { validateDebtInput } from "@/lib/validation/inputs";
 import type { DebtRow } from "@/types/finance";
@@ -46,6 +48,7 @@ const GENERIC_ERROR = "Could not save the debt. Try again.";
 const APR_PATTERN = /^-?\d+(\.\d+)?$/;
 const APR_DEFAULT_TEXT = "";
 const DEBTS_HEADING_ID = "debts-heading";
+const DEBTS_LIST_TITLE = "Your debts";
 const DELETE_LABEL = "Delete debt";
 const DELETED_MESSAGE = "Debt deleted";
 const FOCUS_DELAY_MS = 0;
@@ -216,7 +219,7 @@ function DebtForm({ initial, submitLabel, onSubmit }: DebtFormProps) {
 
 function AddDebtForm({ onClose }: { onClose: () => void }) {
   const { addDebt } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   return (
     <DebtForm
       initial={EMPTY_VALUES}
@@ -229,9 +232,11 @@ function AddDebtForm({ onClose }: { onClose: () => void }) {
             : result.error.message;
         }
         onClose();
-        toast.show({
+        showToast({
           tone: "success",
-          message: `Debt added: ${result.value.name}, ${formatCentsShort(result.value.balanceCents)}`,
+          base: `Debt added: ${result.value.name}, ${formatCentsShort(result.value.balanceCents)}`,
+          effect: { kind: "light", change: result.change },
+          destination: { list: "debts", rowId: result.value.id, tag: "new" },
         });
         return null;
       }}
@@ -248,7 +253,7 @@ type RowSheetProps = {
 
 function RowSheet({ row, onClose, onLogPayment, onDelete }: RowSheetProps) {
   const { editDebt } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const paidOff = row !== null && row.balanceCents === 0;
 
   return (
@@ -283,7 +288,12 @@ function RowSheet({ row, onClose, onLogPayment, onDelete }: RowSheetProps) {
                   : result.error.message;
               }
               onClose();
-              toast.show({ tone: "success", message: `Debt updated: ${result.value.name}` });
+              showToast({
+                tone: "success",
+                base: `Debt updated: ${result.value.name}`,
+                effect: { kind: "light", change: result.change },
+                destination: { list: "debts", rowId: row.id, tag: "updated" },
+              });
               return null;
             }}
           />
@@ -302,7 +312,7 @@ function RowSheet({ row, onClose, onLogPayment, onDelete }: RowSheetProps) {
 export function DebtsScreen() {
   const data = useCryptData();
   const { deleteDebt } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const [addOpen, setAddOpen] = useState(false);
   const [rowId, setRowId] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
@@ -319,6 +329,12 @@ export function DebtsScreen() {
     }, FOCUS_DELAY_MS);
     return () => window.clearTimeout(timer);
   }, [focusHeading, sheetOpen]);
+  const highlight = useRowHighlight({
+    list: "debts",
+    rows: data.status === "loading" ? null : data.rows.debts.map((row) => ({ id: row.id, label: row.name })),
+    listLabel: DEBTS_LIST_TITLE,
+    headingId: DEBTS_HEADING_ID,
+  });
 
   if (data.status === "loading") {
     return (
@@ -350,7 +366,7 @@ export function DebtsScreen() {
           {debts.length} {debts.length === 1 ? "debt" : "debts"}
         </p>
       </Card>
-      <Card title="Your debts" headingId={DEBTS_HEADING_ID}>
+      <Card title={DEBTS_LIST_TITLE} headingId={DEBTS_HEADING_ID}>
         {debts.length === 0 ? (
           <EmptyState icon={Landmark} title={EMPTY_TITLE} description={EMPTY_DESCRIPTION} />
         ) : (
@@ -358,6 +374,8 @@ export function DebtsScreen() {
             {debts.map((row) => (
               <li key={row.id}>
                 <ListRow
+                  id={getRowDomId("debts", row.id)}
+                  highlight={highlight.highlightedId === row.id ? (highlight.tag ?? undefined) : undefined}
                   icon={Landmark}
                   tone="blood"
                   title={row.name}
@@ -394,7 +412,11 @@ export function DebtsScreen() {
           if (deleteTarget === null) return { ok: true, value: undefined };
           const result = await deleteDebt(deleteTarget.id);
           if (result.ok) {
-            toast.show({ tone: "success", message: DELETED_MESSAGE });
+            showToast({
+              tone: "success",
+              base: DELETED_MESSAGE,
+              effect: { kind: "light", change: result.change },
+            });
             setFocusHeading(true);
           }
           return result;

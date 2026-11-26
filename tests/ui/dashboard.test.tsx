@@ -185,11 +185,11 @@ describe("Do it flows on the level 4 demo", () => {
       (b) => b.textContent?.includes(CANCEL_LABEL) && !b.textContent.includes(KEEP_LABEL),
     );
     await user.click(confirm as HTMLButtonElement);
-    expect(await screen.findByText("+$120/mo saved")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$120\/mo\ saved( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(checkboxFor(target.title).checked).toBe(true));
     await waitFor(() => expect(screen.queryByRole("button", { name: `Do it: ${target.title}` })).toBeNull());
     expect(screen.queryByText(COMPLETION_TOAST)).toBeNull();
-    expect(screen.getAllByText(/saved$/)).toHaveLength(1);
+    expect(screen.getAllByText(/\/mo saved( · .+)?$/)).toHaveLength(1);
   });
 
   it("opens the Log payment sheet pre-filled with the minimum plus $300 and shows the action done", async () => {
@@ -315,10 +315,10 @@ describe("Plan actions without a Do it flow", () => {
     });
     await screen.findByText(REDUCE.title);
     await user.click(checkboxFor(REDUCE.title));
-    expect(await screen.findByText("+$41.50/mo freed")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$41\.50\/mo\ freed( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(checkboxFor(REDUCE.title).checked).toBe(true));
     await user.click(checkboxFor(FALLBACK.title));
-    expect(await screen.findByText("Action completed")).toBeTruthy();
+    expect(await screen.findByText(/^Action completed( · .+)?$/)).toBeTruthy();
     const stored = await ctx.realDb.weeklyPlans.get(REAL_NOW);
     expect(stored?.actions.filter((a) => a.done)).toHaveLength(2);
     expect(await ctx.realDb.events.filter((e) => e.type === "exorcism_action_completed").count()).toBe(2);

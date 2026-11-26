@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/common/Skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { HouseScene } from "@/components/house/HouseScene";
 import { DemoControls } from "@/components/demo/DemoControls";
-import { ExorcismPlan } from "@/components/exorcism/ExorcismPlan";
+import { ExorcismPlan, EXORCISM_PLAN_HEADING_ID } from "@/components/exorcism/ExorcismPlan";
 import { AddExpenseSheet } from "@/components/sheets/AddExpenseSheet";
 import { LogPaymentSheet } from "@/components/sheets/LogPaymentSheet";
 import { BalanceHero } from "@/components/ui/BalanceHero";
@@ -133,6 +133,7 @@ export function Dashboard() {
               <Card
                 title={PLAN_CARD_TITLE}
                 headingLevel="h2"
+                headingId={EXORCISM_PLAN_HEADING_ID}
                 action={{ label: PLAN_CARD_ACTION_LABEL, href: EXORCISM_PATH }}
               >
                 <ExorcismPlan variant="card" />

@@ -111,27 +111,27 @@ Conventions that apply to every task:
     - Mutation check: restore the old `TabBar` classes, confirm the browser case fails at 320px, restore the fix and confirm it passes at 320, 375, 768, 1280 and 1920, at `RAF_THROTTLE_MS=0` and `700`.
     - _Requirements: 16.1, 16.5, 16.6_
 
-- [ ] 2. Measured light, toasts and the row highlight
-  - [ ] 2.1 Create `src/lib/utils/lightClause.ts`
+- [x] 2. Measured light, toasts and the row highlight
+  - [x] 2.1 Create `src/lib/utils/lightClause.ts`
     - Add `getLightClause`, `joinToastText`, `LIGHT_NOISE_EPSILON`, `LIGHT_FULL_SCORE`, `CLAUSE_SEPARATOR`, `MINUS_SIGN`, `GHOST_EXPENSE_CLAUSE` and `EXPENSE_CLAUSE`, as in the design's clause table. No React, Dexie, Next.js or clock.
     - `tests/feedback/lightClause.test.ts`: every table row; rounding at 0.05, 0.049, −0.05 and −0.049; 100 → 100 reads "Light already full"; NaN and Infinity read "Light unchanged"; `joinToastText` with and without a clause; the measured values +0.112 → "Light +0.1" and +5.217 → "Light +5.2".
     - _Requirements: 2.1 to 2.8, 14.1_
 
-  - [ ] 2.2 Write property tests for the clause
+  - [x] 2.2 Write property tests for the clause
     - **Property 1: The light clause has the sign of the change.** File: `tests/feedback/properties/p01-light-clause-sign.test.ts`.
     - **Property 2: The shown value is the change rounded to a tenth.** File: `tests/feedback/properties/p02-light-clause-rounding.test.ts`.
     - **Validates: Requirements 2.2 to 2.6, 2.9**
 
-  - [ ] 2.3 Add `readHouseReading` to `src/lib/db/queries.ts`
+  - [x] 2.3 Add `readHouseReading` to `src/lib/db/queries.ts`
     - Use `readAllRows`, then `toFinancialSnapshot`, then `computeHouseState`, and return `{ lightScore, poltergeist }`.
     - `tests/db/readHouseReading.test.ts` (fake-indexeddb): the reading equals the `useHouseState` path, and the design's level-4 table holds to 3 decimals (32.735 → 32.735 → 32.847 → 38.065 → 39.065 → 43.605).
     - _Requirements: 2.7_
 
-  - [ ] 2.4 Write the expense neutrality property
+  - [x] 2.4 Write the expense neutrality property
     - **Property 3: Expenses never move the light.** File: `tests/feedback/properties/p03-expense-neutrality.test.ts`, using the app-screens adapter generators. Cover adding a Transaction and removing an existing one. Add one example through the real `addTransaction` and `deleteTransaction` with fake-indexeddb.
     - **Validates: Requirement 2.10**
 
-  - [ ] 2.5 Measure every Mutation in the action hooks
+  - [x] 2.5 Measure every Mutation in the action hooks
     - `useCryptActions.ts`:
       - Add `HouseChange`, `measured()` and `serialize()` (a `WeakMap<CryptDb, Promise<unknown>>` chain that survives rejections), and the optional `change` on `MutationResult`.
       - Run every Mutation except `clearAll` through them. Route `setIncome` through `withNow`.
@@ -145,7 +145,7 @@ Conventions that apply to every task:
       - `begin` runs before the wait.
     - _Requirements: 1.1, 2.7, 2.8_
 
-  - [ ] 2.6 Update the Toast primitive
+  - [x] 2.6 Update the Toast primitive
     - `Toast.tsx`: the message wraps (no `truncate whitespace-nowrap`), and a new `actionAccessibleName` sets the action Button's `aria-label`. `ToastRegion` passes it through. Add `ACTION_TOAST_DURATION_MS`, `ROW_HIGHLIGHT_MS`, `HIGHLIGHT_WAIT_MS`, `HIGHLIGHT_PENDING_TTL_MS` and `BANNER_HIGHLIGHT_MS` to `motionTokens.ts`.
     - Tests in `tests/ui/Toast.test.tsx`: the accessible name; the existing pause on focus and hover with an action; the full message text present in the DOM.
     - _Requirements: 1.12, 3.1, 3.10_
@@ -154,12 +154,12 @@ Conventions that apply to every task:
     - Visual duplicate of the manual check at 320px: assert the message span has no `truncate` or `whitespace-nowrap` class.
     - _Requirements: 1.12_
 
-  - [ ] 2.8 Create `src/lib/utils/destinations.ts`
+  - [x] 2.8 Create `src/lib/utils/destinations.ts`
     - Add `HighlightList`, `HighlightTag`, `HighlightTarget`, `DESTINATION_PATHS`, `DESTINATION_LABELS`, `getRowDomId` and `HIGHLIGHT_TAG_TEXT`.
     - `tests/feedback/destinations.test.ts`: paths, labels, DOM ids and the "View in …" names for every list.
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 2.9 Create `RowHighlightProvider` and mount it
+  - [x] 2.9 Create `RowHighlightProvider` and mount it
     - `src/components/feedback/RowHighlightProvider.tsx`: the provider with one Pending, the TTL, one polite `role="status"` region, `useRequestHighlight` and `useRowHighlight` as in the design (wait while rows are null, focus and `scrollIntoView` only when `focus` is set, announce, clear after `ROW_HIGHLIGHT_MS`, and handle the missing row after `HIGHLIGHT_WAIT_MS`).
     - Mount it inside `ToastRegion` in `src/app/layout.tsx`.
     - `tests/ui/rowHighlight.test.tsx` (fake timers):
@@ -170,7 +170,7 @@ Conventions that apply to every task:
       - a fresh provider (reload) highlights nothing.
     - _Requirements: 3.4 to 3.9, 12.2_
 
-  - [ ] 2.10 Add the `highlight` prop to `ListRow` and `ExorcismActionRow`
+  - [x] 2.10 Add the `highlight` prop to `ListRow` and `ExorcismActionRow`
     - Render the "New" or "Updated" tag as a candle `Chip` after the title, and fade a `bg-candle-tint` background in and out (no fade under reduced motion). Add both states to the styleguide.
     - Tests in the existing primitive test files: the tag text is present only with the prop, and reduced motion sets no animation duration.
     - _Requirements: 3.5, 3.7, 3.11, 12.5_
@@ -179,12 +179,12 @@ Conventions that apply to every task:
     - Visual duplicate: the styleguide renders one highlighted `ListRow` and one highlighted `ExorcismActionRow`.
     - _Requirements: 3.5_
 
-  - [ ] 2.12 Create `useActionToast`
+  - [x] 2.12 Create `useActionToast`
     - `src/components/feedback/useActionToast.ts`: compose the message, compare `usePathname()` with the destination path, and either request an in-place highlight (no action) or show "View" with `actionAccessibleName`, `ACTION_TOAST_DURATION_MS` and an `onAction` that requests the highlight with focus and calls `router.push`.
     - `tests/ui/useActionToast.test.tsx` (mocked router and pathname): the clause from `change`; no clause when `change` is null; the fixed expense clause; "View" off-Screen; no action and an in-place request on-Screen; no destination gives neither.
     - _Requirements: 1.1, 1.9, 2.8, 3.1, 3.3, 3.4_
 
-  - [ ] 2.13 Switch every toast call site and add the row and heading ids
+  - [x] 2.13 Switch every toast call site and add the row and heading ids
     - Use `useActionToast` in `LogPaymentSheet`, `CancelSubscriptionSheet`, `ExorcismPlanAction`, `AddExpenseSheet`, `TransactionsScreen` (delete), `DebtsScreen` (add, edit, delete), `SubscriptionsScreen` (add, reactivate, delete) and `SettingsScreen` (income), with the bases, effects and destinations of the design's call-site table.
     - Give every list row `id={getRowDomId(list, row.id)}`, replace the local Subscriptions `getRowDomId`, and add `EXORCISM_PLAN_HEADING_ID`.
     - Wire `useRowHighlight` into the Debts, Transactions, Subscriptions (both lists) and Exorcism lists.
@@ -192,7 +192,7 @@ Conventions that apply to every task:
     - Keep the demo control toasts unchanged.
     - _Requirements: 1.1 to 1.13, 3.2, 3.3_
 
-  - [ ] 2.14 Write the toast and highlight integration tests
+  - [x] 2.14 Write the toast and highlight integration tests
     - `tests/ui/actionToasts.test.tsx` (level-4 demo through `renderWithCrypt`):
       - Each toast reads as specified: the measured "+$120/mo saved · Light +5.2", the expense texts, "Expense deleted · doesn't change the light", and a delete with a clause.
       - "View in Transactions" after adding an expense on the Dashboard navigates, focuses the row and announces it.

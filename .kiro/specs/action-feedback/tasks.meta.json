@@ -1,5 +1,14 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "2.2 Write property tests for the clause": {
+      "status": "passed",
+      "lastRunTimestamp": 1795669885584
+    },
+    "2.4 Write the expense neutrality property": {
+      "status": "passed",
+      "lastRunTimestamp": 1795670299422
+    }
+  },
   "executionHistory": {
     "1.1 Write the failing initial-focus test": [
       {
@@ -138,6 +147,157 @@
         "executionId": "86806558-9c8d-441a-bee3-b73884667a96",
         "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
         "timestamp": 1795666793646
+      }
+    ],
+    "2.1 Create `src/lib/utils/lightClause.ts`": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669778064
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669840827
+      }
+    ],
+    "2.3 Add `readHouseReading` to `src/lib/db/queries.ts`": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669778182
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669842467
+      }
+    ],
+    "2.6 Update the Toast primitive": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669778775
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669840054
+      }
+    ],
+    "2.8 Create `src/lib/utils/destinations.ts`": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669779447
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669841614
+      }
+    ],
+    "2.2 Write property tests for the clause": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669856723
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670116610
+      }
+    ],
+    "2.5 Measure every Mutation in the action hooks": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669856770
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670117420
+      }
+    ],
+    "2.10 Add the `highlight` prop to `ListRow` and `ExorcismActionRow`": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669857487
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670118445
+      }
+    ],
+    "2.9 Create `RowHighlightProvider` and mount it": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795669858205
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670119504
+      }
+    ],
+    "2.4 Write the expense neutrality property": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670120316
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670310518
+      }
+    ],
+    "2.12 Create `useActionToast`": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670121159
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670311627
+      }
+    ],
+    "2.13 Switch every toast call site and add the row and heading ids": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670312233
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670783007
+      }
+    ],
+    "2.14 Write the toast and highlight integration tests": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670784036
+      },
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670965434
+      }
+    ],
+    "2. Measured light, toasts and the row highlight": [
+      {
+        "executionId": "09688a42-b328-45e0-a07a-b868ec878ab0",
+        "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
+        "timestamp": 1795670965527
       }
     ]
   }

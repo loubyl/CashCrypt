@@ -5,10 +5,11 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
-import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useNow } from "@/hooks/useNow";
 import { SMALL_EXPENSE_THRESHOLD_CENTS } from "@/lib/haunting/config";
+import { EXPENSE_CLAUSE, GHOST_EXPENSE_CLAUSE } from "@/lib/utils/lightClause";
 import { formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
 import { useFocusFirstInvalid } from "./useFocusFirstInvalid";
 
@@ -39,7 +40,7 @@ type ExpenseFormProps = { onClose: () => void };
 function ExpenseForm({ onClose }: ExpenseFormProps) {
   const { addTransaction } = useCryptActions();
   const now = useNow();
-  const toast = useToast();
+  const showToast = useActionToast();
   const [amountText, setAmountText] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
@@ -82,9 +83,12 @@ function ExpenseForm({ onClose }: ExpenseFormProps) {
     }
     onClose();
     const amount = formatCentsShort(cents);
-    toast.show({
+    const isGhost = cents < SMALL_EXPENSE_THRESHOLD_CENTS;
+    showToast({
       tone: "success",
-      message: cents < SMALL_EXPENSE_THRESHOLD_CENTS ? `Ghost added: ${amount}` : `Expense added: ${amount}`,
+      base: isGhost ? `Ghost added: ${amount}` : `Expense added: ${amount}`,
+      effect: { kind: "fixed", clause: isGhost ? GHOST_EXPENSE_CLAUSE : EXPENSE_CLAUSE },
+      destination: { list: "transactions", rowId: result.value.id, tag: "new" },
     });
   };
 

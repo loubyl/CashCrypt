@@ -10,10 +10,13 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ListRow } from "@/components/ui/ListRow";
-import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
+import { useRowHighlight } from "@/components/feedback/RowHighlightProvider";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
 import { useNow } from "@/hooks/useNow";
+import { getRowDomId } from "@/lib/utils/destinations";
+import { EXPENSE_CLAUSE } from "@/lib/utils/lightClause";
 import { formatMonthDay } from "@/lib/utils/calendar";
 import { formatCents, formatCentsShort } from "@/lib/utils/cents";
 import {
@@ -75,7 +78,7 @@ export function TransactionsScreen() {
   const data = useCryptData();
   const now = useNow();
   const { deleteTransaction } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const [addOpen, setAddOpen] = useState(false);
   const [rowId, setRowId] = useState<string | null>(null);
   // The deleted row is gone, so the element that opened the sheet no longer exists. Focus the
@@ -91,6 +94,15 @@ export function TransactionsScreen() {
     }, FOCUS_DELAY_MS);
     return () => window.clearTimeout(timer);
   }, [focusHeading, sheetOpen]);
+  const highlight = useRowHighlight({
+    list: "transactions",
+    rows:
+      data.status === "loading"
+        ? null
+        : data.rows.transactions.map((row) => ({ id: row.id, label: row.description })),
+    listLabel: LIST_TITLE,
+    headingId: LIST_HEADING_ID,
+  });
 
   if (data.status === "loading" || now === null) {
     return (
@@ -136,6 +148,8 @@ export function TransactionsScreen() {
               <li key={row.id}>
                 {/* The ghost icon marks a small expense; the accessible name says "ghost" too. */}
                 <ListRow
+                  id={getRowDomId("transactions", row.id)}
+                  highlight={highlight.highlightedId === row.id ? (highlight.tag ?? undefined) : undefined}
                   icon={row.isGhost ? Ghost : Receipt}
                   tone={row.isGhost ? "ghost" : "neutral"}
                   title={row.description}
@@ -170,7 +184,11 @@ export function TransactionsScreen() {
           if (deleteTarget === null) return { ok: true, value: undefined };
           const result = await deleteTransaction(deleteTarget.id);
           if (result.ok) {
-            toast.show({ tone: "success", message: DELETED_MESSAGE });
+            showToast({
+              tone: "success",
+              base: DELETED_MESSAGE,
+              effect: { kind: "fixed", clause: EXPENSE_CLAUSE },
+            });
             setFocusHeading(true);
           }
           return result;

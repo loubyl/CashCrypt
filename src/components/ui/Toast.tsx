@@ -52,12 +52,14 @@ const toastVariants: Variants = {
 
 export type ToastProps = {
   tone: ToastTone;
-  /** One line of text. */
+  /** Message text. It wraps onto several lines when long. */
   message: string;
   /** Time in milliseconds before `onDismiss` is called. Default 4000. */
   duration?: number;
   /** When set, renders a ghost action button with this label. */
   actionLabel?: string;
+  /** Sets the action button's `aria-label` (for example "Undo: Spotify canceled"). */
+  actionAccessibleName?: string;
   /** Called when the action button is pressed, right before the toast dismisses itself. */
   onAction?: () => void;
   /**
@@ -74,6 +76,7 @@ export function Toast({
   message,
   duration = TOAST_DEFAULT_DURATION_MS,
   actionLabel,
+  actionAccessibleName,
   onAction,
   onDismiss,
   className,
@@ -154,9 +157,9 @@ export function Toast({
         aria-hidden="true"
         className={`shrink-0 ${TONE_ICON_CLASSES[tone]}`}
       />
-      <span className="min-w-0 truncate whitespace-nowrap">{message}</span>
+      <span className="min-w-0 text-pretty">{message}</span>
       {actionLabel ? (
-        <Button variant="ghost" size="sm" onClick={handleAction}>
+        <Button variant="ghost" size="sm" aria-label={actionAccessibleName} onClick={handleAction}>
           {actionLabel}
         </Button>
       ) : null}

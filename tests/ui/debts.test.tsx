@@ -87,7 +87,7 @@ describe("Debts screen add flow", () => {
     await user.type(within(dialog).getByLabelText("APR (%)"), "7.5");
     await user.type(within(dialog).getByLabelText("Minimum monthly payment"), "150");
     await user.click(within(dialog).getByRole("button", { name: SAVE_DEBT_LABEL }));
-    expect(await screen.findByText("Debt added: Gloom Mortgage, $2,500")).toBeTruthy();
+    expect(await screen.findByText(/^Debt\ added:\ Gloom\ Mortgage,\ \$2,500( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect(await screen.findByText("APR 7.5% · Minimum $150/mo")).toBeTruthy();
     const rows = await ctx.realDb.debts.toArray();
@@ -178,7 +178,7 @@ describe("Debts screen edit flow", () => {
     await user.clear(nameInput);
     await user.type(nameInput, "Crimson Moth Card");
     await user.click(within(dialog).getByRole("button", { name: "Save changes" }));
-    expect(await screen.findByText("Debt updated: Crimson Moth Card")).toBeTruthy();
+    expect(await screen.findByText(/^Debt\ updated:\ Crimson\ Moth\ Card( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect((await ctx.realDb.debts.get(SCARLET.id))?.name).toBe("Crimson Moth Card");
     expect(await ctx.realDb.events.count()).toBe(eventsBefore);
@@ -196,7 +196,7 @@ describe("Debts screen log payment", () => {
     const amount = within(payment).getByLabelText("Payment amount") as HTMLInputElement;
     expect(Number(amount.value.replace(/[^0-9.]/g, ""))).toBe(55);
     await user.click(within(payment).getByRole("button", { name: "Save payment" }));
-    expect(await screen.findByText("Payment saved. $55 off your balance.")).toBeTruthy();
+    expect(await screen.findByText(/^Payment\ saved\.\ \$55\ off\ your\ balance( · .+)?$/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     expect(await screen.findByText("$1,745.00")).toBeTruthy();
     expect((await ctx.realDb.debts.get(SCARLET.id))?.balanceCents).toBe(174_500);

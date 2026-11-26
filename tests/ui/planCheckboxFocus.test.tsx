@@ -11,7 +11,6 @@ import { setReducedMotion } from "./helpers/motion";
 // jsdom does not blur an element that becomes disabled, so this test fails on the `disabled`
 // attribute. The real focus loss is covered by scripts/check-moments.mjs and guarded in task 1.7.
 
-const WEEK_KEY = "2025-01-06";
 const COFFEE_ACTION: StoredPlanAction = {
   id: "reduce-small-expenses-coffee",
   kind: "reduce_small_expenses",
@@ -46,7 +45,6 @@ function renderAction(toggleAction: (id: string, next: boolean) => Promise<Mutat
   render(
     <ToastRegion>
       <ExorcismPlanAction
-        weekKey={WEEK_KEY}
         action={COFFEE_ACTION}
         doItTarget={null}
         onDoIt={vi.fn()}

@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ExorcismActionRow } from "@/components/ui/ExorcismActionRow";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
 import type { MutationResult } from "@/hooks/useCryptActions";
+import { getRowDomId } from "@/lib/utils/destinations";
 import { formatCentsShort } from "@/lib/utils/cents";
 import { getPlanActionSubtitle, getToastForCompletion, type DoItTarget } from "@/lib/utils/planView";
+import type { HighlightTag } from "@/lib/utils/destinations";
 import type { StoredPlanAction } from "@/types/finance";
 
 const TOGGLE_ERROR_MESSAGE = "Could not save that action. Try again.";
@@ -14,13 +17,15 @@ const DO_IT_LABEL = "Do it";
 // Aligns the Do it button with the text column: 44px checkbox target plus the 12px row gap.
 const DO_IT_WRAPPER_CLASSES = "-mt-1 mb-2 pl-14";
 
-export function getPlanRowId(weekKey: string, actionId: string): string {
-  return `plan-${weekKey}-${actionId}`;
+/** DOM id of a plan row's checkbox. */
+export function getPlanRowId(actionId: string): string {
+  return getRowDomId("plan", actionId);
 }
 
 export type ExorcismPlanActionProps = {
-  weekKey: string;
   action: StoredPlanAction;
+  /** Marks the row as just added or changed. */
+  highlight?: HighlightTag;
   /** Non-null only while the action can still be done from here. */
   doItTarget: DoItTarget | null;
   onDoIt: (action: StoredPlanAction, target: DoItTarget) => void;
@@ -28,13 +33,14 @@ export type ExorcismPlanActionProps = {
 };
 
 export function ExorcismPlanAction({
-  weekKey,
   action,
+  highlight,
   doItTarget,
   onDoIt,
   toggleAction,
 }: ExorcismPlanActionProps) {
   const toast = useToast();
+  const showToast = useActionToast();
   const [busy, setBusy] = useState(false);
   const impactCents = action.monthlyAmountCents;
   const impactText = impactCents > 0 ? formatCentsShort(impactCents) : undefined;
@@ -49,19 +55,25 @@ export function ExorcismPlanAction({
       return;
     }
     if (next) {
-      toast.show({ tone: "success", message: getToastForCompletion(action) });
+      showToast({
+        tone: "success",
+        base: getToastForCompletion(action),
+        effect: { kind: "light", change: result.change },
+        destination: { list: "plan", rowId: action.id, tag: "updated" },
+      });
     }
   };
 
   return (
     <div data-plan-action={action.id}>
       <ExorcismActionRow
-        id={getPlanRowId(weekKey, action.id)}
+        id={getPlanRowId(action.id)}
         title={action.title}
         subtitle={getPlanActionSubtitle(action)}
         impactText={impactText}
         done={action.done}
         pending={busy}
+        highlight={highlight}
         onToggle={handleToggle}
       />
       {doItTarget !== null ? (

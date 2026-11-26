@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Inter, JetBrains_Mono, Manrope } from "next/font/google";
 import { CryptProvider } from "@/hooks/useCrypt";
+import { RowHighlightProvider } from "@/components/feedback/RowHighlightProvider";
 import { ToastRegion } from "@/components/ui/ToastRegion";
 import "./globals.css";
 
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       {/* A browser extension adds attributes to <body> before hydration (confirmed in incognito). */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <CryptProvider>
-          <ToastRegion>{children}</ToastRegion>
+          <ToastRegion>
+            <RowHighlightProvider>{children}</RowHighlightProvider>
+          </ToastRegion>
         </CryptProvider>
       </body>
     </html>

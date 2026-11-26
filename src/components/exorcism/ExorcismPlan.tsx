@@ -8,10 +8,13 @@ import { useCryptData } from "@/hooks/useCryptData";
 import { useExorcismPlan } from "@/hooks/useExorcismPlan";
 import { getDoItTarget, type DoItTarget } from "@/lib/utils/planView";
 import type { StoredPlanAction } from "@/types/finance";
+import { useRowHighlight } from "@/components/feedback/RowHighlightProvider";
 import { ExorcismPlanAction, getPlanRowId } from "./ExorcismPlanAction";
 
 const SKELETON_LINES = 3;
 const FOCUS_DELAY_MS = 0;
+export const EXORCISM_PLAN_HEADING_ID = "exorcism-plan-heading";
+const PLAN_LIST_LABEL = "This week's exorcism";
 
 export type ExorcismPlanVariant = "card" | "page";
 
@@ -41,10 +44,16 @@ export function ExorcismPlan({ variant }: ExorcismPlanProps) {
     rows !== null &&
     getDoItTarget(pendingAction, rows) === null;
   const sheetClosed = active === null || !active.open;
+  const highlight = useRowHighlight({
+    list: "plan",
+    rows: plan === null ? null : actions.map((action) => ({ id: action.id, label: action.title })),
+    listLabel: PLAN_LIST_LABEL,
+    headingId: EXORCISM_PLAN_HEADING_ID,
+  });
 
   useEffect(() => {
     if (pendingAction === undefined || weekKey === null || !pendingTargetGone || !sheetClosed) return;
-    const rowId = getPlanRowId(weekKey, pendingAction.id);
+    const rowId = getPlanRowId(pendingAction.id);
     // Wait one tick so the sheet's own focus restore runs first.
     const timer = window.setTimeout(() => {
       document.getElementById(rowId)?.focus();
@@ -75,7 +84,7 @@ export function ExorcismPlan({ variant }: ExorcismPlanProps) {
       {actions.map((action) => (
         <ExorcismPlanAction
           key={action.id}
-          weekKey={weekKey}
+          highlight={highlight.highlightedId === action.id ? (highlight.tag ?? undefined) : undefined}
           action={action}
           doItTarget={getDoItTarget(action, rows)}
           onDoIt={handleDoIt}

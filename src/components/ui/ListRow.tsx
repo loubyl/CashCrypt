@@ -1,3 +1,5 @@
+"use client";
+
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -5,7 +7,10 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import type { LucideIcon } from "lucide-react";
+import { Sparkles, type LucideIcon } from "lucide-react";
+import { HIGHLIGHT_TAG_TEXT, type HighlightTag } from "@/lib/utils/destinations";
+import { Chip } from "./Chip";
+import { RowHighlightFill } from "./RowHighlightFill";
 import type { LayoutClassName } from "./motionTokens";
 
 const ICON_SIZE_PX = 20;
@@ -42,7 +47,7 @@ const DIVIDER_CLASSES =
 
 // At least 64px high. With a badge the row grows (padding instead of a fixed height), so the
 // badge stays inside the row and inside its focus ring.
-const ROW_CLASSES = "relative flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
+const ROW_CLASSES = "relative isolate flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
 
 const INTERACTIVE_CLASSES =
   "rounded-md outline-none transition-colors active:bg-surface-raised " +
@@ -61,6 +66,8 @@ type ListRowContentProps = {
   badge?: ReactNode;
   /** Adds a `+` (in) or `−` (out) sign to the amount as text. */
   amountDirection?: ListRowAmountDirection;
+  /** Marks the row as just added or changed: a visible tag after the title and a fading candle-tint background. */
+  highlight?: HighlightTag;
   /** Draws a 1px divider at the bottom, inset by the avatar width. */
   divider?: boolean;
   /** Layout utilities only (margin, width, grid placement). Never colors or spacing. */
@@ -94,22 +101,39 @@ export type ListRowProps = StaticListRowProps | ButtonListRowProps | LinkListRow
 
 type RowBodyProps = Pick<
   ListRowContentProps,
-  "icon" | "tone" | "title" | "subtitle" | "badge" | "amount" | "amountDirection"
+  "icon" | "tone" | "title" | "subtitle" | "badge" | "amount" | "amountDirection" | "highlight"
 >;
 
-function RowBody({ icon: Icon, tone = "neutral", title, subtitle, badge, amount, amountDirection }: RowBodyProps) {
+function RowBody({
+  icon: Icon,
+  tone = "neutral",
+  title,
+  subtitle,
+  badge,
+  amount,
+  amountDirection,
+  highlight,
+}: RowBodyProps) {
   const sign = amountDirection ? DIRECTION_SIGNS[amountDirection] : "";
   const amountColor = amountDirection ? DIRECTION_CLASSES[amountDirection] : "text-ink";
 
   return (
     <>
+      <RowHighlightFill active={highlight !== undefined} />
       <span
         className={`inline-flex size-10 shrink-0 items-center justify-center rounded-circle ${TONE_CLASSES[tone]}`}
       >
         <Icon size={ICON_SIZE_PX} strokeWidth={ICON_STROKE_WIDTH} aria-hidden="true" />
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-body-lg text-ink">{title}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-body-lg text-ink">{title}</span>
+          {highlight ? (
+            <Chip tone="warning" icon={Sparkles}>
+              {HIGHLIGHT_TAG_TEXT[highlight]}
+            </Chip>
+          ) : null}
+        </span>
         {subtitle ? <span className="truncate text-caption text-ink-secondary">{subtitle}</span> : null}
         {badge ? <span className="mt-1 flex">{badge}</span> : null}
       </span>
@@ -132,6 +156,7 @@ export const ListRow = forwardRef<HTMLElement, ListRowProps>(function ListRow(pr
     badge,
     amount,
     amountDirection,
+    highlight,
     divider = false,
     className,
     ...rest
@@ -146,6 +171,7 @@ export const ListRow = forwardRef<HTMLElement, ListRowProps>(function ListRow(pr
       badge={badge}
       amount={amount}
       amountDirection={amountDirection}
+      highlight={highlight}
     />
   );
   const shared = [ROW_CLASSES, divider ? DIVIDER_CLASSES : "", className ?? ""].filter(Boolean);

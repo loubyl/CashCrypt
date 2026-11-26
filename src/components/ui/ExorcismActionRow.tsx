@@ -2,7 +2,10 @@
 
 import { forwardRef, type ChangeEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
+import { HIGHLIGHT_TAG_TEXT, type HighlightTag } from "@/lib/utils/destinations";
+import { Chip } from "./Chip";
+import { RowHighlightFill } from "./RowHighlightFill";
 import { REDUCED_FADE_MAX_S, TAB_DURATION_S, type LayoutClassName } from "./motionTokens";
 
 const CHECK_ICON_SIZE_PX = 16;
@@ -13,7 +16,7 @@ const IMPACT_SUFFIX = "/mo";
 
 // Same row metrics as ListRow (at least 64px high, 12px gap). The title may wrap to two lines so
 // the saving in it stays visible; the row then grows instead of truncating.
-const ROW_CLASSES = "relative flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
+const ROW_CLASSES = "relative isolate flex min-h-16 w-full items-center gap-3 py-2 text-left font-sans";
 
 // 44px touch target around the 24px round checkbox.
 const TARGET_CLASSES = "relative inline-flex size-11 shrink-0 cursor-pointer items-center justify-center";
@@ -40,13 +43,15 @@ export type ExorcismActionRowProps = {
    * aria-busy), so keyboard focus is not lost. Changes are ignored until it clears.
    */
   pending?: boolean;
+  /** Marks the row as just added or changed: a visible tag after the title and a fading candle-tint background. */
+  highlight?: HighlightTag;
   /** Layout utilities only (margin, width, grid placement). Never colors or spacing. */
   className?: LayoutClassName;
 };
 
 export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowProps>(
   function ExorcismActionRow(
-    { id, title, subtitle, impactText, done, onToggle, disabled = false, pending = false, className },
+    { id, title, subtitle, impactText, done, onToggle, disabled = false, pending = false, highlight, className },
     ref,
   ) {
     const reduced = useReducedMotion();
@@ -69,6 +74,7 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
         data-done={done ? "true" : "false"}
         className={[ROW_CLASSES, className ?? ""].filter(Boolean).join(" ")}
       >
+        <RowHighlightFill active={highlight !== undefined} />
         <label className={TARGET_CLASSES}>
           <input
             id={id}
@@ -93,7 +99,16 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
           </motion.span>
         </label>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className={`line-clamp-2 text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>{title}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            <span className={`line-clamp-2 min-w-0 text-body-lg ${rowColor} ${done ? "line-through" : ""}`}>
+              {title}
+            </span>
+            {highlight ? (
+              <Chip tone="warning" icon={Sparkles}>
+                {HIGHLIGHT_TAG_TEXT[highlight]}
+              </Chip>
+            ) : null}
+          </span>
           {subtitle ? <span className={`truncate text-caption ${subtitleColor}`}>{subtitle}</span> : null}
         </span>
         {impactText ? (

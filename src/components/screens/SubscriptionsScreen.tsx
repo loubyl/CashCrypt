@@ -15,12 +15,15 @@ import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
+import { useRowHighlight } from "@/components/feedback/RowHighlightProvider";
 import { useFocusFirstInvalid } from "@/components/sheets/useFocusFirstInvalid";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
 import { normalizeSubscription } from "@/lib/haunting";
 import { formatMonthDay } from "@/lib/utils/calendar";
 import { formatCents, formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
+import { getRowDomId } from "@/lib/utils/destinations";
 import { sortSubscriptionsByMonthlyCost } from "@/lib/utils/listViews";
 import { validateSubscriptionInput } from "@/lib/validation/inputs";
 import type { Cadence, SubscriptionRow, Usage } from "@/types/finance";
@@ -48,10 +51,8 @@ const HEADING_IDS: Record<"zombies" | "graveyard", string> = {
   graveyard: "graveyard-heading",
 };
 type RowList = "zombies" | "graveyard";
-/** DOM id of a subscription's row in one of the two lists. */
-function getRowDomId(list: RowList, subscriptionId: string): string {
-  return `${list}-row-${subscriptionId}`;
-}
+const ZOMBIES_LIST_LABEL = "Zombies";
+const GRAVEYARD_LIST_LABEL = "Graveyard";
 const DEFAULT_USAGE: Usage = "often";
 
 const CADENCE_LABELS: Record<Cadence, string> = {
@@ -117,7 +118,7 @@ function UsageChip({ usage }: { usage: Usage }) {
 
 function AddSubscriptionForm({ onClose }: { onClose: () => void }) {
   const { addSubscription } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const [name, setName] = useState("");
   const [amountText, setAmountText] = useState("");
   const [cadence, setCadence] = useState<Cadence>(DEFAULT_CADENCE);
@@ -168,9 +169,11 @@ function AddSubscriptionForm({ onClose }: { onClose: () => void }) {
     }
     onClose();
     const monthly = getMonthlyCents(result.value);
-    toast.show({
+    showToast({
       tone: "success",
-      message: `Zombie added: ${result.value.name}, ${formatCentsShort(monthly)}${PER_MONTH_SUFFIX}`,
+      base: `Zombie added: ${result.value.name}, ${formatCentsShort(monthly)}${PER_MONTH_SUFFIX}`,
+      effect: { kind: "light", change: result.change },
+      destination: { list: "zombies", rowId: result.value.id, tag: "new" },
     });
   };
 
@@ -303,6 +306,7 @@ type GraveyardSheetProps = {
 function GraveyardSheet({ row, onClose, onBroughtBack, onDelete }: GraveyardSheetProps) {
   const { reactivateSubscription } = useCryptActions();
   const toast = useToast();
+  const showToast = useActionToast();
   const [submitting, setSubmitting] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -317,9 +321,11 @@ function GraveyardSheet({ row, onClose, onBroughtBack, onDelete }: GraveyardShee
       toast.show({ tone: "danger", message: REACTIVATE_ERROR });
       return;
     }
-    toast.show({
+    showToast({
       tone: "info",
-      message: `${row.name} is back: ${formatCentsShort(getMonthlyCents(row))}${PER_MONTH_SUFFIX} returns`,
+      base: `${row.name} is back: ${formatCentsShort(getMonthlyCents(row))}${PER_MONTH_SUFFIX} returns`,
+      effect: { kind: "light", change: result.change },
+      destination: { list: "zombies", rowId: row.id, tag: "new" },
     });
     onBroughtBack(row.id);
     onClose();
@@ -358,7 +364,24 @@ function GraveyardSheet({ row, onClose, onBroughtBack, onDelete }: GraveyardShee
 export function SubscriptionsScreen() {
   const data = useCryptData();
   const { deleteSubscription } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
+  const subscriptionRows = data.status === "loading" ? null : data.rows.subscriptions;
+  const zombieHighlight = useRowHighlight({
+    list: "zombies",
+    rows: subscriptionRows
+      ?.filter((row) => row.active)
+      .map((row) => ({ id: row.id, label: row.name })) ?? null,
+    listLabel: ZOMBIES_LIST_LABEL,
+    headingId: HEADING_IDS.zombies,
+  });
+  const graveyardHighlight = useRowHighlight({
+    list: "graveyard",
+    rows: subscriptionRows
+      ?.filter((row) => !row.active)
+      .map((row) => ({ id: row.id, label: row.name })) ?? null,
+    listLabel: GRAVEYARD_LIST_LABEL,
+    headingId: HEADING_IDS.graveyard,
+  });
   const [addOpen, setAddOpen] = useState(false);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
@@ -435,7 +458,7 @@ export function SubscriptionsScreen() {
           {active.length} active {active.length === 1 ? "subscription" : "subscriptions"}
         </p>
       </Card>
-      <Card title="Zombies" headingId={HEADING_IDS.zombies}>
+      <Card title={ZOMBIES_LIST_LABEL} headingId={HEADING_IDS.zombies}>
         {active.length === 0 ? (
           <EmptyState
             icon={Ghost}
@@ -448,6 +471,7 @@ export function SubscriptionsScreen() {
               <li key={row.id}>
                 <ListRow
                   id={getRowDomId("zombies", row.id)}
+                  highlight={zombieHighlight.highlightedId === row.id ? (zombieHighlight.tag ?? undefined) : undefined}
                   icon={Repeat}
                   tone="neutral"
                   title={row.name}
@@ -462,7 +486,7 @@ export function SubscriptionsScreen() {
           </ul>
         )}
       </Card>
-      <Card title="Graveyard" headingId={HEADING_IDS.graveyard}>
+      <Card title={GRAVEYARD_LIST_LABEL} headingId={HEADING_IDS.graveyard}>
         {graveyard.length === 0 ? (
           <EmptyState
             icon={Skull}
@@ -475,6 +499,9 @@ export function SubscriptionsScreen() {
               <li key={row.id}>
                 <ListRow
                   id={getRowDomId("graveyard", row.id)}
+                  highlight={
+                    graveyardHighlight.highlightedId === row.id ? (graveyardHighlight.tag ?? undefined) : undefined
+                  }
                   icon={Skull}
                   tone="neutral"
                   title={row.name}
@@ -533,7 +560,11 @@ export function SubscriptionsScreen() {
           if (deleteTarget === null) return { ok: true, value: undefined };
           const result = await deleteSubscription(deleteTarget.id);
           if (result.ok) {
-            toast.show({ tone: "success", message: DELETED_MESSAGE });
+            showToast({
+              tone: "success",
+              base: DELETED_MESSAGE,
+              effect: { kind: "light", change: result.change },
+            });
             setFocusList(deleteTarget.list);
           }
           return result;

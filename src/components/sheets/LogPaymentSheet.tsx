@@ -6,7 +6,7 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
-import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { INITIAL_FOCUS_ATTRIBUTE } from "@/lib/utils/focusTrap";
 import { centsToMoneyText, formatCents, formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
@@ -40,7 +40,7 @@ type PaymentFormProps = {
 
 function PaymentForm({ debt, prefillCents, onClose, amountRef }: PaymentFormProps) {
   const { logPayment } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const initialCents =
     prefillCents === undefined ? getPaymentPrefill(debt) : Math.min(Math.max(prefillCents, 0), debt.balanceCents);
   const [text, setText] = useState(initialCents > 0 ? centsToMoneyText(initialCents) : "");
@@ -80,9 +80,11 @@ function PaymentForm({ debt, prefillCents, onClose, amountRef }: PaymentFormProp
       return;
     }
     onClose();
-    toast.show({
+    showToast({
       tone: "success",
-      message: `Payment saved. ${formatCentsShort(checked.value)} off your balance.`,
+      base: `Payment saved. ${formatCentsShort(checked.value)} off your balance`,
+      effect: { kind: "light", change: result.change },
+      destination: { list: "debts", rowId: debt.id, tag: "updated" },
     });
   };
 

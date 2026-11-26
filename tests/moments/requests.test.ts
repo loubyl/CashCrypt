@@ -63,7 +63,7 @@ describe("planMoments for a payment", () => {
 });
 
 describe("planMoments for plan toggles", () => {
-  const toggle = (actionId: string, next: boolean): ActionOutcome => ({ kind: "planToggle", actionId, next });
+  const toggle = (actionId: string, next: boolean): ActionOutcome => ({ kind: "planToggle", actionId, next, lightDelta: 0 });
 
   it("plans a sigil for ticking reduce_small_expenses while the Poltergeist is present, then the plan-complete Moment", () => {
     expect(planMoments(toggle("a3", true), context())).toEqual([{ kind: "sigil" }, { kind: "exorcismComplete" }]);
@@ -144,7 +144,7 @@ describe("planMoments for the level-4 demo week-1 plan", () => {
     ]);
 
     const sigil = planMoments(
-      { kind: "planToggle", actionId: CUT_COFFEE, next: true },
+      { kind: "planToggle", actionId: CUT_COFFEE, next: true, lightDelta: 0 },
       demoContext([CANCEL_WRAITHCAST]),
     );
     expect(sigil).toEqual([{ kind: "sigil" }]);
@@ -210,7 +210,7 @@ describe("level-4 demo flow through the Moment queue", () => {
       cancelOutcome({ subscriptionId: WRAITHCAST, monthlySavedCents: 12_000, completedActionId: CANCEL_WRAITHCAST }),
       ctx([]),
     );
-    const sigil = planMoments({ kind: "planToggle", actionId: CUT_COFFEE, next: true }, ctx([CANCEL_WRAITHCAST]));
+    const sigil = planMoments({ kind: "planToggle", actionId: CUT_COFFEE, next: true, lightDelta: 0 }, ctx([CANCEL_WRAITHCAST]));
     const payment = planMoments(
       { kind: "payment", extraPrincipalCents: 30_000, completedActionId: PAY_SCARLET, origin: ORIGIN },
       ctx([CANCEL_WRAITHCAST, CUT_COFFEE]),

@@ -3,6 +3,7 @@ import { useCallback, useMemo } from "react";
 import { useCrypt } from "@/hooks/useCrypt";
 import {
   mapCancelOutcome,
+  mapExpenseOutcome,
   mapPaymentOutcome,
   observeAction,
   useActionObserver,
@@ -27,6 +28,7 @@ import {
   type CancelOutcome,
   type LogPaymentOutcome,
 } from "@/lib/db/mutations";
+import { readHouseReading, type HouseReading } from "@/lib/db/queries";
 import type { CryptDb } from "@/lib/db/schema";
 import type {
   DebtInput,
@@ -43,8 +45,15 @@ export type MutationError =
   | { kind: "not-found"; message: string }
   | { kind: "unknown"; message: string };
 
+/** The light score and Poltergeist around one Mutation. */
+export type HouseChange = {
+  lightBefore: number;
+  lightAfter: number;
+  poltergeistAfter: boolean;
+};
+
 export type MutationResult<T> =
-  | { ok: true; value: T }
+  | { ok: true; value: T; change?: HouseChange | null } // null: a reading failed
   | { ok: false; error: MutationError };
 
 export type CryptActions = {
@@ -92,6 +101,50 @@ async function run<T>(task: () => Promise<T>): Promise<MutationResult<T>> {
   }
 }
 
+/**
+ * Reads the house before and after `task`. A failed reading gives
+ * `change: null` and never fails the action; a failed task has no `change`.
+ */
+export async function measured<T>(
+  db: CryptDb,
+  now: LocalDate,
+  task: () => Promise<T>,
+): Promise<MutationResult<T>> {
+  const readSafely = async (): Promise<HouseReading | null> => {
+    try {
+      return await readHouseReading(db, now);
+    } catch {
+      return null;
+    }
+  };
+  const before = await readSafely();
+  const result = await run(task);
+  if (!result.ok) return result;
+  const after = before === null ? null : await readSafely();
+  const change: HouseChange | null =
+    before && after
+      ? {
+          lightBefore: before.lightScore,
+          lightAfter: after.lightScore,
+          poltergeistAfter: after.poltergeist,
+        }
+      : null;
+  return { ...result, change };
+}
+
+const chains = new WeakMap<CryptDb, Promise<unknown>>();
+
+/** Runs `job` after the previous job of the same database; a rejected job does not break the chain. */
+export function serialize<T>(db: CryptDb, job: () => Promise<T>): Promise<T> {
+  const previous = chains.get(db) ?? Promise.resolve();
+  const next = previous.then(job, job);
+  chains.set(
+    db,
+    next.catch(() => undefined),
+  );
+  return next;
+}
+
 function notReady<T>(): Promise<MutationResult<T>> {
   return Promise.resolve({ ok: false, error: { kind: "unknown", message: NOT_READY_MESSAGE } });
 }
@@ -102,16 +155,23 @@ function bindActions(
   observer: ActionObserver | null,
 ): CryptActions {
   const withNow = <T>(task: (today: LocalDate) => Promise<T>): Promise<MutationResult<T>> =>
-    now === null ? notReady<T>() : run(() => task(now));
+    now === null
+      ? notReady<T>()
+      : serialize(db, () => measured(db, now, () => task(now)));
   return {
-    setIncome: (cents) => run(() => setMonthlyIncome(db, cents)),
+    setIncome: (cents) => withNow(() => setMonthlyIncome(db, cents)),
     addDebt: (input) => withNow((today) => addDebt(db, input, { now: today })),
-    editDebt: (id, input) => run(() => editDebt(db, id, input)),
+    editDebt: (id, input) => withNow(() => editDebt(db, id, input)),
     addSubscription: (input) =>
       withNow((today) => addSubscription(db, input, { now: today })),
-    editSubscription: (id, input) => run(() => editSubscription(db, id, input)),
+    editSubscription: (id, input) => withNow(() => editSubscription(db, id, input)),
     addTransaction: (input) =>
-      withNow((today) => addTransaction(db, input, { now: today })),
+      observeAction(
+        observer,
+        { kind: "expense" },
+        () => withNow((today) => addTransaction(db, input, { now: today })),
+        mapExpenseOutcome,
+      ),
     logPayment: (debtId, amountCents) =>
       observeAction(
         observer,
@@ -128,9 +188,9 @@ function bindActions(
       ),
     reactivateSubscription: (id) =>
       withNow((today) => reactivateSubscription(db, id, { now: today })),
-    deleteDebt: (id) => run(() => deleteDebt(db, id)),
-    deleteSubscription: (id) => run(() => deleteSubscription(db, id)),
-    deleteTransaction: (id) => run(() => deleteTransaction(db, id)),
+    deleteDebt: (id) => withNow(() => deleteDebt(db, id)),
+    deleteSubscription: (id) => withNow(() => deleteSubscription(db, id)),
+    deleteTransaction: (id) => withNow(() => deleteTransaction(db, id)),
     clearAll: () => run(() => clearAllData(db)),
   };
 }

@@ -174,7 +174,7 @@ describe("Delete a debt", () => {
     const ctx = await renderDebts({ debts: [SCARLET, SETTLED], events: [PAYMENT_EVENT] });
     const confirm = await openConfirmation(user, /^Scarlet Moth Card, balance/, SCARLET.name, DELETE_DEBT_LABEL);
     await user.click(within(confirm).getByRole("button", { name: DELETE_DEBT_LABEL }));
-    expect(await screen.findByText("Debt deleted")).toBeTruthy();
+    expect(await screen.findByText(/^Debt\ deleted( · .+)?$/)).toBeTruthy();
     await expectHeadingFocused(DEBTS_HEADING);
     expect(await ctx.realDb.debts.toArray()).toEqual([SETTLED]);
     expect(await ctx.realDb.events.toArray()).toEqual([PAYMENT_EVENT]);
@@ -186,7 +186,7 @@ describe("Delete a debt", () => {
     const ctx = await renderDebts({ debts: [SETTLED] });
     const confirm = await openConfirmation(user, /^Old Candle Tab, balance/, SETTLED.name, DELETE_DEBT_LABEL);
     await user.click(within(confirm).getByRole("button", { name: DELETE_DEBT_LABEL }));
-    expect(await screen.findByText("Debt deleted")).toBeTruthy();
+    expect(await screen.findByText(/^Debt\ deleted( · .+)?$/)).toBeTruthy();
     await expectHeadingFocused(DEBTS_HEADING);
     expect(await ctx.realDb.debts.count()).toBe(0);
   });
@@ -246,7 +246,7 @@ describe("Delete a subscription", () => {
       DELETE_SUBSCRIPTION_LABEL,
     );
     await user.click(within(confirm).getByRole("button", { name: DELETE_SUBSCRIPTION_LABEL }));
-    expect(await screen.findByText("Subscription deleted")).toBeTruthy();
+    expect(await screen.findByText(/^Subscription\ deleted( · .+)?$/)).toBeTruthy();
     await expectHeadingFocused(ZOMBIES_HEADING);
     expect(await ctx.realDb.subscriptions.toArray()).toEqual([GAZETTE]);
     expect(await ctx.realDb.events.toArray()).toEqual([EXORCISM_EVENT]);
@@ -260,7 +260,7 @@ describe("Delete a subscription", () => {
     });
     const confirm = await openConfirmation(user, /Bone Daily/, BONE_DAILY.name, DELETE_SUBSCRIPTION_LABEL);
     await user.click(within(confirm).getByRole("button", { name: DELETE_SUBSCRIPTION_LABEL }));
-    expect(await screen.findByText("Subscription deleted")).toBeTruthy();
+    expect(await screen.findByText(/^Subscription\ deleted( · .+)?$/)).toBeTruthy();
     await expectHeadingFocused(GRAVEYARD_HEADING);
     expect(await ctx.realDb.subscriptions.toArray()).toEqual([GAZETTE]);
     expect(await ctx.realDb.events.toArray()).toEqual([BONE_CANCEL_EVENT]);

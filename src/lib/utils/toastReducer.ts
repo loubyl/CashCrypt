@@ -6,6 +6,7 @@ export type ToastItem = {
   message: string;
   duration: number;
   actionLabel?: string;
+  actionAccessibleName?: string;
 };
 
 export type ToastAction =

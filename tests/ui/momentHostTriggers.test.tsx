@@ -162,7 +162,7 @@ const payment = (extraPrincipalCents: number): ActionOutcome => ({
   completedActionId: null,
   origin: null,
 });
-const toggle = (actionId: string, next: boolean): ActionOutcome => ({ kind: "planToggle", actionId, next });
+const toggle = (actionId: string, next: boolean): ActionOutcome => ({ kind: "planToggle", actionId, next, lightDelta: 0 });
 const cancelAction = (subscriptionId: string): ObservedAction => ({ kind: "cancel", subscriptionId });
 const toggleAction = (actionId: string, next: boolean): ObservedAction => ({ kind: "planToggle", actionId, next });
 

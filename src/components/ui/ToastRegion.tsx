@@ -33,6 +33,8 @@ export type ToastShowInput = {
   message: string;
   duration?: number;
   actionLabel?: string;
+  /** Accessible name of the action button; overrides the visible label for assistive tech. */
+  actionAccessibleName?: string;
   onAction?: () => void;
 };
 
@@ -77,6 +79,7 @@ export function ToastRegion({ children }: { children: ReactNode }) {
         message: input.message,
         duration: input.duration ?? TOAST_DEFAULT_DURATION_MS,
         actionLabel: input.actionLabel,
+        actionAccessibleName: input.actionAccessibleName,
       },
     });
     return id;
@@ -101,6 +104,7 @@ export function ToastRegion({ children }: { children: ReactNode }) {
           message={toast.message}
           duration={toast.duration}
           actionLabel={toast.actionLabel}
+          actionAccessibleName={toast.actionAccessibleName}
           onAction={() => runAction(toast.id)}
           onDismiss={() => dismiss(toast.id)}
           className={TOAST_LAYOUT_CLASSES}

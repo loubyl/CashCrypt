@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useActionToast } from "@/components/feedback/useActionToast";
 import { useCrypt } from "@/hooks/useCrypt";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
@@ -43,7 +44,7 @@ type IncomeFormProps = { initialCents: number };
 
 function IncomeForm({ initialCents }: IncomeFormProps) {
   const { setIncome } = useCryptActions();
-  const toast = useToast();
+  const showToast = useActionToast();
   const [text, setText] = useState(centsToMoneyText(initialCents));
   const [error, setError] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
@@ -73,7 +74,11 @@ function IncomeForm({ initialCents }: IncomeFormProps) {
       );
       return;
     }
-    toast.show({ tone: "success", message: INCOME_SAVED_MESSAGE });
+    showToast({
+      tone: "success",
+      base: INCOME_SAVED_MESSAGE,
+      effect: { kind: "light", change: result.change },
+    });
   };
 
   return (

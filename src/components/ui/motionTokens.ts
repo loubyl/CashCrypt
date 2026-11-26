@@ -26,6 +26,21 @@ export const TOAST_RISE_PX = 12;
 /** Default time a toast stays visible, in milliseconds. */
 export const TOAST_DEFAULT_DURATION_MS = 4000;
 
+/** Time a toast with an action stays visible, in milliseconds. */
+export const ACTION_TOAST_DURATION_MS = 6000;
+
+/** Time a list row stays highlighted after an action, in milliseconds. */
+export const ROW_HIGHLIGHT_MS = 4000;
+
+/** Time to wait for a highlight target to appear before giving up, in milliseconds. */
+export const HIGHLIGHT_WAIT_MS = 1500;
+
+/** Time a pending highlight request stays valid, in milliseconds. */
+export const HIGHLIGHT_PENDING_TTL_MS = 5000;
+
+/** Time a banner stays highlighted, in milliseconds. */
+export const BANNER_HIGHLIGHT_MS = 900;
+
 /** Maximum rotation of the QuickAction icon wiggle, in degrees (plus and minus). */
 export const WIGGLE_DEGREES = 6;
 

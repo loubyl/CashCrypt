@@ -4,7 +4,7 @@ import { useCallback, useEffect } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { observeAction, useActionObserver } from "@/hooks/useActionObserver";
 import { useCrypt } from "@/hooks/useCrypt";
-import { toMutationError, type MutationResult } from "@/hooks/useCryptActions";
+import { measured, serialize, type MutationResult } from "@/hooks/useCryptActions";
 import { useNow } from "@/hooks/useNow";
 import { completePlanAction, uncompletePlanAction } from "@/lib/db/mutations";
 import { ensureWeeklyPlan } from "@/lib/db/plans";
@@ -59,15 +59,19 @@ export function useExorcismPlan(): ExorcismPlanState {
           if (!db || now === null || weekKey === null) {
             return { ok: false, error: { kind: "unknown", message: NOT_READY_MESSAGE } };
           }
-          try {
-            if (next) await completePlanAction(db, weekKey, actionId, { now });
-            else await uncompletePlanAction(db, weekKey, actionId);
-            return { ok: true, value: undefined };
-          } catch (error) {
-            return { ok: false, error: toMutationError(error) };
-          }
+          return serialize(db, () =>
+            measured(db, now, async () => {
+              if (next) await completePlanAction(db, weekKey, actionId, { now });
+              else await uncompletePlanAction(db, weekKey, actionId);
+            }),
+          );
         },
-        () => ({ kind: "planToggle", actionId, next }),
+        (_value, change) => ({
+          kind: "planToggle",
+          actionId,
+          next,
+          lightDelta: change ? change.lightAfter - change.lightBefore : 0,
+        }),
       ),
     [db, now, weekKey, observer],
   );

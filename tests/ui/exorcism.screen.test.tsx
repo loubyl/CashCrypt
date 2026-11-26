@@ -166,7 +166,7 @@ describe("Exorcism screen", () => {
     await screen.findByText(/1 of 3 done/);
     expect(screen.getByText("$12/mo")).toBeTruthy();
     expect(screen.queryByText(COMPLETE_MESSAGE)).toBeNull();
-    expect(await screen.findByText("+$12/mo freed")).toBeTruthy();
+    expect(await screen.findByText(/^\+\$12\/mo\ freed( · .+)?$/)).toBeTruthy();
   });
 
   it("shows the completion message when all three actions are done", async () => {
@@ -205,7 +205,8 @@ describe("Exorcism screen", () => {
     expect(checkboxFor(CANCEL.title).getAttribute("aria-disabled")).toBe("true");
     release();
     await screen.findByText(/1 of 3 done/);
-    expect(checkboxFor(CANCEL.title).getAttribute("aria-busy")).toBeNull();
+    // The row stays busy until the after-reading finishes, so it clears a moment after the list updates.
+    await waitFor(() => expect(checkboxFor(CANCEL.title).getAttribute("aria-busy")).toBeNull());
   });
 
   it("offers Do it only on cancellation and extra payment actions", async () => {
@@ -235,8 +236,8 @@ describe("Exorcism screen", () => {
     await user.click(within(dialog).getByRole("button", { name: "Cancel subscription" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(await screen.findByText(/1 of 3 done/)).toBeTruthy();
-    expect(screen.getAllByText(/\/mo (saved|freed)$/)).toHaveLength(1);
-    expect(screen.getByText("+$12/mo saved")).toBeTruthy();
+    expect(screen.getAllByText(/\/mo (saved|freed)( · .+)?$/)).toHaveLength(1);
+    expect(screen.getByText(/^\+\$12\/mo saved( · .+)?$/)).toBeTruthy();
     expect((await ctx.realDb.subscriptions.get(SUB.id))?.active).toBe(false);
     expect((checkboxFor(CANCEL.title) as HTMLInputElement).checked).toBe(true);
     expect(screen.queryByRole("button", { name: `Do it: ${CANCEL.title}` })).toBeNull();
@@ -253,7 +254,7 @@ describe("Exorcism screen", () => {
     await user.click(within(dialog).getByRole("button", { name: "Save payment" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(await screen.findByText(/1 of 3 done/)).toBeTruthy();
-    expect(screen.getAllByText(/^Payment saved|\/mo freed$/)).toHaveLength(1);
+    expect(screen.getAllByText(/^Payment saved|\/mo freed( · .+)?$/)).toHaveLength(1);
     expect((await ctx.realDb.debts.get(DEBT.id))?.balanceCents).toBe(185_000);
     expect((checkboxFor(PAY.title) as HTMLInputElement).checked).toBe(true);
     expect(screen.queryByRole("button", { name: `Do it: ${PAY.title}` })).toBeNull();

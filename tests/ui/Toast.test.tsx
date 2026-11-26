@@ -173,6 +173,65 @@ describe("Toast", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  it("names the action button with actionAccessibleName while the visible label stays", () => {
+    render(
+      <Toast
+        tone="info"
+        message="Spotify canceled"
+        actionLabel="Undo"
+        actionAccessibleName="Undo: Spotify canceled"
+        onAction={() => undefined}
+        onDismiss={() => undefined}
+      />,
+    );
+    const button = screen.getByRole("button", { name: "Undo: Spotify canceled" });
+    expect(button).toHaveAttribute("aria-label", "Undo: Spotify canceled");
+    expect(button).toHaveTextContent("Undo");
+  });
+
+  it("pauses on pointer hover and on focus for a toast with an action and a custom accessible name", () => {
+    const onDismiss = vi.fn();
+    render(
+      <Toast
+        tone="success"
+        message="Payment saved"
+        duration={SHORT_DURATION_MS}
+        actionLabel="Undo"
+        actionAccessibleName="Undo payment"
+        onAction={() => undefined}
+        onDismiss={onDismiss}
+      />,
+    );
+    const toast = screen.getByText("Payment saved").parentElement as HTMLElement;
+
+    fireEvent.pointerEnter(toast);
+    act(() => {
+      vi.advanceTimersByTime(SHORT_DURATION_MS * 5);
+    });
+    expect(onDismiss).not.toHaveBeenCalled();
+    fireEvent.pointerLeave(toast);
+
+    act(() => {
+      screen.getByRole("button", { name: "Undo payment" }).focus();
+    });
+    act(() => {
+      vi.advanceTimersByTime(SHORT_DURATION_MS * 5);
+    });
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
+  it("keeps the full long message in the DOM and lets it wrap", () => {
+    const longMessage =
+      "Payment of $1,250.00 saved to the Visa card, which lowers the balance and raises the light score by two points";
+    render(<Toast tone="success" message={longMessage} onDismiss={() => undefined} />);
+    const span = screen.getByText(longMessage);
+    expect(span).toHaveTextContent(longMessage);
+    expect(span.className).not.toContain("truncate");
+    expect(span.className).not.toContain("whitespace-nowrap");
+    expect(span.className).toContain("min-w-0");
+    expect(span.className).toContain("text-pretty");
+  });
+
   it("starts below its resting position when motion is allowed", () => {
     render(<Toast tone="success" message="Saved" onDismiss={() => undefined} />);
     const toast = screen.getByText("Saved").parentElement as HTMLElement;

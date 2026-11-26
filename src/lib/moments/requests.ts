@@ -25,11 +25,14 @@ function ownRequest(outcome: ActionOutcome, ctx: ActionContext): MomentRequest |
       if (!action || action.done || action.kind !== REDUCE_SMALL_EXPENSES_KIND) return null;
       return { kind: "sigil" };
     }
+    case "expense":
+      return null;
   }
 }
 
 /** The plan action the outcome newly marks as done, if any. */
 function newlyCompletedId(outcome: ActionOutcome): string | null {
+  if (outcome.kind === "expense") return null;
   if (outcome.kind === "planToggle") return outcome.next ? outcome.actionId : null;
   return outcome.completedActionId;
 }

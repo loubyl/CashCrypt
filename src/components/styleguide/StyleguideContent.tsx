@@ -430,6 +430,12 @@ function ListRowSection() {
           <ListRow icon={Tv} tone="ghost" title="StreamMax" subtitle="Renews on the 4th" amount="$22.99" />
         </Card>
       </CardShowcaseItem>
+      <CardShowcaseItem label="ListRow, highlighted (New and Updated tags)">
+        <Card>
+          <ListRow icon={Tv} tone="ghost" title="StreamMax" amount="$22.99" highlight="new" divider />
+          <ListRow icon={Music} tone="spirit" title="TuneBox" amount="$11.99" highlight="updated" />
+        </Card>
+      </CardShowcaseItem>
       <CardShowcaseItem label="ListRow, static, title only">
         <Card>
           <ListRow icon={Ghost} tone="spirit" title="Small expenses" />
@@ -793,6 +799,18 @@ function ExorcismActionRowSection() {
             impactText={EXORCISM_IMPACT_TEXT}
             done
             onToggle={noop}
+          />
+        </Card>
+      </CardShowcaseItem>
+      <CardShowcaseItem label="ExorcismActionRow, highlighted">
+        <Card>
+          <ExorcismActionRow
+            id="styleguide-exorcism-highlight"
+            title="Cancel TuneBox"
+            impactText={EXORCISM_IMPACT_TEXT}
+            done={false}
+            onToggle={noop}
+            highlight="new"
           />
         </Card>
       </CardShowcaseItem>

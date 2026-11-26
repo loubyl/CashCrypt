@@ -55,7 +55,7 @@ describe("Settings income", () => {
     await user.clear(input);
     await user.type(input, "6200");
     await user.click(screen.getByRole("button", { name: SAVE_INCOME_LABEL }));
-    expect(await screen.findByText("Income saved")).toBeTruthy();
+    expect(await screen.findByText(/^Income\ saved( · .+)?$/)).toBeTruthy();
     await waitFor(async () => {
       const rows = await ctx.realDb.profile.toArray();
       expect(rows[0]?.monthlyIncomeCents).toBe(620_000);
