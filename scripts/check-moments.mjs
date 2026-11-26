@@ -664,6 +664,55 @@ function assertCheckboxFocus({ samples, checked, endFocused }) {
   check(checked, "checkboxFocus: the checkbox ends checked");
 }
 
+const CANCEL_TOAST_TEXT = "+$120/mo saved · Light +5.2";
+const WRAITHCAST_PATTERN = "wraithcast";
+/** Reads the Wraithcast plan checkbox: whether the cancel dialog is open and whether the box is checked. */
+const readWraithcastBox = (page) =>
+  page.evaluate((pattern) => {
+    const box = [...document.querySelectorAll('input[type="checkbox"]')].find((el) =>
+      new RegExp(pattern, "i").test(el.closest("[data-plan-action]")?.textContent ?? ""),
+    );
+    const dialog = document.querySelector('[role="dialog"]');
+    return { found: box !== undefined, checked: box?.checked ?? null, dialogOpen: dialog !== null, dialogText: dialog?.textContent ?? "" };
+  }, WRAITHCAST_PATTERN);
+/** Ticks the Wraithcast checkbox on the level-4 Dashboard: the cancel sheet opens, confirming plays the shovel Moment. */
+async function runCheckboxCancel(page) {
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
+  const box = await page.evaluateHandle(
+    (pattern) =>
+      [...document.querySelectorAll('input[type="checkbox"]')].find((el) =>
+        new RegExp(pattern, "i").test(el.closest("[data-plan-action]")?.textContent ?? ""),
+      ) ?? null,
+    WRAITHCAST_PATTERN,
+  );
+  if (!box.asElement()) throw new Error("Wraithcast checkbox not found");
+  await box.asElement().click();
+  await hasButton(page, "Cancel subscription");
+  const whileOpen = await readWraithcastBox(page);
+  await clickByText(page, "button", "Cancel subscription");
+  // The toast lasts about 6 s; read it as soon as it shows, before the Moment ends.
+  await waitFor(page, (text) => document.body.innerText.includes(text), CANCEL_TOAST_TEXT).catch(() => undefined);
+  const toast = await page.evaluate(
+    () => document.body.innerText.split("\n").find((line) => line.includes("/mo saved")) ?? "",
+  );
+  await sleep(MAX_MOMENT_MS);
+  const labels = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-part="scene"] [data-part="tombstone-label"]')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { text: el.textContent ?? "", rect: { left: r.left, top: r.top, width: r.width, height: r.height } };
+    }),
+  );
+  const after = await readWraithcastBox(page);
+  return { samples: await page.evaluate(() => window.__samples), labels, scene: await sceneRect(page), whileOpen, toast, checkedAfter: after.checked };
+}
+function assertCheckboxCancel({ samples, labels, scene, whileOpen, toast, checkedAfter }) {
+  check(whileOpen.dialogOpen, "checkboxCancel: ticking the checkbox opens a dialog");
+  check(whileOpen.dialogText.includes("Cancel subscription"), "checkboxCancel: the dialog offers \"Cancel subscription\"");
+  check(whileOpen.checked === false, `checkboxCancel: the checkbox is still unchecked while the dialog is open (${whileOpen.checked})`);
+  assertShovel({ samples, labels, scene });
+  check(checkedAfter === true, `checkboxCancel: the checkbox ends checked (${checkedAfter})`);
+  check(toast.includes(CANCEL_TOAST_TEXT), `checkboxCancel: the toast reads "${CANCEL_TOAST_TEXT}" (${JSON.stringify(toast)})`);
+}
 const OVERFLOW_WIDTHS = [320, 768, 1280, 1920];
 const OVERFLOW_HEIGHT = 640;
 const OVERFLOW_NARROW_WIDTH = 320;
@@ -797,6 +846,7 @@ const MOMENT_CHECKS = [
   { name: "exorcismComplete", run: runExorcismComplete, assert: assertExorcismComplete },
   { name: "fullDemo", run: runFullDemo, assert: assertFullDemo },
   { name: "checkboxFocus", run: runCheckboxFocus, assert: assertCheckboxFocus },
+  { name: "checkboxCancel", run: runCheckboxCancel, assert: assertCheckboxCancel },
   { name: "noHorizontalScroll", run: runNoHorizontalScroll, assert: assertNoHorizontalScroll },
   { name: "tabBarLabels", run: runTabBarLabels, assert: assertTabBarLabels },
 ];

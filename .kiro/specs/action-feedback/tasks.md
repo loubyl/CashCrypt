@@ -200,14 +200,14 @@ Conventions that apply to every task:
       - The demo control toasts are unchanged.
     - _Requirements: 1.2 to 1.11, 3.1 to 3.9, 14.3_
 
-- [ ] 3. Plan checkbox opens the Do it sheet
+- [x] 3. Plan checkbox opens the Do it sheet
   - [x] 3.1 Implement the checkbox flow
     - `ExorcismPlanAction.handleToggle`: when `next` is true and `doItTarget` is not null, call `onDoIt(action, doItTarget)` and return.
     - Add a `description` prop to `ExorcismActionRow` (a visually hidden span linked with `aria-describedby`). Pass "Opens the cancel confirmation" or "Opens the payment sheet" while the target qualifies.
     - Change `ExorcismScreen.EXPLANATION` to "Ticking a cancel or a payment opens its sheet, so the change is recorded here."
     - _Requirements: 7.1 to 7.9_
 
-  - [ ] 3.2 Write the checkbox flow tests and run the mutation check
+  - [x] 3.2 Write the checkbox flow tests and run the mutation check
     - Tests in `tests/ui/planCheckboxSheet.test.tsx`:
       - Ticking "Cancel Wraithcast" opens the cancel sheet, leaves the checkbox unchecked and creates no `exorcism_action_completed` Event.
       - Confirming marks the action done with exactly one toast.
@@ -220,7 +220,7 @@ Conventions that apply to every task:
     - Mutation check: restore the old `handleToggle` and confirm the first case fails.
     - _Requirements: 7.1 to 7.9, 14.3, 14.7_
 
-  - [ ] 3.3 Add the `checkboxCancel` browser check
+  - [x] 3.3 Add the `checkboxCancel` browser check
     - In `scripts/check-moments.mjs`, add the design's `checkboxCancel` case: the dialog opens with the checkbox unchecked, the shovel assertions pass after confirming, the checkbox ends checked, and the toast reads "+$120/mo saved · Light +5.2".
     - _Requirements: 7.2, 14.8_
 
@@ -413,17 +413,21 @@ Conventions that apply to every task:
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["1.1", "1.4", "1.8", "2.1", "2.3", "2.6", "2.8", "3.1", "4.1", "4.3", "5.1"] },
-    { "id": 1, "tasks": ["1.2", "1.5", "1.9", "2.2", "2.4", "2.5", "2.7", "2.9", "4.2", "4.4", "5.2"] },
-    { "id": 2, "tasks": ["1.3", "1.6", "1.7", "1.10", "2.10", "2.12", "4.5", "4.6", "4.7", "4.8", "5.3"] },
-    { "id": 3, "tasks": ["1.11", "2.11", "2.13", "4.9", "5.4"] },
-    { "id": 4, "tasks": ["2.14", "4.10", "5.5"] },
-    { "id": 5, "tasks": ["3.2", "3.3"] },
-    { "id": 6, "tasks": ["6"] },
-    { "id": 7, "tasks": ["7.1", "7.2", "8.1"] },
-    { "id": 8, "tasks": ["7.3"] },
-    { "id": 9, "tasks": ["9.1", "9.2", "9.3"] },
-    { "id": 10, "tasks": ["10"] }
+    { "id": 0, "tasks": ["1.1", "1.4", "1.8", "2.1", "2.3", "2.6", "2.8"] },
+    { "id": 1, "tasks": ["1.2", "1.5", "1.9", "2.2", "2.4", "2.5", "2.7", "2.9"] },
+    { "id": 2, "tasks": ["1.3", "1.6", "1.7", "1.10", "2.10", "2.12"] },
+    { "id": 3, "tasks": ["1.11", "2.11", "2.13"] },
+    { "id": 4, "tasks": ["2.14"] },
+    { "id": 5, "tasks": ["3.1", "4.1", "4.3", "5.1"] },
+    { "id": 6, "tasks": ["3.2", "3.3", "4.2", "4.4", "5.2"] },
+    { "id": 7, "tasks": ["4.5", "4.6", "4.7", "4.8", "5.3"] },
+    { "id": 8, "tasks": ["4.9", "5.4"] },
+    { "id": 9, "tasks": ["4.10", "5.5"] },
+    { "id": 10, "tasks": ["6"] },
+    { "id": 11, "tasks": ["7.1", "7.2", "8.1"] },
+    { "id": 12, "tasks": ["7.3"] },
+    { "id": 13, "tasks": ["9.1", "9.2", "9.3"] },
+    { "id": 14, "tasks": ["10"] }
   ]
 }
 ```
