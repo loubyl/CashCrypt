@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ActionObserverContext } from "@/hooks/useActionObserver";
 import type { ActionObserver } from "@/hooks/useActionObserver";
-import { useCryptActions } from "@/hooks/useCryptActions";
+import { serialize, useCryptActions } from "@/hooks/useCryptActions";
+import type { CryptDb } from "@/lib/db/schema";
 import type { CryptActions } from "@/hooks/useCryptActions";
 import type { DebtRow, SubscriptionRow } from "@/types/finance";
 import { renderWithCrypt } from "./helpers/crypt";
@@ -145,5 +146,20 @@ describe("measured actions", () => {
     });
 
     expect(calls).toEqual(["begin:cancel", "begin:payment", "resolve:cancel", "resolve:payment"]);
+  });
+  it("keeps running later jobs after a job rejects", async () => {
+    const db = {} as CryptDb;
+    const order: string[] = [];
+    const failing = serialize(db, async () => {
+      order.push("failing");
+      throw new Error("job failed");
+    });
+    const later = serialize(db, async () => {
+      order.push("later");
+      return "done";
+    });
+    await expect(failing).rejects.toThrow("job failed");
+    await expect(later).resolves.toBe("done");
+    expect(order).toEqual(["failing", "later"]);
   });
 });
