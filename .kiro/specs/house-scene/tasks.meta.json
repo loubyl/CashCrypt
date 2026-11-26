@@ -931,6 +931,97 @@
         "chatSessionId": "sess_eda6e8f5-344a-4bf1-a0a2-52409038cad8",
         "timestamp": 1795602425695
       }
+    ],
+    "18.1 Write the source scans": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653198833
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653475757
+      }
+    ],
+    "18.2 Write axe tests for the Dashboard with the Scene": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653198992
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653476556
+      }
+    ],
+    "18.3 Replace the old placeholder assertions": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653199048
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653477425
+      }
+    ],
+    "18.5 Update steering and docs": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653199408
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653478150
+      }
+    ],
+    "18.4 Delete `ScenePlaceholder.tsx`": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653478824
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653508620
+      }
+    ],
+    "18.6 Run the final verification": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653509132
+      },
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653560086
+      }
+    ],
+    "18. Phase E: audit and cleanup": [
+      {
+        "executionId": "f8b8c78a-8ff7-4cbf-bc8b-b65c33bf36e5",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795653560144
+      }
+    ],
+    "18.7 Review fixes for task 18": [
+      {
+        "executionId": "3822e64b-fa53-42bb-9fcd-66d50569ab4d",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795654348400
+      },
+      {
+        "executionId": "3822e64b-fa53-42bb-9fcd-66d50569ab4d",
+        "chatSessionId": "sess_e80832c7-41fd-4dcb-b449-908bb71105cf",
+        "timestamp": 1795654475176
+      }
     ]
   }
 }

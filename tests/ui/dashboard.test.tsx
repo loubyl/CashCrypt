@@ -77,7 +77,7 @@ describe("Dashboard on the level 4 demo", () => {
     expect(screen.getByText(POLTERGEIST_TEXT)).toBeTruthy();
     expect(screen.getByText("Poltergeist")).toBeTruthy();
     expect(screen.getByRole("img", { name: /^Level 4, Crumbling\./ })).toBeTruthy();
-    expect(screen.queryByText("House scene arrives in the next update")).toBeNull();
+    expect(screen.getByRole("img", { name: /^Level 4, Crumbling\./ }).getAttribute("data-part")).toBe("scene");
     const live = screen.getByText("House is now Crumbling — light score 32");
     expect(live.getAttribute("aria-live")).toBe("polite");
     expect(live.className).toContain("sr-only");

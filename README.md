@@ -8,7 +8,7 @@ CashCrypt is a local-first personal finance web app where your financial health 
 
 Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 
-> **Status: work in progress.** The app works end to end without the house scene: the dashboard shows the light score, and debts, subscriptions, transactions, the weekly plan, settings and the demo crypt are all functional. **The animated house scene (SVG house, creatures, moments) and sound are not built yet.** The dashboard shows a placeholder where the scene will go. CSV import is also not built yet.
+> **Status: work in progress.** The app works end to end: the dashboard shows the haunted house scene and the light score, and debts, subscriptions, transactions, the weekly plan, settings and the demo crypt are all functional. The animated house scene (SVG house, creatures and moments) is built. Sound and CSV import are not built yet.
 
 ---
 
@@ -24,7 +24,7 @@ Built for the **Kiroween 2026 Hackathon** — Costume Contest category.
 
 ## 🧭 Not built yet
 
-- The animated house scene, creatures and moment animations (the dashboard uses a placeholder).
+- The spirit-jar moment (ghosts captured).
 - Sound.
 - CSV import.
 - Data export and import as JSON. Settings currently offers income, crypt switching and "Clear all data".
@@ -176,9 +176,10 @@ src/hooks/          — React hooks bridging Dexie and the haunting engine
 src/components/     — screens, shell, dashboard, sheets, exorcism plan, demo controls
 src/components/ui/  — Crypt UI primitives
 src/components/styleguide/ — the /styleguide page content
-Planned, not built yet:
-src/components/house/   — SVG house scene and creatures
-src/components/moments/ — one-shot moment animations
+src/components/house/   — SVG house scene and creatures (GSAP)
+src/components/moments/ — one-shot moment animations (GSAP)
+src/lib/scene/          — pure scene model
+src/lib/moments/        — moment queue
 ```
 
 ---

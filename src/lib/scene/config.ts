@@ -14,7 +14,7 @@ import {
   BAND_L5_MIN,
 } from "@/lib/haunting/config";
 import type { DecayLevel } from "@/lib/haunting/config";
-import type { Box, LevelFeatures, Point } from "./types";
+import type { Box, LevelFeatures, Point, WindowShape } from "./types";
 
 // ---------------------------------------------------------------------------
 // ViewBox
@@ -38,6 +38,17 @@ export const MAX_VISIBLE_TOMBSTONES = 6;
 // ---------------------------------------------------------------------------
 
 export const WINDOW_COUNT = 6;
+/** Window shapes by window index (see WINDOW_LAYOUT in windows.ts for the placement). */
+export const WINDOW_SHAPES: readonly WindowShape[] = ["arched", "arched", "arched", "square", "square", "round"];
+/** Window boxes in ViewBox units by window index. */
+export const WINDOW_BOXES: readonly Box[] = [
+  { x: 241, y: 228, w: 56, h: 60 },
+  { x: 372, y: 176, w: 56, h: 62 },
+  { x: 503, y: 228, w: 56, h: 60 },
+  { x: 241, y: 316, w: 56, h: 58 },
+  { x: 503, y: 316, w: 56, h: 58 },
+  { x: 380, y: 92, w: 40, h: 40 },
+];
 export const WINDOW_FAILURE_ORDER: readonly number[] = [3, 1, 4, 0, 5, 2];
 export const MIN_VISIBLE_WINDOW_DELTA = 0.15;
 export const OPACITY_FLOOR_BY_LEVEL: Readonly<Record<DecayLevel, number>> = {

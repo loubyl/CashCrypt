@@ -361,32 +361,39 @@ Conventions that apply to every task:
   - Apply any timing, size or art changes the user requests before continuing.
   - _Requirements: 12.2, 12.8, 12.9, 12.17, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 24.9_
 
-- [ ] 18. Phase E: audit and cleanup
-  - [ ] 18.1 Write the source scans
+- [x] 18. Phase E: audit and cleanup
+  - [x] 18.1 Write the source scans
     - `tests/scene/staticChecks.test.ts` and `tests/moments/staticChecks.test.ts`: forbidden imports (React, Next, Dexie, GSAP, Motion) and `Math.random`, `Date.now`, `new Date` in `src/lib/scene/` and `src/lib/moments/`; no `canvas`, `getContext`, `WebGL` or `three` under `src/`; GSAP imported only in `AmbientMotion.tsx` and the moment files; no Framer Motion in `house/` or `moments/`; no `MorphSVGPlugin`; a static import walk from `Dashboard.tsx` (following `import` and `export … from`, not `import()`) reaches no `gsap` import; no numeric literal other than 0, 1 and arithmetic identities in `src/lib/scene/` outside `config.ts`; hex colors in `house/` and `moments/` only from the scene-only palette; no image or font asset imports; no `gsap.timeline` at module scope; no `globalTimeline` pause call.
     - _Requirements: 1.1, 1.2, 1.3, 1.5, 1.6, 1.7, 1.8, 2.6, 21.1, 23.6_
 
-  - [ ] 18.2 Write axe tests for the Dashboard with the Scene
+  - [x] 18.2 Write axe tests for the Dashboard with the Scene
     - Axe passes in "empty real crypt", "demo level 4" and "loading" using the existing `tests/ui/helpers/axe.ts`.
     - _Requirements: 19.9, 24.7_
 
-  - [ ] 18.3 Replace the old placeholder assertions
+  - [x] 18.3 Replace the old placeholder assertions
     - Find every test and doc reference to `ScenePlaceholder` or "House scene arrives in the next update", replace them with Scene assertions (the Scene in place of the placeholder in the three states), and keep every other existing test passing.
     - _Requirements: 22.1, 22.6, 24.8_
 
-  - [ ] 18.4 Delete `ScenePlaceholder.tsx`
+  - [x] 18.4 Delete `ScenePlaceholder.tsx`
     - Delete `src/components/dashboard/ScenePlaceholder.tsx`, confirm with `grep_search` that nothing references it or its text, and run typecheck.
     - _Requirements: 22.1_
 
-  - [ ] 18.5 Update steering and docs
+  - [x] 18.5 Update steering and docs
     - `.kiro/steering/structure.md`: list the new `src/lib/scene/`, `src/lib/moments/`, `src/components/house/` and `src/components/moments/` files, note the `.ts` moment modules (F4) and the new hooks, and update the "Built so far" paragraph.
     - `.kiro/steering/visual-language.md`: state that the window-brightness percentages for levels 2 to 4 are nominal and the real curve is in `src/lib/scene/config.ts` (F2).
     - Check `tech.md` and `README.md` for statements that the house scene is not built, and update them. Add a short entry to `docs/kiro-journal.md` if the project keeps one for features.
     - _Requirements: 1.2, 6.1, 7.1_
 
-  - [ ] 18.6 Run the final verification
+  - [x] 18.6 Run the final verification
     - Run `npm test -- --run`, `npm run typecheck` and `npm run lint`. Fix every failure.
     - _Requirements: 24.10_
+
+  - [x] 18.7 Review fixes for task 18
+    - Make the "loading" axe case in `tests/ui/dashboardSceneAxe.test.tsx` deterministic: hold the data load so it never resolves during the test (mock or pending promise), assert the scene skeleton is rendered (`data-part="scene-skeleton"`, `aria-busy`), then run axe. The test must fail if the skeleton never appears.
+    - Revert every edit made to `docs/kiro-journal.md` entries written before task 18. Only the new entry may mention that `ScenePlaceholder` was removed. Leave other historical logs (app-screens `tasks.md`) untouched, and check the app-screens `requirements.md` and `design.md` edits made in 18.3 against the same rule.
+    - Mutation-test the scans not yet tested (canvas/three, asset imports, Framer Motion in `house/` and `moments/`): add a temporary violation, confirm the scan fails, revert, and report each result.
+    - Run `npm test`, `npx tsc --noEmit` and `npm run lint`.
+    - _Requirements: 1.3, 1.5, 1.6, 19.9, 24.7, 24.10_
 
 - [ ] 19. Final checkpoint: ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
@@ -434,7 +441,8 @@ Conventions that apply to every task:
     { "id": 25, "tasks": ["18.1", "18.2", "18.3", "18.5"] },
     { "id": 26, "tasks": ["18.4"] },
     { "id": 27, "tasks": ["18.6"] },
-    { "id": 28, "tasks": ["19"] }
+    { "id": 28, "tasks": ["18.7"] },
+    { "id": 29, "tasks": ["19"] }
   ]
 }
 ```

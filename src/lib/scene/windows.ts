@@ -4,8 +4,10 @@
 import type { DecayLevel } from "@/lib/haunting/config";
 import {
   OPACITY_FLOOR_BY_LEVEL,
+  WINDOW_BOXES,
   WINDOW_COUNT,
   WINDOW_FAILURE_ORDER,
+  WINDOW_SHAPES,
   windowOpacityFromFloors,
 } from "./config";
 import type { Box, LevelFeatures, WindowShape, WindowState } from "./types";
@@ -20,14 +22,11 @@ export type WindowSlot = { index: number; shape: WindowShape; box: Box };
  * windows, 5 the round attic window inside the gable. All boxes sit inside their wall
  * or the gable, and clear of the chimney box and the Poltergeist.
  */
-export const WINDOW_LAYOUT: readonly WindowSlot[] = [
-  { index: 0, shape: "arched", box: { x: 241, y: 228, w: 56, h: 60 } },
-  { index: 1, shape: "arched", box: { x: 372, y: 176, w: 56, h: 62 } },
-  { index: 2, shape: "arched", box: { x: 503, y: 228, w: 56, h: 60 } },
-  { index: 3, shape: "square", box: { x: 241, y: 316, w: 56, h: 58 } },
-  { index: 4, shape: "square", box: { x: 503, y: 316, w: 56, h: 58 } },
-  { index: 5, shape: "round", box: { x: 380, y: 92, w: 40, h: 40 } },
-];
+export const WINDOW_LAYOUT: readonly WindowSlot[] = WINDOW_BOXES.map((box, index) => ({
+  index,
+  shape: WINDOW_SHAPES[index],
+  box,
+}));
 
 const UNIT_MIN = 0;
 const UNIT_MAX = 1;

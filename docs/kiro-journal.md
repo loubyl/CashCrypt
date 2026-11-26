@@ -212,3 +212,8 @@ A dated log of how Kiro features shaped CashCrypt, kept for the Kiroween write-u
   - Kiro rendered the scene in headless Chrome on its own to compare it with the reference image. This is reported in the checkpoint 1 and checkpoint 2 reports of the Kiro session; no script or log of it is stored in the repo.
 - **Note:** the hook change and the `design.md` and `visual-language.md` edits share commit `e70bf8d` with the checkpoint 2 code.
 - **What it changed:** the visual review found problems no test could express (wall color, ghost clustering), and the tests were then written for the cause, not for the picture. The drift check and the sequential hook are now part of the workflow. Related: [Spec 3 complete](#2026-11-20--spec-3-app-screens-complete-what-manual-checks-on-the-deployed-app-caught), [data layer to Dashboard](#2026-11-19--spec-3-app-screens-data-layer-to-dashboard--what-the-tests-caught).
+
+## 2026-11-25 — house-scene: steering and docs brought in line with the code
+- **Kiro feature:** Steering, Specs
+- **What happened:** Task 18.5 updated `structure.md` (new `src/lib/scene/`, `src/lib/moments/`, house and moment files, the `.ts` moment modules, and the hooks `useSceneModel`, `useActionObserver` and `useElementWidth`) and removed the "scene not built" statements from `README.md`. `visual-language.md` already states that the level 2 to 4 window percentages are nominal and that the real curve is in `src/lib/scene/config.ts`.
+- **Note:** the file list was taken from the filesystem, not from the design. The spirit-jar moment has no file yet and `ScenePlaceholder.tsx` is no longer used.
