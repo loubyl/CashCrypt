@@ -115,11 +115,13 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-screen flex-1 flex-col">
       <SkipLink />
       <header className="mx-auto flex w-full max-w-content items-center justify-between gap-3 px-page pt-3">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <p className="font-wordmark text-title font-medium text-ink">CashCrypt</p>
           <DemoChip />
         </div>
-        <NavLink destination={SETTINGS_DESTINATION} variant="icon" />
+        <div className="shrink-0">
+          <NavLink destination={SETTINGS_DESTINATION} variant="icon" />
+        </div>
       </header>
       {content}
       <TabBar />

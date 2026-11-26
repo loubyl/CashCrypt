@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +10,7 @@ import { useCryptActions } from "@/hooks/useCryptActions";
 import { useNow } from "@/hooks/useNow";
 import { SMALL_EXPENSE_THRESHOLD_CENTS } from "@/lib/haunting/config";
 import { formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
+import { useFocusFirstInvalid } from "./useFocusFirstInvalid";
 
 const SHEET_TITLE = "Add expense";
 const EMPTY_AMOUNT_ERROR = "Enter the amount.";
@@ -44,6 +45,9 @@ function ExpenseForm({ onClose }: ExpenseFormProps) {
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusFirstInvalid(formRef, attempt);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,6 +60,7 @@ function ExpenseForm({ onClose }: ExpenseFormProps) {
     if (trimmed === "") found.description = EMPTY_DESCRIPTION_ERROR;
     if (cents === null || cents <= 0 || trimmed === "" || now === null) {
       setErrors(found.amount || found.description ? found : { amount: GENERIC_ERROR });
+      setAttempt((count) => count + 1);
       return;
     }
     setErrors({});
@@ -84,7 +89,7 @@ function ExpenseForm({ onClose }: ExpenseFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <Input
         label="Amount"
         variant="money"

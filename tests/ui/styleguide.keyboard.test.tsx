@@ -99,9 +99,12 @@ describe("styleguide keyboard and structure", () => {
     expect(visited).toEqual(expected);
     for (const element of visited) {
       expect(element).not.toBeDisabled();
-      // A loading Button is aria-disabled and aria-busy but stays focusable on purpose, so
-      // keyboard focus is not lost while it works. Every other aria-disabled control must be skipped.
-      if (element.getAttribute("aria-busy") !== "true") {
+      // A loading Button and an unavailable QuickAction are aria-disabled but stay focusable on
+      // purpose, so keyboard focus is not lost when they become unavailable (action-feedback
+      // Requirement 15). Every other aria-disabled control must be skipped.
+      const keepsFocus =
+        element.getAttribute("aria-busy") === "true" || element.closest('section[aria-labelledby="styleguide-quickaction"]') !== null;
+      if (!keepsFocus) {
         expect(element.getAttribute("aria-disabled")).not.toBe("true");
       }
     }

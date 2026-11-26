@@ -188,11 +188,11 @@ describe("Exorcism screen", () => {
     expect(await screen.findByText(ERROR_MESSAGE)).toBeTruthy();
     const box = checkboxFor(CANCEL.title) as HTMLInputElement;
     expect(box.checked).toBe(false);
-    expect(box.disabled).toBe(false);
+    expect(box.getAttribute("aria-disabled")).toBeNull();
     expect(screen.getByText(/0 of 3 done/)).toBeTruthy();
   });
 
-  it("disables the row while the action is saving", async () => {
+  it("marks the row busy without disabling it while the action is saving", async () => {
     const user = userEvent.setup();
     await renderScreen([CANCEL, PAY, FALLBACK]);
     let release: () => void = () => undefined;
@@ -200,12 +200,12 @@ describe("Exorcism screen", () => {
       release = resolve;
     });
     await user.click(checkboxFor(CANCEL.title));
-    await waitFor(() => expect((checkboxFor(CANCEL.title) as HTMLInputElement).disabled).toBe(true));
-    const row = document.querySelector(`[data-plan-action="${CANCEL.id}"]`) as HTMLElement;
-    expect((within(row).getByRole("button", { name: DO_IT_NAME }) as HTMLButtonElement).disabled).toBe(true);
+    await waitFor(() => expect(checkboxFor(CANCEL.title).getAttribute("aria-busy")).toBe("true"));
+    expect((checkboxFor(CANCEL.title) as HTMLInputElement).disabled).toBe(false);
+    expect(checkboxFor(CANCEL.title).getAttribute("aria-disabled")).toBe("true");
     release();
     await screen.findByText(/1 of 3 done/);
-    expect((checkboxFor(CANCEL.title) as HTMLInputElement).disabled).toBe(false);
+    expect(checkboxFor(CANCEL.title).getAttribute("aria-busy")).toBeNull();
   });
 
   it("offers Do it only on cancellation and extra payment actions", async () => {

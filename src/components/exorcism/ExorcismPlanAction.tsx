@@ -61,7 +61,7 @@ export function ExorcismPlanAction({
         subtitle={getPlanActionSubtitle(action)}
         impactText={impactText}
         done={action.done}
-        disabled={busy}
+        pending={busy}
         onToggle={handleToggle}
       />
       {doItTarget !== null ? (
@@ -70,7 +70,6 @@ export function ExorcismPlanAction({
             type="button"
             variant="secondary"
             size="md"
-            disabled={busy}
             aria-label={`${DO_IT_LABEL}: ${action.title}`}
             onClick={() => onDoIt(action, doItTarget)}
           >

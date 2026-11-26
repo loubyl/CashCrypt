@@ -27,19 +27,19 @@ Conventions that apply to every task:
 
 ## Tasks
 
-- [ ] 1. Focus bugs, header overflow and the pending-control audit
-  - [ ] 1.1 Write the failing initial-focus test
+- [x] 1. Focus bugs, header overflow and the pending-control audit
+  - [x] 1.1 Write the failing initial-focus test
     - `tests/ui/sheetInitialFocus.test.tsx`: open the Add expense sheet from the Dashboard, type `8` with `userEvent.keyboard` and no click, and expect the "Amount" Field to contain "8" and `document.activeElement` to be that input. Also record what Enter does in that state, and state the observed behavior in the task summary, so the review's report is confirmed or corrected.
     - Run it on the current code and confirm it fails (focus is on the Close button).
     - _Requirements: 6.1, 6.6, 14.7_
 
-  - [ ] 1.2 Implement the initial-focus rule
+  - [x] 1.2 Implement the initial-focus rule
     - Add `FIELD_SELECTOR` and `INITIAL_FOCUS_ATTRIBUTE` to `src/lib/utils/focusTrap.ts`. Change `BottomSheet.moveFocusIn` to use, in order, the marked element, the first Field and the first focusable element, and to select a non-empty input value.
     - `LogPaymentSheet`: mark the first Debt row of the picker with `data-initial-focus`. When a Debt is picked, focus and select the "Payment amount" input through its ref in a layout effect.
     - Add `src/components/sheets/useFocusFirstInvalid.ts` and use it in the Add expense, Log payment, Onboarding, Add debt, Edit debt and Add subscription forms, bumping `attempt` on each submit that finds errors.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.7_
 
-  - [ ] 1.3 Write the initial-focus tests for every sheet and run the mutation check
+  - [x] 1.3 Write the initial-focus tests for every sheet and run the mutation check
     - Extend `tests/ui/sheetInitialFocus.test.tsx` with these cases:
       - Typing right after open fills the first Field in Add expense, Onboarding, Add debt, Edit debt and Add subscription.
       - The Log payment amount pre-filled from a Debt is selected, and typing replaces it.
@@ -50,7 +50,7 @@ Conventions that apply to every task:
     - Mutation check: restore the old `moveFocusIn` and confirm the 1.1 test fails.
     - _Requirements: 6.1 to 6.7, 14.3, 14.7_
 
-  - [ ] 1.4 Write the failing checkbox-focus test
+  - [x] 1.4 Write the failing checkbox-focus test
     - `tests/ui/planCheckboxFocus.test.tsx`: render `ExorcismPlanAction` for the "Cut Coffee" action with a mocked `toggleAction` whose promise the test holds open. Focus the checkbox, press Space and, while the promise is pending, expect:
       - no `disabled` attribute on the checkbox;
       - `aria-disabled="true"` and `aria-busy="true"`;
@@ -60,13 +60,13 @@ Conventions that apply to every task:
     - Run it on the current code and confirm it fails on the `disabled` assertion. jsdom does not blur a disabled element, so the focus itself is guarded by task 1.7.
     - _Requirements: 15.1, 15.2, 15.3, 14.7_
 
-  - [ ] 1.5 Implement the pending state of the plan checkbox
+  - [x] 1.5 Implement the pending state of the plan checkbox
     - `ExorcismActionRow`: add a `pending` prop that sets `aria-disabled` and `aria-busy` and makes `onChange` return early. Add `aria-disabled:` variants of the existing `disabled:` classes so the busy look stays.
     - `ExorcismPlanAction`: pass `pending={busy}` instead of `disabled={busy}`, keep the `if (busy) return` guard, and remove `disabled={busy}` from the Do it Button (it is never rendered while busy).
     - Mutation check: restore `disabled={busy}` on the row and confirm the 1.4 test fails.
     - _Requirements: 15.1, 15.2, 15.4, 15.6_
 
-  - [ ] 1.6 Audit the other controls that are disabled while focused
+  - [x] 1.6 Audit the other controls that are disabled while focused
     - Work through the design's audit table:
       - **`DemoControls`:** the activated Button uses `loading`, the other gets `aria-disabled`, and both handlers return early while `busy`.
       - **`QuickAction`:** map `disabled` to `aria-disabled` and keep the click guard and the disabled look.
@@ -80,17 +80,17 @@ Conventions that apply to every task:
     - Update the existing `QuickAction`, Dashboard and styleguide keyboard tests that assert the `disabled` attribute.
     - _Requirements: 15.5, 15.6, 15.7_
 
-  - [ ] 1.7 Add the `checkboxFocus` browser check
+  - [x] 1.7 Add the `checkboxFocus` browser check
     - In `scripts/check-moments.mjs`, add the `checkboxFocus` case of the design. It focuses the "Cut Coffee" checkbox, presses Space, and samples `document.activeElement` and the `disabled` attribute every 5 ms for 500 ms. It asserts the checkbox is never disabled, keeps focus at every sample and ends checked.
     - Mutation check in the browser: build with `disabled={busy}` temporarily restored and confirm the case fails, then restore the fix, rebuild and confirm it passes. Report both runs in the summary.
     - _Requirements: 15.3, 14.8_
 
-  - [ ] 1.8 Add the failing `noHorizontalScroll` browser case
+  - [x] 1.8 Add the failing `noHorizontalScroll` browser case
     - In `scripts/check-moments.mjs`, add a `noHorizontalScroll` case: open the Dashboard in demo mode and, for each width in 320, 768, 1280 and 1920 (height 640), assert `document.documentElement.scrollWidth <= document.documentElement.clientWidth`. At 320, also report the header's width and the `TabBar` width.
     - Run it on the current code and confirm it fails at 320 (header 400px wide) and passes at 768, 1280 and 1920. Report the numbers in the summary.
     - _Requirements: 16.1, 16.4, 16.6, 14.8_
 
-  - [ ] 1.9 Let the header fit at 320px
+  - [x] 1.9 Let the header fit at 320px
     - Read `Chip`, `DemoChip`, `AppShell` and `NavLink` first. Implement D13: the badge shows "Demo" with its icon below `sm` and the full "Demo mode · <date>" from `sm` up, the date stays available to assistive technology, the header group can shrink (`min-w-0`) and the settings link keeps at least 44 by 44px (`shrink-0`). Use layout utilities only in `className`. Keep the header unchanged at 768px and wider.
     - Check the Real_Crypt header at 320px as well (no badge), and the pages other than the Dashboard (`/transactions`, `/subscriptions`, `/debts`, `/exorcism`, `/settings`) for overflow at 320px. If another element overflows, fix it in this task and name it in the summary.
     - jsdom tests in `tests/ui/demoChip.test.tsx`: the chip's accessible text contains "Demo mode" and the date; the short "Demo" text is present; the settings link has its accessible name.

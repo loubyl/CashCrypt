@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useCreateCrypt } from "@/hooks/useCryptActions";
 import { parseMoneyToCents } from "@/lib/utils/cents";
 import { validateIncome } from "@/lib/validation/inputs";
+import { useFocusFirstInvalid } from "./useFocusFirstInvalid";
 
 const GENERIC_ERROR = "Enter your monthly income.";
 
@@ -22,6 +23,9 @@ export function OnboardingSheet({ open, onClose, onCreated }: OnboardingSheetPro
   const [text, setText] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusFirstInvalid(formRef, attempt);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,6 +34,7 @@ export function OnboardingSheet({ open, onClose, onCreated }: OnboardingSheetPro
     const checked = validateIncome(parsed ?? Number.NaN);
     if (!checked.ok) {
       setError(checked.errors[0]?.message ?? GENERIC_ERROR);
+      setAttempt((count) => count + 1);
       return;
     }
     setError(undefined);
@@ -49,7 +54,7 @@ export function OnboardingSheet({ open, onClose, onCreated }: OnboardingSheetPro
 
   return (
     <BottomSheet open={open} onClose={onClose} title="Your monthly income">
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <Input
           label="Monthly income"
           variant="money"

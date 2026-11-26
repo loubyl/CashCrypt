@@ -11,9 +11,14 @@ export function DemoChip() {
   const now = useNow();
   if (status !== "demo") return null;
 
+  const label = now ? `Demo mode · ${now}` : "Demo mode";
+
   return (
-    <Chip tone="warning" icon={FlaskConical} className="self-start">
-      {now ? `Demo mode · ${now}` : "Demo mode"}
+    <Chip tone="warning" icon={FlaskConical} className="self-start" title={label}>
+      <span aria-hidden="true" className="sm:hidden">
+        Demo
+      </span>
+      <span className="sr-only sm:not-sr-only">{label}</span>
     </Chip>
   );
 }

@@ -34,9 +34,12 @@ describe("QuickAction", () => {
     const user = userEvent.setup();
     render(<QuickAction icon={Plus} label="Add" disabled onClick={onClick} />);
     const button = screen.getByRole("button", { name: "Add" });
+    // Unavailable but focusable: `aria-disabled`, never the `disabled` attribute.
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    expect(button).not.toHaveAttribute("disabled");
     await user.click(button);
+    expect(document.activeElement).toBe(button);
     fireEvent.click(button);
-    await user.tab();
     await user.keyboard("{Enter}");
     expect(onClick).not.toHaveBeenCalled();
   });

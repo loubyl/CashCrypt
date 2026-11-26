@@ -1,0 +1,120 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Write the failing initial-focus test": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659002936
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659052811
+      }
+    ],
+    "1.2 Implement the initial-focus rule": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659052869
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659371601
+      }
+    ],
+    "1.3 Write the initial-focus tests for every sheet and run the mutation check": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659372228
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659711159
+      }
+    ],
+    "1.4 Write the failing checkbox-focus test": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659711766
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659765833
+      }
+    ],
+    "1.5 Implement the pending state of the plan checkbox": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795659766449
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660176057
+      }
+    ],
+    "1.6 Audit the other controls that are disabled while focused": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660176134
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660610326
+      }
+    ],
+    "1.7 Add the `checkboxFocus` browser check": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660611111
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660868212
+      }
+    ],
+    "1.8 Add the failing `noHorizontalScroll` browser case": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795660868762
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795661231137
+      }
+    ],
+    "1.9 Let the header fit at 320px": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795661231697
+      },
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795662291591
+      }
+    ],
+    "1. Focus bugs, header overflow and the pending-control audit": [
+      {
+        "executionId": "329d3c97-62c1-4f30-8018-10f16a2dcfc5",
+        "chatSessionId": "sess_745bdab3-fab0-472d-bad6-5385cc23e87a",
+        "timestamp": 1795662291682
+      }
+    ]
+  }
+}

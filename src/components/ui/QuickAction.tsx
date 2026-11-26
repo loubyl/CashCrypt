@@ -17,7 +17,7 @@ const ICON_STROKE_WIDTH = 2;
 const BASE_CLASSES =
   "inline-flex min-h-11 min-w-11 shrink-0 select-none flex-col items-center gap-2 bg-transparent font-sans text-label font-medium text-ink " +
   "outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
-  "disabled:cursor-not-allowed disabled:opacity-40";
+  "disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:opacity-40";
 
 const CIRCLE_CLASSES =
   "inline-flex size-13 items-center justify-center rounded-pill bg-surface-raised text-ink";
@@ -76,7 +76,9 @@ export const QuickAction = forwardRef<HTMLButtonElement, QuickActionProps>(funct
       ref={ref}
       type="button"
       className={`${BASE_CLASSES} ${className ?? ""}`}
-      disabled={disabled}
+      // Not the `disabled` attribute: a disabled button drops focus, and BottomSheet returns focus
+      // here after a payment that pays off the last Debt (Requirement 15.5).
+      aria-disabled={disabled ? true : undefined}
       data-reduced-motion={reduced ? "true" : "false"}
       variants={quickActionVariants}
       initial="rest"

@@ -117,8 +117,10 @@ describe("Dashboard on the level 4 demo", () => {
       .map((button) => button.textContent?.trim() ?? "")
       .filter((text) => QUICK_ACTION_LABELS.includes(text));
     expect(names).toEqual(QUICK_ACTION_LABELS);
-    expect((screen.getByRole("button", { name: "Import CSV" }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole("button", { name: "Log payment" }) as HTMLButtonElement).disabled).toBe(false);
+    // Unavailable QuickActions are aria-disabled, not `disabled`, so they can keep focus.
+    expect(screen.getByRole("button", { name: "Import CSV" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Import CSV" })).not.toHaveAttribute("disabled");
+    expect(screen.getByRole("button", { name: "Log payment" })).not.toHaveAttribute("aria-disabled");
   });
 
   it("opens the Log payment and Add expense sheets and navigates on Exorcise", async () => {
@@ -285,7 +287,8 @@ describe("Plan actions without a Do it flow", () => {
     });
     await screen.findByText(REDUCE.title);
     expect(screen.queryAllByRole("button", { name: DO_IT_NAME })).toHaveLength(0);
-    expect((screen.getByRole("button", { name: "Log payment" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: "Log payment" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Log payment" })).not.toHaveAttribute("disabled");
     expect(screen.queryByText(POLTERGEIST_TEXT)).toBeNull();
   });
 

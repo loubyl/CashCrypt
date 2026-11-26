@@ -12,6 +12,10 @@ import type { ScenarioId } from "@/types/finance";
 const LEVELS = [1, 2, 3, 4, 5] as const;
 const SCENARIO_PREFIX = "level-";
 const RESET_MESSAGE = "Demo reset";
+const RESET_ACTION = "reset";
+const SKIP_ACTION = "skip";
+const SCENARIO_ACTION = "scenario";
+type BusyAction = typeof RESET_ACTION | typeof SKIP_ACTION | typeof SCENARIO_ACTION;
 const ERROR_MESSAGE = "Something went wrong. Try again.";
 
 const SCENARIO_LABEL = "Start scenario";
@@ -30,7 +34,10 @@ export function DemoControls() {
   const demo = useDemo();
   const toast = useToast();
   const [announcement, setAnnouncement] = useState("");
-  const [busy, setBusy] = useState(false);
+  // Which demo action is running. The activated Button shows `loading` and the other one
+  // `aria-disabled`, so neither loses keyboard focus (Requirement 15.5).
+  const [busyAction, setBusyAction] = useState<BusyAction | null>(null);
+  const busy = busyAction !== null;
   const scenarioLabelId = useId();
 
   if (status !== "demo") return null;
@@ -39,9 +46,10 @@ export function DemoControls() {
 
   const handleSelect = async (value: string) => {
     const id = value as ScenarioId;
-    setBusy(true);
+    if (busy) return;
+    setBusyAction(SCENARIO_ACTION);
     const result = await demo.loadScenario(id);
-    setBusy(false);
+    setBusyAction(null);
     if (!result.ok) {
       showError();
       return;
@@ -50,9 +58,10 @@ export function DemoControls() {
   };
 
   const handleReset = async () => {
-    setBusy(true);
+    if (busy) return;
+    setBusyAction(RESET_ACTION);
     const result = await demo.reset();
-    setBusy(false);
+    setBusyAction(null);
     if (!result.ok) {
       showError();
       return;
@@ -61,9 +70,10 @@ export function DemoControls() {
   };
 
   const handleSkip = async () => {
-    setBusy(true);
+    if (busy) return;
+    setBusyAction(SKIP_ACTION);
     const result = await demo.skipWeek();
-    setBusy(false);
+    setBusyAction(null);
     if (!result.ok) {
       showError();
       return;
@@ -86,10 +96,22 @@ export function DemoControls() {
           className="max-w-full self-start overflow-x-auto"
         />
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="md" disabled={busy} onClick={() => void handleReset()}>
+          <Button
+            variant="secondary"
+            size="md"
+            loading={busyAction === RESET_ACTION}
+            aria-disabled={busy ? true : undefined}
+            onClick={() => void handleReset()}
+          >
             Reset demo
           </Button>
-          <Button variant="secondary" size="md" disabled={busy} onClick={() => void handleSkip()}>
+          <Button
+            variant="secondary"
+            size="md"
+            loading={busyAction === SKIP_ACTION}
+            aria-disabled={busy ? true : undefined}
+            onClick={() => void handleSkip()}
+          >
             Skip to next week
           </Button>
         </div>

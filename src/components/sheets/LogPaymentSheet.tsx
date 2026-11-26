@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useLayoutEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { Landmark } from "lucide-react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button } from "@/components/ui/Button";
@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
 import { useToast } from "@/components/ui/ToastRegion";
 import { useCryptActions } from "@/hooks/useCryptActions";
+import { INITIAL_FOCUS_ATTRIBUTE } from "@/lib/utils/focusTrap";
 import { centsToMoneyText, formatCents, formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
 import { getExtraAboveMinimum, getPaymentPrefill } from "@/lib/utils/planView";
 import { validatePaymentAmount } from "@/lib/validation/inputs";
+import { useFocusFirstInvalid } from "./useFocusFirstInvalid";
 import type { DebtRow } from "@/types/finance";
 
 const SHEET_TITLE = "Log payment";
@@ -32,9 +34,11 @@ type PaymentFormProps = {
   debt: DebtRow;
   prefillCents?: number;
   onClose: () => void;
+  /** Receives the amount input so the sheet can focus it after a Debt is picked. */
+  amountRef?: RefObject<HTMLInputElement | null>;
 };
 
-function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
+function PaymentForm({ debt, prefillCents, onClose, amountRef }: PaymentFormProps) {
   const { logPayment } = useCryptActions();
   const toast = useToast();
   const initialCents =
@@ -42,6 +46,9 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
   const [text, setText] = useState(initialCents > 0 ? centsToMoneyText(initialCents) : "");
   const [error, setError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusFirstInvalid(formRef, attempt);
 
   const parsed = parseMoneyToCents(text);
   const extraCents = parsed === null ? 0 : getExtraAboveMinimum(parsed, debt.minimumPaymentCents);
@@ -51,11 +58,13 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
     if (submitting) return;
     if (text.trim() === "" || parsed === null) {
       setError(EMPTY_AMOUNT_ERROR);
+      setAttempt((count) => count + 1);
       return;
     }
     const checked = validatePaymentAmount(parsed, debt);
     if (!checked.ok) {
       setError(checked.errors[0]?.message ?? GENERIC_ERROR);
+      setAttempt((count) => count + 1);
       return;
     }
     setError(undefined);
@@ -78,7 +87,7 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <p className="text-body-lg text-ink">{debt.name}</p>
         <p className="text-body text-ink-secondary">
@@ -86,6 +95,7 @@ function PaymentForm({ debt, prefillCents, onClose }: PaymentFormProps) {
         </p>
       </div>
       <Input
+        ref={amountRef}
         label="Payment amount"
         variant="money"
         fill="raised"
@@ -120,6 +130,17 @@ export function LogPaymentSheet({
   const pickedDebt = payable.find((debt) => debt.id === pickedId);
   const selected = givenDebt ?? pickedDebt ?? (payable.length === 1 ? payable[0] : undefined);
   const usePrefill = givenDebt !== undefined;
+  const amountRef = useRef<HTMLInputElement>(null);
+
+  // Only a pick from the picker moves focus here. A sheet opened on a given Debt gets its focus
+  // from BottomSheet, which also records the element to return to.
+  useLayoutEffect(() => {
+    if (pickedId === undefined) return;
+    const input = amountRef.current;
+    if (!input) return;
+    input.focus();
+    input.select();
+  }, [pickedId]);
 
   const handleClose = () => {
     setPickedId(undefined);
@@ -134,12 +155,14 @@ export function LogPaymentSheet({
           debt={selected}
           prefillCents={usePrefill ? prefillCents : undefined}
           onClose={handleClose}
+          amountRef={amountRef}
         />
       ) : (
         <div className="flex flex-col">
-          {payable.map((debt) => (
+          {payable.map((debt, index) => (
             <ListRow
               key={debt.id}
+              {...(index === 0 ? { [INITIAL_FOCUS_ATTRIBUTE]: "" } : {})}
               icon={Landmark}
               tone="blood"
               title={debt.name}

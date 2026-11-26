@@ -11,7 +11,13 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { FOCUSABLE_SELECTOR, getNextFocusIndex, shouldSkipInert } from "@/lib/utils/focusTrap";
+import {
+  FIELD_SELECTOR,
+  FOCUSABLE_SELECTOR,
+  INITIAL_FOCUS_ATTRIBUTE,
+  getNextFocusIndex,
+  shouldSkipInert,
+} from "@/lib/utils/focusTrap";
 import { Button } from "./Button";
 import { REDUCED_FADE_MAX_S, SHEET_DURATION_S, type LayoutClassName } from "./motionTokens";
 
@@ -141,8 +147,15 @@ function lockScroll(): () => void {
 }
 
 function moveFocusIn(dialog: HTMLElement): void {
-  const first = dialog.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-  (first ?? dialog).focus();
+  const target =
+    dialog.querySelector<HTMLElement>(`[${INITIAL_FOCUS_ATTRIBUTE}]`) ??
+    dialog.querySelector<HTMLElement>(FIELD_SELECTOR) ??
+    dialog.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ??
+    dialog;
+  target.focus();
+  if (target instanceof HTMLInputElement && target.value !== "") {
+    target.select();
+  }
 }
 
 export type BottomSheetProps = {

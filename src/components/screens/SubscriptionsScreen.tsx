@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Flame, Hourglass, Plus, Skull, Ghost, Repeat, type LucideIcon } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui/SegmentedControl";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useFocusFirstInvalid } from "@/components/sheets/useFocusFirstInvalid";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
 import { normalizeSubscription } from "@/lib/haunting";
@@ -123,6 +124,9 @@ function AddSubscriptionForm({ onClose }: { onClose: () => void }) {
   const [usage, setUsage] = useState<Usage>(DEFAULT_USAGE);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusFirstInvalid(formRef, attempt);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -147,6 +151,7 @@ function AddSubscriptionForm({ onClose }: { onClose: () => void }) {
     else if (cents === null) found.amount = INVALID_AMOUNT_ERROR;
     if (!validation.ok || found.amount) {
       setErrors(found);
+      setAttempt((count) => count + 1);
       return;
     }
     setErrors({});
@@ -170,7 +175,7 @@ function AddSubscriptionForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <Input
         label="Name"
         fill="raised"

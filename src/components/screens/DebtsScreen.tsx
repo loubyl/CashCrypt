@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, Landmark, Plus } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -14,6 +14,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Input } from "@/components/ui/Input";
 import { ListRow } from "@/components/ui/ListRow";
 import { useToast } from "@/components/ui/ToastRegion";
+import { useFocusFirstInvalid } from "@/components/sheets/useFocusFirstInvalid";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useCryptData } from "@/hooks/useCryptData";
 import {
@@ -122,6 +123,9 @@ function DebtForm({ initial, submitLabel, onSubmit }: DebtFormProps) {
   const [values, setValues] = useState<FormValues>(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFocusFirstInvalid(formRef, attempt);
 
   const setField = (field: keyof FormValues, errorKey: keyof FieldErrors) => (value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -155,6 +159,7 @@ function DebtForm({ initial, submitLabel, onSubmit }: DebtFormProps) {
     if (apr.error) found.apr = apr.error;
     if (!validation.ok || Object.keys(found).length > 0) {
       setErrors(found);
+      setAttempt((count) => count + 1);
       return;
     }
     setErrors({});
@@ -165,7 +170,7 @@ function DebtForm({ initial, submitLabel, onSubmit }: DebtFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <Input
         label="Name"
         fill="raised"

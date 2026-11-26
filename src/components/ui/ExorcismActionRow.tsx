@@ -22,7 +22,7 @@ const CHECKBOX_CLASSES =
   "size-6 shrink-0 cursor-pointer appearance-none rounded-circle border-2 border-control bg-transparent outline-none " +
   "transition-colors checked:border-candle checked:bg-candle " +
   "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
-  "disabled:cursor-not-allowed disabled:opacity-40";
+  "disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:opacity-40";
 
 export type ExorcismActionRowProps = {
   /** Id of the native checkbox. Required so the row can be targeted and labelled. */
@@ -35,13 +35,18 @@ export type ExorcismActionRowProps = {
   /** Called once per activation with the next done value. */
   onToggle: (next: boolean) => void;
   disabled?: boolean;
+  /**
+   * Busy while a save runs. Unlike `disabled`, the checkbox stays focusable (aria-disabled and
+   * aria-busy), so keyboard focus is not lost. Changes are ignored until it clears.
+   */
+  pending?: boolean;
   /** Layout utilities only (margin, width, grid placement). Never colors or spacing. */
   className?: LayoutClassName;
 };
 
 export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowProps>(
   function ExorcismActionRow(
-    { id, title, subtitle, impactText, done, onToggle, disabled = false, className },
+    { id, title, subtitle, impactText, done, onToggle, disabled = false, pending = false, className },
     ref,
   ) {
     const reduced = useReducedMotion();
@@ -51,7 +56,7 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
     const subtitleColor = done ? "text-ink-tertiary" : "text-ink-secondary";
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-      if (disabled) {
+      if (disabled || pending) {
         return;
       }
       onToggle(event.target.checked);
@@ -70,6 +75,8 @@ export const ExorcismActionRow = forwardRef<HTMLDivElement, ExorcismActionRowPro
             type="checkbox"
             checked={done}
             disabled={disabled}
+            aria-disabled={pending ? true : undefined}
+            aria-busy={pending ? true : undefined}
             onChange={handleChange}
             aria-label={`Mark "${title}" as done`}
             className={CHECKBOX_CLASSES}

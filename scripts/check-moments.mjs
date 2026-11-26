@@ -603,6 +603,109 @@ function assertFullDemo({ samples, saveClickT }) {
   check(final.level === "3", `fullDemo: scene ends at level 3 (${final.level})`);
 }
 
+const CHECKBOX_FOCUS_SAMPLE_MS = 5;
+const CHECKBOX_FOCUS_WINDOW_MS = 500;
+
+/** Level 4: focus the "Cut Coffee" checkbox, press Space and sample focus and `disabled` every 5 ms. */
+async function runCheckboxFocus(page) {
+  const found = await page.evaluate(() => {
+    const box = [...document.querySelectorAll('input[type="checkbox"]')].find((el) =>
+      /coffee/i.test(el.closest("[data-plan-action]")?.textContent ?? ""),
+    );
+    if (!box) return false;
+    window.__cb = box;
+    box.focus();
+    return document.activeElement === box;
+  });
+  if (!found) throw new Error("Cut Coffee checkbox not found or not focusable");
+  await page.evaluate((sampleMs, windowMs) => {
+    window.__focusSamples = [];
+    const start = performance.now();
+    const id = setInterval(() => {
+      const box = window.__cb;
+      window.__focusSamples.push({
+        t: Math.round(performance.now() - start),
+        focused: document.activeElement === box,
+        disabled: box.disabled || box.hasAttribute("disabled"),
+        connected: box.isConnected,
+      });
+      if (performance.now() - start >= windowMs) clearInterval(id);
+    }, sampleMs);
+  }, CHECKBOX_FOCUS_SAMPLE_MS, CHECKBOX_FOCUS_WINDOW_MS);
+  await page.keyboard.press("Space");
+  await sleep(CHECKBOX_FOCUS_WINDOW_MS + 100);
+  return page.evaluate(() => ({
+    samples: window.__focusSamples,
+    checked: window.__cb.checked,
+    endFocused: document.activeElement === window.__cb,
+  }));
+}
+
+function assertCheckboxFocus({ samples, checked, endFocused }) {
+  const disabledAt = samples.filter((s) => s.disabled);
+  const blurredAt = samples.filter((s) => !s.focused);
+  console.log(
+    `checkboxFocus: ${samples.length} samples over ${samples.at(-1)?.t ?? 0} ms, disabled in ${disabledAt.length}, not focused in ${blurredAt.length}, checked ${checked}, focused at end ${endFocused}`,
+  );
+  check(samples.length >= 50, `checkboxFocus: sampled ${samples.length} times (min 50)`);
+  check(disabledAt.length === 0, `checkboxFocus: the checkbox is never disabled (${disabledAt.length} sample(s), first at ${disabledAt[0]?.t ?? "-"} ms)`);
+  check(blurredAt.length === 0, `checkboxFocus: the checkbox keeps focus at every sample (${blurredAt.length} sample(s) without, first at ${blurredAt[0]?.t ?? "-"} ms)`);
+  check(endFocused, "checkboxFocus: the checkbox is the active element at the end");
+  check(checked, "checkboxFocus: the checkbox ends checked");
+}
+
+const OVERFLOW_WIDTHS = [320, 768, 1280, 1920];
+const OVERFLOW_HEIGHT = 640;
+const OVERFLOW_NARROW_WIDTH = 320;
+const OVERFLOW_SETTLE_MS = 400;
+
+/** Dashboard in demo mode at several widths: measures the page width, the header and the TabBar. */
+async function runNoHorizontalScroll(page) {
+  const results = [];
+  for (const width of OVERFLOW_WIDTHS) {
+    await page.setViewport({ width, height: OVERFLOW_HEIGHT });
+    await sleep(OVERFLOW_SETTLE_MS);
+    results.push(
+      await page.evaluate((viewportWidth) => {
+        const root = document.documentElement;
+        const box = (el) => {
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { width: r.width, right: r.right, scrollWidth: el.scrollWidth };
+        };
+        return {
+          width: viewportWidth,
+          scrollWidth: root.scrollWidth,
+          clientWidth: root.clientWidth,
+          header: box(document.querySelector("header")),
+          tabBar: box(document.querySelector('nav[aria-label="Main"]')),
+        };
+      }, width),
+    );
+  }
+  return { results };
+}
+
+function assertNoHorizontalScroll({ results }) {
+  for (const r of results) {
+    check(
+      r.scrollWidth <= r.clientWidth,
+      `noHorizontalScroll: at ${r.width} px the page does not scroll sideways (scrollWidth ${r.scrollWidth}, clientWidth ${r.clientWidth})`,
+    );
+    if (r.width !== OVERFLOW_NARROW_WIDTH) continue;
+    const { header, tabBar } = r;
+    console.log(
+      `noHorizontalScroll: at ${r.width} px header width ${header ? header.width.toFixed(1) : "-"} (right edge ${header ? header.right.toFixed(1) : "-"}, content ${header ? header.scrollWidth : "-"}), TabBar width ${tabBar ? tabBar.width.toFixed(1) : "-"}`,
+    );
+    // The header box is clamped to the viewport; its content (scrollWidth) is what overflows.
+    check(
+      Boolean(header) && Math.max(header.right, header.scrollWidth) <= r.width,
+      `noHorizontalScroll: at ${r.width} px the header's content fits the viewport`,
+    );
+    check(Boolean(tabBar) && Math.abs(tabBar.width - r.clientWidth) < 1, `noHorizontalScroll: at ${r.width} px the TabBar width equals the viewport width`);
+  }
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
@@ -610,6 +713,8 @@ const MOMENT_CHECKS = [
   { name: "level", run: runLevel, assert: assertLevel },
   { name: "exorcismComplete", run: runExorcismComplete, assert: assertExorcismComplete },
   { name: "fullDemo", run: runFullDemo, assert: assertFullDemo },
+  { name: "checkboxFocus", run: runCheckboxFocus, assert: assertCheckboxFocus },
+  { name: "noHorizontalScroll", run: runNoHorizontalScroll, assert: assertNoHorizontalScroll },
 ];
 
 // ---------------------------------------------------------------------------------------------
