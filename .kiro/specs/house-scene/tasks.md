@@ -395,7 +395,7 @@ Conventions that apply to every task:
     - Run `npm test`, `npx tsc --noEmit` and `npm run lint`.
     - _Requirements: 1.3, 1.5, 1.6, 19.9, 24.7, 24.10_
 
-- [ ] 19. Final checkpoint: ensure all tests pass
+- [x] 19. Final checkpoint: ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
   - Record in the task summary the manual checklist of Requirement 24.9: all five levels at 320, 768, 1280 and 1920px with and without reduced motion, and the level-4 demo flow at 1280 by 720, with the three checkpoint outcomes.
   - _Requirements: 24.9, 24.10_
