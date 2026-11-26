@@ -7,6 +7,10 @@
     "2.4 Write the expense neutrality property": {
       "status": "passed",
       "lastRunTimestamp": 1795670299422
+    },
+    "5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1795683178468
     }
   },
   "executionHistory": {
@@ -425,6 +429,73 @@
         "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
         "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
         "timestamp": 1795677111823
+      }
+    ],
+    "5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683130330
+      },
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683188089
+      }
+    ],
+    "5.2 Create `CryptGuide`": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683188686
+      },
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683244808
+      }
+    ],
+    "5.3 Place the Guide and \"How it works\" on the Dashboard": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683244868
+      },
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683375240
+      }
+    ],
+    "5.4 Write the Guide tests": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683374642
+      },
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683484568
+      }
+    ],
+    "5.5 Update the browser script for the Guide": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795683485134
+      },
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795685167396
+      }
+    ],
+    "5. Guide": [
+      {
+        "executionId": "db44e006-c088-46c5-9432-7d3b7add144d",
+        "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
+        "timestamp": 1795685167450
       }
     ]
   }

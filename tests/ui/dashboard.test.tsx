@@ -94,7 +94,10 @@ describe("Dashboard on the level 4 demo", () => {
     expect(grid.className).toContain("lg:grid-cols-2");
     expect(grid.className).toContain("xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]");
     expect(grid.className).toContain("flex-col");
-    for (const column of Array.from(grid.children)) expect(column.className).toContain("contents");
+    // The Guide (first child while shown) is a Card, not a column wrapper.
+    const columns = Array.from(grid.children).filter((child) => !child.className.includes("bg-surface-card"));
+    expect(columns).toHaveLength(2);
+    for (const column of columns) expect(column.className).toContain("contents");
     const scene = screen.getByRole("img", { name: /^Level 4, Crumbling\./ });
     const score = screen.getByText("Light score", { selector: "p" });
     const banner = bannerParagraph();

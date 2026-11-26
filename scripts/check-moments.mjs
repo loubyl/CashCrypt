@@ -293,11 +293,26 @@ function installSampler(sampleMs, DRAWN_PART_SELECTORS) {
   }, sampleMs);
 }
 
-async function openDemo(page) {
+const GUIDE_TITLE = "How your crypt works";
+const GUIDE_GOT_IT = "Got it";
+const GUIDE_VIEWPORT = { width: 1280, height: 720 };
+const guideShown = (page) =>
+  page.evaluate((title) => [...document.querySelectorAll("h2")].some((h) => (h.textContent ?? "").trim() === title), GUIDE_TITLE);
+
+/**
+ * Enters the demo crypt. The Guide must be shown on entry (action-feedback Requirement 5.1); unless
+ * `keepGuide` is set, it is then dismissed with "Got it" so the Scene keeps the house-scene layout.
+ */
+async function openDemo(page, { keepGuide = false } = {}) {
   await page.goto(BASE_URL, { waitUntil: "networkidle0" });
   await clickByText(page, "button", "Enter the demo crypt");
   await waitFor(page, () => document.querySelector('[data-part="scene"][data-level="4"]') !== null);
   await sleep(1500);
+  check(await guideShown(page), "openDemo: the Guide is shown on entering the demo");
+  if (keepGuide) return;
+  await clickByText(page, "button", GUIDE_GOT_IT);
+  await waitFor(page, (title) => ![...document.querySelectorAll("h2")].some((h) => (h.textContent ?? "").trim() === title), GUIDE_TITLE);
+  await sleep(300);
 }
 
 async function cancelWraithcast(page) {
@@ -411,7 +426,13 @@ function assertPayment({ samples, saveRect, frozenBefore, scene }) {
   const orbPoints = during.filter((s) => s.orb && s.orbOpacity > 0.05).map((s) => s.orb);
   const from = THROTTLED ? { cx: saveRect.cx, cy: saveRect.cy } : orbPoints[0];
   const travel = orbPoints.length > 0 && from ? Math.max(...orbPoints.map((p) => Math.hypot(p.cx - from.cx, p.cy - from.cy))) : 0;
-  check(travel >= ORB_MIN_TRAVEL_PX, `payment: orb travels ${travel.toFixed(0)} px away from its start (min ${ORB_MIN_TRAVEL_PX})`);
+  if (THROTTLED && orbPoints.length === 0) {
+    // With frames 700 ms apart the ~1 s orb flight can fall entirely between two frames. The Moment is
+    // still driven on the wall clock, so what is asserted is that its art is gone on time (below).
+    console.log("payment: no frame landed during the orb flight at this frame rate; travel is not asserted");
+  } else {
+    check(travel >= ORB_MIN_TRAVEL_PX, `payment: orb travels ${travel.toFixed(0)} px away from its start (min ${ORB_MIN_TRAVEL_PX})`);
+  }
   const lastOrb = orbPoints.at(-1);
   const inScene =
     Boolean(lastOrb) &&
@@ -1121,6 +1142,54 @@ function assertCandleFlicker({ samples, light }) {
   check(Boolean(toast), `candleFlicker: toast reads "${FLICKER_TOAST}" (${samples.map((s) => s.toastText).find((t) => t.includes("Light")) ?? "none"})`);
 }
 
+/** Level 4 at 1280 by 720: Guide shown (Scene and Guide_Step fit), then dismissed (Scene, plan heading and actions fit). */
+const measureGuideLayout = (page) =>
+  page.evaluate((title) => {
+    const bottomOf = (el) => (el ? el.getBoundingClientRect().bottom : null);
+    const heading = [...document.querySelectorAll("h2")].find((h) => (h.textContent ?? "").trim() === title) ?? null;
+    const card = heading?.closest("section, div[class*='rounded']") ?? null;
+    const stepEl = card ? [...card.querySelectorAll("p")].find((p) => p.querySelector("svg")) ?? null : null;
+    const plan = document.querySelector("#exorcism-plan-heading");
+    const actions = [...document.querySelectorAll("[data-plan-action]")];
+    return {
+      viewportHeight: window.innerHeight,
+      sceneBottom: bottomOf(document.querySelector('[data-part="scene"]')),
+      stepBottom: bottomOf(stepEl),
+      stepText: stepEl?.textContent ?? null,
+      planHeadingBottom: bottomOf(plan),
+      actionBottoms: actions.map(bottomOf),
+    };
+  }, GUIDE_TITLE);
+
+async function runGuide(page) {
+  await page.setViewport(GUIDE_VIEWPORT);
+  await sleep(OVERFLOW_SETTLE_MS_GUIDE);
+  const shown = await measureGuideLayout(page);
+  await clickByText(page, "button", GUIDE_GOT_IT);
+  await waitFor(page, (title) => ![...document.querySelectorAll("h2")].some((h) => (h.textContent ?? "").trim() === title), GUIDE_TITLE);
+  await sleep(OVERFLOW_SETTLE_MS_GUIDE);
+  const dismissed = await measureGuideLayout(page);
+  return { shown, dismissed };
+}
+const OVERFLOW_SETTLE_MS_GUIDE = 500;
+const GUIDE_PLAN_ACTION_COUNT = 3;
+
+function assertGuide({ shown, dismissed }) {
+  const vh = GUIDE_VIEWPORT.height;
+  check(shown.sceneBottom !== null && shown.sceneBottom <= vh, `guide: with the Guide shown the whole Scene fits (bottom ${fmt(shown.sceneBottom)} of ${vh} px)`);
+  check(shown.stepBottom !== null && shown.stepBottom <= vh, `guide: the Guide_Step fits (bottom ${fmt(shown.stepBottom)} of ${vh} px, "${shown.stepText}")`);
+  check(
+    Boolean(shown.stepText) && shown.stepText.includes("Cancel Wraithcast"),
+    `guide: the Guide_Step names Cancel Wraithcast ("${shown.stepText}")`,
+  );
+  check(dismissed.sceneBottom !== null && dismissed.sceneBottom <= vh, `guide: after "Got it" the whole Scene fits (bottom ${fmt(dismissed.sceneBottom)} of ${vh} px)`);
+  check(dismissed.planHeadingBottom !== null && dismissed.planHeadingBottom <= vh, `guide: after "Got it" the plan heading fits (bottom ${fmt(dismissed.planHeadingBottom)} of ${vh} px)`);
+  check(
+    dismissed.actionBottoms.length === GUIDE_PLAN_ACTION_COUNT && dismissed.actionBottoms.every((b) => b <= vh),
+    `guide: after "Got it" the three plan actions fit (bottoms ${dismissed.actionBottoms.map(fmt).join(", ")} of ${vh} px)`,
+  );
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
@@ -1135,6 +1204,7 @@ const MOMENT_CHECKS = [
   { name: "feed", run: runFeed, assert: assertFeed },
   { name: "ghostArrival", run: runGhostArrival, assert: assertGhostArrival },
   { name: "candleFlicker", run: runCandleFlicker, assert: assertCandleFlicker },
+  { name: "guide", run: runGuide, assert: assertGuide, keepGuide: true },
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -1155,7 +1225,7 @@ try {
       await page.setViewport(VIEWPORT);
       await page.evaluateOnNewDocument(installPageHooks, RAF_THROTTLE_MS);
       page.on("pageerror", (error) => console.log("pageerror:", error.message));
-      await openDemo(page);
+      await openDemo(page, { keepGuide: Boolean(moment.keepGuide) });
       const data = await moment.run(page);
       moment.assert(data);
       const calls = await page.evaluate(() => window.__clipboardCalls);

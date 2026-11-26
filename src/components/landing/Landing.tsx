@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { startGuideSession } from "@/components/dashboard/CryptGuide";
 import { OnboardingSheet } from "@/components/sheets/OnboardingSheet";
 import { Button } from "@/components/ui/Button";
 import { useCrypt } from "@/hooks/useCrypt";
@@ -25,6 +26,7 @@ export function Landing() {
   const handleDemo = async () => {
     setEntering(true);
     try {
+      startGuideSession();
       await enterDemo();
       router.replace(HOME_PATH);
     } catch {

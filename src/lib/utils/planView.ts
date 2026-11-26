@@ -10,6 +10,14 @@ const IMPACT_PREFIX = "+";
 const FREED_SUFFIX = "freed";
 const NO_AMOUNT_TOAST = "Action completed";
 const DONE_PREFIX = "Done";
+const TITLE_SEPARATOR = " — ";
+const GUIDE_PRESS_PREFIX = "Press Do it on ";
+const GUIDE_CANCEL_OUTCOME = " and watch the zombie get buried";
+const GUIDE_PAY_OUTCOME = " and watch the windows light up";
+const GUIDE_TICK_PREFIX = "Tick ";
+const GUIDE_TICK_SUFFIX = " in This week's exorcism once you've done it";
+const GUIDE_DONE_TEXT =
+  "This week's exorcism is done. Use Skip to next week in Demo controls for a new plan.";
 
 export type PlanSummary = {
   doneCount: number;
@@ -87,6 +95,31 @@ export function getDoItTarget(action: ExorcismAction, rows: DoItRows): DoItTarge
       : null;
   }
   return null;
+}
+
+/** The part of an action title before " — " (the whole title when there is no separator). */
+export function getShortTitle(title: string): string {
+  const index = title.indexOf(TITLE_SEPARATOR);
+  return (index >= 0 ? title.slice(0, index) : title).trim();
+}
+
+/**
+ * Guide first-step line: the first not-done action with a Do it button, else the first
+ * not-done action to tick, else the done text.
+ */
+export function getGuideStep(actions: readonly ExorcismAction[], rows: DoItRows): string {
+  for (const action of actions) {
+    const target = getDoItTarget(action, rows);
+    if (target !== null) {
+      const outcome = target.kind === "cancel" ? GUIDE_CANCEL_OUTCOME : GUIDE_PAY_OUTCOME;
+      return `${GUIDE_PRESS_PREFIX}${getShortTitle(action.title)}${outcome}`;
+    }
+  }
+  const pending = actions.find((action) => !action.done);
+  if (pending !== undefined) {
+    return `${GUIDE_TICK_PREFIX}${getShortTitle(pending.title)}${GUIDE_TICK_SUFFIX}`;
+  }
+  return GUIDE_DONE_TEXT;
 }
 
 /** "+$120/mo" when the action frees money, otherwise undefined. */

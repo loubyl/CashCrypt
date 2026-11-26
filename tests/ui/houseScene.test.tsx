@@ -152,7 +152,7 @@ describe("Dashboard scene states", () => {
     expect(classes).toContain("lg:grid-cols-2");
     expect(classes).toContain("xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]");
     // Below lg the two column wrappers dissolve so the order is a single stack.
-    for (const column of Array.from(grid.children)) {
+    for (const column of Array.from(grid.children).filter((child) => !child.className.includes("bg-surface-card"))) {
       expect(column.className.split(/\s+/)).toContain("contents");
       expect(column.className).toContain("lg:flex-col");
     }

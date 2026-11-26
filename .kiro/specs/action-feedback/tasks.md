@@ -300,24 +300,24 @@ Conventions that apply to every task:
     - In `runGhostArrival` (`scripts/check-moments.mjs`), install a `MutationObserver` on the Moment layer before the action. In its callback, read `getComputedStyle(node).opacity` of every added `[data-moment="ghost-arrival"]` node (or one inside an added node). The check uses the first recorded value and keeps the limit ≤ 0.05 (`ARRIVAL_HIDDEN_MAX`). The 10 ms sampler stays for the log only.
     - Run the full script 5 times at `RAF_THROTTLE_MS=0` and twice at `700`, and report the pass counts.
     - _Requirements: 14.8_
-- [ ] 5. Guide
-  - [ ] 5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`
+- [x] 5. Guide
+  - [x] 5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`
     - Tests in `tests/feedback/guideStep.test.ts`: the level-4 start reads "Press Do it on Cancel Wraithcast and watch the zombie get buried"; the payment text; the tick text; the done text.
     - **Property 5: The Guide_Step names the right action.** File: `tests/feedback/properties/p05-guide-step.test.ts`.
     - **Validates: Requirements 5.3, 5.4, 5.5**
 
-  - [ ] 5.2 Create `CryptGuide`
+  - [x] 5.2 Create `CryptGuide`
     - `src/components/dashboard/CryptGuide.tsx`: add `GUIDE_STORAGE_KEY`, `startGuideSession`, `useGuideVisibility` (`useSyncExternalStore` with a hidden server snapshot, an in-memory fallback when storage throws, and component state only in the real Crypt) and the Card with its four lines, the Guide_Step in the demo and the "Got it" header action.
     - `Landing.handleDemo` calls `startGuideSession()` before `enterDemo()`.
     - _Requirements: 5.1 to 5.12, 5.14_
 
-  - [ ] 5.3 Place the Guide and "How it works" on the Dashboard
+  - [x] 5.3 Place the Guide and "How it works" on the Dashboard
     - Make the Guide the first grid child, with the grid-placement classes of the design for 1024px and up.
     - Put "How it works" (ghost Button, size `md`) in the `PageHeader` action slot while the Guide is hidden, in both Crypts.
     - Move focus to "How it works" after dismissing and to the Guide heading after opening.
     - _Requirements: 5.1, 5.7, 5.8, 5.13_
 
-  - [ ] 5.4 Write the Guide tests
+  - [x] 5.4 Write the Guide tests
     - Tests in `tests/ui/cryptGuide.test.tsx`:
       - The Guide shows on entering the demo.
       - "Got it" hides it and focuses "How it works", and "How it works" reopens it and focuses its heading.
@@ -330,7 +330,7 @@ Conventions that apply to every task:
     - Axe on the Dashboard in "demo level 4" with the Guide shown and dismissed, and in "populated real crypt" with the Guide opened.
     - _Requirements: 5.1 to 5.14, 12.3, 12.4, 14.3_
 
-  - [ ] 5.5 Update the browser script for the Guide
+  - [x] 5.5 Update the browser script for the Guide
     - `openDemo` asserts that the Guide is shown on entry and then clicks "Got it". Add the `guide` case at 1280 by 720.
     - Run the whole script again.
     - _Requirements: 5.13, 14.8_

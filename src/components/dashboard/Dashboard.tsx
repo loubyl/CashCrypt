@@ -1,22 +1,26 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, Flame, Plus, Wallet } from "lucide-react";
 import { Skeleton } from "@/components/common/Skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { HouseScene } from "@/components/house/HouseScene";
+import { CryptGuide, useGuideVisibility } from "@/components/dashboard/CryptGuide";
 import { DemoControls } from "@/components/demo/DemoControls";
 import { ExorcismPlan, EXORCISM_PLAN_HEADING_ID } from "@/components/exorcism/ExorcismPlan";
 import { AddExpenseSheet } from "@/components/sheets/AddExpenseSheet";
 import { LogPaymentSheet } from "@/components/sheets/LogPaymentSheet";
 import { BalanceHero } from "@/components/ui/BalanceHero";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { LightScoreBar } from "@/components/ui/LightScoreBar";
 import { QuickAction } from "@/components/ui/QuickAction";
+import { useCrypt } from "@/hooks/useCrypt";
 import { useExorcismPlan } from "@/hooks/useExorcismPlan";
 import { useHouseState } from "@/hooks/useHouseState";
 import { useSceneModel } from "@/hooks/useSceneModel";
+import { getGuideStep } from "@/lib/utils/planView";
 import { getLevelAnnouncement, getNextLevelText, getScoreDelta } from "@/lib/utils/scoreView";
 import { MomentHost } from "@/components/moments/MomentHost";
 import type { MomentHostLive } from "@/components/moments/MomentHost";
@@ -38,6 +42,15 @@ const COLUMN_CLASSES = "contents lg:flex lg:flex-col lg:gap-3";
 // uses minmax(0, 1fr).
 const GRID_CLASSES =
   "flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]";
+const HOW_IT_WORKS_LABEL = "How it works";
+const HOW_IT_WORKS_ID = "dashboard-how-it-works";
+const GUIDE_HEADING_ID = "dashboard-guide-heading";
+// Grid placement (design D9): the Guide is first in the DOM and sits at the top of the right column
+// from 1024px. The placement classes apply only while the Guide is shown, so a hidden Guide leaves
+// no empty grid row and the first viewport stays as it was.
+const GUIDE_PLACEMENT_CLASSES = "lg:col-start-2 lg:row-start-1";
+const LEFT_COLUMN_GUIDE_CLASSES = "lg:col-start-1 lg:row-start-1 lg:row-span-2";
+const RIGHT_COLUMN_GUIDE_CLASSES = "lg:col-start-2 lg:row-start-2";
 const DELTA_SIGN_PATTERN = /^[+−]/;
 
 export function Dashboard() {
@@ -47,12 +60,32 @@ export function Dashboard() {
   const { plan } = useExorcismPlan();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false);
+  const { status } = useCrypt();
+  const guide = useGuideVisibility(status === "demo" ? "demo" : "real");
+  const pendingFocus = useRef<"button" | "heading" | null>(null);
   const [bannerPulseKey, setBannerPulseKey] = useState(0);
   const handlePlanned = useCallback((requests: readonly MomentRequest[]) => {
     if (requests.some((request) => request.kind === "poltergeistFeed")) {
       setBannerPulseKey((key) => key + 1);
     }
   }, []);
+
+  const guideShown = guide.shown;
+  useLayoutEffect(() => {
+    const target = pendingFocus.current;
+    if (target === null) return;
+    pendingFocus.current = null;
+    const id = target === "button" ? HOW_IT_WORKS_ID : GUIDE_HEADING_ID;
+    document.getElementById(id)?.focus();
+  }, [guideShown]);
+  const handleDismissGuide = useCallback(() => {
+    pendingFocus.current = "button";
+    guide.dismiss();
+  }, [guide]);
+  const handleOpenGuide = useCallback(() => {
+    pendingFocus.current = "heading";
+    guide.open();
+  }, [guide]);
 
   if (result.status !== "ready" || scene.status !== "ready") {
     return (
@@ -94,7 +127,16 @@ export function Dashboard() {
 
   return (
     <main className="flex flex-col gap-3">
-      <PageHeader title={PAGE_TITLE} />
+      <PageHeader
+        title={PAGE_TITLE}
+        action={
+          guideShown ? undefined : (
+            <Button id={HOW_IT_WORKS_ID} variant="ghost" size="md" onClick={handleOpenGuide}>
+              {HOW_IT_WORKS_LABEL}
+            </Button>
+          )
+        }
+      />
       <p className="sr-only" aria-live="polite" role="status">
         {getLevelAnnouncement(houseState.decayLevel, houseState.lightScore)}
       </p>
@@ -102,7 +144,16 @@ export function Dashboard() {
         {({ model, held, onRelease }) => (
           <>
           <div className={GRID_CLASSES}>
-            <div className={COLUMN_CLASSES}>
+            {guideShown ? (
+              <CryptGuide
+                mode={status === "demo" ? "demo" : "real"}
+                step={status === "demo" && plan ? getGuideStep(plan.actions, rows) : null}
+                onDismiss={handleDismissGuide}
+                headingId={GUIDE_HEADING_ID}
+                className={GUIDE_PLACEMENT_CLASSES}
+              />
+            ) : null}
+            <div className={guideShown ? `${COLUMN_CLASSES} ${LEFT_COLUMN_GUIDE_CLASSES}` : COLUMN_CLASSES}>
               <HouseScene model={model} held={held} onRelease={onRelease} />
               <Card>
                 <BalanceHero
@@ -134,7 +185,7 @@ export function Dashboard() {
                 </div>
               </Card>
             </div>
-            <div className={COLUMN_CLASSES}>
+            <div className={guideShown ? `${COLUMN_CLASSES} ${RIGHT_COLUMN_GUIDE_CLASSES}` : COLUMN_CLASSES}>
               {houseState.poltergeist ? (
                 <PoltergeistBanner smallExpenseTotalCents={houseState.poltergeist.totalAmount} pulseKey={bannerPulseKey} />
               ) : null}
