@@ -286,6 +286,15 @@ Conventions that apply to every task:
     - Run every case, old and new, at `RAF_THROTTLE_MS=0` and `700`, and report the numbers.
     - _Requirements: 14.8_
 
+  - [x] 4.11 Make the ghost toast say what happened to the Poltergeist (deployed review of task 4, Requirement 2.6)
+    - The deployed review found that the level-2 $3 expense toasted "feeds the Poltergeist" with no Poltergeist to feed. Update `requirements.md` 2.6 and `design.md` (the three toasts, `getPoltergeistStage`, `centsToWake`, Property 6, the browser checks), then implement:
+    - `src/lib/utils/listViews.ts`: `SmallExpenseSummary` gains `centsToWake` (the smallest extra small expense, in cents, that makes the total strictly exceed the threshold; `null` when the Poltergeist is awake or cannot wake).
+    - `src/lib/db/queries.ts`: `HouseReading` gains `centsToWake`, read through `getSmallExpenseSummary` on the same rows. `useCryptActions.ts`: `HouseChange` gains `poltergeistBefore` and `centsToWake`.
+    - `src/lib/utils/lightClause.ts`: add `getPoltergeistStage(before, after)` and `getGhostClause(change)`. `src/lib/moments/requests.ts` plans the expense request from `getPoltergeistStage(ctx.poltergeistPresent, outcome.poltergeistAfter)`, so the toast and the Moment use one rule.
+    - `AddExpenseSheet`: build the ghost clause from `getGhostClause(result.change)`.
+    - Tests: `tests/feedback/lightClause.test.ts` (stage and the three clauses), `tests/feedback/properties/p06-ghost-toast.test.ts` (**Property 6**), `tests/utils/listViews` and `tests/db/readHouseReading.test.ts` for `centsToWake`, `tests/ui/actionToasts.test.tsx` and the other toast tests (awake, woke, asleep, income too low), and a Dashboard test where toast and Moment agree.
+    - `scripts/check-moments.mjs`: `feed` keeps its toast, `ghostArrival` asserts the level-2 toast and that `$Y` matches the Transactions page. Run every case at `RAF_THROTTLE_MS=0` and `700`.
+    - _Requirements: 2.6, 4.1, 4.5, 14.8_
 - [ ] 5. Guide
   - [ ] 5.1 Add `getGuideStep` and `getShortTitle` to `planView.ts`
     - Tests in `tests/feedback/guideStep.test.ts`: the level-4 start reads "Press Do it on Cancel Wraithcast and watch the zombie get buried"; the payment text; the tick text; the done text.
@@ -328,7 +337,7 @@ Conventions that apply to every task:
     - **Checkbox:** ticking "Cancel Wraithcast" opens the cancel sheet, and confirming plays the shovel Moment. "Keep it" leaves the checkbox unticked.
     - **Toasts:**
       - The cancel toast reads "+$120/mo saved · Light +5.2" and has "View in Subscriptions". "View" opens the Graveyard row highlighted with "New" and focused.
-      - The $8 expense reads "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light".
+      - The $8 expense at level 4 reads "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light". The $3 expense at level 2 reads "Ghost added: $3 · doesn't dim the light · $Y more wakes the Poltergeist" and the Transactions page agrees with `$Y`.
       - A minimum payment shows "Light +0.1".
     - **Moments:**
       - At level 4 the Poltergeist swells and settles, and the banner amount pulses.
@@ -423,11 +432,12 @@ Conventions that apply to every task:
     { "id": 7, "tasks": ["4.5", "4.6", "4.7", "4.8", "5.3"] },
     { "id": 8, "tasks": ["4.9", "5.4"] },
     { "id": 9, "tasks": ["4.10", "5.5"] },
-    { "id": 10, "tasks": ["6"] },
-    { "id": 11, "tasks": ["7.1", "7.2", "8.1"] },
-    { "id": 12, "tasks": ["7.3"] },
-    { "id": 13, "tasks": ["9.1", "9.2", "9.3"] },
-    { "id": 14, "tasks": ["10"] }
+    { "id": 10, "tasks": ["4.11"] },
+    { "id": 11, "tasks": ["6"] },
+    { "id": 12, "tasks": ["7.1", "7.2", "8.1"] },
+    { "id": 13, "tasks": ["7.3"] },
+    { "id": 14, "tasks": ["9.1", "9.2", "9.3"] },
+    { "id": 15, "tasks": ["10"] }
   ]
 }
 ```

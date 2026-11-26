@@ -883,8 +883,13 @@ function assertTabBarLabels({ results }) {
 const FEED_MAX_SPAN_MS = 1700;
 const FEED_PEAK_SHARE = 0.9; // peak scale must reach 1 + share * (FEED_SCALE - 1)
 const FEED_REST_EPSILON = 0.002;
+// Level 4 has the Poltergeist awake before and after the expense, so the toast says it feeds it.
 const FEED_TOAST = "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light";
 const FEED_AMOUNT_CENTS = 800;
+// Level 2 has no Poltergeist, so the toast names the amount that wakes it (requirement 2.6).
+const ARRIVAL_TOAST_PATTERN = /Ghost added: \$3 · doesn't dim the light · (\$[\d,]+(?:\.\d+)?) more wakes the Poltergeist/;
+const ARRIVAL_AMOUNT_CENTS = 300;
+const WAKE_ROUNDING_MAX_CENTS = 1; // the page shows the rounded threshold, the toast the exact strict excess
 const FLICKER_SAMPLE_MS = 10; // fast sampler for beats shorter than the 100 ms sampler
 const ARRIVAL_HIDDEN_MAX = 0.05;
 const ARRIVAL_SHOWN_MIN = 0.95;
@@ -979,10 +984,42 @@ async function runGhostArrival(page) {
   await sleep(MAX_MOMENT_MS);
   await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
   await sleep(SAMPLE_MS * 3);
-  return { samples: await page.evaluate(() => window.__samples), fastOpacity: await page.evaluate(() => window.__arrivalOpacity) };
+  const samples = await page.evaluate(() => window.__samples);
+  const fastOpacity = await page.evaluate(() => window.__arrivalOpacity);
+  return { samples, fastOpacity, transactionsPage: await readTransactionsSummary(page) };
+}
+/** Opens Transactions through the visible Main nav link and reads the page's total and threshold. */
+async function readTransactionsSummary(page) {
+  await page.evaluate(() => {
+    const link = [...document.querySelectorAll('nav[aria-label="Main"] a')].find(
+      (a) => (a.getAttribute("aria-label") ?? a.textContent ?? "").includes("Transactions") && a.getBoundingClientRect().width > 0,
+    );
+    link?.click();
+  });
+  await waitFor(page, () => [...document.querySelectorAll("p")].some((p) => p.textContent?.startsWith("Poltergeist threshold:")));
+  return page.evaluate(() => {
+    const paragraphs = [...document.querySelectorAll("p")];
+    const label = paragraphs.find((p) => p.textContent?.trim() === "Small expenses, last 30 days");
+    return {
+      total: label?.nextElementSibling?.textContent ?? null,
+      threshold: paragraphs.find((p) => p.textContent?.startsWith("Poltergeist threshold:"))?.textContent ?? null,
+    };
+  });
 }
 
-function assertGhostArrival({ samples, fastOpacity }) {
+function assertGhostArrival({ samples, fastOpacity, transactionsPage }) {
+  const toast = samples.map((s) => s.toastText).find((t) => ARRIVAL_TOAST_PATTERN.test(t));
+  check(Boolean(toast), `ghostArrival: toast names what wakes the Poltergeist (${samples.map((s) => s.toastText).find((t) => t.includes("Ghost added")) ?? "none"})`);
+  check(!samples.some((s) => /feeds the Poltergeist|woke the Poltergeist/.test(s.toastText)), "ghostArrival: toast never says it feeds or woke a Poltergeist that is not there");
+  const wakes = toast ? parseCents(ARRIVAL_TOAST_PATTERN.exec(toast)[1]) : null;
+  const total = parseCents(transactionsPage.total);
+  const threshold = parseCents(transactionsPage.threshold);
+  console.log(`ghostArrival: toast wake amount ${wakes} c, Transactions page total ${transactionsPage.total}, ${transactionsPage.threshold}`);
+  check(total !== null && threshold !== null && total >= ARRIVAL_AMOUNT_CENTS, `ghostArrival: the page total ${transactionsPage.total} includes the $3 expense`);
+  if (wakes !== null && total !== null && threshold !== null) {
+    const gap = wakes - (threshold - total);
+    check(gap >= 0 && gap <= WAKE_ROUNDING_MAX_CENTS, `ghostArrival: toast amount ${wakes} c is the page threshold minus total (${threshold - total} c) plus ${gap} c`);
+  }
   const initial = new Set(samples[0].ghostIds);
   const during = samples.filter((s) => s.parts.some((p) => PART_OWNER[p] === "ghostArrival"));
   check(during.length > 0, "ghostArrival: arrival art appeared in the Moment layer");

@@ -149,7 +149,9 @@ describe("Transactions screen add flow", () => {
     await user.type(within(dialog).getByLabelText("Amount"), "6.25");
     await user.type(within(dialog).getByLabelText("What was it?"), "Haunted espresso");
     await user.click(within(dialog).getByRole("button", { name: "Save expense" }));
-    expect(await screen.findByText("Ghost added: $6.25 · feeds the Poltergeist, doesn't dim the light")).toBeTruthy();
+    expect(
+      await screen.findByText("Ghost added: $6.25 · doesn't dim the light · $493.76 more wakes the Poltergeist"),
+    ).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     await waitFor(() => rowOf("Haunted espresso"));
     expect(screen.getByRole("button", { name: /^Haunted espresso, .*, ghost$/ })).toBeTruthy();

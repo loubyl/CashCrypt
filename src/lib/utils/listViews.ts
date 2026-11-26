@@ -17,7 +17,13 @@ export type SmallExpenseSummary = {
   thresholdCents: number;
   /** True while the small-expense total strictly exceeds the threshold (same rule as the engine). */
   awake: boolean;
+  /**
+   * Smallest extra small expense, in cents, that makes the total strictly exceed the engine's unrounded
+   * threshold. Null when the Poltergeist is already awake or cannot wake (income below the minimum).
+   */
+  centsToWake: number | null;
 };
+const ONE_CENT = 1;
 
 function compareIds(a: string, b: string): number {
   if (a < b) return -1;
@@ -103,10 +109,12 @@ export function getSmallExpenseSummary(
   const incomeUsable =
     Number.isFinite(monthlyIncomeCents) && monthlyIncomeCents >= MIN_INCOME_CENTS;
   const exactThreshold = incomeUsable ? POLTERGEIST_RATIO * monthlyIncomeCents : EMPTY_TOTAL;
+  const awake = incomeUsable && small.length > NO_ROWS && totalCents > exactThreshold;
   return {
     totalCents,
     thresholdCents: Math.round(exactThreshold),
-    awake: incomeUsable && small.length > NO_ROWS && totalCents > exactThreshold,
+    awake,
+    centsToWake: incomeUsable && !awake ? Math.floor(exactThreshold) + ONE_CENT - totalCents : null,
   };
 }
 

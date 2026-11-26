@@ -8,7 +8,7 @@ import { AddExpenseSheet } from "@/components/sheets/AddExpenseSheet";
 import { CancelSubscriptionSheet } from "@/components/sheets/CancelSubscriptionSheet";
 import { LogPaymentSheet } from "@/components/sheets/LogPaymentSheet";
 import { useCryptData } from "@/hooks/useCryptData";
-import type { DebtRow, SubscriptionRow } from "@/types/finance";
+import type { DebtRow, SubscriptionRow, TransactionRow } from "@/types/finance";
 import { renderWithCrypt, type RealSeed } from "./helpers/crypt";
 
 const OPENER_LABEL = "Open sheet";
@@ -270,6 +270,19 @@ describe("CancelSubscriptionSheet", () => {
   });
 });
 
+const SMALL_ROW_CENTS = 1_499;
+
+/** `count` small expenses of $14.99 dated on the helper's default day (2025-06-15). */
+function smallRows(count: number): TransactionRow[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `seed-${i}`,
+    amountCents: SMALL_ROW_CENTS,
+    description: `Seed ${i}`,
+    category: "Coffee",
+    date: "2025-06-15",
+  }));
+}
+
 function ExpenseHost() {
   return <Host>{(sheet) => <AddExpenseSheet {...sheet} />}</Host>;
 }
@@ -282,11 +295,44 @@ describe("AddExpenseSheet", () => {
     await user.type(await screen.findByLabelText(AMOUNT_LABEL), "4.50");
     await user.type(screen.getByLabelText(DESCRIPTION_LABEL), "Latte");
     await user.click(screen.getByRole("button", { name: SAVE_EXPENSE_LABEL }));
-    expect(await screen.findByText("Ghost added: $4.50 · feeds the Poltergeist, doesn't dim the light")).toBeTruthy();
+    // Default income $5,000 gives a $500 threshold, and no Poltergeist yet: $500 − $4.50 + 1 cent more wakes it.
+    expect(
+      await screen.findByText("Ghost added: $4.50 · doesn't dim the light · $495.51 more wakes the Poltergeist"),
+    ).toBeTruthy();
     await waitFor(() => expect(screen.queryByRole(DIALOG_ROLE)).toBeNull());
     const rows = await ctx.realDb.transactions.toArray();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ amountCents: 450, description: "Latte", category: "Coffee" });
+  });
+
+  it("says the expense woke the Poltergeist when it pushes the 30-day total over the threshold", async () => {
+    const user = userEvent.setup();
+    await renderWithCrypt(<ExpenseHost />, realSeed({ transactions: smallRows(33) }));
+    await openSheet(user);
+    await user.type(await screen.findByLabelText(AMOUNT_LABEL), "8");
+    await user.type(screen.getByLabelText(DESCRIPTION_LABEL), "Latte");
+    await user.click(screen.getByRole("button", { name: SAVE_EXPENSE_LABEL }));
+    expect(await screen.findByText("Ghost added: $8 · woke the Poltergeist, doesn't dim the light")).toBeTruthy();
+  });
+
+  it("says the expense feeds the Poltergeist when it was already awake", async () => {
+    const user = userEvent.setup();
+    await renderWithCrypt(<ExpenseHost />, realSeed({ transactions: smallRows(34) }));
+    await openSheet(user);
+    await user.type(await screen.findByLabelText(AMOUNT_LABEL), "8");
+    await user.type(screen.getByLabelText(DESCRIPTION_LABEL), "Latte");
+    await user.click(screen.getByRole("button", { name: SAVE_EXPENSE_LABEL }));
+    expect(await screen.findByText("Ghost added: $8 · feeds the Poltergeist, doesn't dim the light")).toBeTruthy();
+  });
+
+  it("omits the wake amount when the income is too low for a Poltergeist to wake", async () => {
+    const user = userEvent.setup();
+    await renderWithCrypt(<ExpenseHost />, realSeed({ profile: { monthlyIncomeCents: 50 } }));
+    await openSheet(user);
+    await user.type(await screen.findByLabelText(AMOUNT_LABEL), "8");
+    await user.type(screen.getByLabelText(DESCRIPTION_LABEL), "Latte");
+    await user.click(screen.getByRole("button", { name: SAVE_EXPENSE_LABEL }));
+    expect(await screen.findByText("Ghost added: $8 · doesn't dim the light")).toBeTruthy();
   });
 
   it("shows an error on each invalid field and writes nothing", async () => {

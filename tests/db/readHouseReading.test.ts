@@ -15,6 +15,7 @@ import { DEMO_DB_NAME, type CryptDb } from "@/lib/db/schema";
 import { toFinancialSnapshot } from "@/lib/db/snapshotAdapter";
 import { loadScenario } from "@/lib/demo/service";
 import { computeHouseState } from "@/lib/haunting";
+import { getSmallExpenseSummary } from "@/lib/utils/listViews";
 
 const NOW = "2025-06-02";
 const DECIMALS = 3;
@@ -73,5 +74,20 @@ describe("readHouseReading", () => {
     const extraCents = 30000;
     await logPayment(db, card.id, card.minimumPaymentCents + extraCents, ctx);
     expect(await light()).toBeCloseTo(43.605, DECIMALS);
+  });
+});
+
+describe("readHouseReading centsToWake", () => {
+  it("is null on the level-4 seed, where the Poltergeist is awake", async () => {
+    expect(await readHouseReading(db, NOW)).toMatchObject({ poltergeist: true, centsToWake: null });
+  });
+  it("matches the Transactions page summary on the level-2 seed", async () => {
+    await loadScenario(db, "level-2", NOW);
+    const rows = await readAllRows(db);
+    const reading = await readHouseReading(db, NOW);
+    const summary = getSmallExpenseSummary(rows.transactions, NOW, rows.profile?.monthlyIncomeCents ?? 0);
+    expect(reading.poltergeist).toBe(false);
+    expect(reading.centsToWake).toBe(summary.centsToWake);
+    expect(reading.centsToWake).toBeGreaterThan(0);
   });
 });

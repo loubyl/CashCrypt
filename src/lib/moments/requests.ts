@@ -1,3 +1,4 @@
+import { getPoltergeistStage } from "@/lib/utils/lightClause";
 import type { DecayLevel } from "@/lib/haunting/config";
 import type { ActionContext, ActionOutcome, MomentRequest } from "./types";
 
@@ -32,8 +33,9 @@ function expenseRequest(
   ctx: ActionContext,
 ): MomentRequest | null {
   if (!outcome.small) return null;
-  if (outcome.poltergeistAfter) return { kind: "poltergeistFeed", appeared: !ctx.poltergeistPresent };
-  return { kind: "ghostArrival", transactionId: outcome.transactionId };
+  const stage = getPoltergeistStage(ctx.poltergeistPresent, outcome.poltergeistAfter);
+  if (stage === "asleep") return { kind: "ghostArrival", transactionId: outcome.transactionId };
+  return { kind: "poltergeistFeed", appeared: stage === "woke" };
 }
 
 function planToggleRequest(

@@ -49,7 +49,10 @@ export type MutationError =
 export type HouseChange = {
   lightBefore: number;
   lightAfter: number;
+  poltergeistBefore: boolean;
   poltergeistAfter: boolean;
+  /** From the reading after the Mutation: the smallest extra small expense that wakes the Poltergeist. */
+  centsToWake: number | null;
 };
 
 export type MutationResult<T> =
@@ -126,7 +129,9 @@ export async function measured<T>(
       ? {
           lightBefore: before.lightScore,
           lightAfter: after.lightScore,
+          poltergeistBefore: before.poltergeist,
           poltergeistAfter: after.poltergeist,
+          centsToWake: after.centsToWake,
         }
       : null;
   return { ...result, change };

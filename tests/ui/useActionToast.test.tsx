@@ -25,7 +25,13 @@ vi.mock("@/components/feedback/RowHighlightProvider", () => ({
 }));
 
 const DEBT_TARGET: HighlightTarget = { list: "debts", rowId: "d1", tag: "updated" };
-const CHANGE = { lightBefore: 32.735, lightAfter: 32.847, poltergeistAfter: true };
+const CHANGE = {
+  lightBefore: 32.735,
+  lightAfter: 32.847,
+  poltergeistBefore: true,
+  poltergeistAfter: true,
+  centsToWake: null,
+};
 
 function lastToast(): ToastShowInput {
   return mocks.show.mock.calls.at(-1)?.[0] as ToastShowInput;

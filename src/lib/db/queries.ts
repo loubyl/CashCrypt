@@ -10,6 +10,9 @@ import type {
 } from "@/types/finance";
 import { PROFILE_ID, type CryptDb, type ProfileRecord } from "./schema";
 import { toFinancialSnapshot } from "./snapshotAdapter";
+import { getSmallExpenseSummary } from "@/lib/utils/listViews";
+
+const NO_INCOME_CENTS = 0;
 
 /** Date descending, then id ascending (code-point order, not locale order). */
 function compareTransactions(a: TransactionRow, b: TransactionRow): number {
@@ -61,13 +64,23 @@ export function readAllRows(db: CryptDb): Promise<CryptRows> {
   );
 }
 
-export type HouseReading = { lightScore: number; poltergeist: boolean };
+export type HouseReading = {
+  lightScore: number;
+  poltergeist: boolean;
+  /** Smallest extra small expense (cents) that wakes the Poltergeist; null when awake or unable to wake. */
+  centsToWake: number | null;
+};
 
 /** Reads every table in one read-only transaction and runs the engine on it. */
 export async function readHouseReading(db: CryptDb, now: LocalDate): Promise<HouseReading> {
   const rows = await readAllRows(db);
   const houseState = computeHouseState(toFinancialSnapshot(rows, now));
-  return { lightScore: houseState.lightScore, poltergeist: houseState.poltergeist !== null };
+  const income = rows.profile?.monthlyIncomeCents ?? NO_INCOME_CENTS;
+  return {
+    lightScore: houseState.lightScore,
+    poltergeist: houseState.poltergeist !== null,
+    centsToWake: getSmallExpenseSummary(rows.transactions, now, income).centsToWake,
+  };
 }
 
 /**

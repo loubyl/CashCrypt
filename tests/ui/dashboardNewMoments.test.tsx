@@ -7,6 +7,7 @@ import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { MOMENT_GAP_MS } from "@/lib/scene";
+import type { TransactionRow } from "@/types/finance";
 import { renderWithCrypt, resetNavigationMock, setMockPathname } from "./helpers/crypt";
 
 vi.mock("next/navigation", async () => (await import("./helpers/crypt")).createNavigationMock());
@@ -66,6 +67,32 @@ function stubReducedPreference(reduced: boolean): void {
 
 type User = ReturnType<typeof userEvent.setup>;
 
+const SMALL_ROW_CENTS = 1_499;
+const REAL_INCOME_CENTS = 500_000;
+const WOKE_TOAST = "Ghost added: $8 \u00b7 woke the Poltergeist, doesn't dim the light";
+const ASLEEP_TOAST = /^Ghost added: \$8 \u00b7 doesn't dim the light \u00b7 \$[\d,.]+ more wakes the Poltergeist$/;
+
+/** `count` small expenses of $14.99 dated today, so the 30-day total is count × $14.99. */
+function smallRows(count: number): TransactionRow[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `seed-${i}`,
+    amountCents: SMALL_ROW_CENTS,
+    description: `Seed ${i}`,
+    category: "Coffee",
+    date: NOW,
+  }));
+}
+
+async function renderRealDashboard(smallCount: number): Promise<void> {
+  await renderWithCrypt(<Dashboard />, {
+    mode: "real",
+    seed: { profile: { monthlyIncomeCents: REAL_INCOME_CENTS }, transactions: smallRows(smallCount) },
+    now: NOW,
+    pathname: "/",
+  });
+  await screen.findByRole("button", { name: "Add expense" }, WAIT);
+}
+
 async function renderDashboard(seed: "level-1" | "level-2" | "level-4"): Promise<void> {
   await renderWithCrypt(<Dashboard />, { mode: "demo", seed, now: NOW, pathname: "/" });
   await screen.findAllByRole("checkbox", {}, WAIT);
@@ -111,6 +138,33 @@ describe("Dashboard small expense Moments", () => {
       await renderDashboard("level-4");
       await addExpense(user, "8");
       await waitFor(() => expect(playCalls.kinds).toEqual(["poltergeistFeed"]), WAIT);
+      expect(
+        await screen.findByText("Ghost added: $8 \u00b7 feeds the Poltergeist, doesn't dim the light"),
+      ).toBeTruthy();
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "enqueues poltergeistFeed and toasts 'woke' when the expense wakes the Poltergeist",
+    async () => {
+      const user = userEvent.setup();
+      await renderRealDashboard(33);
+      await addExpense(user, "8");
+      await waitFor(() => expect(playCalls.kinds).toEqual(["poltergeistFeed"]), WAIT);
+      expect(await screen.findByText(WOKE_TOAST)).toBeTruthy();
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "enqueues ghostArrival and names the amount that wakes it when the Poltergeist stays asleep",
+    async () => {
+      const user = userEvent.setup();
+      await renderRealDashboard(5);
+      await addExpense(user, "8");
+      await waitFor(() => expect(playCalls.kinds).toEqual(["ghostArrival"]), WAIT);
+      expect(await screen.findByText(ASLEEP_TOAST)).toBeTruthy();
     },
     TEST_TIMEOUT_MS,
   );
@@ -122,6 +176,8 @@ describe("Dashboard small expense Moments", () => {
       await renderDashboard("level-2");
       await addExpense(user, "8");
       await waitFor(() => expect(playCalls.kinds).toEqual(["ghostArrival"]), WAIT);
+      expect(await screen.findByText(ASLEEP_TOAST)).toBeTruthy();
+      expect(screen.queryByText(/feeds the Poltergeist/)).toBeNull();
     },
     TEST_TIMEOUT_MS,
   );

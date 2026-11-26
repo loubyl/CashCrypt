@@ -164,9 +164,10 @@ sequenceDiagram
   participant Q as Moment_Queue
   S->>A: addTransaction(input)
   A->>O: begin({ kind: "expense" })  (freezes the pre-action model)
-  A->>A: before, mutate, after (change.poltergeistAfter)
+  A->>A: before, mutate, after (change.poltergeistBefore, poltergeistAfter, centsToWake)
   A-->>O: resolve({ kind: "expense", transactionId, small, poltergeistAfter })
-  O->>O: planMoments → poltergeistFeed { appeared } or ghostArrival { transactionId }
+  O->>O: planMoments → getPoltergeistStage(ctx.poltergeistPresent, poltergeistAfter) → poltergeistFeed { appeared } or ghostArrival { transactionId }
+  S->>S: ghost toast clause = getGhostClause(change), the same stage rule (Property 6)
   O->>S: onPlanned(requests) → Dashboard pulses the banner amount
   O->>Q: enqueue
   Q->>Q: play (or 150ms fade under Reduced_Motion)
@@ -179,16 +180,27 @@ sequenceDiagram
 
 ```ts
 // src/lib/db/queries.ts
-export type HouseReading = { lightScore: number; poltergeist: boolean };
+export type HouseReading = {
+  lightScore: number;
+  poltergeist: boolean;
+  /** Smallest extra small expense (cents) that wakes the Poltergeist; null when awake or unable to wake. */
+  centsToWake: number | null;
+};
 /** Reads every table in one read-only transaction and runs the engine on it. */
 export async function readHouseReading(db: CryptDb, now: LocalDate): Promise<HouseReading>;
 ```
 
-It is `readAllRows` → `toFinancialSnapshot(rows, now)` → `computeHouseState`, the same path as `useHouseState`.
+It is `readAllRows` → `toFinancialSnapshot(rows, now)` → `computeHouseState`, the same path as `useHouseState`. `centsToWake` comes from `getSmallExpenseSummary(rows.transactions, now, income)` on the same rows, the function the Transactions page uses for its total and threshold.
 
 ```ts
 // src/hooks/useCryptActions.ts
-export type HouseChange = { lightBefore: number; lightAfter: number; poltergeistAfter: boolean };
+export type HouseChange = {
+  lightBefore: number;
+  lightAfter: number;
+  poltergeistBefore: boolean;
+  poltergeistAfter: boolean;
+  centsToWake: number | null;   // the reading after the Mutation
+};
 export type MutationResult<T> =
   | { ok: true; value: T; change?: HouseChange | null }   // null: a reading failed
   | { ok: false; error: MutationError };
@@ -209,8 +221,13 @@ export const LIGHT_NOISE_EPSILON = 1e-9;        // float noise from re-summing e
 export const LIGHT_FULL_SCORE = 100;
 export const CLAUSE_SEPARATOR = " · ";
 export const MINUS_SIGN = "\u2212";
-export const GHOST_EXPENSE_CLAUSE = "feeds the Poltergeist, doesn't dim the light";
+export const GHOST_EXPENSE_CLAUSE = "feeds the Poltergeist, doesn't dim the light";   // awake before and after
+export const GHOST_WOKE_CLAUSE = "woke the Poltergeist, doesn't dim the light";        // asleep before, awake after
+export const GHOST_ASLEEP_CLAUSE = "doesn't dim the light";                            // no Poltergeist after
 export const EXPENSE_CLAUSE = "doesn't change the light";
+export type PoltergeistStage = "awake" | "woke" | "asleep";
+export function getPoltergeistStage(before: boolean, after: boolean): PoltergeistStage;
+export function getGhostClause(change: GhostClauseInput | null | undefined): string;
 export function getLightClause(before: number, after: number): string;
 export function joinToastText(base: string, clause: string | null): string; // base, or base + " · " + clause
 ```
@@ -224,6 +241,17 @@ export function joinToastText(base: string, clause: string | null): string; // b
 | r is 0 and d < 0 | "Light dims slightly" |
 | otherwise | `"Light " + (d > 0 ? "+" : "−") + abs(r).toFixed(1)` |
 
+`getPoltergeistStage(before, after)` is `after ? (before ? "awake" : "woke") : "asleep"`. A Poltergeist that was awake before and is gone after (only possible through a race) reads as `asleep`, which is also what the Moment planning did before this rule.
+`getGhostClause(change)` takes `{ poltergeistBefore, poltergeistAfter, centsToWake }` (a `HouseChange` fits):
+| Stage | Clause |
+|---|---|
+| `awake` | `GHOST_EXPENSE_CLAUSE` |
+| `woke` | `GHOST_WOKE_CLAUSE` |
+| `asleep` and `centsToWake` is a number | `GHOST_ASLEEP_CLAUSE + " · " + formatCentsShort(centsToWake) + " more wakes the Poltergeist"` |
+| `asleep` and `centsToWake` is null (income too low to wake it) | `GHOST_ASLEEP_CLAUSE` |
+| `change` is null or undefined (reading failed) | `GHOST_ASLEEP_CLAUSE`, because nothing is known about the Poltergeist |
+**`centsToWake`** is added to `SmallExpenseSummary` (`listViews.ts`). With `exact = POLTERGEIST_RATIO × income` (the engine's unrounded threshold) and the in-window small total `total`, it is `null` when the income is not usable or `awake`, else `floor(exact) + 1 − total`. It is the smallest extra amount that makes `total` strictly exceed `exact`, the engine's rule. The page shows the rounded threshold, so `centsToWake` is the page's "threshold − total" or one cent more, and adding it always wakes the Poltergeist (a plain "threshold − total" can land exactly on the threshold, which does not wake it). The toast and the page read the same function on the same rows.
+The Moment and the toast share one rule. `requests.ts` plans an expense as `awake → poltergeistFeed { appeared: false }`, `woke → poltergeistFeed { appeared: true }`, `asleep → ghostArrival`, from `getPoltergeistStage(ctx.poltergeistPresent, outcome.poltergeistAfter)`. The toast calls the same function with `change.poltergeistBefore` and `change.poltergeistAfter`. On the Dashboard `ctx.poltergeistPresent` is the Scene model at `begin` and `poltergeistBefore` is the reading just before the write, which are the same Crypt state. The toast also appears on the Transactions page, where there is no observer, so it cannot read the context.
 Rounding is half away from zero on the absolute value, so 0.05 rounds to 0.1 and 0.049 gives "Light rises slightly". The epsilon only absorbs floating-point noise. A real change is never below 1e-9, because the smallest money step is one cent.
 
 Base texts lose their trailing period where the clause follows ("Payment saved. $150 off your balance · Light +0.1").
@@ -255,7 +283,7 @@ Call sites and their texts:
 | `LogPaymentSheet` | "Payment saved. $X off your balance" | light | `debts`, debt id, tag "Updated" |
 | `CancelSubscriptionSheet` | "+$X/mo saved" | light | `graveyard`, subscription id, "New" |
 | `ExorcismPlanAction` (tick) | `getToastForCompletion(action)` | light | `plan`, action id, "Updated" |
-| `AddExpenseSheet` | "Ghost added: $X" / "Expense added: $X" | fixed: ghost / expense clause | `transactions`, transaction id, "New" |
+| `AddExpenseSheet` | "Ghost added: $X" / "Expense added: $X" | fixed: `getGhostClause(result.change)` / expense clause | `transactions`, transaction id, "New" |
 | `TransactionsScreen` delete | "Expense deleted" | fixed: expense clause | none |
 | `DebtsScreen` add / edit / delete | "Debt added: …" / "Debt updated: …" / "Debt deleted" | light | add and edit: `debts`; delete: none |
 | `SubscriptionsScreen` add / reactivate / delete | existing texts | light | add and reactivate: `zombies`; delete: none |
@@ -330,8 +358,9 @@ export type ActionContext = { …existing…; litWindowCount: number };   // lit
 
 ```text
 expense:    if !small → none
-            if poltergeistAfter → poltergeistFeed { appeared: !ctx.poltergeistPresent }
-            else → ghostArrival { transactionId }
+            stage = getPoltergeistStage(ctx.poltergeistPresent, poltergeistAfter)
+            awake → poltergeistFeed { appeared: false }; woke → poltergeistFeed { appeared: true }
+            asleep → ghostArrival { transactionId }
 planToggle: if !next → none; action = ctx.planActions[actionId]; if !action or action.done → none
             if action.kind = reduce_small_expenses and ctx.poltergeistPresent → sigil      (unchanged)
             if (action.kind = fallback or action.kind = reduce_small_expenses) and lightDelta > 0
@@ -545,6 +574,9 @@ FOR ALL `ActionContext` values and outcomes:
 ### Property 5: The Guide_Step names the right action
 FOR ALL plans of three actions and rows: when some not-done action has a Do it target, the step starts with "Press Do it on " followed by the short title of the first such action in plan order; else, when some action is not done, it starts with "Tick " followed by the short title of the first not-done action; else it equals the done text. **Validates: Requirement 5.3 to 5.5.**
 
+### Property 6: The ghost toast and the Moment agree
+FOR ALL `before`, `after` in {true, false} and every `centsToWake` (null or a positive integer): with `stage = getPoltergeistStage(before, after)`, an `expense` outcome with `small = true` and `poltergeistAfter = after` planned in a context with `poltergeistPresent = before` yields `poltergeistFeed { appeared: false }` exactly when `getGhostClause({ poltergeistBefore: before, poltergeistAfter: after, centsToWake })` is `GHOST_EXPENSE_CLAUSE`, `poltergeistFeed { appeared: true }` exactly when it is `GHOST_WOKE_CLAUSE`, and `ghostArrival` exactly when it starts with `GHOST_ASLEEP_CLAUSE`. The clause names the Poltergeist ("feeds", "woke") only when the Moment is a feed, and it contains "more wakes the Poltergeist" only when `centsToWake` is a number and the stage is `asleep`.
+FOR ALL generated Crypt rows, adding `centsToWake` cents of small expense to an asleep Poltergeist with a usable income wakes it, and adding one cent less does not (when `centsToWake > 1`). **Validates: Requirements 2.6, 4.1, 4.5.**
 ### Extended `house-scene` properties
 - **Property 4 (ViewBox bounds)** samples `getMomentExtents` for the new request shapes too: feed and appear at every Decay_Level, arrival at every drawn ghost slot and at the overflow marker, flicker with and without lit windows. **Deviation (where it lives):** the extension is in `tests/scene/properties/p04b-moment-art-bounds.test.ts` (the Moment art part of `house-scene` Property 4), in `requestsFor(model)`. The overflow arrival uses a `transactionId` that is not among the model's ghosts (`"overflow-transaction"`), and it is checked with the same ViewBox bounds as every other request.
 - **Property 13 (config validation)** covers the four new duration keys.
@@ -589,7 +621,7 @@ FOR ALL plans of three actions and rows: when some not-done action has a Do it t
 - `tests/db/readHouseReading.test.ts`: the reading equals the `useHouseState` path on the level-4 seed, and the measured table above is asserted to 3 decimals.
 
 ### Property tests
-The five properties above, plus the extended `house-scene` Properties 4 and 13.
+The six properties above, plus the extended `house-scene` Properties 4 and 13.
 
 ### Component tests (jsdom)
 **Deviation (frames in 4.5).** `tests/ui/poltergeistFeedMoment.test.tsx` mocks the wall clock with frames 700 ms apart (`FRAME_GAP_MS`), the gap of the `RAF_THROTTLE_MS=700` browser run, instead of the 1.5 s used by the shovel, orb, ghost arrival and candle flicker tests and written in task 4.5. The test still asserts the Moment ends on schedule, the swell peak at `FEED_SCALE` and the end at scale 1.
@@ -611,8 +643,8 @@ The five properties above, plus the extended `house-scene` Properties 4 and 13.
 
 | Case | Drives | Asserts |
 |---|---|---|
-| `feed` | level-4: QuickAction "Add expense", then `keyboard.type("8")` with no click (it relies on the initial focus), Tab, type "Latte", "Save expense" | peak feed scale ≥ 1 + 0.9 × (`FEED_SCALE` − 1) (read from `config.ts` like `MOMENT_GAP_MS`); scale back to 1 ± 0.002 at the end; particles visible; on-screen span ≤ 1700 ms; layer empty at the end; Poltergeist still present; banner amount + $8; toast "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light" with a "View in Transactions" button |
-| `ghostArrival` | Demo controls "Level 2", wait for `data-level="2"`, add a $3 "Gum" expense | the arrival art goes from opacity ≤ 0.05 to ≥ 0.95; beat visible ≥ 300 ms (unless throttled); one new drawn ghost id after the release; its rect center within 6px of the art's last visible rect; layer empty at the end |
+| `feed` | level-4: QuickAction "Add expense", then `keyboard.type("8")` with no click (it relies on the initial focus), Tab, type "Latte", "Save expense" | peak feed scale ≥ 1 + 0.9 × (`FEED_SCALE` − 1) (read from `config.ts` like `MOMENT_GAP_MS`); scale back to 1 ± 0.002 at the end; particles visible; on-screen span ≤ 1700 ms; layer empty at the end; Poltergeist still present; banner amount + $8; toast "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light" (awake before and after, so the stage is `awake`) with a "View in Transactions" button |
+| `ghostArrival` | Demo controls "Level 2", wait for `data-level="2"`, add a $3 "Gum" expense | the arrival art goes from opacity ≤ 0.05 to ≥ 0.95; beat visible ≥ 300 ms (unless throttled); one new drawn ghost id after the release; its rect center within 6px of the art's last visible rect; layer empty at the end; toast "Ghost added: $3 · doesn't dim the light · $Y more wakes the Poltergeist" (no Poltergeist at level 2, stage `asleep`), where "View in Transactions" opens a page whose "Small expenses, last 30 days" total and "Poltergeist threshold" give `Y = threshold − total` or that plus one cent |
 | `candleFlicker` | "Level 1", tick the "emergency fund" checkbox on the Dashboard | `lightMax` dips to ≤ 0.5 × its value before (dip ratio 0.35 with slack) and settles steady at a value ≥ the value before; no layer art left; toast "Action completed · Light +1.0" |
 | `checkboxCancel` | level-4: tick the Wraithcast checkbox | a dialog with "Cancel subscription" opens and the checkbox is still unchecked; after confirming, the `shovel` assertions pass on the samples, the checkbox ends checked, and the toast reads "+$120/mo saved · Light +5.2" |
 | `noHorizontalScroll` | Dashboard in demo mode at `setViewport(w, 640)` for w in 320, 768, 1280 and 1920, Guide dismissed and shown | `document.documentElement.scrollWidth <= clientWidth` at every width; at 320 also the header's right edge ≤ 320 and the `TabBar` width equals the viewport width |
@@ -654,7 +686,7 @@ Run the level-4 flow at 1280 by 720 and 375 by 667, with and without reduced mot
 1. **Bugs first.** Initial focus in sheets, checkbox focus loss and the 320px header overflow, each with a failing test first, the fix and a mutation check, then the pending-control audit.
 2. **Measured light, toasts and highlight.** `readHouseReading`, `measured` and `serialize`, `getLightClause`, `useActionToast`, the Toast changes, every call site, the highlight service and Properties 1 to 3.
 3. **Checkbox behavior.** Ticking an action with a Do it target opens its sheet.
-4. **Moments.** Types, planning and Property 4, config and geometry, the three `playXMoment` files, the banner pulse, clock tests and browser checks.
+4. **Moments.** Types, planning and Property 4, config and geometry, the three `playXMoment` files, the banner pulse, clock tests and browser checks. The deployed review added the ghost toast rule (Property 6, `getPoltergeistStage`, `centsToWake`) as task 4.11.
 5. **Guide.** Property 5, the Card, "How it works" and the grid placement.
 6. **Manual checkpoint** on the deployed app at 1280 by 720.
 7. **Landing preview and three QuickActions.**

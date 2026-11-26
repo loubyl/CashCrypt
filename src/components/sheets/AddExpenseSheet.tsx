@@ -9,7 +9,7 @@ import { useActionToast } from "@/components/feedback/useActionToast";
 import { useCryptActions } from "@/hooks/useCryptActions";
 import { useNow } from "@/hooks/useNow";
 import { SMALL_EXPENSE_THRESHOLD_CENTS } from "@/lib/haunting/config";
-import { EXPENSE_CLAUSE, GHOST_EXPENSE_CLAUSE } from "@/lib/utils/lightClause";
+import { EXPENSE_CLAUSE, getGhostClause } from "@/lib/utils/lightClause";
 import { formatCentsShort, parseMoneyToCents } from "@/lib/utils/cents";
 import { useFocusFirstInvalid } from "./useFocusFirstInvalid";
 
@@ -87,7 +87,7 @@ function ExpenseForm({ onClose }: ExpenseFormProps) {
     showToast({
       tone: "success",
       base: isGhost ? `Ghost added: ${amount}` : `Expense added: ${amount}`,
-      effect: { kind: "fixed", clause: isGhost ? GHOST_EXPENSE_CLAUSE : EXPENSE_CLAUSE },
+      effect: { kind: "fixed", clause: isGhost ? getGhostClause(result.change) : EXPENSE_CLAUSE },
       destination: { list: "transactions", rowId: result.value.id, tag: "new" },
     });
   };
