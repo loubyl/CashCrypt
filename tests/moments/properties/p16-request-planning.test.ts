@@ -10,6 +10,7 @@ const NUM_RUNS = 200;
 const IDS = ["a", "b", "c", "d", "e"] as const;
 const KINDS = ["reduce_small_expenses", "cancel_subscription", "extra_payment", "fallback"] as const;
 const REDUCE = "reduce_small_expenses";
+const FALLBACK = "fallback";
 const COMPLETE_FROM = 2;
 
 const rectArb = fc.record({
@@ -32,6 +33,7 @@ const ctxArb: fc.Arbitrary<ActionContext> = fc.record({
   poltergeistPresent: fc.boolean(),
   drawnZombieIds: fc.uniqueArray(fc.constantFrom(...IDS), { maxLength: 5 }),
   crackCount: fc.integer({ min: 0, max: 6 }),
+  litWindowCount: fc.integer({ min: 0, max: 4 }),
   subscriptionNames: fc.constant({ a: "Alpha", b: "Beta", c: "Gamma" } as Record<string, string>),
   planActions: planActionsArb,
 });
@@ -56,7 +58,7 @@ const outcomeArb: fc.Arbitrary<ActionOutcome> = fc.oneof(
     kind: fc.constant("planToggle" as const),
     actionId: fc.constantFrom(...IDS),
     next: fc.boolean(),
-    lightDelta: fc.constant(0),
+    lightDelta: fc.constantFrom(-1, 0, 0.1, 1),
   }),
 );
 
@@ -77,9 +79,10 @@ function expectedOwn(outcome: ActionOutcome, ctx: ActionContext): MomentRequest 
   }
   if (outcome.kind === "expense") return null;
   const action = ctx.planActions.find((a) => a.id === outcome.actionId);
-  const isSigil =
-    outcome.next && ctx.poltergeistPresent && action !== undefined && !action.done && action.kind === REDUCE;
-  return isSigil ? { kind: "sigil" } : null;
+  if (!outcome.next || action === undefined || action.done) return null;
+  if (action.kind === REDUCE && ctx.poltergeistPresent) return { kind: "sigil" };
+  const flickers = (action.kind === REDUCE || action.kind === FALLBACK) && outcome.lightDelta > 0;
+  return flickers ? { kind: "candleFlicker", litWindows: ctx.litWindowCount > 0 } : null;
 }
 
 function expectedCompletes(outcome: ActionOutcome, ctx: ActionContext): boolean {
@@ -143,6 +146,7 @@ describe("Property 16: Request planning follows the action outcome", () => {
       poltergeistPresent: true,
       drawnZombieIds: ["a"],
       crackCount: 1,
+      litWindowCount: 2,
       subscriptionNames: { a: "Alpha" },
       planActions: IDS.slice(0, 3).map((id, i) => ({ id, kind: REDUCE, done: done[i] })),
     }));
@@ -169,6 +173,21 @@ describe("Property 16: Request planning follows the action outcome", () => {
     );
   });
 
+  it("never plans a sigil for a fallback tick, whatever the light delta", () => {
+    fc.assert(
+      fc.property(ctxArb, fc.constantFrom(...IDS), fc.constantFrom(-1, 0, 0.1, 1), (ctx, id, lightDelta) => {
+        const withFallback: ActionContext = {
+          ...ctx,
+          planActions: [{ id, kind: FALLBACK, done: false }],
+        };
+        const kinds = planMoments({ kind: "planToggle", actionId: id, next: true, lightDelta }, withFallback).map(
+          (r) => r.kind,
+        );
+        expect(kinds).not.toContain("sigil");
+      }),
+      { numRuns: NUM_RUNS },
+    );
+  });
   it("plans exorcismComplete again after an untick and a tick", () => {
     const actions: PlanActionView[] = [
       { id: "a", kind: "fallback", done: true },
@@ -180,6 +199,7 @@ describe("Property 16: Request planning follows the action outcome", () => {
       poltergeistPresent: false,
       drawnZombieIds: [],
       crackCount: 0,
+      litWindowCount: 2,
       subscriptionNames: {},
       planActions: actions,
     };

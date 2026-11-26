@@ -84,6 +84,16 @@ function readMomentGapMs() {
 }
 const MOMENT_GAP_MS = readMomentGapMs();
 
+/** Reads a numeric `export const NAME = 1.15;` from the scene config. */
+function readSceneConstant(name) {
+  const source = readFileSync(new URL("../src/lib/scene/config.ts", import.meta.url), "utf8");
+  const match = source.match(new RegExp(`export const ${name}\\s*=\\s*([0-9.]+)`));
+  if (!match) throw new Error(`${name} not found in src/lib/scene/config.ts`);
+  return Number(match[1]);
+}
+const FEED_SCALE = readSceneConstant("FEED_SCALE");
+const FLICKER_DIP_RATIO = readSceneConstant("FLICKER_DIP_RATIO");
+
 /** Which Moment owns each art part in the Moment layer. */
 const PART_OWNER = {
   shovel: "cancel", "name-label": "cancel", "tombstone-clip": "cancel", tombstone: "cancel", "dirt-puff": "cancel",
@@ -91,6 +101,9 @@ const PART_OWNER = {
   sigil: "sigil", "sigil-flash": "sigil",
   candle: "exorcismComplete", "candle-flame": "exorcismComplete",
   bat: "level", "creak-crack": "level", shutter: "level",
+  "feed-particle": "poltergeistFeed", "poltergeist-copy": "poltergeistFeed", "poltergeist-copy-feed": "poltergeistFeed",
+  "ghost-arrival": "ghostArrival", "ghost-arrival-rise": "ghostArrival", "marker-pulse": "ghostArrival", "marker-pulse-inner": "ghostArrival",
+  "flicker-glow": "candleFlicker",
 };
 
 function loadPuppeteer() {
@@ -213,6 +226,32 @@ function installSampler(sampleMs, DRAWN_PART_SELECTORS) {
       tombstoneArtOpacity: opacityOf(part("tombstone")),
       sigilOpacity: opacityOf(part("sigil")),
       sigilDrawn: sigilDrawn(part("sigil")),
+      feedScale: (() => {
+        const el = document.querySelector('[data-part="scene"] [data-part="poltergeist-feed"]');
+        if (!el) return null;
+        const t = getComputedStyle(el).transform;
+        const m = t && t !== "none" ? new DOMMatrixReadOnly(t) : el.transform?.baseVal?.consolidate()?.matrix;
+        return m ? Math.hypot(m.a, m.b) : 1;
+      })(),
+      arrival: rectOf(part("ghost-arrival")),
+      arrivalOpacity: opacityOf(part("ghost-arrival")),
+      ghostIds: [...document.querySelectorAll('[data-part="scene"] [data-part="ghost"]')].map((el) => el.getAttribute("data-id")),
+      // Rect of each ghost at its rest point: the ambient orbit and bob translate the inner group, so remove that offset.
+      ghostRects: Object.fromEntries(
+        [...document.querySelectorAll('[data-part="scene"] [data-part="ghost"]')].map((el) => {
+          const rect = rectOf(el);
+          const inner = el.querySelector('[data-ambient="ghost-orbit"]');
+          const matrix = inner?.transform?.baseVal?.consolidate()?.matrix;
+          const svg = el.ownerSVGElement;
+          const scale = svg && svg.viewBox.baseVal.width > 0 ? svg.getBoundingClientRect().width / svg.viewBox.baseVal.width : 1;
+          const dx = matrix ? matrix.e * scale : 0;
+          const dy = matrix ? matrix.f * scale : 0;
+          return [el.getAttribute("data-id"), { ...rect, cx: rect.cx - dx, cy: rect.cy - dy }];
+        }),
+      ),
+      bannerAmount: document.querySelector('[data-part="banner-amount"]')?.textContent ?? null,
+      toastText: [...document.querySelectorAll('[role="status"], [role="alert"]')].map((el) => el.textContent ?? "").join(" | "),
+      toastView: [...document.querySelectorAll("button")].map((b) => b.getAttribute("aria-label") ?? "").filter((l) => l.startsWith("View in")),
       polterBodyOpacity: opacityOf(document.querySelector('[data-part="scene"] [data-part="poltergeist-body"]')),
       polterState: document.querySelector('[data-part="scene"] [data-part="poltergeist"]')?.getAttribute("data-state") ?? null,
       zombies: document.querySelectorAll('[data-part="scene"] [data-part="zombie"]').length,
@@ -838,6 +877,190 @@ function assertTabBarLabels({ results }) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// action-feedback Moments: feed, ghostArrival, candleFlicker
+// ---------------------------------------------------------------------------------------------
+const FEED_MAX_SPAN_MS = 1700;
+const FEED_PEAK_SHARE = 0.9; // peak scale must reach 1 + share * (FEED_SCALE - 1)
+const FEED_REST_EPSILON = 0.002;
+const FEED_TOAST = "Ghost added: $8 · feeds the Poltergeist, doesn't dim the light";
+const FEED_AMOUNT_CENTS = 800;
+const FLICKER_SAMPLE_MS = 10; // fast sampler for beats shorter than the 100 ms sampler
+const ARRIVAL_HIDDEN_MAX = 0.05;
+const ARRIVAL_SHOWN_MIN = 0.95;
+const ARRIVAL_BEAT_MIN_MS = 300;
+const ARRIVAL_NEAR_PX = 6;
+const ARRIVAL_MAX_SPAN_MS = 2200;
+const FLICKER_DIP_SLACK = 0.5; // dip must reach this share of the value before (ratio 0.35 plus slack)
+const FLICKER_MAX_SPAN_MS = 2200;
+const FLICKER_TOAST = "Action completed · Light +1.0";
+
+const parseCents = (text) => {
+  const match = /\$([\d,]+(?:\.\d+)?)/.exec(text ?? "");
+  return match ? Math.round(Number(match[1].replace(/,/g, "")) * 100) : null;
+};
+
+/** Opens the Add expense sheet from the Dashboard QuickAction and types without clicking a field. */
+async function typeExpense(page, amount, description) {
+  await clickByText(page, "button", "Add expense");
+  await waitFor(page, () => document.querySelector('[role="dialog"]') !== null);
+  await sleep(500); // the sheet's open animation and its initial focus
+  const focus = await page.evaluate(() => {
+    const a = document.activeElement;
+    return { tag: a?.tagName ?? null, label: a?.getAttribute("aria-label") ?? a?.id ?? "", inDialog: Boolean(a?.closest('[role="dialog"]')) };
+  });
+  await page.keyboard.type(amount);
+  const amountValue = await page.evaluate(() => document.querySelector('[role="dialog"] input')?.value ?? null);
+  await page.keyboard.press("Tab");
+  await page.keyboard.type(description);
+  const descriptionValue = await page.evaluate(() => document.activeElement?.value ?? null);
+  await clickByText(page, "button", "Save expense");
+  return { focus, amountValue, descriptionValue };
+}
+
+async function runFeed(page) {
+  const bannerBefore = await page.evaluate(() => document.querySelector('[data-part="banner-amount"]')?.textContent ?? null);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
+  const typed = await typeExpense(page, "8", "Latte");
+  await sleep(MAX_MOMENT_MS);
+  await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
+  await sleep(SAMPLE_MS * 3);
+  return { samples: await page.evaluate(() => window.__samples), typed, bannerBefore };
+}
+
+function assertFeed({ samples, typed, bannerBefore }) {
+  // Task 1: the sheet's initial focus is the Amount field, so typing without a click reaches it.
+  console.log(`feed: initial focus ${typed.focus.tag} "${typed.focus.label}", amount field "${typed.amountValue}", description "${typed.descriptionValue}"`);
+  check(typed.focus.inDialog && typed.focus.tag === "INPUT", `feed: the Add expense sheet focuses an input on open (${typed.focus.tag} "${typed.focus.label}")`);
+  check(typed.amountValue === "8", `feed: typing without a click fills Amount with "8" (${JSON.stringify(typed.amountValue)})`);
+  check(typed.descriptionValue === "Latte", `feed: Tab then typing fills the description (${JSON.stringify(typed.descriptionValue)})`);
+  const during = samples.filter((s) => s.parts.some((p) => PART_OWNER[p] === "poltergeistFeed"));
+  check(during.length > 0, "feed: feed art appeared in the Moment layer");
+  const scales = samples.map((s) => s.feedScale).filter((v) => v !== null);
+  const peak = Math.max(...scales, 0);
+  const need = 1 + FEED_PEAK_SHARE * (FEED_SCALE - 1);
+  const final = samples.at(-1);
+  const particles = samples.filter((s) => s.visibleParts.includes("feed-particle"));
+  const visible = samples.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "poltergeistFeed"));
+  const span = visible.length ? visible.at(-1).t - during[0].t : 0;
+  console.log(`feed: peak scale ${fmt(peak)} (need ${fmt(need)}), end scale ${fmt(final.feedScale)}, particles visible in ${particles.length} sample(s), art span ${span} ms`);
+  if (!THROTTLED) check(peak >= need, `feed: peak swell scale ${fmt(peak)} reaches ${fmt(need)}`);
+  check(Math.abs((final.feedScale ?? 1) - 1) <= FEED_REST_EPSILON, `feed: scale is back to 1 at the end (${fmt(final.feedScale)})`);
+  if (!THROTTLED) check(particles.length > 0, "feed: particles were visible");
+  check(span <= FEED_MAX_SPAN_MS, `feed: art on screen for ${span} ms (max ${FEED_MAX_SPAN_MS})`);
+  check(final.layerChildren === 0, "feed: Moment layer empty at the end");
+  check(final.polterState !== null, `feed: Poltergeist still present (${final.polterState})`);
+  const before = parseCents(bannerBefore);
+  const after = parseCents(final.bannerAmount);
+  check(before !== null && after === before + FEED_AMOUNT_CENTS, `feed: banner amount ${bannerBefore} -> ${final.bannerAmount} (+$8)`);
+  const toast = samples.find((s) => s.toastText.includes(FEED_TOAST));
+  check(Boolean(toast), `feed: toast reads "${FEED_TOAST}"`);
+  check(Boolean(toast) && toast.toastView.includes("View in Transactions"), `feed: toast has "View in Transactions" (${toast?.toastView.join(", ") ?? "-"})`);
+}
+
+async function loadLevel(page, level) {
+  await clickByText(page, '[role="radio"]', `Level ${level}`);
+  await waitFor(page, (n) => document.querySelector(`[data-part="scene"][data-level="${n}"]`) !== null, String(level));
+  await sleep(SETTLE_MS);
+}
+
+async function runGhostArrival(page) {
+  await loadLevel(page, 2);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
+  // Fast sampler for the arrival art's opacity: the first beats are shorter than two 100 ms samples.
+  await page.evaluate((everyMs) => {
+    window.__arrivalOpacity = [];
+    setInterval(() => {
+      const art = document.querySelector('[data-part="moment-layer"] [data-moment="ghost-arrival"]');
+      if (art) window.__arrivalOpacity.push(Number(getComputedStyle(art).opacity));
+    }, everyMs);
+  }, FLICKER_SAMPLE_MS);
+  await typeExpense(page, "3", "Gum");
+  await sleep(MAX_MOMENT_MS);
+  await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
+  await sleep(SAMPLE_MS * 3);
+  return { samples: await page.evaluate(() => window.__samples), fastOpacity: await page.evaluate(() => window.__arrivalOpacity) };
+}
+
+function assertGhostArrival({ samples, fastOpacity }) {
+  const initial = new Set(samples[0].ghostIds);
+  const during = samples.filter((s) => s.parts.some((p) => PART_OWNER[p] === "ghostArrival"));
+  check(during.length > 0, "ghostArrival: arrival art appeared in the Moment layer");
+  const arrivals = samples.filter((s) => s.arrival);
+  const minOpacity = fastOpacity.length ? Math.min(...fastOpacity) : null;
+  const shown = arrivals.filter((s) => s.arrivalOpacity >= ARRIVAL_SHOWN_MIN);
+  const beat = shown.length ? shown.at(-1).t - shown[0].t + SAMPLE_MS : 0;
+  const visible = samples.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "ghostArrival"));
+  const span = visible.length && during.length ? visible.at(-1).t - during[0].t : 0;
+  console.log(`ghostArrival: art opacity min ${fmt(minOpacity)}, max ${fmt(Math.max(...arrivals.map((s) => s.arrivalOpacity), 0))}, full-opacity beat ${beat} ms, art span ${span} ms`);
+  if (!THROTTLED) {
+    check(minOpacity !== null && minOpacity <= ARRIVAL_HIDDEN_MAX, `ghostArrival: art starts hidden (min opacity ${fmt(minOpacity)})`);
+    check(shown.length > 0, "ghostArrival: art reaches full opacity");
+    check(beat >= ARRIVAL_BEAT_MIN_MS, `ghostArrival: art stays fully visible ${beat} ms (min ${ARRIVAL_BEAT_MIN_MS})`);
+  }
+  check(span <= ARRIVAL_MAX_SPAN_MS, `ghostArrival: art on screen for ${span} ms (max ${ARRIVAL_MAX_SPAN_MS})`);
+  const final = samples.at(-1);
+  const fresh = final.ghostIds.filter((id) => !initial.has(id));
+  check(fresh.length === 1, `ghostArrival: exactly one new drawn ghost after the release (${fresh.length})`);
+  check(final.layerChildren === 0, "ghostArrival: Moment layer empty at the end");
+  const lastShown = (shown.length ? shown : arrivals.filter((s) => s.arrivalOpacity > ARRIVAL_HIDDEN_MAX)).at(-1);
+  if (fresh.length === 1 && lastShown) {
+    const ghost = final.ghostRects[fresh[0]];
+    const distance = Math.hypot(ghost.cx - lastShown.arrival.cx, ghost.cy - lastShown.arrival.cy);
+    console.log(`ghostArrival: real ghost center vs art's last visible center: ${distance.toFixed(1)} px`);
+    check(distance <= ARRIVAL_NEAR_PX, `ghostArrival: the new ghost lands ${distance.toFixed(1)} px from the art (max ${ARRIVAL_NEAR_PX})`);
+  } else if (!THROTTLED) {
+    check(false, "ghostArrival: art had a visible rect to compare with the new ghost");
+  }
+}
+
+async function runCandleFlicker(page) {
+  await loadLevel(page, 1);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
+  // Fast sampler: the dip lasts 100 ms, which the 100 ms sampler can step over.
+  await page.evaluate((everyMs) => {
+    window.__light = [];
+    const t0 = performance.now();
+    setInterval(() => {
+      const lit = [...document.querySelectorAll('[data-part="scene"] [data-state="lit"] [data-part="light"]')];
+      window.__light.push({ t: Math.round(performance.now() - t0), max: lit.length ? Math.max(...lit.map((w) => Number(getComputedStyle(w).opacity))) : null });
+    }, everyMs);
+  }, FLICKER_SAMPLE_MS);
+  await sleep(300);
+  const box = await page.evaluateHandle(
+    () => [...document.querySelectorAll('input[type="checkbox"]')].find((el) => /emergency/i.test(el.closest("[data-plan-action]")?.textContent ?? "")) ?? null,
+  );
+  if (!box.asElement()) throw new Error("Emergency fund checkbox not found");
+  const tickT = await page.evaluate(() => performance.now());
+  await box.asElement().click();
+  await sleep(MAX_MOMENT_MS);
+  await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
+  await sleep(SAMPLE_MS * 3);
+  return { samples: await page.evaluate(() => window.__samples), light: await page.evaluate(() => window.__light), tickT: Math.round(tickT) };
+}
+
+function assertCandleFlicker({ samples, light }) {
+  const values = light.map((l) => l.max).filter((v) => v !== null);
+  const before = values[0];
+  // The live value after the tick is the last one; the dip is the minimum below the value just before the Moment.
+  const final = values.at(-1);
+  const dip = Math.min(...values);
+  const during = samples.filter((s) => s.parts.some((p) => PART_OWNER[p] === "candleFlicker"));
+  console.log(`candleFlicker: light trace (t ms:max) ${light.filter((_, i) => i % 5 === 0).slice(0, 80).map((l) => `${l.t}:${fmt(l.max).trim()}`).join(" ")}`);
+  console.log(`candleFlicker: light before ${fmt(before)}, min ${fmt(dip)}, final ${fmt(final)}, flicker art in ${during.length} sample(s)`);
+  if (!THROTTLED) check(dip <= before * FLICKER_DIP_SLACK, `candleFlicker: light dips to ${fmt(dip)} (<= ${fmt(before * FLICKER_DIP_SLACK)}, ratio ${FLICKER_DIP_RATIO})`);
+  const tail = values.slice(-30);
+  check(tail.every((v) => Math.abs(v - tail[0]) < LIVE_EPSILON), `candleFlicker: light settles on a steady value (${fmt(final)})`);
+  check(final >= before - LIVE_EPSILON, `candleFlicker: settled light ${fmt(final)} is not below the value before ${fmt(before)}`);
+  const last = samples.at(-1);
+  check(last.layerChildren === 0, "candleFlicker: Moment layer empty at the end");
+  const visible = samples.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "candleFlicker"));
+  const span = visible.length && during.length ? visible.at(-1).t - during[0].t : 0;
+  check(span <= FLICKER_MAX_SPAN_MS, `candleFlicker: art on screen for ${span} ms (max ${FLICKER_MAX_SPAN_MS})`);
+  const toast = samples.find((s) => s.toastText.includes(FLICKER_TOAST));
+  check(Boolean(toast), `candleFlicker: toast reads "${FLICKER_TOAST}" (${samples.map((s) => s.toastText).find((t) => t.includes("Light")) ?? "none"})`);
+}
+
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
@@ -849,6 +1072,9 @@ const MOMENT_CHECKS = [
   { name: "checkboxCancel", run: runCheckboxCancel, assert: assertCheckboxCancel },
   { name: "noHorizontalScroll", run: runNoHorizontalScroll, assert: assertNoHorizontalScroll },
   { name: "tabBarLabels", run: runTabBarLabels, assert: assertTabBarLabels },
+  { name: "feed", run: runFeed, assert: assertFeed },
+  { name: "ghostArrival", run: runGhostArrival, assert: assertGhostArrival },
+  { name: "candleFlicker", run: runCandleFlicker, assert: assertCandleFlicker },
 ];
 
 // ---------------------------------------------------------------------------------------------

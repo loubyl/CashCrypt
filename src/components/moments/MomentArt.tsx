@@ -1,7 +1,14 @@
+import { useId } from "react";
 import type { ReactNode } from "react";
+import { HALO_BLUR, makeFilterIds } from "@/components/house/houseGeometry";
+import { GhostShape } from "@/components/house/GhostSwarm";
+import { PoltergeistShape } from "@/components/house/Poltergeist";
 import {
   DECAY_TINTS,
+  FEED_PARTICLES,
+  FEED_PARTICLE_R,
   MIN_LABEL_PX,
+  SIGIL_STROKE,
   SCENE_BAT,
   SCENE_DIRT,
   VIEWBOX_HEIGHT,
@@ -16,6 +23,7 @@ import {
   SHOVEL_VIEW_H,
   SHOVEL_VIEW_W,
 } from "@/lib/scene";
+import type { Point, SceneGhost, ScenePoltergeist } from "@/lib/scene";
 
 // Static Moment art. It never imports GSAP: ShovelMoment mounts it in the Moment_Layer and animates it.
 // Every piece renders hidden (opacity 0); the timeline reveals it. Original, rounded, cartoon art.
@@ -69,6 +77,14 @@ export const ART_PART = {
   shutter: "shutter",
   candle: "candle",
   candleFlame: "candle-flame",
+  feedParticle: "feed-particle",
+  poltergeistCopy: "poltergeist-copy",
+  poltergeistCopyFeed: "poltergeist-copy-feed",
+  ghostArrival: "ghost-arrival",
+  ghostArrivalRise: "ghost-arrival-rise",
+  markerPulse: "marker-pulse",
+  markerPulseInner: "marker-pulse-inner",
+  flickerGlow: "flicker-glow",
 } as const;
 
 export type ShovelArtProps = { widthPx: number; heightPx: number };
@@ -524,6 +540,152 @@ export function CandlesArt({ leftPx, topPx, widthPx, boxes }: CandlesArtProps) {
           </g>
         );
       })}
+    </SceneOverlay>
+  );
+}
+
+// Poltergeist feed Moment art: a ring of spirit-colored particles and, when the Poltergeist appears, a copy of its figure.
+const FULL_TURN_RAD = Math.PI * 2;
+const COPY_SIGIL_OPACITY = 0.9;
+
+export type FeedParticlesArtProps = SceneOverlayProps & { cx: number; cy: number };
+
+/** Small spirit dots stacked at the Poltergeist center; the Moment bursts them outward. Starts hidden. */
+export function FeedParticlesArt({ leftPx, topPx, widthPx, cx, cy }: FeedParticlesArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      {Array.from({ length: FEED_PARTICLES }, (_, index) => (
+        <circle
+          key={index}
+          data-moment={ART_PART.feedParticle}
+          data-angle={(FULL_TURN_RAD * index) / FEED_PARTICLES}
+          cx={cx}
+          cy={cy}
+          r={FEED_PARTICLE_R}
+          fill={SPIRIT_COLOR}
+          style={{ opacity: 0 }}
+        />
+      ))}
+    </SceneOverlay>
+  );
+}
+
+export type PoltergeistCopyArtProps = SceneOverlayProps & { poltergeist: ScenePoltergeist };
+
+/**
+ * A copy of the Poltergeist figure (the shared PoltergeistShape, no ambient loops) with its own halo filter,
+ * for the Moment that wakes it: the frozen Scene does not contain the new figure. Starts hidden.
+ */
+export function PoltergeistCopyArt({ leftPx, topPx, widthPx, poltergeist }: PoltergeistCopyArtProps) {
+  const filterIds = makeFilterIds(useId());
+  const { center, sigil, state } = poltergeist;
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      <defs>
+        <filter id={filterIds.halo} x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation={HALO_BLUR} />
+        </filter>
+      </defs>
+      <g data-moment={ART_PART.poltergeistCopy} transform={`translate(${center.x} ${center.y})`} style={{ opacity: 0 }}>
+        {state === "bound" ? (
+          <ellipse
+            cx={sigil.cx - center.x}
+            cy={sigil.cy - center.y}
+            rx={sigil.r}
+            ry={sigil.r}
+            fill="none"
+            stroke={SPIRIT_COLOR}
+            strokeWidth={SIGIL_STROKE}
+            opacity={COPY_SIGIL_OPACITY}
+          />
+        ) : null}
+        <g data-moment={ART_PART.poltergeistCopyFeed}>
+          <PoltergeistShape poltergeist={poltergeist} filterIds={filterIds} ambient={false} />
+        </g>
+      </g>
+    </SceneOverlay>
+  );
+}
+
+export type GhostCopyArtProps = SceneOverlayProps & { ghost: SceneGhost };
+
+/**
+ * A copy of the arriving Ghost figure (the shared GhostShape, no orbit) at its live rest point, for the
+ * Moment that shows it: the frozen Scene does not contain it. The inner group is the one that rises.
+ * Starts hidden.
+ */
+export function GhostCopyArt({ leftPx, topPx, widthPx, ghost }: GhostCopyArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      <g data-moment={ART_PART.ghostArrival} transform={`translate(${ghost.rest.x} ${ghost.rest.y})`} style={{ opacity: 0 }}>
+        <g data-moment={ART_PART.ghostArrivalRise}>
+          <GhostShape sizeUnits={ghost.sizeUnits} />
+        </g>
+      </g>
+    </SceneOverlay>
+  );
+}
+
+export type MarkerPulseArtProps = SceneOverlayProps & { count: number; anchor: Point };
+
+const PERCENT = 100;
+
+/**
+ * The Ghosts "+N" marker with the live Overflow_Count, bottom-right anchored like the Scene marker, in an
+ * overlay with the Scene's proportions. The inner span is the one that pulses. Starts hidden.
+ */
+export function MarkerPulseArt({ leftPx, topPx, widthPx, count, anchor }: MarkerPulseArtProps) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute"
+      style={{ left: leftPx, top: topPx, width: widthPx, height: (widthPx * VIEWBOX_HEIGHT) / VIEWBOX_WIDTH }}
+    >
+      <span
+        data-moment={ART_PART.markerPulse}
+        className="absolute whitespace-nowrap font-medium tabular-nums text-ink-secondary"
+        style={{
+          fontSize: MIN_LABEL_PX,
+          lineHeight: `${LABEL_LINE_HEIGHT_PX}px`,
+          left: `${(anchor.x / VIEWBOX_WIDTH) * PERCENT}%`,
+          top: `${(anchor.y / VIEWBOX_HEIGHT) * PERCENT}%`,
+          transform: "translate(-100%, -100%)",
+          opacity: 0,
+        }}
+      >
+        <span data-moment={ART_PART.markerPulseInner} className="block" style={{ transformOrigin: "100% 100%" }}>
+          {`+${count}`}
+        </span>
+      </span>
+    </div>
+  );
+}
+
+export type FlickerGlowBox = { x: number; y: number; w: number; h: number };
+export type FlickerGlowArtProps = SceneOverlayProps & { boxes: readonly FlickerGlowBox[]; pad: number };
+
+const FLICKER_GLOW_RADIUS = 6;
+
+/**
+ * Candle glow through the gaps of the boarded and broken windows, for the flicker Moment when no window is
+ * lit: one candle-colored rounded rectangle per window box, padded by `pad`. Starts hidden.
+ */
+export function FlickerGlowArt({ leftPx, topPx, widthPx, boxes, pad }: FlickerGlowArtProps) {
+  return (
+    <SceneOverlay leftPx={leftPx} topPx={topPx} widthPx={widthPx}>
+      {boxes.map((box) => (
+        <rect
+          key={`${box.x}:${box.y}`}
+          data-moment={ART_PART.flickerGlow}
+          x={box.x - pad}
+          y={box.y - pad}
+          width={box.w + pad * 2}
+          height={box.h + pad * 2}
+          rx={FLICKER_GLOW_RADIUS}
+          fill={CANDLE_COLOR}
+          style={{ opacity: 0 }}
+        />
+      ))}
     </SceneOverlay>
   );
 }

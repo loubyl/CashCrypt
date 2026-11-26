@@ -32,11 +32,40 @@ const GHOST_PATH =
   "C-0.28 0.52 -0.36 0.42 -0.42 0.34 C-0.46 0.24 -0.46 0.14 -0.46 0.02 " +
   "C-0.46 -0.26 -0.30 -0.5 0 -0.5Z";
 
+export type GhostShapeProps = { sizeUnits: number };
+
+/** The ghost figure, centered on the origin and scaled by its size. Shared by the Scene and the Moment art. */
+export function GhostShape({ sizeUnits }: GhostShapeProps) {
+  const width = sizeUnits * WIDTH_RATIO;
+  return (
+    <g transform={`scale(${width} ${sizeUnits})`}>
+      <g data-part="ghost-halo" transform={`scale(${HALO_SCALE})`}>
+        <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={HALO_OPACITY} />
+      </g>
+      <path data-part="ghost-body" d={GHOST_PATH} fill={TOKEN.ghost} opacity={BODY_OPACITY} />
+      <path
+        d={GHOST_PATH}
+        fill="none"
+        stroke={TOKEN.ink}
+        strokeWidth={RIM_WIDTH}
+        vectorEffect="non-scaling-stroke"
+        opacity={RIM_OPACITY}
+      />
+      {[-EYE_OFFSET, EYE_OFFSET].map((cx) => (
+        <g key={cx}>
+          <ellipse data-part="ghost-eye" cx={cx} cy={EYE_Y} rx={EYE_RX} ry={EYE_RY} fill={TOKEN.void} />
+          <circle cx={cx + EYE_RX * 0.35} cy={EYE_Y - EYE_RY * 0.4} r={SHINE_RADIUS} fill={TOKEN.ink} />
+        </g>
+      ))}
+      <ellipse cx={0} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={TOKEN.void} />
+    </g>
+  );
+}
+
 type GhostFigureProps = { ghost: SceneGhost };
 
 function GhostFigureBase({ ghost }: GhostFigureProps) {
   const { rest, sizeUnits, orbit } = ghost;
-  const width = sizeUnits * WIDTH_RATIO;
   return (
     <g data-part="ghost" data-id={ghost.id} transform={`translate(${rest.x} ${rest.y})`}>
       <g
@@ -50,27 +79,7 @@ function GhostFigureBase({ ghost }: GhostFigureProps) {
         data-orbit-rx={orbit.rx}
         data-orbit-ry={orbit.ry}
       >
-        <g transform={`scale(${width} ${sizeUnits})`}>
-          <g data-part="ghost-halo" transform={`scale(${HALO_SCALE})`}>
-            <path d={GHOST_PATH} fill={TOKEN.ghost} opacity={HALO_OPACITY} />
-          </g>
-          <path data-part="ghost-body" d={GHOST_PATH} fill={TOKEN.ghost} opacity={BODY_OPACITY} />
-          <path
-            d={GHOST_PATH}
-            fill="none"
-            stroke={TOKEN.ink}
-            strokeWidth={RIM_WIDTH}
-            vectorEffect="non-scaling-stroke"
-            opacity={RIM_OPACITY}
-          />
-          {[-EYE_OFFSET, EYE_OFFSET].map((cx) => (
-            <g key={cx}>
-              <ellipse data-part="ghost-eye" cx={cx} cy={EYE_Y} rx={EYE_RX} ry={EYE_RY} fill={TOKEN.void} />
-              <circle cx={cx + EYE_RX * 0.35} cy={EYE_Y - EYE_RY * 0.4} r={SHINE_RADIUS} fill={TOKEN.ink} />
-            </g>
-          ))}
-          <ellipse cx={0} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={TOKEN.void} />
-        </g>
+        <GhostShape sizeUnits={sizeUnits} />
       </g>
     </g>
   );

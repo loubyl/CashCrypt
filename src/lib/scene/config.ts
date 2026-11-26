@@ -199,6 +199,30 @@ export const CRACK_FLASH_POINTS: readonly Point[] = [
 export const FLAME_PX = 32;
 export const ORB_PX = 28;
 
+/**
+ * Feed, arrival and flicker Moments (action-feedback). The feed swell scales the Poltergeist glow
+ * (radius = size / 2 * POLTERGEIST_GLOW_RATIO) by FEED_SCALE on top of the ambient pulse; the
+ * particles burst out to FEED_PARTICLE_REACH with a radius of FEED_PARTICLE_R. The arrival ghost
+ * starts GHOST_ARRIVAL_RISE below its rest point. The flicker dips a lit window to
+ * FLICKER_DIP_RATIO of its opacity, or pads the glow of an unlit window by FLICKER_GLOW_PAD.
+ */
+export const FEED_SCALE = 1.15;
+export const FEED_PARTICLES = 8;
+export const FEED_PARTICLE_REACH = 110;
+export const FEED_PARTICLE_R = 4;
+export const GHOST_ARRIVAL_RISE = 12;
+export const FLICKER_DIP_RATIO = 0.35;
+export const FLICKER_GLOW_PAD = 4;
+/** Poltergeist glow radius relative to the body radius (the same ratio Poltergeist.tsx draws). */
+export const POLTERGEIST_GLOW_RATIO = 1.1;
+/** Halo of a ghost relative to its body (the same ratio GhostSwarm.tsx draws). */
+export const GHOST_HALO_RATIO = 1.22;
+/** Ghost figure width relative to its height (GhostSwarm.tsx). */
+export const GHOST_WIDTH_RATIO = 0.8;
+/** The "+N" marker pulse: scale, and the marker box (ViewBox units) anchored at its bottom right. */
+export const MARKER_PULSE_SCALE = 1.25;
+export const OVERFLOW_MARKER_BOX: Readonly<{ w: number; h: number }> = { w: 56, h: 22 };
+
 // ---------------------------------------------------------------------------
 // Motion data
 // ---------------------------------------------------------------------------
@@ -247,7 +271,11 @@ export type MomentDurationKey =
   | "sigil"
   | "levelBetter"
   | "levelWorse"
-  | "exorcismComplete";
+  | "exorcismComplete"
+  | "poltergeistFeed"
+  | "poltergeistAppear"
+  | "ghostArrival"
+  | "candleFlicker";
 
 export const MOMENT_DURATION_MS: Readonly<Record<MomentDurationKey, number>> = {
   cancel: 1400,
@@ -256,6 +284,10 @@ export const MOMENT_DURATION_MS: Readonly<Record<MomentDurationKey, number>> = {
   levelBetter: 1600,
   levelWorse: 1000,
   exorcismComplete: 1200,
+  poltergeistFeed: 900,
+  poltergeistAppear: 1300,
+  ghostArrival: 800,
+  candleFlicker: 700,
 };
 export const MOMENT_MIN_DURATION_MS = 600;
 export const MOMENT_HARD_CAP_MS = 2500;
@@ -516,6 +548,13 @@ export type SceneConfig = {
   FLAME_PX: number;
   ORB_PX: number;
   MOMENT_DURATION_MS: Readonly<Record<MomentDurationKey, number>>;
+  FEED_SCALE: number;
+  FEED_PARTICLES: number;
+  FEED_PARTICLE_REACH: number;
+  FEED_PARTICLE_R: number;
+  GHOST_ARRIVAL_RISE: number;
+  FLICKER_DIP_RATIO: number;
+  FLICKER_GLOW_PAD: number;
   MOMENT_HARD_CAP_MS: number;
   MOMENT_INPUT_UNBLOCK_MS: number;
   MOMENT_GAP_MS: number;
@@ -600,6 +639,13 @@ export const SCENE_CONFIG: SceneConfig = {
   FLAME_PX,
   ORB_PX,
   MOMENT_DURATION_MS,
+  FEED_SCALE,
+  FEED_PARTICLES,
+  FEED_PARTICLE_REACH,
+  FEED_PARTICLE_R,
+  GHOST_ARRIVAL_RISE,
+  FLICKER_DIP_RATIO,
+  FLICKER_GLOW_PAD,
   MOMENT_HARD_CAP_MS,
   MOMENT_INPUT_UNBLOCK_MS,
   MOMENT_GAP_MS,
@@ -660,6 +706,7 @@ export function getSigilExtent(
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const MOMENT_KEYS: readonly MomentDurationKey[] = [
   "cancel", "payment", "sigil", "levelBetter", "levelWorse", "exorcismComplete",
+  "poltergeistFeed", "poltergeistAppear", "ghostArrival", "candleFlicker",
 ];
 
 type Obj = Record<string, unknown>;
@@ -909,6 +956,24 @@ function checkMomentArt(c: Obj, problems: string[]): void {
   }
 }
 
+function checkFeedbackArt(c: Obj, problems: string[]): void {
+  const scale = c.FEED_SCALE;
+  if (!isNum(scale) || scale < UNIT_MAX) problems.push("FEED_SCALE must be a finite number of at least 1");
+  if (!isIntAtLeast(c.FEED_PARTICLES, 1)) problems.push("FEED_PARTICLES must be an integer of at least 1");
+  for (const key of ["FEED_PARTICLE_REACH", "FEED_PARTICLE_R"]) {
+    const value = c[key];
+    if (!isNum(value) || value <= 0) problems.push(`${key} must be a positive finite number`);
+  }
+  for (const key of ["GHOST_ARRIVAL_RISE", "FLICKER_GLOW_PAD"]) {
+    const value = c[key];
+    if (!isNum(value) || value < 0) problems.push(`${key} must be a non-negative finite number`);
+  }
+  const dip = c.FLICKER_DIP_RATIO;
+  if (!isNum(dip) || dip <= UNIT_MIN || dip >= UNIT_MAX) {
+    problems.push("FLICKER_DIP_RATIO must be a finite number above 0 and below 1");
+  }
+}
+
 function checkLabelsAndColors(c: Obj, problems: string[]): void {
   for (const key of ["MIN_SCENE_WIDTH_DESKTOP_PX", "MIN_LABEL_PX", "TOMBSTONE_LABEL_MIN_SLOT_PX"]) {
     const value = c[key];
@@ -945,6 +1010,7 @@ export function validateSceneConfig(config: unknown): string[] {
     checkSizes(config, problems);
     checkSigil(config, problems);
     checkMomentArt(config, problems);
+    checkFeedbackArt(config, problems);
     checkLabelsAndColors(config, problems);
   } catch (error) {
     problems.push(`config could not be validated: ${error instanceof Error ? error.message : "unknown error"}`);

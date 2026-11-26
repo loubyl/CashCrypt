@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileUp, Flame, Plus, Wallet } from "lucide-react";
 import { Skeleton } from "@/components/common/Skeleton";
@@ -20,6 +20,7 @@ import { useSceneModel } from "@/hooks/useSceneModel";
 import { getLevelAnnouncement, getNextLevelText, getScoreDelta } from "@/lib/utils/scoreView";
 import { MomentHost } from "@/components/moments/MomentHost";
 import type { MomentHostLive } from "@/components/moments/MomentHost";
+import type { MomentRequest } from "@/lib/moments/types";
 import { PoltergeistBanner } from "./PoltergeistBanner";
 
 const PAGE_TITLE = "Your crypt";
@@ -46,6 +47,12 @@ export function Dashboard() {
   const { plan } = useExorcismPlan();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false);
+  const [bannerPulseKey, setBannerPulseKey] = useState(0);
+  const handlePlanned = useCallback((requests: readonly MomentRequest[]) => {
+    if (requests.some((request) => request.kind === "poltergeistFeed")) {
+      setBannerPulseKey((key) => key + 1);
+    }
+  }, []);
 
   if (result.status !== "ready" || scene.status !== "ready") {
     return (
@@ -76,6 +83,7 @@ export function Dashboard() {
   const live: MomentHostLive = {
     model: scene.model,
     liveKey: houseState,
+    ghostTransactionIds: houseState.ghosts.map((ghost) => ghost.transactionId),
     subscriptionNames: Object.fromEntries(rows.subscriptions.map((sub) => [sub.id, sub.name])),
     planActions: (plan?.actions ?? []).map((action) => ({
       id: action.id,
@@ -90,7 +98,7 @@ export function Dashboard() {
       <p className="sr-only" aria-live="polite" role="status">
         {getLevelAnnouncement(houseState.decayLevel, houseState.lightScore)}
       </p>
-      <MomentHost live={live}>
+      <MomentHost live={live} onPlanned={handlePlanned}>
         {({ model, held, onRelease }) => (
           <>
           <div className={GRID_CLASSES}>
@@ -128,7 +136,7 @@ export function Dashboard() {
             </div>
             <div className={COLUMN_CLASSES}>
               {houseState.poltergeist ? (
-                <PoltergeistBanner smallExpenseTotalCents={houseState.poltergeist.totalAmount} />
+                <PoltergeistBanner smallExpenseTotalCents={houseState.poltergeist.totalAmount} pulseKey={bannerPulseKey} />
               ) : null}
               <Card
                 title={PLAN_CARD_TITLE}

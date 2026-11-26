@@ -20,7 +20,7 @@ import type { HoldEvent, HoldState } from "@/lib/moments/hold";
 import { createMomentQueue } from "@/lib/moments/queue";
 import type { MomentQueue } from "@/lib/moments/queue";
 import { planLevelMoment, planMoments } from "@/lib/moments/requests";
-import type { ActionContext, ActionOutcome, PlanActionView, RectLike } from "@/lib/moments/types";
+import type { ActionContext, ActionOutcome, MomentRequest, PlanActionView, RectLike } from "@/lib/moments/types";
 import {
   MOMENT_GAP_MS,
   MOMENT_HARD_CAP_MS,
@@ -40,6 +40,8 @@ export type MomentHostLive = {
   liveKey: object;
   subscriptionNames: Readonly<Record<string, string>>;
   planActions: readonly PlanActionView[];
+  /** Transaction ids of the live Ghosts (drawn and overflow). When absent, no ghostArrival is dropped. */
+  ghostTransactionIds?: readonly string[];
 };
 
 /** What the children need to draw the Scene. */
@@ -53,6 +55,8 @@ export type MomentHostView = {
 
 export type MomentHostProps = {
   live: MomentHostLive;
+  /** Called right after an action is planned, with its requests (possibly empty). */
+  onPlanned?: (requests: readonly MomentRequest[]) => void;
   children: (view: MomentHostView) => ReactNode;
 };
 
@@ -68,6 +72,7 @@ const SUBMIT_CONTROL_SELECTOR = 'button[type="submit"], input[type="submit"]';
 /** A submit rect older than this is not the control that started the action. */
 const SUBMIT_ORIGIN_MAX_AGE_MS = 1500;
 const NO_AWAITING = 0;
+const NO_OPACITY = 0;
 // z-50 matches the ToastRegion and sits above the sheets (z-40) and the TabBar (z-30).
 // The layer ignores pointer events, so sharing the toast level blocks nothing.
 const LAYER_CLASSES = "pointer-events-none fixed inset-0 z-50";
@@ -97,12 +102,26 @@ function getSubmitControl(event: SubmitEvent): Element | null {
   return event.target instanceof Element ? event.target.querySelector(SUBMIT_CONTROL_SELECTOR) : null;
 }
 
+/** True when the live data no longer holds the target of the request. */
+function isStale(request: MomentRequest, live: MomentHostLive): boolean {
+  switch (request.kind) {
+    case "sigil":
+    case "poltergeistFeed":
+      return live.model.poltergeist === null;
+    case "ghostArrival":
+      return live.ghostTransactionIds !== undefined && !live.ghostTransactionIds.includes(request.transactionId);
+    default:
+      return false;
+  }
+}
+
 function buildContext(live: MomentHostLive): ActionContext {
   return {
     level: live.model.level,
     poltergeistPresent: live.model.poltergeist !== null,
     drawnZombieIds: live.model.zombies.map((zombie) => zombie.id),
     crackCount: live.model.features.crackCount,
+    litWindowCount: live.model.windows.filter((window) => window.opacity > NO_OPACITY).length,
     subscriptionNames: live.subscriptionNames,
     planActions: live.planActions,
   };
@@ -112,7 +131,7 @@ function buildContext(live: MomentHostLive): ActionContext {
  * Observer, hold, queue and Moment_Layer of the Dashboard. Provides the
  * `ActionObserver` to the hooks below it and hands the Scene the model to draw.
  */
-export function MomentHost({ live, children }: MomentHostProps) {
+export function MomentHost({ live, onPlanned, children }: MomentHostProps) {
   const reduced = useReducedMotionPreference();
   // False on the server and during hydration, true afterwards: the portal needs `document`.
   const layerMounted = useSyncExternalStore(subscribeNever, getClientMounted, getServerMounted);
@@ -120,6 +139,7 @@ export function MomentHost({ live, children }: MomentHostProps) {
 
   const liveRef = useRef(live);
   const reducedRef = useRef(reduced);
+  const onPlannedRef = useRef(onPlanned);
   const layerRef = useRef<HTMLDivElement>(null);
   const queueRef = useRef<MomentQueue | null>(null);
   const [cleanups] = useState<Array<() => void>>(() => []);
@@ -137,6 +157,7 @@ export function MomentHost({ live, children }: MomentHostProps) {
   useLayoutEffect(() => {
     liveRef.current = live;
     reducedRef.current = reduced;
+    onPlannedRef.current = onPlanned;
     dispatchRef.current = dispatch;
   });
 
@@ -202,7 +223,7 @@ export function MomentHost({ live, children }: MomentHostProps) {
         return waitForSheetsClosed(doc, signal, SHEET_CLOSE_WAIT_MAX_MS).then(() => (signal.aborted ? undefined : start()));
       },
       isTargetMounted: () => mountedRef.current && layerRef.current !== null && getScene() !== null,
-      shouldDrop: (request) => request.kind === "sigil" && liveRef.current.model.poltergeist === null,
+      shouldDrop: (request) => isStale(request, liveRef.current),
       gapMs: MOMENT_GAP_MS,
       hardCapMs: MOMENT_HARD_CAP_MS,
       maxPending: MOMENT_QUEUE_MAX_PENDING,
@@ -306,7 +327,19 @@ export function MomentHost({ live, children }: MomentHostProps) {
         if (!entry || !queue) return;
         const full: ActionOutcome =
           outcome.kind === "payment" ? { ...outcome, origin: entry.origin } : outcome;
-        for (const request of planMoments(full, entry.ctx)) void queue.enqueue(request);
+        const requests = planMoments(full, entry.ctx);
+        onPlannedRef.current?.(requests);
+        // A request that reads the live model (a new Ghost or Poltergeist) waits until the live data
+        // holds the figure; otherwise the stale check drops it before the live query has caught up.
+        const needsLive = requests.some((request) => request.kind === "ghostArrival" || request.kind === "poltergeistFeed");
+        if (needsLive) {
+          void waitForSettle(entry.version).then(() => {
+            if (!mountedRef.current || !tickets.has(ticket.id)) return;
+            for (const request of requests) void queue.enqueue(request);
+          });
+        } else {
+          for (const request of requests) void queue.enqueue(request);
+        }
         void settleTicket(ticket.id, entry);
       },
       fail(ticket: ActionTicket): void {

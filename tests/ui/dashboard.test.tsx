@@ -23,6 +23,11 @@ const CANCEL_LABEL = "Cancel subscription";
 const COMPLETION_TOAST = /freed|Action completed/;
 const QUICK_ACTION_LABELS = ["Log payment", "Add expense", "Import CSV", "Exorcise"];
 const POLTERGEIST_TEXT = /A Poltergeist is haunting you: \$[\d,.]+ in small expenses in 30 days/;
+// The amount sits in its own element (for the pulse), so match on the paragraph's full text.
+const matchBanner = (_: string, el: Element | null) =>
+  el?.tagName === "P" && POLTERGEIST_TEXT.test(el.textContent ?? "");
+const bannerParagraph = () => screen.getByText(matchBanner);
+const queryBannerParagraph = () => screen.queryByText(matchBanner);
 const L4_SCORE_TEXT = "32 out of 100";
 const SUGGESTED_EXTRA_CENTS = 30_000;
 const CENTS_PER_DOLLAR = 100;
@@ -74,7 +79,7 @@ describe("Dashboard on the level 4 demo", () => {
     expect(within(meter).getByText("8 to Level 3")).toBeTruthy();
     expect(within(meter).queryByText("32")).toBeNull();
     expect(meter.getAttribute("aria-valuetext")).toBe("Light score 32 of 100");
-    expect(screen.getByText(POLTERGEIST_TEXT)).toBeTruthy();
+    expect(bannerParagraph()).toBeTruthy();
     expect(screen.getByText("Poltergeist")).toBeTruthy();
     expect(screen.getByRole("img", { name: /^Level 4, Crumbling\./ })).toBeTruthy();
     expect(screen.getByRole("img", { name: /^Level 4, Crumbling\./ }).getAttribute("data-part")).toBe("scene");
@@ -92,7 +97,7 @@ describe("Dashboard on the level 4 demo", () => {
     for (const column of Array.from(grid.children)) expect(column.className).toContain("contents");
     const scene = screen.getByRole("img", { name: /^Level 4, Crumbling\./ });
     const score = screen.getByText("Light score", { selector: "p" });
-    const banner = screen.getByText(POLTERGEIST_TEXT);
+    const banner = bannerParagraph();
     const plan = screen.getByRole("heading", { name: "This week's exorcism" });
     const demo = screen.getByRole("button", { name: "Skip to next week" });
     const ordered = [scene, score, banner, plan, demo];
@@ -289,7 +294,7 @@ describe("Plan actions without a Do it flow", () => {
     expect(screen.queryAllByRole("button", { name: DO_IT_NAME })).toHaveLength(0);
     expect(screen.getByRole("button", { name: "Log payment" })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByRole("button", { name: "Log payment" })).not.toHaveAttribute("disabled");
-    expect(screen.queryByText(POLTERGEIST_TEXT)).toBeNull();
+    expect(queryBannerParagraph()).toBeNull();
   });
 
   it("shows Done <date> instead of the instruction once an action is done", async () => {

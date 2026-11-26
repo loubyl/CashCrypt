@@ -53,6 +53,11 @@ function requestsFor(model: SceneModel): MomentRequest[] {
   }
   for (const from of LEVELS) for (const to of LEVELS) requests.push({ kind: "level", from, to });
   requests.push({ kind: "sigil" }, { kind: "exorcismComplete" });
+  // action-feedback: feed and appear, arrival at every drawn slot and at the marker, flicker.
+  requests.push({ kind: "poltergeistFeed", appeared: false }, { kind: "poltergeistFeed", appeared: true });
+  for (const g of model.ghosts) requests.push({ kind: "ghostArrival", transactionId: g.id });
+  requests.push({ kind: "ghostArrival", transactionId: "overflow-transaction" });
+  requests.push({ kind: "candleFlicker", litWindows: true }, { kind: "candleFlicker", litWindows: false });
   return requests;
 }
 

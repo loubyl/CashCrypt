@@ -299,6 +299,133 @@
         "chatSessionId": "sess_d5bc94fb-2db1-4623-aa72-c35eeeffc540",
         "timestamp": 1795670965527
       }
+    ],
+    "4.1 Extend the Moment types, planning and observer": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674422714
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674610700
+      }
+    ],
+    "4.3 Add the config and geometry of the new Moments": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674422775
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674762147
+      }
+    ],
+    "4.2 Write the planning property and update `house-scene` Property 16": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674772892
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675140650
+      }
+    ],
+    "4.4 Share the creature shapes and add the feed wrapper": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795674773033
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675141207
+      }
+    ],
+    "4.5 Implement the Poltergeist feed Moment": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675146758
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675354358
+      }
+    ],
+    "4.8 Add the Poltergeist banner pulse": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675146818
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675354435
+      }
+    ],
+    "4.6 Implement the ghost arrival Moment": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675355278
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675539234
+      }
+    ],
+    "4.7 Implement the candle flicker Moment": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675539894
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675705018
+      }
+    ],
+    "4.9 Write the Dashboard Moment integration tests": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795675705773
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795676075220
+      }
+    ],
+    "4.10 Add the Moment browser checks": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795676075601
+      },
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795677111776
+      }
+    ],
+    "4. Three new Moments": [
+      {
+        "executionId": "1cc3c25b-0e04-42ef-a639-1ee2dc7c4a80",
+        "chatSessionId": "sess_efa62f20-b188-483c-ac78-fc731b842895",
+        "timestamp": 1795677111823
+      }
     ]
   }
 }

@@ -8,7 +8,13 @@ import {
   BAT_FADE_START,
   CRACK_FLASH_POINTS,
   CRACK_FLASH_STROKE,
+  GHOST_HALO_RATIO,
+  GHOST_WIDTH_RATIO,
   HALF,
+  MARKER_PULSE_SCALE,
+  OVERFLOW_MARKER_BOX,
+  POLTERGEIST_GLOW_RATIO,
+  POLTERGEIST_PULSE_SCALE,
   SCENE_CONFIG,
   SHOVEL_CONTROL_LIFT,
   SHOVEL_STRIKE_OFFSET,
@@ -314,6 +320,86 @@ function levelExtents(
   return extents;
 }
 
+// ---------------------------------------------------------------------------
+// Feed, ghost arrival and flicker (action-feedback)
+// ---------------------------------------------------------------------------
+
+const EXTENT_STEP = HALF;
+
+/** Rounds up to the next half unit, so a box never ends short of the art it bounds. */
+function ceilToHalfUnit(value: number): number {
+  return Math.ceil(value / EXTENT_STEP) * EXTENT_STEP;
+}
+
+function viewBoxBox(config: SceneConfig): Box {
+  return { x: 0, y: 0, w: config.VIEWBOX_WIDTH, h: config.VIEWBOX_HEIGHT };
+}
+
+function poltergeistCenter(model: SceneModel, config: SceneConfig): Point {
+  return model.poltergeist?.center ?? config.POLTERGEIST_CENTER;
+}
+
+/** Glow circle of the fed Poltergeist at the top of the swell, with the ambient pulse on top. */
+export function getFeedGlowBox(model: SceneModel, config: SceneConfig = SCENE_CONFIG): Box {
+  const size = model.poltergeist?.sizeUnits ?? config.POLTERGEIST_SIZE;
+  const radius = ceilToHalfUnit(size * HALF * POLTERGEIST_GLOW_RATIO * config.FEED_SCALE * POLTERGEIST_PULSE_SCALE);
+  return boxAround(poltergeistCenter(model, config), radius, radius);
+}
+
+/** Box that holds every feed particle at the end of its burst. */
+export function getFeedParticlesBox(model: SceneModel, config: SceneConfig = SCENE_CONFIG): Box {
+  const reach = config.FEED_PARTICLE_REACH + config.FEED_PARTICLE_R;
+  return boxAround(poltergeistCenter(model, config), reach, reach);
+}
+
+/** Live box of a drawn ghost at its rest point (figure only), centered on the rest point. */
+export function getGhostRestBox(ghost: SceneModel["ghosts"][number]): Box {
+  return boxAround(ghost.rest, (ghost.sizeUnits * GHOST_WIDTH_RATIO) * HALF, ghost.sizeUnits * HALF);
+}
+
+/** The same box scaled around its center by the halo ratio. */
+function scaleBox(box: Box, ratio: number): Box {
+  const w = box.w * ratio;
+  const h = box.h * ratio;
+  return { x: box.x + box.w * HALF - w * HALF, y: box.y + box.h * HALF - h * HALF, w, h };
+}
+
+/** Marker box at the ghosts anchor, right-and-bottom anchored, at the pulse scale. */
+export function getMarkerPulseBox(config: SceneConfig = SCENE_CONFIG): Box {
+  const anchor = getOverflowAnchors(config).ghosts;
+  const w = OVERFLOW_MARKER_BOX.w * MARKER_PULSE_SCALE;
+  const h = OVERFLOW_MARKER_BOX.h * MARKER_PULSE_SCALE;
+  return { x: anchor.x - w, y: anchor.y - h, w, h };
+}
+
+function ghostArrivalExtents(
+  model: SceneModel,
+  request: Extract<MomentRequest, { kind: "ghostArrival" }>,
+  config: SceneConfig,
+): MomentExtent[] {
+  const ghost = model.ghosts.find((g) => g.id === request.transactionId);
+  if (!ghost) return [{ name: "markerPulse", boxes: [getMarkerPulseBox(config)] }];
+  const rest = scaleBox(getGhostRestBox(ghost), GHOST_HALO_RATIO);
+  const risen = clampBoxInto({ ...rest, y: rest.y + config.GHOST_ARRIVAL_RISE }, viewBoxBox(config));
+  return [{ name: "ghostArrival", boxes: [rest, risen] }];
+}
+
+function candleFlickerExtents(
+  model: SceneModel,
+  request: Extract<MomentRequest, { kind: "candleFlicker" }>,
+  config: SceneConfig,
+): MomentExtent[] {
+  const pad = config.FLICKER_GLOW_PAD;
+  const wanted = request.litWindows ? "lit" : null;
+  const windows = model.windows.filter((w) => (wanted ? w.state === wanted : w.state !== "lit"));
+  return [
+    {
+      name: "flickerGlow",
+      boxes: windows.map((w) => ({ x: w.box.x - pad, y: w.box.y - pad, w: w.box.w + pad * PAIR, h: w.box.h + pad * PAIR })),
+    },
+  ];
+}
+
 /** Every piece of ViewBox art a request draws, for bounds checks and for the GSAP files. */
 export function getMomentExtents(
   model: SceneModel,
@@ -331,5 +417,14 @@ export function getMomentExtents(
       return [{ name: "candles", boxes: getCandleBoxes(config) }];
     case "level":
       return levelExtents(model, request, config);
+    case "poltergeistFeed":
+      return [
+        { name: "feedGlow", boxes: [getFeedGlowBox(model, config)] },
+        { name: "feedParticles", boxes: [getFeedParticlesBox(model, config)] },
+      ];
+    case "ghostArrival":
+      return ghostArrivalExtents(model, request, config);
+    case "candleFlicker":
+      return candleFlickerExtents(model, request, config);
   }
 }

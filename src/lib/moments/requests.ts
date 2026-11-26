@@ -4,6 +4,7 @@ import type { ActionContext, ActionOutcome, MomentRequest } from "./types";
 /** Number of done plan actions that completes the weekly plan. */
 const PLAN_COMPLETE_COUNT = 3;
 const REDUCE_SMALL_EXPENSES_KIND = "reduce_small_expenses";
+const FALLBACK_KIND = "fallback";
 
 function ownRequest(outcome: ActionOutcome, ctx: ActionContext): MomentRequest | null {
   switch (outcome.kind) {
@@ -19,15 +20,35 @@ function ownRequest(outcome: ActionOutcome, ctx: ActionContext): MomentRequest |
     case "payment":
       if (!(outcome.extraPrincipalCents > 0)) return null;
       return { kind: "payment", origin: outcome.origin, hasCrack: ctx.crackCount > 0 };
-    case "planToggle": {
-      if (!outcome.next || !ctx.poltergeistPresent) return null;
-      const action = ctx.planActions.find((a) => a.id === outcome.actionId);
-      if (!action || action.done || action.kind !== REDUCE_SMALL_EXPENSES_KIND) return null;
-      return { kind: "sigil" };
-    }
+    case "planToggle":
+      return planToggleRequest(outcome, ctx);
     case "expense":
-      return null;
+      return expenseRequest(outcome, ctx);
   }
+}
+
+function expenseRequest(
+  outcome: Extract<ActionOutcome, { kind: "expense" }>,
+  ctx: ActionContext,
+): MomentRequest | null {
+  if (!outcome.small) return null;
+  if (outcome.poltergeistAfter) return { kind: "poltergeistFeed", appeared: !ctx.poltergeistPresent };
+  return { kind: "ghostArrival", transactionId: outcome.transactionId };
+}
+
+function planToggleRequest(
+  outcome: Extract<ActionOutcome, { kind: "planToggle" }>,
+  ctx: ActionContext,
+): MomentRequest | null {
+  if (!outcome.next) return null;
+  const action = ctx.planActions.find((a) => a.id === outcome.actionId);
+  if (!action || action.done) return null;
+  const reducesSmallExpenses = action.kind === REDUCE_SMALL_EXPENSES_KIND;
+  if (reducesSmallExpenses && ctx.poltergeistPresent) return { kind: "sigil" };
+  if ((reducesSmallExpenses || action.kind === FALLBACK_KIND) && outcome.lightDelta > 0) {
+    return { kind: "candleFlicker", litWindows: ctx.litWindowCount > 0 };
+  }
+  return null;
 }
 
 /** The plan action the outcome newly marks as done, if any. */

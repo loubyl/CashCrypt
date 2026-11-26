@@ -40,7 +40,8 @@ const CAP_KEYS = [
 const BAD_CAPS = [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY] as const;
 const VIEWBOX_KEYS = ["VIEWBOX_WIDTH", "VIEWBOX_HEIGHT", "REFERENCE_WIDTH_PX"] as const;
 const BAD_VIEWBOX = [0, -10, Number.NaN, Number.POSITIVE_INFINITY] as const;
-const DURATION_KEYS = ["cancel", "payment", "sigil", "levelBetter", "levelWorse", "exorcismComplete"] as const;
+const DURATION_KEYS = ["cancel", "payment", "sigil", "levelBetter", "levelWorse", "exorcismComplete",
+  "poltergeistFeed", "poltergeistAppear", "ghostArrival", "candleFlicker"] as const;
 const BAD_FLARE = [0, -0.1, 1.01, 5, Number.NaN] as const;
 
 describe("Property 13: Config validation never throws and flags broken configs", () => {

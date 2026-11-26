@@ -224,55 +224,55 @@ Conventions that apply to every task:
     - In `scripts/check-moments.mjs`, add the design's `checkboxCancel` case: the dialog opens with the checkbox unchecked, the shovel assertions pass after confirming, the checkbox ends checked, and the toast reads "+$120/mo saved · Light +5.2".
     - _Requirements: 7.2, 14.8_
 
-- [ ] 4. Three new Moments
-  - [ ] 4.1 Extend the Moment types, planning and observer
+- [x] 4. Three new Moments
+  - [x] 4.1 Extend the Moment types, planning and observer
     - `src/lib/moments/types.ts`: add the `poltergeistFeed`, `ghostArrival` and `candleFlicker` requests, the `expense` outcome, `lightDelta` on `planToggle`, and `litWindowCount` on `ActionContext`.
     - `requests.ts`: add the planning rules of the design.
     - `useActionObserver.ts`: add the `expense` ObservedAction and its mapper.
     - `MomentHost`: build `litWindowCount`, add the `onPlanned` callback and the two new `shouldDrop` rules.
     - _Requirements: 4.1, 4.5, 4.8, 4.9, 8.1 to 8.3, 8.7, 11.1, 11.5_
 
-  - [ ] 4.2 Write the planning property and update `house-scene` Property 16
+  - [x] 4.2 Write the planning property and update `house-scene` Property 16
     - **Property 4: New Moment requests follow the outcome.** File: `tests/feedback/properties/p04-moment-planning.test.ts`.
     - Update `house-scene` Property 16's test for the `lightDelta` field. Keep its assertion that a fallback tick never yields `sigil`.
     - `tests/moments/requests.test.ts` examples: the level-4 $8 expense yields `poltergeistFeed { appeared: false }`; the level-2 expense yields `ghostArrival`; a $40 expense yields nothing; a level-1 fallback tick with delta 1 yields `candleFlicker { litWindows: true }`; its re-tick with delta 0 yields nothing.
     - **Validates: Requirements 4.1, 4.5, 4.8, 8.1 to 8.3**
 
-  - [ ] 4.3 Add the config and geometry of the new Moments
+  - [x] 4.3 Add the config and geometry of the new Moments
     - `src/lib/scene/config.ts`: add the four duration keys (`poltergeistFeed` 900, `poltergeistAppear` 1300, `ghostArrival` 800, `candleFlicker` 700) and the art constants, all checked by `validateSceneConfig`.
     - `momentGeometry.ts`: extend `getMomentExtents` for the new requests, with the clamp for the arrival rise.
     - Extend the `house-scene` Property 4 test (new request shapes at every level, every drawn ghost slot, the overflow marker, flicker with and without lit windows) and the Property 13 test (the new keys).
     - Add examples to `tests/scene/config.test.ts`: the feed extents x 149.5..354.5, y 23.5..228.5; the particles x 138..366, y 12..240; both inside the sigil extent.
     - _Requirements: 11.2, 11.3_
 
-  - [ ] 4.4 Share the creature shapes and add the feed wrapper
+  - [x] 4.4 Share the creature shapes and add the feed wrapper
     - Export `PoltergeistShape` from `Poltergeist.tsx` and `GhostShape` from `GhostSwarm.tsx`, so the Scene and the Moment art draw the same figures.
     - Wrap the glow and the body (not the sigil) in `<g data-part="poltergeist-feed">`.
     - All existing scene and ambient tests keep passing, and the ambient pulse still targets `poltergeist-body`.
     - _Requirements: 4.2, 11.6_
 
-  - [ ] 4.5 Implement the Poltergeist feed Moment
+  - [x] 4.5 Implement the Poltergeist feed Moment
     - `src/components/moments/PoltergeistFeedMoment.ts` (fed and appeared sequences), `FeedParticlesArt` and `PoltergeistCopyArt` in `MomentArt.tsx`, and the `momentLoader` import and duration mapping (`appeared` → `poltergeistAppear`).
     - Follow the `house-scene` contract exactly: one context and one timeline, `driveOnWallClock`, `stop` in both `finish` and `onAbort`, `progress(1)` on abort, and the cleanup registered.
     - Tests: `tests/ui/poltergeistFeedMoment.test.tsx` covers frames 1.5 s apart ending on schedule, the swell peak reaching `FEED_SCALE`, a bound Poltergeist ending bound with its ring unscaled, and abort ending at scale 1 with no art left.
     - _Requirements: 4.2, 4.4, 4.10, 11.1 to 11.4_
 
-  - [ ] 4.6 Implement the ghost arrival Moment
+  - [x] 4.6 Implement the ghost arrival Moment
     - `src/components/moments/GhostArrivalMoment.ts` with both the drawn and the overflow variants, `GhostCopyArt` and `MarkerPulseArt`, and the loader entry.
     - Tests: `tests/ui/ghostArrivalMoment.test.tsx` covers the wall-clock frames, the copy at the live rest point at the end, the overflow variant showing the live count and hiding the frozen marker for the duration, and abort leaving no art.
     - _Requirements: 4.5, 4.6, 4.7, 4.10, 11.1 to 11.4_
 
-  - [ ] 4.7 Implement the candle flicker Moment
+  - [x] 4.7 Implement the candle flicker Moment
     - `src/components/moments/CandleFlickerMoment.ts` with the lit and the no-lit-window variants, and `FlickerGlowArt`. Use the same window light selectors and `transition: none` handling and restore as `CandleOrbMoment`. Add the loader entry.
     - Tests: `tests/ui/candleFlickerMoment.test.tsx` covers the wall-clock frames, the dip to `FLICKER_DIP_RATIO` × frozen, the rise to the live opacity, the restored transitions, the glow variant at level 5 ending at opacity 0, and abort.
     - _Requirements: 8.4, 8.5, 8.6, 11.1 to 11.4_
 
-  - [ ] 4.8 Add the Poltergeist banner pulse
+  - [x] 4.8 Add the Poltergeist banner pulse
     - `PoltergeistBanner`: add `pulseKey` and the `data-part="banner-amount"` emphasis over `BANNER_HIGHLIGHT_MS`, with nothing under reduced motion. `Dashboard`: bump the key from `MomentHost.onPlanned` when a `poltergeistFeed` is planned.
     - Tests in `tests/ui/poltergeistBanner.test.tsx`: the key change starts the emphasis; reduced motion does nothing; a ghost arrival does not change the key.
     - _Requirements: 4.3, 4.9_
 
-  - [ ] 4.9 Write the Dashboard Moment integration tests
+  - [x] 4.9 Write the Dashboard Moment integration tests
     - `tests/ui/dashboardNewMoments.test.tsx` (GSAP mocked, as in `house-scene`):
       - The level-4 small expense enqueues `poltergeistFeed`, and the level-2 one enqueues `ghostArrival`.
       - A $40 expense enqueues nothing, and so does an expense added on `/transactions`.
@@ -281,7 +281,7 @@ Conventions that apply to every task:
       - Reduced motion creates no timeline.
     - _Requirements: 4.1, 4.5, 4.8, 4.9, 4.10, 8.2, 8.3, 11.5, 14.4_
 
-  - [ ] 4.10 Add the Moment browser checks
+  - [x] 4.10 Add the Moment browser checks
     - In `scripts/check-moments.mjs`, add the `PART_OWNER` entries, the sampler fields and the `feed`, `ghostArrival` and `candleFlicker` cases of the design. `feed` types the amount without a click, so it also checks task 1.
     - Run every case, old and new, at `RAF_THROTTLE_MS=0` and `700`, and report the numbers.
     - _Requirements: 14.8_

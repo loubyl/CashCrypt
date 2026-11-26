@@ -53,11 +53,64 @@ const EYE = { rx: 0.12, ry: 0.17 } as const;
 const MOUTH = { cx: 0, cy: 0.06, rx: 0.08, ry: 0.1 } as const;
 const SIGIL_TICK_ANGLES = Array.from({ length: SIGIL_TICKS }, (_, index) => (FULL_TURN_DEG / SIGIL_TICKS) * index);
 
+export type PoltergeistShapeProps = {
+  poltergeist: ScenePoltergeist;
+  filterIds: SceneFilterIds;
+  /** False for copies drawn by Moment art, so the ambient loops never pick them up. */
+  ambient?: boolean;
+};
+
+/** Glow and body of the spirit, centered on the origin of its parent. Shared by the Scene and the Moment art. */
+export function PoltergeistShape({ poltergeist, filterIds, ambient = true }: PoltergeistShapeProps) {
+  const { sizeUnits, state } = poltergeist;
+  const radius = sizeUnits / HALF;
+  const bound = state === "bound";
+  return (
+    <>
+      <circle
+        data-part="poltergeist-glow"
+        r={radius * GLOW_RATIO}
+        fill={TOKEN.spirit}
+        opacity={bound ? GLOW_OPACITY / HALF : GLOW_OPACITY}
+        filter={`url(#${filterIds.halo})`}
+      />
+      <g
+        data-part="poltergeist-body"
+        data-ambient={bound || !ambient ? undefined : "poltergeist"}
+        opacity={bound ? BOUND_OPACITY : BODY_OPACITY}
+      >
+        <g transform={`scale(${radius})`}>
+          <g data-part="poltergeist-swirl" data-ambient={bound || !ambient ? undefined : "poltergeist-swirl"}>
+            <circle
+              r={SWIRL_RADIUS}
+              fill="none"
+              stroke={TOKEN.spirit}
+              strokeWidth={SWIRL_WIDTH}
+              strokeDasharray={SWIRL_DASH}
+              strokeLinecap="round"
+              opacity={SWIRL_OPACITY}
+            />
+          </g>
+          <path d={SPIRIT_BODY} fill={TOKEN.spirit} />
+          <path d={SPIRIT_BODY} fill="none" stroke={TOKEN.ink} strokeWidth={RIM_WIDTH} opacity={RIM_OPACITY} />
+          <ellipse cx={0} cy={-0.2} rx={0.44} ry={0.4} fill={TOKEN.ink} opacity={CORE_OPACITY} />
+          {WISPS.map((wisp) => (
+            <circle key={wisp.cx} cx={wisp.cx} cy={wisp.cy} r={wisp.r} fill={TOKEN.spirit} opacity={wisp.opacity} />
+          ))}
+          {EYES.map((eye) => (
+            <ellipse key={eye.cx} cx={eye.cx} cy={eye.cy} rx={EYE.rx} ry={EYE.ry} fill={TOKEN.void} />
+          ))}
+          <ellipse cx={MOUTH.cx} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={TOKEN.void} />
+        </g>
+      </g>
+    </>
+  );
+}
+
 type PoltergeistFigureProps = { poltergeist: ScenePoltergeist; filterIds: SceneFilterIds };
 
 function PoltergeistFigureBase({ poltergeist, filterIds }: PoltergeistFigureProps) {
-  const { center, sizeUnits, sigil, state } = poltergeist;
-  const radius = sizeUnits / HALF;
+  const { center, sigil, state } = poltergeist;
   const bound = state === "bound";
   return (
     <g data-part="poltergeist" data-state={state} transform={`translate(${center.x} ${center.y})`}>
@@ -85,41 +138,8 @@ function PoltergeistFigureBase({ poltergeist, filterIds }: PoltergeistFigureProp
           ))}
         </g>
       ) : null}
-      <circle
-        data-part="poltergeist-glow"
-        r={radius * GLOW_RATIO}
-        fill={TOKEN.spirit}
-        opacity={bound ? GLOW_OPACITY / HALF : GLOW_OPACITY}
-        filter={`url(#${filterIds.halo})`}
-      />
-      <g
-        data-part="poltergeist-body"
-        data-ambient={bound ? undefined : "poltergeist"}
-        opacity={bound ? BOUND_OPACITY : BODY_OPACITY}
-      >
-        <g transform={`scale(${radius})`}>
-          <g data-part="poltergeist-swirl" data-ambient={bound ? undefined : "poltergeist-swirl"}>
-            <circle
-              r={SWIRL_RADIUS}
-              fill="none"
-              stroke={TOKEN.spirit}
-              strokeWidth={SWIRL_WIDTH}
-              strokeDasharray={SWIRL_DASH}
-              strokeLinecap="round"
-              opacity={SWIRL_OPACITY}
-            />
-          </g>
-          <path d={SPIRIT_BODY} fill={TOKEN.spirit} />
-          <path d={SPIRIT_BODY} fill="none" stroke={TOKEN.ink} strokeWidth={RIM_WIDTH} opacity={RIM_OPACITY} />
-          <ellipse cx={0} cy={-0.2} rx={0.44} ry={0.4} fill={TOKEN.ink} opacity={CORE_OPACITY} />
-          {WISPS.map((wisp) => (
-            <circle key={wisp.cx} cx={wisp.cx} cy={wisp.cy} r={wisp.r} fill={TOKEN.spirit} opacity={wisp.opacity} />
-          ))}
-          {EYES.map((eye) => (
-            <ellipse key={eye.cx} cx={eye.cx} cy={eye.cy} rx={EYE.rx} ry={EYE.ry} fill={TOKEN.void} />
-          ))}
-          <ellipse cx={MOUTH.cx} cy={MOUTH.cy} rx={MOUTH.rx} ry={MOUTH.ry} fill={TOKEN.void} />
-        </g>
+      <g data-part="poltergeist-feed">
+        <PoltergeistShape poltergeist={poltergeist} filterIds={filterIds} />
       </g>
     </g>
   );

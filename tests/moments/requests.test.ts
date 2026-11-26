@@ -13,6 +13,7 @@ function context(overrides: Partial<ActionContext> = {}): ActionContext {
     poltergeistPresent: true,
     drawnZombieIds: ["sub-1"],
     crackCount: 2,
+    litWindowCount: 2,
     subscriptionNames: { "sub-1": "StreamMax", "sub-2": "Gym" },
     planActions: [
       { id: "a1", kind: "cancel_subscription", done: true },
@@ -91,6 +92,42 @@ describe("planMoments for plan toggles", () => {
   it("adds the plan-complete Moment after a payment that completes the third action", () => {
     const paid: ActionOutcome = { kind: "payment", extraPrincipalCents: 100, completedActionId: "a3", origin: ORIGIN };
     expect(planMoments(paid, context()).map((r) => r.kind)).toEqual(["payment", "exorcismComplete"]);
+  });
+});
+
+describe("planMoments for expenses and fallback ticks", () => {
+  const expense = (over: Partial<Extract<ActionOutcome, { kind: "expense" }>> = {}): ActionOutcome => ({
+    kind: "expense",
+    transactionId: "t1",
+    small: true,
+    poltergeistAfter: true,
+    ...over,
+  });
+  const fallbackCtx = context({
+    level: 1,
+    poltergeistPresent: false,
+    planActions: [{ id: "f1", kind: "fallback", done: false }],
+  });
+  const tick = (lightDelta: number): ActionOutcome => ({ kind: "planToggle", actionId: "f1", next: true, lightDelta });
+
+  it("feeds the existing Poltergeist for a small expense at level 4", () => {
+    expect(planMoments(expense(), context())).toEqual([{ kind: "poltergeistFeed", appeared: false }]);
+  });
+
+  it("plans a ghost arrival for a small expense at level 2 without a Poltergeist", () => {
+    const ctx = context({ level: 2, poltergeistPresent: false });
+    expect(planMoments(expense({ poltergeistAfter: false }), ctx)).toEqual([
+      { kind: "ghostArrival", transactionId: "t1" },
+    ]);
+  });
+
+  it("plans nothing for a $40 expense", () => {
+    expect(planMoments(expense({ small: false }), context())).toEqual([]);
+  });
+
+  it("flickers lit windows for a level-1 fallback tick with delta 1, and nothing for its re-tick with delta 0", () => {
+    expect(planMoments(tick(1), fallbackCtx)).toEqual([{ kind: "candleFlicker", litWindows: true }]);
+    expect(planMoments(tick(0), fallbackCtx)).toEqual([]);
   });
 });
 

@@ -30,6 +30,9 @@ const MOMENT_IMPORTS: Partial<Record<MomentKind, () => Promise<MomentPlayer>>> =
   cancel: () => import("./ShovelMoment").then((module) => module.playShovelMoment),
   payment: () => import("./CandleOrbMoment").then((module) => module.playCandleOrbMoment),
   sigil: () => import("./SigilMoment").then((module) => module.playSigilMoment),
+  poltergeistFeed: () => import("./PoltergeistFeedMoment").then((module) => module.playPoltergeistFeedMoment),
+  ghostArrival: () => import("./GhostArrivalMoment").then((module) => module.playGhostArrivalMoment),
+  candleFlicker: () => import("./CandleFlickerMoment").then((module) => module.playCandleFlickerMoment),
   level: () => import("./LevelChangeMoment").then((module) => module.playLevelChangeMoment),
   exorcismComplete: () => import("./ThreeCandlesMoment").then((module) => module.playThreeCandlesMoment),
 };
@@ -39,6 +42,8 @@ export function getDurationKey(request: MomentRequest): MomentDurationKey {
   switch (request.kind) {
     case "level":
       return request.to < request.from ? "levelBetter" : "levelWorse";
+    case "poltergeistFeed":
+      return request.appeared ? "poltergeistAppear" : "poltergeistFeed";
     default:
       return request.kind;
   }

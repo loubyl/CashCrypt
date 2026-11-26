@@ -11,6 +11,9 @@ export type MomentRequest =
   | { kind: "cancel"; subscriptionId: string; name: string; monthlyCents: number; target: CancelTarget }
   | { kind: "payment"; origin: RectLike | null; hasCrack: boolean }
   | { kind: "sigil" }
+  | { kind: "poltergeistFeed"; appeared: boolean }
+  | { kind: "ghostArrival"; transactionId: string }
+  | { kind: "candleFlicker"; litWindows: boolean }
   | { kind: "exorcismComplete" }
   | { kind: "level"; from: DecayLevel; to: DecayLevel };
 
@@ -41,6 +44,8 @@ export type ActionContext = {
   poltergeistPresent: boolean;
   drawnZombieIds: readonly string[];
   crackCount: number;
+  /** Windows with candlelight opacity above 0. */
+  litWindowCount: number;
   subscriptionNames: Readonly<Record<string, string>>;
   planActions: readonly PlanActionView[];
 };

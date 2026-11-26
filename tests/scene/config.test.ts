@@ -17,6 +17,8 @@ import {
   getSigilExtent,
   validateSceneConfig,
 } from "@/lib/scene/config";
+import { buildSceneModel } from "@/lib/scene";
+import { getMomentExtents } from "@/lib/scene/momentGeometry";
 import { getWindowOpacity } from "@/lib/scene/windows";
 
 type Mutable = Record<string, unknown>;
@@ -204,5 +206,50 @@ describe("sigil geometry", () => {
     expect(movedExtent.top).toBeLessThan(0);
     const problems = problemsOf({ POLTERGEIST_CENTER: moved });
     expect(problems.join("\n")).toContain("the sigil, with stroke, glow padding and shake, must lie inside the ViewBox");
+  });
+});
+
+describe("feed Moment extents and config", () => {
+  const model = buildSceneModel({
+    houseState: {
+      lightScore: 30, baseScore: 30, momentum: 0, decayLevel: 4, windowBrightness: 0.3, levelProgress: 0.5,
+      zombies: [], ghosts: [],
+      poltergeist: { byCategory: { coffee: 100 }, transactionCount: 1, totalAmount: 100 },
+    },
+    monthlyIncomeCents: 100000,
+    graveyard: [],
+    bound: false,
+  });
+  const extents = getMomentExtents(model, { kind: "poltergeistFeed", appeared: false });
+  const glow = extents.find((e) => e.name === "feedGlow")?.boxes[0];
+  const particles = extents.find((e) => e.name === "feedParticles")?.boxes[0];
+  const sigil = getSigilExtent(POLTERGEIST_CENTER, SIGIL_DIAMETER, SIGIL_STROKE, SIGIL_GLOW_PAD, SIGIL_SHAKE);
+
+  it("puts the swelling glow at x 149.5 to 354.5 and y 23.5 to 228.5", () => {
+    expect(glow).toEqual({ x: 149.5, y: 23.5, w: 205, h: 205 });
+  });
+
+  it("puts the particles at x 138 to 366 and y 12 to 240", () => {
+    expect(particles).toEqual({ x: 138, y: 12, w: 228, h: 228 });
+  });
+
+  it("keeps both inside the sigil extent", () => {
+    for (const box of [glow, particles]) {
+      expect(box).toBeDefined();
+      if (!box) continue;
+      expect(box.x).toBeGreaterThanOrEqual(sigil.left);
+      expect(box.y).toBeGreaterThanOrEqual(sigil.top);
+      expect(box.x + box.w).toBeLessThanOrEqual(sigil.right);
+      expect(box.y + box.h).toBeLessThanOrEqual(sigil.bottom);
+    }
+  });
+
+  it("reports the new duration keys and art constants when they are broken", () => {
+    const durations = { ...SCENE_CONFIG.MOMENT_DURATION_MS, candleFlicker: 300 };
+    expect(problemsOf({ MOMENT_DURATION_MS: durations }).join("\n")).toContain("MOMENT_DURATION_MS.candleFlicker");
+    expect(problemsOf({ FEED_SCALE: 0.5 }).join("\n")).toContain("FEED_SCALE");
+    expect(problemsOf({ FEED_PARTICLES: 0 }).join("\n")).toContain("FEED_PARTICLES");
+    expect(problemsOf({ FLICKER_DIP_RATIO: 1 }).join("\n")).toContain("FLICKER_DIP_RATIO");
+    expect(problemsOf({ GHOST_ARRIVAL_RISE: -1 }).join("\n")).toContain("GHOST_ARRIVAL_RISE");
   });
 });
