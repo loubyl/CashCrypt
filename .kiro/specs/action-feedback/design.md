@@ -537,7 +537,7 @@ Markup (one `h1`, one primary Button):
 ```
 
 Three lines:
-- "Debt dims the house. Paying it down brings the light back."
+- "Debt darkens the house. Paying it down brings the light back."
 - "Subscriptions become zombies, and small expenses become ghosts that can merge into a Poltergeist."
 - "Every week, a three-step exorcism plan tells you what to do next."
 

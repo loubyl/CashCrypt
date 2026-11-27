@@ -206,7 +206,7 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 #### Acceptance Criteria
 
 1. WHILE no Active_Crypt exists, THE Landing Screen SHALL show, in this reading order: the "CashCrypt" wordmark `h1`, the one-line pitch of `app-screens` Requirement 20.1, the two Buttons of `app-screens` Requirement 20 (with "Continue to my crypt" in place of "Start my own crypt" when a Real_Crypt Profile exists), the Landing_Preview and three short lines on how the game works. The visual order MAY place the Landing_Preview beside the text from 1024px.
-2. THE three lines SHALL say, in plain language: debt dims the house and paying it down brings the light back; subscriptions are zombies and small expenses are ghosts that can merge into a Poltergeist; a weekly exorcism plan gives three actions to do next.
+2. THE three lines SHALL say, in plain language: debt darkens the house and paying it down brings the light back; subscriptions are zombies and small expenses are ghosts that can merge into a Poltergeist; a weekly exorcism plan gives three actions to do next.
 3. THE Landing_Preview SHALL be built from the `level-4` Demo_Scenario seed in memory, through the Snapshot_Adapter, `computeHouseState` and the Scene_Builder, with the Preview_Date as "now", so that it shows the level-4 demo look (Crumbling, five zombies, the Poltergeist awake).
 4. THE Landing_Preview SHALL open no Crypt, SHALL write nothing to IndexedDB or `localStorage`, SHALL read no clock, and SHALL render identical markup on the server and on the client.
 5. THE Landing_Preview SHALL draw the static Scene only: no ambient loop, no Moment, no Moment_Target, and no GSAP module loaded by the Landing route.

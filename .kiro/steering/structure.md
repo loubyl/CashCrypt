@@ -2,7 +2,7 @@
 
 ## Directory Layout
 
-The tree below is the target layout. Built so far: `src/app/` (root layout, `globals.css`, `/styleguide`, and the `(app)` route group with `/`, `/transactions`, `/subscriptions`, `/debts`, `/exorcism` and `/settings`), `src/components/{ui,styleguide,shell,common,landing,dashboard,sheets,screens,demo,exorcism,house,moments}/`, `src/hooks/`, `src/types/`, `src/lib/{haunting,exorcism,db,demo,validation,utils,scene,moments}/`, and the tests in `tests/{haunting,exorcism,db,demo,validation,design-system,ui,utils,scene,moments}/`. The house scene is built: `HouseScene` is mounted on the Dashboard, and the moment modules (`ShovelMoment`, `CandleOrbMoment`, `SigilMoment`, `ThreeCandlesMoment`, `LevelChangeMoment`) are `.ts` files loaded lazily through `momentLoader.ts`. The old `ScenePlaceholder.tsx` was deleted. Not built yet: `src/components/{transactions,subscriptions,debts}/` feature folders, `src/components/settings/`, the spirit-jar moment, and CSV import. The settings screen lives in `src/components/screens/SettingsScreen.tsx`.
+The tree below is the target layout. Built so far: `src/app/` (root layout, `globals.css`, `/styleguide`, and the `(app)` route group with `/`, `/transactions`, `/subscriptions`, `/debts`, `/exorcism` and `/settings`), `src/components/{ui,styleguide,shell,common,landing,dashboard,sheets,screens,demo,exorcism,feedback,house,moments}/`, `src/hooks/`, `src/types/`, `src/lib/{haunting,exorcism,db,demo,validation,utils,scene,moments}/`, and the tests in `tests/{haunting,exorcism,db,demo,validation,design-system,ui,utils,scene,moments,feedback}/`. The house scene is built: `HouseScene` is mounted on the Dashboard, and the moment modules (`ShovelMoment`, `CandleOrbMoment`, `SigilMoment`, `ThreeCandlesMoment`, `LevelChangeMoment`, `PoltergeistFeedMoment`, `GhostArrivalMoment`, `CandleFlickerMoment`) are `.ts` files loaded lazily through `momentLoader.ts`. Action feedback is built: toasts with a measured light clause (`src/lib/utils/lightClause.ts`), the row highlight (`src/components/feedback/`), the Dashboard `CryptGuide`, and the Landing demo preview (`src/lib/demo/preview.ts`). The old `ScenePlaceholder.tsx` was deleted. Not built yet: `src/components/{transactions,subscriptions,debts}/` feature folders, `src/components/settings/`, the spirit-jar moment, and CSV import. The settings screen lives in `src/components/screens/SettingsScreen.tsx`.
 
 Test convention: property-based tests live in `tests/<area>/properties/pNN-<slug>.test.ts`, one file per numbered design property, tagged `// Feature: <spec>, Property N: <text>` (for example `tests/db/properties/p07-log-payment.test.ts`). Example-based tests stay beside them in `tests/<area>/`.
 
@@ -60,6 +60,9 @@ CashCrypt/
 │   │   │   ├── SigilMoment.ts          # Poltergeist bound → sigil circle draw
 │   │   │   ├── ThreeCandlesMoment.ts   # Weekly plan completed → three candles light
 │   │   │   ├── LevelChangeMoment.ts    # Decay level improves (dawn) or worsens (creak)
+│   │   │   ├── PoltergeistFeedMoment.ts # Small expense feeds (or wakes) the Poltergeist
+│   │   │   ├── GhostArrivalMoment.ts   # Small expense adds a ghost (or pulses the overflow marker)
+│   │   │   ├── CandleFlickerMoment.ts  # Fallback plan action ticked → windows flicker
 │   │   │   ├── MomentArt.tsx           # SVG art shared by the moments (shovel, tombstone, flame, orb, sigil, candles)
 │   │   │   ├── MomentHost.tsx          # Moment_Layer: runs the queue, skip on click or Esc
 │   │   │   ├── momentLoader.ts         # Lazy registry of the play modules
@@ -80,14 +83,19 @@ CashCrypt/
 │   │   ├── landing/
 │   │   │   └── Landing.tsx     # Home with no Active_Crypt
 │   │   ├── dashboard/
+│   │   │   ├── CryptGuide.tsx  # Next-step guide card on the Dashboard
 │   │   │   ├── Dashboard.tsx
 │   │   │   └── PoltergeistBanner.tsx
+│   │   ├── feedback/           # Action feedback: toasts and row highlight
+│   │   │   ├── RowHighlightProvider.tsx # Pending highlight, useRequestHighlight, useRowHighlight
+│   │   │   └── useActionToast.ts       # Toast with light clause and "View" action
 │   │   ├── sheets/             # BottomSheet-based forms and confirmations
 │   │   │   ├── OnboardingSheet.tsx
 │   │   │   ├── LogPaymentSheet.tsx
 │   │   │   ├── AddExpenseSheet.tsx
 │   │   │   ├── CancelSubscriptionSheet.tsx
-│   │   │   └── DeleteConfirmSheet.tsx
+│   │   │   ├── DeleteConfirmSheet.tsx
+│   │   │   └── useFocusFirstInvalid.ts # Focuses the first invalid Field after a failed submit
 │   │   ├── screens/            # One Client Component per route, rendered by the page files
 │   │   │   ├── HomeScreen.tsx
 │   │   │   ├── TransactionsScreen.tsx
@@ -158,6 +166,7 @@ CashCrypt/
 │   │   │   ├── requests.ts     # Builds moment requests from user actions and level changes
 │   │   │   └── types.ts
 │   │   ├── demo/
+│   │   │   ├── preview.ts      # Landing preview of the demo house (no Dexie)
 │   │   │   ├── seed.ts         # Five named demo scenarios (one per decay level)
 │   │   │   └── service.ts      # Load a scenario, skip a week, reset (Demo_Crypt only)
 │   │   ├── validation/         # Pure input validators (never throw; no React, Dexie or Next)
@@ -173,7 +182,9 @@ CashCrypt/
 │   │       ├── score.ts            # Score clamping, fill percent, score text and breakdown
 │   │       ├── delta.ts            # Delta chip presentation (sign, icon, tone)
 │   │       ├── segmentedNav.ts     # Arrow/Home/End navigation over enabled segments
-│   │       ├── focusTrap.ts        # Focusable selector, next focus index, inert skip rule
+│   │       ├── focusTrap.ts        # Focusable selector, initial focus rule, next focus index, inert skip rule
+│   │       ├── lightClause.ts      # Toast light clause ("Light +5.2") and ghost clause
+│   │       ├── destinations.ts     # Highlight targets: paths, labels, row DOM ids
 │   │       └── toastReducer.ts     # Toast queue reducer and live-region choice
 │   │
 │   ├── hooks/                  # Custom React hooks
@@ -225,6 +236,8 @@ CashCrypt/
 │   │   ├── setup.ts            # Vitest setup file: jest-dom, cleanup, matchMedia stub, reduced-motion mock
 │   │   ├── helpers/            # axe.ts, crypt.tsx, motion.ts, viewport.ts
 │   │   └── *.test.ts(x)        # One file per primitive, plus styleguide, screen, sheet and hook tests
+│   ├── feedback/               # Action feedback: clause, destinations, guide step, preview
+│   │   └── properties/         # p01–p07
 │   └── utils/                  # Unit tests for src/lib/utils/ (one file per helper)
 │       └── properties/         # p01–p03, p24–p28
 │

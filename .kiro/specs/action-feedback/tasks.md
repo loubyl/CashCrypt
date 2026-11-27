@@ -401,8 +401,8 @@ Conventions that apply to every task:
     - Update the Dashboard test to assert exactly three QuickActions in this order.
     - _Requirements: 10.1, 10.2, 10.3, 14.6_
 
-- [ ] 9. Documentation for the other specs and steering
-  - [ ] 9.1 Update `design-system.md` and `visual-language.md`
+- [x] 9. Documentation for the other specs and steering
+  - [x] 9.1 Update `design-system.md` and `visual-language.md`
     - `design-system.md`:
       - Add the four new moment catalog rows (Poltergeist fed 900 ms, Poltergeist wakes 1300 ms, Ghost arrives 800 ms, Candle flicker 700 ms).
       - QuickAction: "Row of 3 under the hero: Log payment, Add expense, Exorcise". An unavailable QuickAction uses `aria-disabled` and stays focusable.
@@ -412,13 +412,13 @@ Conventions that apply to every task:
     - `visual-language.md`: timing rows for the new Moments, and the feed swell in the Poltergeist movement notes.
     - _Requirements: 13.2, 13.3_
 
-  - [ ] 9.2 Mark superseded criteria in `app-screens` and update `house-scene`
+  - [x] 9.2 Mark superseded criteria in `app-screens` and update `house-scene`
     - `.kiro/specs/app-screens/requirements.md`: add a "Superseded by action-feedback" note on 20.8, 21.5, 21.9, 22.8, 22.12, the "Plan actions do the work" decision, and the toast criteria 22.3, 23.6, 23.8, 23.12, 24.10, 25.5, 26.6, 26.9 and 27.1.
     - `.kiro/specs/house-scene/requirements.md`: 12.5 lists the new kinds as own Moments, and 18.1 applies while the Guide is hidden.
     - `.kiro/specs/house-scene/design.md`: add a short pointer to the new request kinds and to the extended Properties 4, 13 and 16.
     - _Requirements: 13.1, 13.4_
 
-  - [ ] 9.3 Update `structure.md` and the README
+  - [x] 9.3 Update `structure.md` and the README
     - `structure.md`: add `src/components/feedback/`, `CryptGuide.tsx`, `src/lib/demo/preview.ts`, `src/lib/utils/{lightClause,destinations}.ts`, the three Moment files, `src/components/sheets/useFocusFirstInvalid.ts` and `tests/feedback/`.
     - Check `README.md` for the Landing styleguide link and the four QuickActions, and update them.
     - _Requirements: 13.1_

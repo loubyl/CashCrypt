@@ -571,6 +571,59 @@
         "chatSessionId": "sess_07611b5f-c45d-4fc7-971d-d5a75f0d52ee",
         "timestamp": 1795761317251
       }
+    ],
+    "9.1 Update `design-system.md` and `visual-language.md`": [
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762716871
+      },
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762832914
+      },
+      {
+        "executionId": "cfa0399f-b7ef-4f9a-8a2d-44093c0331ae",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762888752
+      },
+      {
+        "executionId": "cfa0399f-b7ef-4f9a-8a2d-44093c0331ae",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762963810
+      }
+    ],
+    "9.2 Mark superseded criteria in `app-screens` and update `house-scene`": [
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762717609
+      },
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762834234
+      }
+    ],
+    "9.3 Update `structure.md` and the README": [
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762718407
+      },
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762834574
+      }
+    ],
+    "9. Documentation for the other specs and steering": [
+      {
+        "executionId": "cdb2de4c-d9ec-4ac8-af13-b31b1ce8f2d5",
+        "chatSessionId": "sess_4ea9fca1-b3c0-485e-80ca-08640b282735",
+        "timestamp": 1795762834616
+      }
     ]
   }
 }

@@ -164,6 +164,7 @@ The window fill is `--accent-candle` at full opacity (level 1) down to 0% (level
 - Its dashed smoke swirl rotates slowly (full 360° over 8s); the body itself does not rotate, because it has a face and a tail.
 - Pulses in scale: 1.0 → 1.08 → 1.0, period 1.5s.
 - Emits small particle dots in `--accent-spirit` that drift outward and fade.
+- Feed swell: when a small expense is added on the Dashboard, the body and glow scale to 1.15× on top of the ambient pulse over 300ms (`power2.out`), hold for a 300ms beat while eight spirit particles burst out and fade, then settle back over 300ms (`power2.inOut`), 900ms in total. A bound Poltergeist keeps its sigil ring drawn and ends bound. When the Poltergeist first appears, the ghosts fade out as a copy of it fades in, then the same swell plays (1300ms).
 
 **Exorcism**
 - Handled by the SigilMoment (see `design-system.md` → Moment catalog).
@@ -199,6 +200,10 @@ The scene is animated exclusively with GSAP (see `design-system.md` → Implemen
 | House light flicker | 200ms per flicker | `none` |
 | Poltergeist pulse | 1500ms loop | `power2.inOut` |
 | Window brightness interpolation | 600ms | `power2.out` |
+| Poltergeist fed (feed swell) | 900ms | `power2.out` up, `power2.inOut` back |
+| Poltergeist wakes (appear, then swell) | 1300ms | `power2.out` 400ms fade-in, then as the feed swell (3 × 300ms) |
+| Ghost arrives | 800ms | `power2.out` for the 400ms rise and fade-in, `power2.inOut` for the glow settle (the "+N" marker pulse: 300ms `power2.out` swell, `power2.inOut` settle) |
+| Candle flicker | 700ms | `none` for the dip, `power2.out` for the rise |
 
 ### `prefers-reduced-motion`
 

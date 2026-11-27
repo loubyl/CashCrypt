@@ -239,6 +239,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 3. WHEN a Mutation rejects, THE App SHALL create no Moment_Request.
 4. THE Moment_Queue SHALL play Moment_Requests one at a time in the order they were enqueued, and SHALL wait `MOMENT_GAP_MS` between two Moments.
 5. WHEN several Moment_Requests come from one user action, THE App SHALL enqueue them in this order: the action's own Moment, the exorcism-complete Moment, the level-change Moment.
+   - **Extended by action-feedback** (Requirements 8.7, 11 and 13.4): the action's own Moment also includes the `poltergeistFeed`, `ghostArrival` and `candleFlicker` kinds, ordered before the exorcism-complete and level-change Moments like the other own Moments.
 6. WHEN more than `MOMENT_QUEUE_MAX_PENDING` Moment_Requests are pending, THE Moment_Queue SHALL finish the oldest pending one at its End_State without animation, and WHEN two level-change requests are pending THE Moment_Queue SHALL merge them into one that goes to the latest level.
 7. THE Moment_Layer and the Scene overlay SHALL ignore pointer events and SHALL take no focus from the first frame, so that no Moment blocks input.
 8. WHILE a Moment plays, THE App SHALL accept user input at every moment, and SHALL show the toast and the changed chrome figures of the action immediately, without waiting for the Moment.
@@ -331,6 +332,7 @@ The static house with its five Decay_Levels is built and reviewed by hand in the
 #### Acceptance Criteria
 
 1. WHILE the viewport is 1280px wide and 720px tall, THE Dashboard SHALL show the whole Scene and the heading and three actions of the "This week's exorcism" card in the first viewport without scrolling, with a Scene width of at least `MIN_SCENE_WIDTH_DESKTOP_PX` (the layout of Requirement 22 criteria 8 to 10).
+   - **Clarified by action-feedback** (Requirements 5.13 and 13.4): this layout rule applies while the Guide is hidden. While the Guide is shown, the Scene and the Guide's first step must fit the first viewport.
 2. WHILE the viewport is 1280px wide, THE cancel Moment SHALL draw the shovel at least a quarter of the Scene height tall, the sinking Zombie large enough to show its usage badge, and the tombstone label at least `MIN_LABEL_PX` tall on screen.
 3. WHILE the viewport is 1280px wide, THE sigil Moment SHALL draw the circle with a diameter of at least 1.5 times the Poltergeist width.
 4. WHILE the viewport is 1280px wide, THE payment Moment SHALL draw the flame and orb at least 24px across, and, for the level-4 demo payment, the flare peak SHALL be at least `MIN_VISIBLE_WINDOW_DELTA` above the previous window opacity.

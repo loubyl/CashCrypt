@@ -17,7 +17,7 @@ const PITCH =
 const DEMO_ERROR = "The demo crypt could not be opened. Check that your browser allows local storage.";
 const HOW_HEADING_ID = "landing-how";
 const HOW_IT_WORKS_LINES = [
-  "Debt dims the house. Paying it down brings the light back.",
+  "Debt darkens the house. Paying it down brings the light back.",
   "Subscriptions become zombies, and small expenses become ghosts that can merge into a Poltergeist.",
   "Every week, a three-step exorcism plan tells you what to do next.",
 ] as const;

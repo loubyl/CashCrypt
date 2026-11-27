@@ -22,6 +22,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 - **Debt must always be addressed.** WHEN an `extra_payment` candidate exists, the plan always includes it. If it would rank below the top three, it takes the third slot and the other two slots keep their priority order (the best two non-extra-payment items). Rationale: interest saved understates the structural effect that paying principal has on the house, because principal lowers the debt balance factor of the light score (factor B) and the minimum-payment pressure, not only the interest bill. Ranking by interest saved alone would let small cancellations push debt out of the plan every week. The final list is still sorted by `priorityCents`, so the forced extra payment may appear last.
 - **Delta on the Dashboard.** "Delta since last week" is computed against the light score stored when the current Weekly_Plan was generated (the start of the Plan_Week), because past balances cannot be reconstructed from the current rows.
 - **Plan actions do the work.** For `cancel_subscription` and `extra_payment` actions, a "Do it" button opens the matching sheet pre-filled. The existing Mutations `cancelSubscription` and `logPayment` complete the matching action of the current Weekly_Plan in their own Dexie transaction (Requirement 8). Ticking stays available for every action, for things done outside the app. `fallback` and `reduce_small_expenses` actions are completed by ticking only. A completion creates at most one `exorcism_action_completed` Event per action, whichever way it happens.
+   - **Superseded by action-feedback** — Requirement 7: ticking an action that has a Do_It_Button now opens the same sheet as "Do it" and completes through Auto_Completion; the "tick for things done outside the app" rule no longer applies. Unticking and ticking an action without a Do_It_Button stay direct.
 - **Current week.** The "current week" of a Mutation is `getPlanWeekStart(now)`, with `now` being the Local_Date passed to that Mutation. A Mutation never generates a Weekly_Plan; when none exists for that week, no automatic completion happens.
 - **Extra-payment suggestion.** The planner suggests one extra payment, on the highest-APR debt, equal to 10% of monthly income rounded down to whole dollars (this yields $300 for the $3,000 persona). The Plan_Action stores this amount as `suggestedAmountCents`, and the "Do it" button pre-fills the Log payment sheet with the minimum monthly payment plus that amount, limited to the balance.
 - **Poltergeist action rounding.** The `reduce_small_expenses` action uses the Poltergeist excess (the 30-day small-expense total minus the Poltergeist threshold) rounded up to whole dollars, and the same rounded figure is used for the title, `priorityCents` and `monthlyAmountCents`, so that title and figures agree.
@@ -410,6 +411,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 6. WHEN a Real_Crypt Profile already exists and the Mode_Store is empty, THE Landing Screen SHALL show a "Continue to my crypt" Button that sets the Mode_Store to `real`.
 7. THE Landing Screen SHALL show exactly one primary Button.
 8. THE Landing Screen SHALL keep a link to `/styleguide`.
+   - **Superseded by action-feedback** — Requirement 9.10: the Landing no longer shows the styleguide link; the `/styleguide` route stays.
 
 ### Requirement 21: Dashboard
 
@@ -422,10 +424,13 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 3. WHEN the two floored scores are equal, THE Dashboard SHALL show no delta.
 4. THE Dashboard SHALL show a LightScoreBar with the light score, the base score and the momentum, so that the displayed breakdown reads like "39 = 33 base + 6 momentum". Because the BalanceHero in the same card already shows the score, the LightScoreBar SHALL show the distance from the displayed score to the next healthier level instead of a second score number ("17 to Level 2" at 43), and nothing in its place at level 1.
 5. THE Dashboard SHALL show four QuickActions in this order: "Log payment", "Add expense", "Import CSV" and "Exorcise".
+   - **Superseded by action-feedback** — Requirement 10.1 and 10.2: three QuickActions, "Log payment", "Add expense" and "Exorcise".
 6. WHEN the user activates "Log payment", THE Dashboard SHALL open the Log payment BottomSheet of Requirement 25, and WHEN there is no Debt with a balance above 0, THE QuickAction SHALL be disabled.
+   - **Superseded by action-feedback** — Requirement 15.5: an unavailable "Log payment" QuickAction uses `aria-disabled` and stays focusable instead of the `disabled` attribute.
 7. WHEN the user activates "Add expense", THE Dashboard SHALL open the Add expense BottomSheet of Requirement 26.
 8. WHEN the user activates "Exorcise", THE Dashboard SHALL navigate to `/exorcism`.
 9. WHILE CSV import is not implemented, THE "Import CSV" QuickAction SHALL be disabled.
+   - **Superseded by action-feedback** — Requirement 10.1: the "Import CSV" QuickAction is not rendered while CSV import is not implemented.
 10. THE Dashboard SHALL show a Card titled "This week's exorcism" with a "See all" action to `/exorcism` and three ExorcismActionRows from the stored Weekly_Plan, each with its title, subtitle and impact text, and with a Do_It_Button as defined in Requirement 22 criteria 9 to 11.
 11. WHILE the House_State has a Poltergeist, THE Dashboard SHALL show a warning banner built from a Card and a Chip with the text "A Poltergeist is haunting you: $X in small expenses in 30 days" with `$X` taken from `poltergeist.totalAmount`, and the banner SHALL include an icon and the text, not only a color.
 12. THE Dashboard SHALL show a Placeholder_Area that is labelled in visible text "House scene arrives in the next update" and that shows the decay level number and name ("Level 4 — Crumbling") as text.
@@ -442,15 +447,19 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 1. THE Exorcism Screen SHALL show the week's date range (Monday to Sunday) and a progress line "N of 3 done".
 2. THE Exorcism Screen SHALL show the three Plan_Actions of the stored Weekly_Plan as ExorcismActionRows in stored order, with impact text such as "+$120/mo" or "+$5.50/mo" for actions whose `monthlyAmountCents` is above 0.
 3. WHEN the user toggles an ExorcismActionRow, THE Exorcism Screen SHALL call the matching complete or uncomplete Mutation, and WHEN it completes an action the Screen SHALL show a success toast that states the money figure ("+$120/mo freed") or "Action completed" for an action with no amount.
+   - **Superseded by action-feedback** — Requirements 1.4 and 8: the completion toast ends with the Light_Clause ("+$60/mo freed · Light +1.0"), and ticking an action opens its sheet when it has a Do_It_Button (Requirement 7).
 4. THE Exorcism Screen SHALL show "Money freed this week" as the sum of `monthlyAmountCents` of the actions that are done, formatted as currency per month, next to "of $T/mo possible" where `$T` is the sum over all three actions.
 5. WHEN all three actions are done, THE Exorcism Screen SHALL show a Card with the candle-colored flame icon, the text "Exorcism complete. The lights flicker back on." and the week's result from floored scores, "Light score S → C · Level N — <name>", where S is the plan's `startLightScore`, C the current light score and N the current decay level ("Light score 32 → 43 · Level 3 — Haunted"). The Card SHALL appear inside a polite live region that is present before it appears, so screen readers announce it.
 6. WHILE a Mutation is running for a row, THE ExorcismActionRow SHALL be disabled.
+   - **Superseded by action-feedback** — Requirement 15.1 and 15.2: the checkbox stays focusable with `aria-disabled="true"` and `aria-busy="true"`, and further activations are ignored, instead of the `disabled` attribute.
 7. IF a Mutation fails, THEN THE Exorcism Screen SHALL leave the row state unchanged and SHALL show an error toast with the message "Could not save that action. Try again."
 8. WHILE at least one action is not done, THE Exorcism Screen SHALL show a short explanation under the list: "Tap Do it to make the change here, or tick an action you did somewhere else." WHEN all three actions are done, THE explanation SHALL be hidden.
+   - **Superseded by action-feedback** — Requirement 7.8: the text is "Ticking a cancel or a payment opens its sheet, so the change is recorded here."
 9. WHILE a `cancel_subscription` or `extra_payment` Plan_Action is not done and its target still qualifies (the Subscription exists and is active, or the Debt exists and its balance is above 0; `getDoItTarget` returns null for a deleted target), THE ExorcismActionRow area SHALL show a secondary "Do it" Button with the accessible name "Do it: <action title>", on the Exorcism Screen and on the Dashboard plan card.
 10. WHEN the user activates the Do_It_Button of a `cancel_subscription` action, THE Screen SHALL open the cancel confirmation BottomSheet of Requirement 23 criterion 5 for that Subscription, and WHEN the user activates the Do_It_Button of an `extra_payment` action, THE Screen SHALL open the Log payment BottomSheet of Requirement 25 for that Debt, pre-filled with the Debt's minimum monthly payment plus the action's `suggestedAmountCents`, limited to the Debt balance.
 11. WHEN the sheet opened by a Do_It_Button completes its Mutation, THE Screen SHALL show the toast of that Mutation, SHALL show the Plan_Action as done through Auto_Completion without a page reload, and SHALL NOT show a second toast for the completion.
 12. THE Exorcism Screen SHALL keep the checkbox of every Plan_Action usable, including those with a Do_It_Button, so that the user can tick actions done outside the App.
+   - **Superseded by action-feedback** — Requirement 7.1 to 7.7: the checkbox of an action with a Do_It_Button opens its sheet and becomes checked only after the Mutation succeeds; it is no longer a way to record changes made outside the App.
 13. THE Exorcism Screen SHALL render no more than one primary Button.
 14. WHEN a Plan_Action is done, THE ExorcismActionRow SHALL show "Done <Mon D>" from its `completedOn` (for example "Done Nov 19", formatted with `formatMonthDay`) instead of its instruction subtitle, on the Exorcism Screen and on the Dashboard plan Card.
 
@@ -466,12 +475,15 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 4. WHEN the user selects a Subscription row, THE Subscriptions Screen SHALL open a BottomSheet that shows its details (the monthly cost "$60/mo", plus a cadence line with the original amount only when the cadence is not monthly, for example "Yearly · $120 per year"), a SegmentedControl to change the usage and a primary "Cancel subscription" Button (canceling a zombie is the good action; the `danger` variant is only for destructive data actions such as deleting a row).
 5. WHEN the user activates "Cancel subscription", or activates the Do_It_Button of a `cancel_subscription` Plan_Action, THE App SHALL ask for confirmation in a BottomSheet that states "Cancel Wraithcast — saves $120/mo" with a secondary "Keep it" Button and a primary "Cancel subscription" Button.
 6. WHEN the user confirms, THE Subscriptions Screen SHALL call `cancelSubscription` and SHALL show a success toast "+$120/mo saved" with the exact monthly cost.
+   - **Superseded by action-feedback** — Requirement 1.3: the toast reads "+$120/mo saved · Light +5.2" (base text plus the Light_Clause).
 7. THE Subscriptions Screen SHALL show a "Graveyard" Card that lists every inactive Subscription as a ListRow with its name, "R.I.P. $X/mo" and the cancellation date, and WHEN the list is empty THE Card SHALL show "No tombstones yet. Suspiciously quiet."
 8. WHEN the user selects a graveyard row, THE Subscriptions Screen SHALL offer a secondary "Bring it back" Button (reviving a zombie is allowed but not encouraged, so it is not a primary Button) that calls `reactivateSubscription` and SHALL show a toast that states the monthly cost returning.
+   - **Superseded by action-feedback** — Requirements 1.1 and 1.5: the toast ends with the Light_Clause, and Requirement 3 adds "View" and the Row_Highlight.
 9. WHEN there are no active Subscriptions, THE Subscriptions Screen SHALL show the empty state "No zombies in the basement. Suspiciously quiet."
 10. THE Subscriptions Screen SHALL show the total monthly cost of active Subscriptions in a summary Card.
 11. IF the Add subscription form has an empty name, a missing amount or an amount of 0, THEN THE form SHALL show an error on the field and SHALL create no row.
 12. THE Subscription details BottomSheet and the graveyard BottomSheet SHALL show a text-only destructive "Delete subscription" Button (the `danger-ghost` variant, set apart below the main action, so it never outweighs it). WHEN the user activates it, THE Subscriptions Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete subscription" Button. WHEN the user confirms, THE Screen SHALL call `deleteSubscription`, SHALL show the toast "Subscription deleted", SHALL move focus to the heading of the list the row was in ("Zombies" or "Graveyard"), and SHALL leave the row out of both lists.
+   - **Superseded by action-feedback** — Requirements 1.1 and 1.5: the toast reads "Subscription deleted · <Light_Clause>".
 
 ### Requirement 24: Debts screen
 
@@ -489,6 +501,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 8. IF the Add debt form has an empty name, a negative or missing balance, an APR outside 0 to 100 percent, or a missing minimum payment, THEN THE form SHALL show an error on each invalid field and SHALL create no row.
 9. WHEN an edit changes a Debt balance, THE Debts Screen SHALL create no Event, since only the Log payment action records progress.
 10. THE Debt BottomSheet SHALL show a text-only destructive "Delete debt" Button (the `danger-ghost` variant, set apart below "Save changes"), also for a Debt with a balance of 0. WHEN the user activates it, THE Debts Screen SHALL ask for confirmation in a BottomSheet whose title states "Delete <name>?" (for example "Delete Car loan?") and whose body states "This can't be undone." with a secondary "Keep it" Button and a danger "Delete debt" Button. WHEN the user confirms, THE Screen SHALL call `deleteDebt`, SHALL show the toast "Debt deleted", SHALL move focus to the heading of the debt list ("Your debts") and SHALL leave the row out of the list.
+   - **Superseded by action-feedback** — Requirements 1.1 and 1.5: the toast reads "Debt deleted · <Light_Clause>".
 
 ### Requirement 25: Log payment sheet
 
@@ -501,6 +514,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 3. WHEN the user opens the sheet from a Debt, THE money Input SHALL be pre-filled with the minimum monthly payment, limited to the balance.
 4. THE Log payment BottomSheet SHALL show a primary "Save payment" Button, and WHEN the payment is larger than the minimum THE sheet SHALL show the text "$X goes above your minimum" with `$X` equal to the extra principal. WHILE the amount shows a validation error, THE sheet SHALL hide that text, so the green hint never appears next to an error.
 5. WHEN the user submits a valid amount, THE sheet SHALL call `logPayment`, close, and show a success toast "Payment saved. $X off your balance." with the exact amount.
+   - **Superseded by action-feedback** — Requirement 1.2: the toast reads "Payment saved. $X off your balance · <Light_Clause>".
 6. IF the amount is empty, is 0 or is above the Debt balance, THEN THE sheet SHALL stay open, SHALL show an error message on the Input that names the problem and SHALL write nothing.
 7. THE Log payment BottomSheet SHALL trap focus, close on Escape and return focus to the control that opened it, as the BottomSheet primitive provides.
 8. WHEN the sheet opens from the Do_It_Button of an `extra_payment` Plan_Action, THE sheet SHALL skip the Debt picker, SHALL show that Debt and SHALL pre-fill the money Input with the minimum monthly payment plus the action's `suggestedAmountCents`, limited to the Debt balance, instead of the pre-fill of criterion 3.
@@ -518,9 +532,11 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 4. THE Transactions Screen SHALL show a primary "Add expense" Button that opens the Add expense BottomSheet.
 5. THE Add expense BottomSheet SHALL contain a money Input labelled "Amount", a text Input labelled "What was it?" and a SegmentedControl for the category with the options "Coffee", "Food", "Transport" and "Other", and SHALL date the Transaction with the current "now".
 6. WHEN the user submits a valid expense, THE sheet SHALL call `addTransaction`, close, and show a toast that states the amount, and WHERE the amount is below the small-expense threshold THE toast SHALL read "Ghost added: $X".
+   - **Superseded by action-feedback** — Requirements 1.6 and 1.7: the toast says what happened to the Poltergeist ("Ghost added: $X · feeds the Poltergeist, doesn't dim the light" and its variants) or "Expense added: $X · doesn't change the light".
 7. IF the amount is empty or 0, or the description is empty, THEN THE sheet SHALL stay open, SHALL show an error on each invalid field and SHALL write nothing.
 8. WHEN no Transaction exists in the window, THE Transactions Screen SHALL show the empty state "No ghosts this month. The house is quiet."
 9. WHEN the user selects a Transaction row, THE Transactions Screen SHALL open a BottomSheet with the expense details (amount, category and date, and a ghost note for a Ghost) and a text-only destructive "Delete expense" Button. WHEN the user activates it, THE Screen SHALL ask for confirmation in the same confirmation BottomSheet as debts and subscriptions ("Delete <description>? This can't be undone.", secondary "Keep it", danger "Delete expense"), and WHEN the user confirms THE Screen SHALL call `deleteTransaction`, SHALL show the toast "Expense deleted" and SHALL move focus to the "Last 30 days" heading.
+   - **Superseded by action-feedback** — Requirement 1.8: the toast reads "Expense deleted · doesn't change the light".
 
 ### Requirement 27: Settings screen
 
@@ -529,6 +545,7 @@ All code, comments, tests and UI text are in English. Money is stored and comput
 #### Acceptance Criteria
 
 1. THE Settings Screen SHALL show a money Input labelled "Monthly income" with the current value and a "Save income" Button, and WHEN saved THE Screen SHALL call `setMonthlyIncome` and show the toast "Income saved".
+   - **Superseded by action-feedback** — Requirements 1.1 and 1.5: the toast reads "Income saved · <Light_Clause>".
 2. THE Settings Screen SHALL show a Card titled "Crypt" with a SegmentedControl named "Active crypt" (the name may be visually hidden) with the options "Demo crypt" and "My crypt" that sets the Mode_Store.
 3. WHEN the user selects "My crypt" and no Real_Crypt Profile exists, THE Settings Screen SHALL open the onboarding sheet of Requirement 20.
 4. THE Settings Screen SHALL provide a "Clear all data" control that acts on the Real_Crypt only.

@@ -107,6 +107,10 @@ The new hex values in `config.ts`, next to `DECAY_TINTS`, `ZOMBIE_BODY` and `ZOM
 - **Container queries** are native in Tailwind v4, but the label threshold must come from `Scene_Config`, so the design measures the Scene width with a `ResizeObserver` instead of a literal `@min-[...]` class.
 - **Existing code relied on:** `useHouseState` (live `HouseState` and `rows`), `useExorcismPlan` (stored plan, `toggleAction`), `useCryptActions` (`logPayment`, `cancelSubscription`), `CancelOutcome` and `LogPaymentOutcome` from `src/lib/db/mutations.ts`, `normalizeSubscription` from `@/lib/haunting`, `getLevelLabel` and `getLevelAnnouncement` from `@/lib/utils/scoreView`, `formatCentsShort` from `@/lib/utils/cents`, and the 1024px `matchMedia` switch of `AppShell`.
 
+### Extended by action-feedback
+
+The `action-feedback` spec adds three Moment_Request kinds (`poltergeistFeed`, `ghostArrival` and `candleFlicker`) and their art, durations and planning rules; see `.kiro/specs/action-feedback/design.md`. They extend Property 4 (Moment art geometry for the new request shapes), Property 13 (the new duration keys in `validateSceneConfig`) and Property 16 (planning of the new kinds, and the `lightDelta` field on the plan-toggle outcome). The new kinds follow Requirement 12 unchanged, and Requirement 18.1 applies while the Guide is hidden.
+
 ## Architecture
 
 ### Layers and module boundaries
