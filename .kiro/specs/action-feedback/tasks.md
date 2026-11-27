@@ -395,8 +395,8 @@ Conventions that apply to every task:
     - Run `npm test`, `npx tsc --noEmit`, `npm run lint` one after another, and every `check-moments.mjs` case in both modes.
     - _Requirements: 9.1, 9.5, 9.8, 12.4_
 
-- [ ] 8. Three QuickActions
-  - [ ] 8.1 Hide "Import CSV"
+- [x] 8. Three QuickActions
+  - [x] 8.1 Hide "Import CSV"
     - In `Dashboard.tsx`, use `grid grid-cols-3 gap-2` with "Log payment", "Add expense" and "Exorcise", and remove `FileUp` and the disabled "Import CSV".
     - Update the Dashboard test to assert exactly three QuickActions in this order.
     - _Requirements: 10.1, 10.2, 10.3, 14.6_

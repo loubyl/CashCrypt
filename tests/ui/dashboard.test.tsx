@@ -21,7 +21,7 @@ const SAVE_PAYMENT_LABEL = "Save payment";
 const KEEP_LABEL = "Keep it";
 const CANCEL_LABEL = "Cancel subscription";
 const COMPLETION_TOAST = /freed|Action completed/;
-const QUICK_ACTION_LABELS = ["Log payment", "Add expense", "Import CSV", "Exorcise"];
+const QUICK_ACTION_LABELS = ["Log payment", "Add expense", "Exorcise"];
 const POLTERGEIST_TEXT = /A Poltergeist is haunting you: \$[\d,.]+ in small expenses in 30 days/;
 // The amount sits in its own element (for the pulse), so match on the paragraph's full text.
 const matchBanner = (_: string, el: Element | null) =>
@@ -118,16 +118,15 @@ describe("Dashboard on the level 4 demo", () => {
     expect(screen.queryByText(/this week/)).toBeNull();
   });
 
-  it("shows four quick actions in order with Import CSV disabled", async () => {
+  it("shows exactly three quick actions in order and no Import CSV", async () => {
     await renderDemo();
     const names = screen
       .getAllByRole("button")
       .map((button) => button.textContent?.trim() ?? "")
       .filter((text) => QUICK_ACTION_LABELS.includes(text));
     expect(names).toEqual(QUICK_ACTION_LABELS);
-    // Unavailable QuickActions are aria-disabled, not `disabled`, so they can keep focus.
-    expect(screen.getByRole("button", { name: "Import CSV" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Import CSV" })).not.toHaveAttribute("disabled");
+    expect(names).toHaveLength(3);
+    expect(screen.queryByRole("button", { name: "Import CSV" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Log payment" })).not.toHaveAttribute("aria-disabled");
   });
 

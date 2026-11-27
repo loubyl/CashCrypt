@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp, Flame, Plus, Wallet } from "lucide-react";
+import { Flame, Plus, Wallet } from "lucide-react";
 import { Skeleton } from "@/components/common/Skeleton";
 import { PageHeader } from "@/components/common/PageHeader";
 import { HouseScene } from "@/components/house/HouseScene";
@@ -174,7 +174,7 @@ export function Dashboard() {
                   caption={getNextLevelText(houseState.decayLevel, houseState.lightScore)}
                   className="mt-4"
                 />
-                <div className="mt-6 grid grid-cols-4 gap-2">
+                <div className="mt-6 grid grid-cols-3 gap-2">
                   <QuickAction
                     icon={Wallet}
                     label="Log payment"
@@ -182,7 +182,6 @@ export function Dashboard() {
                     onClick={() => setPaymentOpen(true)}
                   />
                   <QuickAction icon={Plus} label="Add expense" onClick={() => setExpenseOpen(true)} />
-                  <QuickAction icon={FileUp} label="Import CSV" disabled />
                   <QuickAction icon={Flame} label="Exorcise" onClick={() => router.push(EXORCISM_PATH)} />
                 </div>
               </Card>
