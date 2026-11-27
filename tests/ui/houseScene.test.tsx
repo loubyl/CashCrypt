@@ -10,6 +10,9 @@ import type { SceneModel } from "@/lib/scene";
 import { renderWithCrypt, resetNavigationMock } from "./helpers/crypt";
 import { resetViewport, setViewportWidth } from "./helpers/viewport";
 
+vi.mock("@/components/house/AmbientMotion", () => ({
+  AmbientMotion: () => <div data-testid="ambient-motion-mock" />,
+}));
 vi.mock("next/navigation", async () => (await import("./helpers/crypt")).createNavigationMock());
 
 const MONTHLY_INCOME_CENTS = 300_000;
@@ -95,6 +98,22 @@ describe("HouseScene accessibility", () => {
     expect(container.querySelector("svg")).toBe(before);
     expect(container.firstElementChild).toBe(root);
     expect(root?.getAttribute("data-level")).toBe("1");
+  });
+});
+
+describe("HouseScene ambient prop", () => {
+  const AMBIENT_MARKER = "ambient-motion-mock";
+  const SETTLE_MS = 50;
+
+  it("renders the ambient loops by default", async () => {
+    render(<HouseScene model={modelAt(4)} />);
+    expect(await screen.findByTestId(AMBIENT_MARKER)).toBeTruthy();
+  });
+
+  it("never renders the ambient loops with ambient false", async () => {
+    render(<HouseScene model={modelAt(4)} ambient={false} />);
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+    expect(screen.queryByTestId(AMBIENT_MARKER)).toBeNull();
   });
 });
 

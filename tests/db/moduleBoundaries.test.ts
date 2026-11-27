@@ -121,10 +121,12 @@ describe("module boundaries", () => {
     expect(scan(inside, importPattern("dexie-react-hooks")).length).toBeGreaterThan(0);
   });
 
-  it("no component imports @/lib/db/ or @/lib/demo/", () => {
+  it("no component imports @/lib/db/ or @/lib/demo/ (except the pure @/lib/demo/preview)", () => {
     const components = sourceFilesIn("src/components");
     expect(components.length).toBeGreaterThan(0);
-    expect(scan(components, /["'`]@\/lib\/(?:db|demo)(?:\/|["'`])/)).toEqual([]);
+    expect(
+      scan(components, /["'`]@\/lib\/(?:db|demo)(?:\/(?!preview["'`])|["'`])/),
+    ).toEqual([]);
   });
 
   it("no component calls computeHouseState", () => {

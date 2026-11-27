@@ -23,6 +23,8 @@ export type HouseSceneProps = {
   held?: boolean;
   /** Called in a layout effect when the hold is released, in the same commit as the live model. */
   onRelease?: () => void;
+  /** Runs the ambient GSAP loops. With `false` the AmbientMotion module is never requested. */
+  ambient?: boolean;
   /** Layout utilities only. */
   className?: string;
 };
@@ -45,7 +47,7 @@ function getAmbientSignature(model: SceneModel): string {
 }
 
 /** Static haunted house: one SVG painted from the scene model, with no animation library. */
-export function HouseScene({ model, held = false, onRelease, className }: HouseSceneProps) {
+export function HouseScene({ model, held = false, onRelease, ambient = true, className }: HouseSceneProps) {
   const filterIds = makeFilterIds(useId());
   const wasHeldRef = useRef(false);
   useLayoutEffect(() => {
@@ -55,7 +57,7 @@ export function HouseScene({ model, held = false, onRelease, className }: HouseS
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneWidthPx = useElementWidth(containerRef);
   const reduced = useReducedMotionPreference();
-  const motionEnabled = reduced === false;
+  const motionEnabled = ambient && reduced === false;
   const classes = ["@container group/scene relative block w-full overflow-hidden rounded-lg bg-surface-void", className ?? ""]
     .filter(Boolean)
     .join(" ");

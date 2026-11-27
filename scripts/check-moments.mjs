@@ -18,7 +18,8 @@
 //   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment,sigil";
 //                     "fullDemo" runs the whole level-4 flow and checks the order, gaps and overlap of the Moments)
 //
-// Each check runs in a fresh browser context (empty IndexedDB) and loads the demo crypt at level 4.
+// Each check runs in a fresh browser context (empty IndexedDB) and loads the demo crypt at level 4,
+// except `landing`, which measures the Landing at 1280x720 and 375x667 and enters the demo from it.
 // Every check also fails if anything wrote to the clipboard (navigator.clipboard, execCommand, "copy" event).
 //
 // To add a Moment: write an async `run(page)` that drives the UI and returns its sampled data, then
@@ -306,7 +307,14 @@ const guideShown = (page) =>
 async function openDemo(page, { keepGuide = false } = {}) {
   await page.goto(BASE_URL, { waitUntil: "networkidle0" });
   await clickByText(page, "button", "Enter the demo crypt");
-  await waitFor(page, () => document.querySelector('[data-part="scene"][data-level="4"]') !== null);
+  // The Landing preview is a level-4 Scene too, so also wait until the Landing button is gone.
+  await waitFor(
+    page,
+    (label) =>
+      document.querySelector('[data-part="scene"][data-level="4"]') !== null &&
+      ![...document.querySelectorAll("button")].some((b) => (b.textContent ?? "").trim() === label),
+    "Enter the demo crypt",
+  );
   await sleep(1500);
   check(await guideShown(page), "openDemo: the Guide is shown on entering the demo");
   if (keepGuide) return;
@@ -1245,6 +1253,112 @@ function assertGuide({ shown, dismissed, showMe }) {
   );
 }
 
+const LANDING_VIEWPORTS = [
+  { width: 1280, height: 720 },
+  { width: 375, height: 667 },
+];
+const LANDING_DEMO_LABEL = "Enter the demo crypt";
+const LANDING_PREVIEW_PREFIX = "Preview of the demo house:";
+const LANDING_PITCH_START = "Your money habits haunt your house";
+const LANDING_SETTLE_MS = 500;
+const DEMO_MODE_KEY = "cashcrypt:mode";
+/** Measures the Landing (clean storage) and enters the demo from it. */
+async function measureLanding(page, viewport) {
+  await page.setViewport(viewport);
+  await page.goto(BASE_URL, { waitUntil: "networkidle0" });
+  await sleep(LANDING_SETTLE_MS);
+  const layout = await page.evaluate(
+    (demoLabel, previewPrefix, pitchStart) => {
+      const box = (el) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+      };
+      const root = document.documentElement;
+      const buttons = [...document.querySelectorAll("main button")];
+      return {
+        scrollY: window.scrollY,
+        innerWidth: window.innerWidth,
+        innerHeight: window.innerHeight,
+        scrollWidth: root.scrollWidth,
+        clientWidth: root.clientWidth,
+        storedMode: localStorage.getItem("cashcrypt:mode"),
+        preview: box(
+          [...document.querySelectorAll('[role="img"]')].find((el) => (el.getAttribute("aria-label") ?? "").startsWith(previewPrefix)) ?? null,
+        ),
+        h1: box(document.querySelector("h1")),
+        pitch: box([...document.querySelectorAll("main p")].find((el) => (el.textContent ?? "").startsWith(pitchStart)) ?? null),
+        demoButton: box(buttons.find((b) => (b.textContent ?? "").trim() === demoLabel) ?? null),
+        secondButton: box(buttons.find((b) => /^(Start my own crypt|Continue to my crypt)$/.test((b.textContent ?? "").trim())) ?? null),
+      };
+    },
+    LANDING_DEMO_LABEL,
+    LANDING_PREVIEW_PREFIX,
+    LANDING_PITCH_START,
+  );
+  await clickByText(page, "button", LANDING_DEMO_LABEL);
+  let reached = true;
+  try {
+    await waitFor(
+      page,
+      ({ key, title, label }) =>
+        localStorage.getItem(key) === "demo" &&
+        [...document.querySelectorAll("h2")].some((h) => (h.textContent ?? "").trim() === title) &&
+        ![...document.querySelectorAll("button")].some((b) => (b.textContent ?? "").trim() === label),
+      { key: DEMO_MODE_KEY, title: GUIDE_TITLE, label: LANDING_DEMO_LABEL },
+    );
+  } catch {
+    reached = false;
+  }
+  const after = await page.evaluate((key) => ({
+    path: location.pathname,
+    storedMode: localStorage.getItem(key),
+    demoChip: [...document.querySelectorAll("[title]")].some((el) => (el.getAttribute("title") ?? "").startsWith("Demo mode")),
+    planHeading: [...document.querySelectorAll("h2")].some((h) => /exorcism/i.test(h.textContent ?? "")),
+  }), DEMO_MODE_KEY);
+  const guide = await guideShown(page);
+  const clipboard = await page.evaluate(() => window.__clipboardCalls ?? []);
+  return { viewport, layout, reached, after: { ...after, guide }, clipboard };
+}
+/** Each size runs in its own fresh context, so both start with clean storage. */
+async function runLanding(page) {
+  const results = [await measureLanding(page, LANDING_VIEWPORTS[0])];
+  for (const viewport of LANDING_VIEWPORTS.slice(1)) {
+    const context = await page.browser().createBrowserContext();
+    try {
+      const fresh = await context.newPage();
+      await fresh.evaluateOnNewDocument(installPageHooks, RAF_THROTTLE_MS);
+      fresh.on("pageerror", (error) => console.log("pageerror:", error.message));
+      results.push(await measureLanding(fresh, viewport));
+    } finally {
+      await context.close();
+    }
+  }
+  return { results };
+}
+function assertLanding({ results }) {
+  for (const { viewport, layout, reached, after, clipboard } of results) {
+    const size = `${viewport.width}x${viewport.height}`;
+    const inView = (b) =>
+      Boolean(b) && b.left >= -OVERLAP_SLACK_PX && b.top >= -OVERLAP_SLACK_PX && b.right <= layout.innerWidth + OVERLAP_SLACK_PX && b.bottom <= layout.innerHeight + OVERLAP_SLACK_PX;
+    const where = (b) => (b ? `top ${fmt(b.top)}, bottom ${fmt(b.bottom)}, left ${fmt(b.left)}, right ${fmt(b.right)}` : "missing");
+    check(layout.storedMode === null, `landing ${size}: starts with clean storage (mode ${layout.storedMode})`);
+    check(layout.scrollY === 0, `landing ${size}: the page is not scrolled (scrollY ${layout.scrollY})`);
+    check(inView(layout.preview), `landing ${size}: the preview role="img" is fully in the first viewport (${where(layout.preview)} of ${viewport.height} px)`);
+    check(inView(layout.h1), `landing ${size}: the h1 is fully in the first viewport (${where(layout.h1)})`);
+    check(inView(layout.pitch), `landing ${size}: the pitch is fully in the first viewport (${where(layout.pitch)})`);
+    check(inView(layout.demoButton), `landing ${size}: "${LANDING_DEMO_LABEL}" is fully in the first viewport (${where(layout.demoButton)})`);
+    check(inView(layout.secondButton), `landing ${size}: the second Button is fully in the first viewport (${where(layout.secondButton)})`);
+    check(
+      layout.scrollWidth <= layout.clientWidth,
+      `landing ${size}: no horizontal scroll (scrollWidth ${layout.scrollWidth}, clientWidth ${layout.clientWidth})`,
+    );
+    check(reached, `landing ${size}: clicking "${LANDING_DEMO_LABEL}" reaches the Dashboard`);
+    check(after.storedMode === "demo" && after.demoChip, `landing ${size}: the Dashboard is in demo mode (stored ${after.storedMode}, demo chip ${after.demoChip}, path ${after.path})`);
+    check(after.guide, `landing ${size}: the Guide "${GUIDE_TITLE}" is shown`);
+    check(clipboard.length === 0, `landing ${size}: nothing wrote to the clipboard`);
+  }
+}
 const MOMENT_CHECKS = [
   { name: "shovel", run: runShovel, assert: assertShovel },
   { name: "payment", run: runPayment, assert: assertPayment },
@@ -1260,6 +1374,7 @@ const MOMENT_CHECKS = [
   { name: "ghostArrival", run: runGhostArrival, assert: assertGhostArrival },
   { name: "candleFlicker", run: runCandleFlicker, assert: assertCandleFlicker },
   { name: "guide", run: runGuide, assert: assertGuide, keepGuide: true },
+  { name: "landing", run: runLanding, assert: assertLanding, startsOnLanding: true },
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -1280,7 +1395,7 @@ try {
       await page.setViewport(VIEWPORT);
       await page.evaluateOnNewDocument(installPageHooks, RAF_THROTTLE_MS);
       page.on("pageerror", (error) => console.log("pageerror:", error.message));
-      await openDemo(page, { keepGuide: Boolean(moment.keepGuide) });
+      if (!moment.startsOnLanding) await openDemo(page, { keepGuide: Boolean(moment.keepGuide) });
       const data = await moment.run(page);
       moment.assert(data);
       const calls = await page.evaluate(() => window.__clipboardCalls);

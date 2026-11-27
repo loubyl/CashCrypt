@@ -357,8 +357,8 @@ Conventions that apply to every task:
     - `getGuideStepTarget` and `getGuideStepText` in `planView.ts`; `getDoItDomId` in `destinations.ts`; id on the Do it Button; `CryptGuide` takes `stepTarget` and renders the ghost "Show me: <short title>" Button for Do it and Tick steps only.
     - Tests in `tests/ui/cryptGuide.test.tsx` (three variants, focus target, smooth and instant scroll, ghost 44px, axe) and `tests/feedback/guideStep.test.ts`; the `guide` browser case asserts the Do it button is fully inside 1280 by 720 and focused after "Show me".
     - _Requirements: 5.3, 5.4, 5.5, 12.4_
-- [ ] 7. Landing preview
-  - [ ] 7.1 Create `src/lib/demo/preview.ts`
+- [x] 7. Landing preview
+  - [x] 7.1 Create `src/lib/demo/preview.ts`
     - `PREVIEW_DATE`, `PREVIEW_LABEL_PREFIX` and a cached `buildLandingPreview()` as in the design.
     - Tests in `tests/feedback/preview.test.ts`:
       - Two calls return deeply equal models.
@@ -366,12 +366,12 @@ Conventions that apply to every task:
       - A source scan confirms that the file and its imports pull no `dexie` value import.
     - _Requirements: 9.3, 9.4, 9.6_
 
-  - [ ] 7.2 Add the `ambient` prop to `HouseScene`
+  - [x] 7.2 Add the `ambient` prop to `HouseScene`
     - Default `true`. With `false` the `AmbientMotion` dynamic import is never rendered.
     - Test in `tests/ui/houseScene.test.tsx` (mocked `AmbientMotion` module): not rendered with `ambient={false}`, rendered by default.
     - _Requirements: 9.5_
 
-  - [ ] 7.3 Rebuild the Landing
+  - [x] 7.3 Rebuild the Landing
     - Use the design's markup: text block, preview, and the "How it works" section with its three lines. Remove the "View the styleguide" link. Leave `/styleguide` untouched.
     - Tests in `tests/ui/landing.test.tsx`:
       - The preview `role="img"` has the label from 7.1.
@@ -382,6 +382,13 @@ Conventions that apply to every task:
       - Axe passes.
     - Remove the old styleguide-link assertion.
     - _Requirements: 9.1, 9.2, 9.5, 9.6, 9.7, 9.9, 9.10, 12.4, 14.5_
+
+  - [x] 7.4 Fix the "enters the demo crypt" failure and verify the Landing in the browser
+    - Find the root cause of the full-suite failure in `tests/ui/landing.test.tsx` > "enters the demo crypt: sets mode demo, seeds level-4 and navigates to home" (`MODE_STORAGE_KEY` is `null`) before changing anything: run the test alone and in the full suite, and check on a production build in the browser whether "Enter the demo crypt" sets demo mode, seeds level-4 and opens the Dashboard. State whether it is an app bug or a test problem and fix that cause, not the assertion.
+    - Run the mutation checks skipped in 7.2 and 7.3: remove the `ambient &&` condition and confirm the 7.2 test fails; for each new Landing test, reintroduce the behavior it guards against (styleguide link, AmbientMotion rendered, early `openDemoDb`, wrong preview label) and confirm it fails. Restore the code and leave no trace.
+    - Add a `landing` case to `check-moments.mjs`: at 1280x720 and 375x667 the preview, the text block and "Enter the demo crypt" fit in the first viewport, there is no horizontal scroll, and clicking the button reaches the Dashboard in demo mode with the Guide shown.
+    - Run `npm test`, `npx tsc --noEmit`, `npm run lint` one after another, and every `check-moments.mjs` case in both modes.
+    - _Requirements: 9.1, 9.5, 9.8, 12.4_
 
 - [ ] 8. Three QuickActions
   - [ ] 8.1 Hide "Import CSV"
@@ -442,11 +449,12 @@ Conventions that apply to every task:
     { "id": 8, "tasks": ["4.9", "5.4"] },
     { "id": 9, "tasks": ["4.10", "5.5"] },
     { "id": 10, "tasks": ["4.11", "4.12"] },
-    { "id": 11, "tasks": ["6"] },
+    { "id": 11, "tasks": ["6.1"] },
     { "id": 12, "tasks": ["7.1", "7.2", "8.1"] },
     { "id": 13, "tasks": ["7.3"] },
-    { "id": 14, "tasks": ["9.1", "9.2", "9.3"] },
-    { "id": 15, "tasks": ["10"] }
+    { "id": 14, "tasks": ["7.4"] },
+    { "id": 15, "tasks": ["9.1", "9.2", "9.3"] },
+    { "id": 16, "tasks": ["10"] }
   ]
 }
 ```

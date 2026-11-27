@@ -497,6 +497,61 @@
         "chatSessionId": "sess_7cfc0910-8524-4f2b-8bc7-625a6c5b60dc",
         "timestamp": 1795685167450
       }
+    ],
+    "7.1 Create `src/lib/demo/preview.ts`": [
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795748935418
+      },
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795748985940
+      }
+    ],
+    "7.2 Add the `ambient` prop to `HouseScene`": [
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795748986458
+      },
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795749030070
+      }
+    ],
+    "7.3 Rebuild the Landing": [
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795749030601
+      },
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795749182728
+      }
+    ],
+    "7. Landing preview": [
+      {
+        "executionId": "013920f1-ba6a-4e8c-8f58-23ff10e66703",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795749182798
+      }
+    ],
+    "7.4 Fix the \"enters the demo crypt\" failure and verify the Landing in the browser": [
+      {
+        "executionId": "1986edd8-d9b2-4bcc-9fe9-11e243a683cd",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795749346166
+      },
+      {
+        "executionId": "1986edd8-d9b2-4bcc-9fe9-11e243a683cd",
+        "chatSessionId": "sess_4fee4dc4-6e60-4611-b004-45a498b37f6f",
+        "timestamp": 1795753350151
+      }
     ]
   }
 }
