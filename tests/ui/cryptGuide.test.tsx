@@ -1,8 +1,9 @@
 // Tests of the Dashboard Guide: visibility, dismissal, focus, storage and axe
 // (Requirements 5.1 to 5.14, 12.3, 12.4, 14.3).
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RowHighlightProvider } from "@/components/feedback/RowHighlightProvider";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { CryptGuide, GUIDE_STORAGE_KEY, startGuideSession } from "@/components/dashboard/CryptGuide";
 import { getDoItDomId, getRowDomId } from "@/lib/utils/destinations";
@@ -43,7 +44,10 @@ async function settle(): Promise<void> {
 }
 
 async function renderDemo() {
-  const ctx = await renderWithCrypt(<Dashboard />, { mode: "demo", seed: "level-4" });
+  const ctx = await renderWithCrypt(
+    <RowHighlightProvider>
+      <Dashboard />
+    </RowHighlightProvider>, { mode: "demo", seed: "level-4" });
   await settle();
   return ctx;
 }
@@ -307,7 +311,7 @@ describe("Guide Show me", () => {
     );
     await user.click(button);
     expect(scrolled).toEqual([document.getElementById(getDoItDomId("a1"))]);
-    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "smooth", block: "nearest" });
     expect(document.activeElement).toBe(document.getElementById(getDoItDomId("a1")));
   });
 
@@ -320,6 +324,29 @@ describe("Guide Show me", () => {
     expect(document.activeElement).toBe(checkbox);
   });
 
+  it("scrolls the whole plan row, not just the control, and marks the focused control for the ring", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <CryptGuide
+          mode="demo"
+          step="A step"
+          stepTarget={{ kind: "doIt", actionId: "a1", shortTitle: "Cancel Wraithcast", outcome: "cancel" }}
+          onDismiss={() => undefined}
+          headingId="guide-heading"
+        />
+        <div data-plan-action="a1" className="scroll-my-4">
+          <button type="button" id={getDoItDomId("a1")}>Do it</button>
+        </div>
+      </>,
+    );
+    await user.click(screen.getByRole("button", { name: /^Show me/ }));
+    const doIt = document.getElementById(getDoItDomId("a1"));
+    expect(scrolled).toEqual([doIt?.closest("[data-plan-action]")]);
+    expect(doIt?.hasAttribute("data-guide-focus")).toBe(true);
+    await user.tab();
+    expect(doIt?.hasAttribute("data-guide-focus")).toBe(false);
+  });
   it("for the all done step shows no Show me Button", () => {
     renderGuide({ kind: "done" });
     expect(screen.queryByRole("button", { name: SHOW_ME_PATTERN })).toBeNull();
@@ -335,7 +362,7 @@ describe("Guide Show me", () => {
     const user = userEvent.setup();
     renderGuide({ kind: "doIt", actionId: "a1", shortTitle: "Cancel Wraithcast", outcome: "cancel" });
     await user.click(screen.getByRole("button", { name: SHOW_ME_PATTERN }));
-    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "instant", block: "center" });
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "instant", block: "nearest" });
     expect(document.activeElement).toBe(document.getElementById(getDoItDomId("a1")));
   });
 
@@ -355,6 +382,10 @@ describe("Guide Show me", () => {
     await user.click(button);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Do it: Cancel Wraithcast — saves $120/mo" }));
     expect(scrolled.length).toBe(1);
+    expect(scrolled[0]?.hasAttribute("data-plan-action")).toBe(true);
+    const row = scrolled[0] as Element;
+    expect(row.className).toContain("scroll-my-4");
+    expect(await within(row as HTMLElement).findByText("Start here")).toBeTruthy();
   }, TEST_TIMEOUT_MS);
 
   it("has no axe violations for each variant", async () => {

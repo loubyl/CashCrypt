@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { Footprints } from "lucide-react";
+import { useRequestHighlight } from "@/components/feedback/RowHighlightProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
@@ -123,15 +124,24 @@ export function getShowMeLabel(shortTitle: string): string {
   return `${SHOW_ME_LABEL}: ${shortTitle}`;
 }
 
-/** Scrolls the control into view (smooth, instant under reduced motion) and focuses it. */
+const PLAN_ROW_SELECTOR = "[data-plan-action]";
+const FOCUS_MARK_ATTRIBUTE = "data-guide-focus";
+
+/**
+ * Brings the target's plan row fully into view with the least scrolling (the row's own
+ * `scroll-my-4` keeps 16px around it), then focuses the target. Smooth, or instant under reduced
+ * motion. The focus mark draws the ring that `:focus-visible` withholds after a mouse click.
+ */
 function revealControl(elementId: string, reduced: boolean): void {
   const element = document.getElementById(elementId);
   if (element === null) return;
-  element.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "center" });
+  const scrollTarget = element.closest(PLAN_ROW_SELECTOR) ?? element;
+  scrollTarget.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "nearest" });
   // preventScroll keeps the smooth scroll above from being cut short by the focus jump.
   element.focus({ preventScroll: true });
+  element.setAttribute(FOCUS_MARK_ATTRIBUTE, "");
+  element.addEventListener("blur", () => element.removeAttribute(FOCUS_MARK_ATTRIBUTE), { once: true });
 }
-
 export type CryptGuideProps = {
   mode: GuideMode;
   /** The first-step line. Shown only in the demo. */
@@ -154,6 +164,7 @@ export function CryptGuide({
   className,
 }: CryptGuideProps) {
   const reduced = useReducedMotionPreference();
+  const requestHighlight = useRequestHighlight();
   const showMeId = mode === "demo" && stepTarget !== null ? getShowMeElementId(stepTarget) : null;
   const showMeTitle = stepTarget !== null && stepTarget.kind !== "done" ? stepTarget.shortTitle : "";
   return (
@@ -182,7 +193,12 @@ export function CryptGuide({
             variant="ghost"
             size="md"
             aria-label={getShowMeLabel(showMeTitle)}
-            onClick={() => revealControl(showMeId, reduced === true)}
+            onClick={() => {
+              revealControl(showMeId, reduced === true);
+              if (stepTarget !== null && stepTarget.kind !== "done") {
+                requestHighlight({ list: "plan", rowId: stepTarget.actionId, tag: "start", focus: false });
+              }
+            }}
             className="self-start"
           >
             {SHOW_ME_LABEL}

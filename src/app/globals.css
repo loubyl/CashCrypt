@@ -200,3 +200,13 @@
     font-family: var(--font-sans);
   }
 }
+
+/*
+ * The Guide's "Show me" moves focus by script after a mouse click, and browsers then withhold
+ * :focus-visible. The Guide marks its target so the same 2px ring still shows. Unlayered on purpose:
+ * it must beat the `outline-none` utility on the checkbox.
+ */
+[data-guide-focus]:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

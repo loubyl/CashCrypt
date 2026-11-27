@@ -17,6 +17,8 @@ const DO_IT_LABEL = "Do it";
 const CANCEL_DESCRIPTION = "Opens the cancel confirmation";
 const PAY_DESCRIPTION = "Opens the payment sheet";
 // Aligns the Do it button with the text column: 44px checkbox target plus the 12px row gap.
+// Keeps 16px of space around the row when the Guide scrolls it into view (Requirement 5.3).
+const ROW_SCROLL_MARGIN_CLASSES = "scroll-my-4";
 const DO_IT_WRAPPER_CLASSES = "-mt-1 mb-2 pl-14";
 
 /** DOM id of a plan row's checkbox. */
@@ -76,7 +78,7 @@ export function ExorcismPlanAction({
   };
 
   return (
-    <div data-plan-action={action.id}>
+    <div data-plan-action={action.id} className={ROW_SCROLL_MARGIN_CLASSES}>
       <ExorcismActionRow
         id={getPlanRowId(action.id)}
         title={action.title}

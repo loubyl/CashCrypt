@@ -60,6 +60,6 @@ describe("destinations", () => {
   });
 
   it("has visible text for both highlight tags", () => {
-    expect(HIGHLIGHT_TAG_TEXT).toEqual({ new: "New", updated: "Updated" });
+    expect(HIGHLIGHT_TAG_TEXT).toEqual({ new: "New", updated: "Updated", start: "Start here" });
   });
 });

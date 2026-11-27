@@ -357,6 +357,11 @@ Conventions that apply to every task:
     - `getGuideStepTarget` and `getGuideStepText` in `planView.ts`; `getDoItDomId` in `destinations.ts`; id on the Do it Button; `CryptGuide` takes `stepTarget` and renders the ghost "Show me: <short title>" Button for Do it and Tick steps only.
     - Tests in `tests/ui/cryptGuide.test.tsx` (three variants, focus target, smooth and instant scroll, ghost 44px, axe) and `tests/feedback/guideStep.test.ts`; the `guide` browser case asserts the Do it button is fully inside 1280 by 720 and focused after "Show me".
     - _Requirements: 5.3, 5.4, 5.5, 12.4_
+  - [x] 6.2 Scroll "Show me" only as far as needed and mark the target row (review of 6.1 at 1280 by 720)
+    - Problem: `block: "center"` scrolled 442px and pushed the Scene (and the shovel Moment) off screen; after a mouse click the focused Do it had no ring; nothing marked the row.
+    - `CryptGuide` scrolls the plan row (`[data-plan-action]`, `scroll-my-4`) with `block: "nearest"` (instant under reduced motion), focuses the target, sets `data-guide-focus` (ring rule in `globals.css`), and requests a Row_Highlight with the new tag `"start"` ("Start here") for both the Do it and Tick variants.
+    - Tests: `cryptGuide.test.tsx` and `destinations.test.ts` updated; mutation check: restoring `block: "center"` fails two tests (`Received "nearest"` vs `"center"`). `check-moments.mjs` `guide` case now asserts the 16px bottom margin, focus, a ≥2px ring, the zombie row in view and "Start here" (scroll went from 442px to 128px); new `REDUCED_MOTION=1` switch. Ran every case at normal speed, with `RAF_THROTTLE_MS=700` and with reduced motion.
+    - _Requirements: 5.3, 5.4_
 - [x] 7. Landing preview
   - [x] 7.1 Create `src/lib/demo/preview.ts`
     - `PREVIEW_DATE`, `PREVIEW_LABEL_PREFIX` and a cached `buildLandingPreview()` as in the design.
@@ -450,11 +455,12 @@ Conventions that apply to every task:
     { "id": 9, "tasks": ["4.10", "5.5"] },
     { "id": 10, "tasks": ["4.11", "4.12"] },
     { "id": 11, "tasks": ["6.1"] },
-    { "id": 12, "tasks": ["7.1", "7.2", "8.1"] },
-    { "id": 13, "tasks": ["7.3"] },
-    { "id": 14, "tasks": ["7.4"] },
-    { "id": 15, "tasks": ["9.1", "9.2", "9.3"] },
-    { "id": 16, "tasks": ["10"] }
+    { "id": 12, "tasks": ["6.2"] },
+    { "id": 13, "tasks": ["7.1", "7.2", "8.1"] },
+    { "id": 14, "tasks": ["7.3"] },
+    { "id": 15, "tasks": ["7.4"] },
+    { "id": 16, "tasks": ["9.1", "9.2", "9.3"] },
+    { "id": 17, "tasks": ["10"] }
   ]
 }
 ```

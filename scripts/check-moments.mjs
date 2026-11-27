@@ -15,6 +15,7 @@
 //   VIEWPORT          WIDTHxHEIGHT (default 1280x900)
 //   RAF_THROTTLE_MS   makes animation frames arrive this far apart (default 0); use 700 to emulate a
 //                     slow or background tab, where GSAP lag smoothing would stretch a Moment
+//   REDUCED_MOTION   set to 1 to emulate prefers-reduced-motion: reduce (only meaningful with MOMENTS=guide: the other cases assert Moment art, which reduced motion replaces with a fade)
 //   MOMENTS           comma list of checks to run (default: all of MOMENT_CHECKS, e.g. "shovel,payment,sigil";
 //                     "fullDemo" runs the whole level-4 flow and checks the order, gaps and overlap of the Moments)
 //
@@ -33,6 +34,7 @@ const PUPPETEER_DIR = process.env.PUPPETEER_DIR ?? "/tmp/cc-pw";
 const [VW, VH] = (process.env.VIEWPORT ?? "1280x900").split("x").map(Number);
 const VIEWPORT = { width: VW, height: VH };
 const RAF_THROTTLE_MS = Number(process.env.RAF_THROTTLE_MS ?? 0);
+const REDUCED_MOTION = process.env.REDUCED_MOTION === "1";
 const ONLY = (process.env.MOMENTS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 
 const SAMPLE_MS = 100;
@@ -1174,6 +1176,10 @@ const DO_IT_LABEL = "Do it: Cancel Wraithcast";
 const SCROLL_STABLE_MS = 300;
 const SCROLL_TIMEOUT_MS = 4000;
 const SHOW_ME_MIN_TARGET_PX = 44;
+const SHOW_ME_BOTTOM_MARGIN_PX = 16;
+const SHOW_ME_MARGIN_SLACK_PX = 1; // sub-pixel rounding
+const SHOW_ME_RING_MIN_PX = 2;
+const START_HERE_TEXT = "Start here";
 /** Clicks "Show me" below the fold, waits for the (smooth) scroll to stop, and reports where the Do it button ended up. */
 async function runShowMe(page) {
   const before = await page.evaluate((label) => {
@@ -1208,6 +1214,14 @@ async function runShowMe(page) {
       width: window.innerWidth,
       height: window.innerHeight,
       focused: document.activeElement === doIt,
+      scrollY: window.scrollY,
+      ringStyle: doIt ? getComputedStyle(doIt).outlineStyle : null,
+      ringWidth: doIt ? Number.parseFloat(getComputedStyle(doIt).outlineWidth) : null,
+      zombies: (() => {
+        const rect = document.querySelector('[data-part="zombies"]')?.getBoundingClientRect();
+        return rect ? { top: rect.top, bottom: rect.bottom } : null;
+      })(),
+      rowText: doIt?.closest("[data-plan-action]")?.textContent ?? "",
       activeLabel: document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.tagName ?? null,
     };
   }, DO_IT_LABEL);
@@ -1239,6 +1253,19 @@ function assertGuide({ shown, dismissed, showMe }) {
     `guide: after Show me the Do it button is fully in the viewport (top ${fmt(showMe.top)}, bottom ${fmt(showMe.bottom)} of ${showMe.height} px)`,
   );
   check(showMe.focused, `guide: after Show me the Do it button has focus (active: ${showMe.activeLabel})`);
+  check(
+    showMe.bottom <= showMe.height - SHOW_ME_BOTTOM_MARGIN_PX + SHOW_ME_MARGIN_SLACK_PX,
+    `guide: after Show me the Do it button keeps a ${SHOW_ME_BOTTOM_MARGIN_PX}px bottom margin (bottom ${fmt(showMe.bottom)} of ${showMe.height} px)`,
+  );
+  check(
+    showMe.zombies !== null && showMe.zombies.top >= 0 && showMe.zombies.bottom <= showMe.height,
+    `guide: after Show me the zombie row is still in the viewport (top ${fmt(showMe.zombies?.top)}, bottom ${fmt(showMe.zombies?.bottom)} of ${showMe.height} px, scrolled ${fmt(showMe.scrollY)} px)`,
+  );
+  check(
+    showMe.ringStyle !== "none" && showMe.ringWidth >= SHOW_ME_RING_MIN_PX,
+    `guide: after a mouse click the focused Do it button shows a ring (${showMe.ringStyle} ${fmt(showMe.ringWidth)} px)`,
+  );
+  check(showMe.rowText.includes(START_HERE_TEXT), `guide: after Show me the plan row shows "${START_HERE_TEXT}" (row text: ${showMe.rowText.slice(0, 80)})`);
   check(shown.sceneBottom !== null && shown.sceneBottom <= vh, `guide: with the Guide shown the whole Scene fits (bottom ${fmt(shown.sceneBottom)} of ${vh} px)`);
   check(shown.stepBottom !== null && shown.stepBottom <= vh, `guide: the Guide_Step fits (bottom ${fmt(shown.stepBottom)} of ${vh} px, "${shown.stepText}")`);
   check(
@@ -1393,6 +1420,7 @@ try {
     try {
       const page = await context.newPage();
       await page.setViewport(VIEWPORT);
+      if (REDUCED_MOTION) await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
       await page.evaluateOnNewDocument(installPageHooks, RAF_THROTTLE_MS);
       page.on("pageerror", (error) => console.log("pageerror:", error.message));
       if (!moment.startsOnLanding) await openDemo(page, { keepGuide: Boolean(moment.keepGuide) });

@@ -1,7 +1,8 @@
 /** Pure map of the lists a toast action can point to (Requirement 3). */
 
 export type HighlightList = "debts" | "transactions" | "zombies" | "graveyard" | "plan";
-export type HighlightTag = "new" | "updated";
+/** `start` marks the row the Guide points at ("Start here"). */
+export type HighlightTag = "new" | "updated" | "start";
 export type HighlightTarget = { list: HighlightList; rowId: string; tag: HighlightTag };
 
 export const DESTINATION_PATHS: Record<HighlightList, string> = {
@@ -23,6 +24,7 @@ export const DESTINATION_LABELS: Record<HighlightList, string> = {
 export const HIGHLIGHT_TAG_TEXT: Record<HighlightTag, string> = {
   new: "New",
   updated: "Updated",
+  start: "Start here",
 };
 
 /** DOM id of a list row: `row-<list>-<rowId>`. */
