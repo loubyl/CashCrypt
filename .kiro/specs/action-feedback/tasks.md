@@ -62,7 +62,7 @@ Conventions that apply to every task:
 
   - [x] 1.5 Implement the pending state of the plan checkbox
     - `ExorcismActionRow`: add a `pending` prop that sets `aria-disabled` and `aria-busy` and makes `onChange` return early. Add `aria-disabled:` variants of the existing `disabled:` classes so the busy look stays.
-    - `ExorcismPlanAction`: pass `pending={busy}` instead of `disabled={busy}`, keep the `if (busy) return` guard, and remove `disabled={busy}` from the Do it Button (it is never rendered while busy).
+    - `ExorcismPlanAction`: pass `pending={busy}` instead of `disabled={busy}`, keep the `if (busy) return` guard, and remove `disabled={busy}` from the Do it Button (it stays rendered while the checkbox saves).
     - Mutation check: restore `disabled={busy}` on the row and confirm the 1.4 test fails.
     - _Requirements: 15.1, 15.2, 15.4, 15.6_
 
