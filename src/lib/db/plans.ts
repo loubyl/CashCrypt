@@ -9,6 +9,7 @@ import { getPlanWeekStart, type LocalDate } from "@/lib/utils/calendar";
 import type { StoredPlanAction, WeeklyPlanRow } from "@/types/finance";
 
 const CONSTRAINT_ERROR_NAME = "ConstraintError";
+const FALLBACK_KIND = "fallback";
 
 function isConstraintError(error: unknown): boolean {
   return (
@@ -35,6 +36,26 @@ function generateRow(
     startLightScore: houseState.lightScore,
     generatedOn: now,
   };
+}
+
+/** True when every action is a fallback and none is done: nothing real to lose by regenerating. */
+export function isRefreshablePlan(plan: WeeklyPlanRow): boolean {
+  return plan.actions.every((action) => action.kind === FALLBACK_KIND && !action.done);
+}
+
+/**
+ * Regenerates the plan of the current week when it holds only fallback actions and none is done,
+ * so a new crypt gets its first real actions as soon as it has data to act on. A plan with a real
+ * action, or with any action done, is never touched. Must run inside a "rw" transaction over every
+ * table. Returns true when the stored plan was replaced.
+ */
+export async function refreshFallbackOnlyPlan(db: CryptDb, now: LocalDate): Promise<boolean> {
+  const weekKey = getPlanWeekStart(now);
+  const existing = await db.weeklyPlans.get(weekKey);
+  if (!existing || !isRefreshablePlan(existing)) return false;
+  const row = generateRow(await readAllRows(db), weekKey, now);
+  await db.weeklyPlans.put(row);
+  return true;
 }
 
 /**

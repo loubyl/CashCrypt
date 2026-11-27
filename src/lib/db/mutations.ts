@@ -2,7 +2,8 @@
 // invalid input) and then writes inside exactly one Dexie "rw" transaction.
 import { assertRealDb } from "@/lib/db/crypt";
 import { DbNotFoundError, DbValidationError } from "@/lib/db/errors";
-import { cancelRefKey } from "@/lib/db/refKeys";
+import { refreshFallbackOnlyPlan } from "@/lib/db/plans";
+import { cancelRefKey, planRefKey } from "@/lib/db/refKeys";
 import { PROFILE_ID, type CryptDb, type ProfileRecord } from "@/lib/db/schema";
 import type { ExorcismActionKind } from "@/lib/exorcism/types";
 import { normalizeSubscription } from "@/lib/haunting";
@@ -46,6 +47,11 @@ function createId(ctx: MutationContext): string {
   return (ctx.newId ?? (() => crypto.randomUUID()))();
 }
 
+/** Every table: a transaction that may regenerate the plan reads them all. */
+function allTables(db: CryptDb) {
+  return [db.profile, db.debts, db.subscriptions, db.transactions, db.events, db.weeklyPlans];
+}
+
 // ---------------------------------------------------------------------------
 // Profile
 // ---------------------------------------------------------------------------
@@ -71,8 +77,9 @@ export async function addDebt(
 ): Promise<DebtRow> {
   const value = unwrap(validateDebtInput(input));
   const row: DebtRow = { id: createId(ctx), ...value };
-  await db.transaction("rw", [db.debts], async () => {
+  await db.transaction("rw", allTables(db), async () => {
     await db.debts.add(row);
+    await refreshFallbackOnlyPlan(db, ctx.now);
   });
   return row;
 }
@@ -81,13 +88,15 @@ export async function editDebt(
   db: CryptDb,
   id: string,
   input: DebtInput,
+  ctx: MutationContext,
 ): Promise<DebtRow> {
   const value = unwrap(validateDebtInput(input));
-  return db.transaction("rw", [db.debts], async () => {
+  return db.transaction("rw", allTables(db), async () => {
     const existing = await db.debts.get(id);
     if (!existing) throw new DbNotFoundError(id);
     const row: DebtRow = { ...existing, ...value, id };
     await db.debts.put(row);
+    await refreshFallbackOnlyPlan(db, ctx.now);
     return row;
   });
 }
@@ -104,20 +113,25 @@ export async function addSubscription(
 ): Promise<SubscriptionRow> {
   const value = unwrap(validateSubscriptionInput(input));
   const row: SubscriptionRow = { id: createId(ctx), ...value, active: true };
-  await db.transaction("rw", [db.subscriptions], async () => {
+  await db.transaction("rw", allTables(db), async () => {
     await db.subscriptions.add(row);
+    await refreshFallbackOnlyPlan(db, ctx.now);
   });
   return row;
 }
 
-/** Edits details only. `active` and `canceledOn` keep their stored values. */
+/**
+ * Edits details only. `active` and `canceledOn` keep their stored values.
+ * Like every add or edit of a Debt, Subscription or Transaction, it refreshes a fallback-only plan.
+ */
 export async function editSubscription(
   db: CryptDb,
   id: string,
   input: SubscriptionInput,
+  ctx: MutationContext,
 ): Promise<SubscriptionRow> {
   const value = unwrap(validateSubscriptionInput(input));
-  return db.transaction("rw", [db.subscriptions], async () => {
+  return db.transaction("rw", allTables(db), async () => {
     const existing = await db.subscriptions.get(id);
     if (!existing) throw new DbNotFoundError(id);
     const row: SubscriptionRow = {
@@ -128,6 +142,7 @@ export async function editSubscription(
       usage: value.usage,
     };
     await db.subscriptions.put(row);
+    await refreshFallbackOnlyPlan(db, ctx.now);
     return row;
   });
 }
@@ -171,8 +186,9 @@ export async function addTransaction(
 ): Promise<TransactionRow> {
   const value = unwrap(validateTransactionInput(input, ctx.now));
   const row: TransactionRow = { id: createId(ctx), ...value };
-  await db.transaction("rw", [db.transactions], async () => {
+  await db.transaction("rw", allTables(db), async () => {
     await db.transactions.add(row);
+    await refreshFallbackOnlyPlan(db, ctx.now);
   });
   return row;
 }
@@ -202,12 +218,6 @@ export type LogPaymentOutcome = {
 export type CancelOutcome =
   | { changed: false }
   | { changed: true; monthlySavedCents: number; completedActionId: string | null };
-
-const PLAN_REF_PREFIX = "plan:";
-
-function planRefKey(weekKey: LocalDate, actionId: string): string {
-  return `${PLAN_REF_PREFIX}${weekKey}:${actionId}`;
-}
 
 /**
  * Shared completion body. Marks the action done (keeping an earlier completedOn)

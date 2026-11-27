@@ -215,14 +215,17 @@ describe("Dashboard small expense Moments", () => {
 });
 
 describe("Dashboard candle flicker", () => {
+  // Requirement 17.1: a fallback action adds no momentum, so the light never rises and no Moment plays.
   it(
-    "enqueues candleFlicker for the level-1 fallback tick and nothing for its re-tick",
+    "enqueues nothing for the level-1 fallback tick and says it doesn't change the light",
     async () => {
       const user = userEvent.setup();
       await renderDashboard("level-1");
       await user.click(fallbackBox());
-      await waitFor(() => expect(playCalls.kinds).toEqual(["candleFlicker"]), WAIT);
+      expect(await screen.findByText("Action completed \u00b7 doesn't change the light", {}, WAIT)).toBeTruthy();
+      await waitFor(() => expect(fallbackBox().checked).toBe(true), WAIT);
       await settle();
+      expect(playCalls.kinds).toEqual([]);
 
       // A pending checkbox ignores clicks, so each click waits for the previous save to end.
       const notPending = (): void => expect(fallbackBox().getAttribute("aria-busy")).not.toBe("true");
@@ -233,7 +236,7 @@ describe("Dashboard candle flicker", () => {
       await user.click(fallbackBox());
       await waitFor(() => expect(fallbackBox().checked).toBe(true), WAIT);
       await settle();
-      expect(playCalls.kinds).toEqual(["candleFlicker"]);
+      expect(playCalls.kinds).toEqual([]);
     },
     TEST_TIMEOUT_MS,
   );

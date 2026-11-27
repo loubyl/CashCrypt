@@ -46,6 +46,8 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 - **Poltergeist_Feed_Moment**: The new Moment in which the Poltergeist swells briefly because a small expense was added.
 - **Ghost_Arrival_Moment**: The new Moment in which the new Ghost appears visibly in the Scene.
 - **Candle_Flicker_Moment**: The new Moment in which the house windows flicker once, for a ticked Plan_Action without a Do_It_Button.
+- **Fallback_Action**: A Plan_Action of kind `fallback` (a welcome suggestion): "Set aside $X for an emergency fund", "Review last week's small expenses" or "Review your subscription list". Its id starts with `fallback:`.
+- **Real_Action**: A Plan_Action of kind `cancel_subscription`, `extra_payment` or `reduce_small_expenses`.
 - **Guide**: The dismissible "How your crypt works" Card on the Dashboard, available in both Crypts.
 - **Guide_Step**: The "first step" line of the Guide, derived from the current Weekly_Plan, shown in the Demo_Crypt only.
 - **Guide_Session**: The period in one browser tab from entering the demo on the Landing until the tab closes, during which the dismissal of the Guide in the Demo_Crypt is remembered.
@@ -276,6 +278,7 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 7. WHEN a test is added for a bug fix (the Add expense initial focus, the checkbox focus loss of Requirement 15 and the checkbox that recorded nothing), THE task summary SHALL report the mutation check required by `conventions.md`: the bug reintroduced, the test failing, the fix restored.
 8. THE `scripts/check-moments.mjs` browser script SHALL gain one case per new Moment (Poltergeist_Feed_Moment, Ghost_Arrival_Moment, Candle_Flicker_Moment), one case for the plan checkbox that opens the cancel sheet, and one case that ticks a plan checkbox with Space and asserts that focus stays on it, because jsdom does not blur a focused element when it becomes disabled. Every existing case SHALL keep passing.
    - It SHALL also gain the `noHorizontalScroll` case of Requirement 16.4.
+   - The level-1 `candleFlicker` case becomes the `fallbackTick` case of Requirement 17.8, because a Fallback_Action tick no longer raises the light.
 9. THE Test_Suite SHALL record, as a manual checklist in the task summary, a browser check of the level-4 demo flow at 1280 by 720 and at 375 by 667 with and without Reduced_Motion, covering every toast, "View", the Guide, the three new Moments and the Landing.
 10. THE Test_Suite SHALL keep `npm test`, `npm run lint` and `npm run typecheck` passing, with plain English test descriptions and no snapshot tests for pure functions.
 
@@ -307,3 +310,28 @@ Found on the deployed app at 320 by 640 in demo mode: the header (wordmark, "Dem
 4. THE `scripts/check-moments.mjs` browser script SHALL include a `noHorizontalScroll` case that opens the Dashboard in demo mode at viewport widths 320, 768, 1280 and 1920 and asserts `document.documentElement.scrollWidth <= document.documentElement.clientWidth` at each.
 5. THE fix SHALL keep the header layout at 768px and wider unchanged, and SHALL pass the className layout-only, token and hex scans.
 6. WHEN a test is added for this bug fix, THE task summary SHALL report the mutation check required by `conventions.md`: the browser case failing on the current header (header 400px wide at 320px), the fix applied, the case passing.
+
+### Requirement 17: Welcome suggestions do not raise the light
+
+**User Story:** As a user with a new crypt, I want ticking a welcome suggestion to be honest about its effect, so that the light only rises when my money really changes.
+
+The `fallback` actions fill the plan when a crypt has no debts, subscriptions or small expenses to act on. Ticking one changes no money, so it must not add momentum. A crypt that starts with only fallbacks must also get its first real actions as soon as it has data.
+
+#### Acceptance Criteria
+
+1. WHEN a Fallback_Action is completed, THE App SHALL mark it done and keep its `exorcism_action_completed` Event, and THE Snapshot_Adapter SHALL NOT pass that Event to the Haunting_Engine, so that the Fallback_Action adds no momentum. Only Real_Actions count: cancel, extra payment and reduce small expenses. The Haunting_Engine stays pure and unchanged.
+2. THE Snapshot_Adapter SHALL recognise a Fallback_Action Event by its reference key `plan:<weekKey>:fallback:<key>`, so that Events already stored by earlier versions follow the same rule. Unticking and ticking a Fallback_Action again SHALL leave the light score unchanged.
+3. WHEN the user ticks a Fallback_Action, THE toast SHALL read "Action completed · doesn't change the light" (the base text of an action with no amount, the Light_Clause fixed to the expense text), and no Light_Delta SHALL be computed for it.
+4. WHEN the user adds or edits a Debt, a Subscription or a Transaction, and the Weekly_Plan of the current Plan_Week holds only Fallback_Actions and none is done, THE Data_Layer SHALL regenerate that plan with the Planner from the new data, in the same Dexie transaction as the change, keeping its week key, so that the first Real_Actions appear right away. `startLightScore` and `generatedOn` are set again.
+5. THE Data_Layer SHALL NOT regenerate a plan that has any Real_Action or any done action, SHALL NOT create a plan when none exists for the current Plan_Week, and SHALL NOT touch the plan of another week. A change that fails validation SHALL leave the plan as it was.
+6. THE candle-flicker Moment of Requirement 8 SHALL NOT play for a Fallback_Action, because it plays only when the light rises (Requirement 8.1). No Demo_Scenario can still trigger it: the only plan with a `reduce_small_expenses` action is level 4, which also has the Poltergeist, so ticking it plays the sigil. The future of the Moment is a pending product decision and its code is not changed by this requirement.
+7. THE level-4 Calibration_Path numbers SHALL stay unchanged (32.74, 37.95, 38.95, 43.49), because that path completes only Real_Actions.
+8. THE Test_Suite SHALL include a fast-check property (at least 100 runs) that Fallback_Action completions never change momentum or the light score, a property that a plan with a Real_Action or a done action is never changed by an add or an edit, examples for the toast text and for the refresh and no-refresh cases, and a `fallbackTick` browser case in `scripts/check-moments.mjs` that replaces the old level-1 `candleFlicker` case. WHEN the property is added, THE task summary SHALL report the mutation check required by `conventions.md`.
+
+#### Supersedes
+
+- `app-screens` Requirement 4.4 and 4.5: the adapter now also omits `exorcism_action_completed` Events of Fallback_Actions, so the passed-through event count is the stored count minus the omitted `subscription_canceled` and Fallback_Action Events.
+- `app-screens` Requirement 8.1 and the "Plan actions do the work" decision: a completion still creates its Event, but a Fallback_Action Event carries no momentum.
+- `app-screens` Requirement 14.2 and 14.3: a fallback-only plan with nothing done is regenerated by an add or an edit (criterion 4); every other plan stays unchanged.
+- Requirement 8.2 of this spec, in so far as it gave a fallback tick a light rise and a candle flicker: a Fallback_Action tick now has a Light_Delta of 0 and plays no Moment. Requirement 8.2 still holds for a `reduce_small_expenses` tick with no Poltergeist.
+- `haunting-engine` Requirement 3.4 is unchanged for the engine, but its input no longer holds Fallback_Action Events, so "every in-window `exorcism_action_completed` event" means the Events the adapter passes.

@@ -1105,7 +1105,11 @@ function assertGhostArrival({ samples, fastOpacity, addedOpacity, transactionsPa
   }
 }
 
-async function runCandleFlicker(page) {
+// The two functions below measure the candleFlicker Moment itself. After action-feedback Requirement 17
+// no demo scenario can trigger it (a fallback tick no longer raises the light), so they are not
+// registered in MOMENT_CHECKS. They stay until the Moment's future is decided.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function runCandleFlickerArt(page) {
   await loadLevel(page, 1);
   await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
   // Fast sampler: the dip lasts 100 ms, which the 100 ms sampler can step over.
@@ -1130,7 +1134,8 @@ async function runCandleFlicker(page) {
   return { samples: await page.evaluate(() => window.__samples), light: await page.evaluate(() => window.__light), tickT: Math.round(tickT) };
 }
 
-function assertCandleFlicker({ samples, light }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function assertCandleFlickerArt({ samples, light }) {
   const values = light.map((l) => l.max).filter((v) => v !== null);
   const before = values[0];
   // The live value after the tick is the last one; the dip is the minimum below the value just before the Moment.
@@ -1152,6 +1157,46 @@ function assertCandleFlicker({ samples, light }) {
   check(Boolean(toast), `candleFlicker: toast reads "${FLICKER_TOAST}" (${samples.map((s) => s.toastText).find((t) => t.includes("Light")) ?? "none"})`);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Fallback tick (action-feedback Requirement 17): welcome suggestions add no momentum
+// ---------------------------------------------------------------------------------------------
+const FALLBACK_TOAST = "Action completed · doesn't change the light";
+/** Level 1 ticks "Set aside ... for an emergency fund": nothing must flicker or change the light. */
+async function runFallbackTick(page) {
+  await loadLevel(page, 1);
+  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
+  await page.evaluate((everyMs) => {
+    window.__light = [];
+    const t0 = performance.now();
+    setInterval(() => {
+      const lit = [...document.querySelectorAll('[data-part="scene"] [data-state="lit"] [data-part="light"]')];
+      window.__light.push({ t: Math.round(performance.now() - t0), max: lit.length ? Math.max(...lit.map((w) => Number(getComputedStyle(w).opacity))) : null });
+    }, everyMs);
+  }, FLICKER_SAMPLE_MS);
+  await sleep(300);
+  const box = await page.evaluateHandle(
+    () => [...document.querySelectorAll('input[type="checkbox"]')].find((el) => /emergency/i.test(el.closest("[data-plan-action]")?.textContent ?? "")) ?? null,
+  );
+  if (!box.asElement()) throw new Error("Emergency fund checkbox not found");
+  await box.asElement().click();
+  await sleep(MAX_MOMENT_MS);
+  const checked = await page.evaluate(
+    () => [...document.querySelectorAll('input[type="checkbox"]')].find((el) => /emergency/i.test(el.closest("[data-plan-action]")?.textContent ?? ""))?.checked ?? null,
+  );
+  return { samples: await page.evaluate(() => window.__samples), light: await page.evaluate(() => window.__light), checked };
+}
+function assertFallbackTick({ samples, light, checked }) {
+  const values = light.map((l) => l.max).filter((v) => v !== null);
+  const spread = values.length ? Math.max(...values) - Math.min(...values) : Infinity;
+  check(checked === true, "fallbackTick: the emergency-fund action is marked done");
+  check(spread < LIVE_EPSILON, `fallbackTick: the window light never moves (spread ${spread.toExponential(2)} over ${values.length} readings)`);
+  check(!samples.some((s) => s.parts.some((p) => PART_OWNER[p] === "candleFlicker")), "fallbackTick: no candleFlicker art is drawn");
+  check(samples.every((s) => s.layerChildren === 0), "fallbackTick: the Moment layer stays empty");
+  check(
+    samples.some((s) => s.toastText.includes(FALLBACK_TOAST)),
+    `fallbackTick: toast reads "${FALLBACK_TOAST}" (${samples.map((s) => s.toastText).find((t) => t.includes("Action completed")) ?? "none"})`,
+  );
+}
 /** Level 4 at 1280 by 720: Guide shown (Scene and Guide_Step fit), then dismissed (Scene, plan heading and actions fit). */
 const measureGuideLayout = (page) =>
   page.evaluate((title) => {
@@ -1399,7 +1444,7 @@ const MOMENT_CHECKS = [
   { name: "tabBarLabels", run: runTabBarLabels, assert: assertTabBarLabels },
   { name: "feed", run: runFeed, assert: assertFeed },
   { name: "ghostArrival", run: runGhostArrival, assert: assertGhostArrival },
-  { name: "candleFlicker", run: runCandleFlicker, assert: assertCandleFlicker },
+  { name: "fallbackTick", run: runFallbackTick, assert: assertFallbackTick },
   { name: "guide", run: runGuide, assert: assertGuide, keepGuide: true },
   { name: "landing", run: runLanding, assert: assertLanding, startsOnLanding: true },
 ];

@@ -10,6 +10,8 @@ export const GHOST_EXPENSE_CLAUSE = "feeds the Poltergeist, doesn't dim the ligh
 export const GHOST_WOKE_CLAUSE = "woke the Poltergeist, doesn't dim the light";
 export const GHOST_ASLEEP_CLAUSE = "doesn't dim the light";
 export const EXPENSE_CLAUSE = "doesn't change the light";
+/** Clause of the toast for a ticked fallback action: it adds no momentum (Requirement 17.2). */
+export const FALLBACK_CLAUSE = EXPENSE_CLAUSE;
 const WAKES_SUFFIX = "more wakes the Poltergeist";
 
 const LIGHT_UNCHANGED = "Light unchanged";

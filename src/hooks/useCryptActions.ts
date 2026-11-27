@@ -166,10 +166,11 @@ function bindActions(
   return {
     setIncome: (cents) => withNow(() => setMonthlyIncome(db, cents)),
     addDebt: (input) => withNow((today) => addDebt(db, input, { now: today })),
-    editDebt: (id, input) => withNow(() => editDebt(db, id, input)),
+    editDebt: (id, input) => withNow((today) => editDebt(db, id, input, { now: today })),
     addSubscription: (input) =>
       withNow((today) => addSubscription(db, input, { now: today })),
-    editSubscription: (id, input) => withNow(() => editSubscription(db, id, input)),
+    editSubscription: (id, input) =>
+      withNow((today) => editSubscription(db, id, input, { now: today })),
     addTransaction: (input) =>
       observeAction(
         observer,

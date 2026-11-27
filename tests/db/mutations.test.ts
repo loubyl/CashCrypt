@@ -205,7 +205,7 @@ describe("addDebt and editDebt", () => {
   it("edits a debt in place and keeps its id", async () => {
     const db = freshDb();
     await addDebt(db, DEBT_INPUT, ctx());
-    const edited = await editDebt(db, "id-1", { ...DEBT_INPUT, balanceCents: 90_000 });
+    const edited = await editDebt(db, "id-1", { ...DEBT_INPUT, balanceCents: 90_000 }, ctx());
     expect(edited).toEqual({ id: "id-1", ...DEBT_INPUT, balanceCents: 90_000 });
     expect(await db.debts.toArray()).toEqual([edited]);
   });
@@ -214,7 +214,7 @@ describe("addDebt and editDebt", () => {
     const db = freshDb();
     await addDebt(db, DEBT_INPUT, ctx());
     const before = await dump(db);
-    await expect(editDebt(db, "missing", DEBT_INPUT)).rejects.toBeInstanceOf(DbNotFoundError);
+    await expect(editDebt(db, "missing", DEBT_INPUT, ctx())).rejects.toBeInstanceOf(DbNotFoundError);
     expect(await dump(db)).toEqual(before);
   });
 });
@@ -244,11 +244,12 @@ describe("addSubscription, editSubscription and reactivateSubscription", () => {
       active: false,
       canceledOn: "2025-01-02",
     });
-    const edited = await editSubscription(db, "s1", {
-      ...SUB_INPUT,
-      name: "Renamed",
-      active: true,
-    });
+    const edited = await editSubscription(
+      db,
+      "s1",
+      { ...SUB_INPUT, name: "Renamed", active: true },
+      ctx(),
+    );
     expect(edited).toEqual({
       id: "s1",
       ...SUB_INPUT,
@@ -262,7 +263,7 @@ describe("addSubscription, editSubscription and reactivateSubscription", () => {
   it("rejects editing a missing subscription and leaves every table unchanged", async () => {
     const db = freshDb();
     const before = await dump(db);
-    await expect(editSubscription(db, "missing", SUB_INPUT)).rejects.toBeInstanceOf(
+    await expect(editSubscription(db, "missing", SUB_INPUT, ctx())).rejects.toBeInstanceOf(
       DbNotFoundError,
     );
     expect(await dump(db)).toEqual(before);

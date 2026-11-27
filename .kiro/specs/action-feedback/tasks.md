@@ -423,9 +423,31 @@ Conventions that apply to every task:
     - Check `README.md` for the Landing styleguide link and the four QuickActions, and update them.
     - _Requirements: 13.1_
 
+- [x] 11. Welcome suggestions do not raise the light (new product rule, before the final checkpoint)
+  - [x] 11.1 Fallback completions add no momentum
+    - `planRefKey` moves to `src/lib/db/refKeys.ts` with `isFallbackPlanRefKey`; `FALLBACK_ID_PREFIX` in `src/lib/exorcism/config.ts`; `snapshotAdapter.countsForMomentum` omits Events of fallback actions. The engine is unchanged.
+    - Tests: Property 7 in `tests/feedback/properties/p07-fallback-no-momentum.test.ts` and `tests/db/fallbackMomentum.test.ts` (ticking all three fallbacks keeps the light and momentum, still marks them done and stores the Events).
+    - Mutation check: with the filter replaced by `return true` the property fails with the counterexample `income 100, one Event plan:2025-06-16:fallback:emergency-fund`, and the example test fails; restored.
+    - _Requirements: 17.1, 17.2, 17.8_
+  - [x] 11.2 Toast "Action completed · doesn't change the light"
+    - `FALLBACK_CLAUSE` in `lightClause.ts`; `ExorcismPlanAction` uses the fixed clause for `fallback` actions.
+    - Tests: the level-1 test in `tests/ui/dashboardNewMoments.test.tsx` asserts the exact toast and that no Moment is enqueued, for the tick and for the re-tick.
+    - _Requirements: 17.3, 17.8_
+  - [x] 11.3 Plan refresh for new crypts
+    - `refreshFallbackOnlyPlan` and `isRefreshablePlan` in `plans.ts`; the five add and edit mutations run over every table and call it; `editDebt` and `editSubscription` take a `ctx`; `useCryptActions` passes it.
+    - Tests: `tests/db/planRefresh.test.ts` (refreshes after a debt, a subscription, a Poltergeist transaction and two edits; does not refresh with a real action, with a done action, when no plan exists, for another week, or on invalid input) and Property 8 in `tests/db/properties/p08-plan-refresh.test.ts`.
+    - _Requirements: 17.4, 17.5, 17.8_
+  - [x] 11.4 Check which scenario can still trigger the candle flicker (stop point)
+    - Scanned the five scenarios at their plan: only level 1 had a fallback (the old trigger); `reduce_small_expenses` exists only at level 4, which has the Poltergeist (sigil). No scenario triggers the flicker any more.
+    - The Moment code, its unit tests and its geometry are not changed. `check-moments.mjs` registers `fallbackTick` instead of `candleFlicker`; the flicker art functions stay unregistered. Options are reported to the user for a decision.
+    - _Requirements: 17.6, 17.8_
+  - [x] 11.5 Record what this supersedes and confirm the demo path
+    - Supersede notes in `.kiro/specs/app-screens/requirements.md` (4.4, 4.5, 8.1 and the "Plan actions do the work" decision, 14.2, 14.3) and `.kiro/specs/haunting-engine/requirements.md` (3.4); `tests/demo/calibration.test.ts` and `tests/scene/demoPath.test.ts` pass with 32.74, 37.95, 38.95 and 43.49.
+    - _Requirements: 17.7_
+
 - [ ] 10. Final checkpoint
   - Run `npm test`, `npx tsc --noEmit` and `npm run lint`, one after the other, and fix every failure.
-  - Run `scripts/check-moments.mjs` (every case) at `RAF_THROTTLE_MS=0` and `700` against a local build and report the results.
+  - Run `scripts/check-moments.mjs` (every case, including `fallbackTick`) at `RAF_THROTTLE_MS=0` and `700` against a local build and report the results.
   - Record in the task summary:
     - the manual checklist of Requirement 14.9: the level-4 flow at 1280 by 720 and at 375 by 667, with and without reduced motion, covering every toast, "View", the Guide in both Crypts, the three new Moments, the checkbox flow, the focus fixes and the Landing at both sizes;
     - the mutation checks of tasks 1.3, 1.5, 1.6, 1.9 and 3.2.
@@ -460,7 +482,9 @@ Conventions that apply to every task:
     { "id": 14, "tasks": ["7.3"] },
     { "id": 15, "tasks": ["7.4"] },
     { "id": 16, "tasks": ["9.1", "9.2", "9.3"] },
-    { "id": 17, "tasks": ["10"] }
+    { "id": 17, "tasks": ["11.1", "11.2", "11.3", "11.4"] },
+    { "id": 18, "tasks": ["11.5"] },
+    { "id": 19, "tasks": ["10"] }
   ]
 }
 ```

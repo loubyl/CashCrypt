@@ -113,9 +113,9 @@ const invalidCaseArb: fc.Arbitrary<InvalidCase> = fc.oneof(
   fc
     .tuple(badNameArb, badAprArb)
     .map(([name, apr]) =>
-      v("editDebt invalid", (db) => editDebt(db, OPEN_DEBT_ID, { ...validDebt, name, apr })),
+      v("editDebt invalid", (db) => editDebt(db, OPEN_DEBT_ID, { ...validDebt, name, apr }, CTX)),
     ),
-  unknownIdArb.map((id) => n("editDebt unknown id", (db) => editDebt(db, id, validDebt))),
+  unknownIdArb.map((id) => n("editDebt unknown id", (db) => editDebt(db, id, validDebt, CTX))),
   badNameArb.map((name) =>
     v("addSubscription name", (db) => addSubscription(db, { ...validSub, name }, CTX)),
   ),
@@ -126,11 +126,11 @@ const invalidCaseArb: fc.Arbitrary<InvalidCase> = fc.oneof(
   ),
   badPositiveAmountArb.map((c) =>
     v("editSubscription amount", (db) =>
-      editSubscription(db, SUB_ID, { ...validSub, amountCents: c }),
+      editSubscription(db, SUB_ID, { ...validSub, amountCents: c }, CTX),
     ),
   ),
   unknownIdArb.map((id) =>
-    n("editSubscription unknown id", (db) => editSubscription(db, id, validSub)),
+    n("editSubscription unknown id", (db) => editSubscription(db, id, validSub, CTX)),
   ),
   badPositiveAmountArb.map((c) =>
     v("addTransaction amount", (db) =>

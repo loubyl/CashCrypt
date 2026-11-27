@@ -256,3 +256,8 @@ The Haunting Engine is a pure, deterministic TypeScript module located at `src/l
 17. FOR ALL Structurally_Valid_Snapshots, WHEN a new snapshot is derived from the original by adding one FinancialEvent with a `date` within the 30-Day_Window and a non-negative `extraPrincipalCents` or `amountCents`, THE Haunting_Engine SHALL return a `lightScore` greater than or equal to the original. *(Adding an in-window event never lowers lightScore)*
 18. FOR ALL Structurally_Valid_Snapshots, all existing monotonicity properties for `baseScore` (Req 14 AC6, AC7, AC8) SHALL hold when `momentum` is held constant, because `lightScore = min(100, baseScore + momentum)` and `baseScore` retains all prior monotonicity guarantees. *(Momentum does not break existing monotonicity)*
 19. FOR ALL Structurally_Valid_Snapshots where `monthlyIncome` is 0, `momentum` SHALL equal 0 and `lightScore` SHALL equal `baseScore`. *(Zero-income momentum neutrality)*
+
+## Superseded by action-feedback Requirement 17
+
+- **Requirement 3.4** (actions contribution): the engine is unchanged and stays pure. The app's Snapshot_Adapter no longer passes the `exorcism_action_completed` Events of `fallback` plan actions, so in the app "every in-window `exorcism_action_completed` event" means the Events of real actions (cancel, extra payment, reduce small expenses).
+

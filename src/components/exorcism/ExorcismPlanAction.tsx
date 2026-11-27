@@ -7,12 +7,14 @@ import { useToast } from "@/components/ui/ToastRegion";
 import { useActionToast } from "@/components/feedback/useActionToast";
 import type { MutationResult } from "@/hooks/useCryptActions";
 import { getDoItDomId, getRowDomId } from "@/lib/utils/destinations";
+import { FALLBACK_CLAUSE } from "@/lib/utils/lightClause";
 import { formatCentsShort } from "@/lib/utils/cents";
 import { getPlanActionSubtitle, getToastForCompletion, type DoItTarget } from "@/lib/utils/planView";
 import type { HighlightTag } from "@/lib/utils/destinations";
 import type { StoredPlanAction } from "@/types/finance";
 
 const TOGGLE_ERROR_MESSAGE = "Could not save that action. Try again.";
+const FALLBACK_KIND = "fallback";
 const DO_IT_LABEL = "Do it";
 const CANCEL_DESCRIPTION = "Opens the cancel confirmation";
 const PAY_DESCRIPTION = "Opens the payment sheet";
@@ -71,7 +73,10 @@ export function ExorcismPlanAction({
       showToast({
         tone: "success",
         base: getToastForCompletion(action),
-        effect: { kind: "light", change: result.change },
+        effect:
+          action.kind === FALLBACK_KIND
+            ? { kind: "fixed", clause: FALLBACK_CLAUSE }
+            : { kind: "light", change: result.change },
         destination: { list: "plan", rowId: action.id, tag: "updated" },
       });
     }

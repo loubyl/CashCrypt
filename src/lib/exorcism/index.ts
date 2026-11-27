@@ -9,6 +9,7 @@ import {
   CENTS_PER_WHOLE_DOLLAR,
   EMERGENCY_FUND_INCOME_BASIS_POINTS,
   EXTRA_PAYMENT_INCOME_BASIS_POINTS,
+  FALLBACK_ID_PREFIX,
   FALLBACK_KEYS,
   FLOAT_NOISE_EPSILON,
   MONTHS_PER_YEAR_FOR_INTEREST,
@@ -23,7 +24,6 @@ export type { ExorcismAction, ExorcismActionKind } from "./types";
 const CANCEL_PREFIX = "cancel:";
 const PAY_PREFIX = "pay:";
 const REDUCE_PREFIX = "reduce:";
-const FALLBACK_PREFIX = "fallback:";
 const CANCEL_SUBTITLE = "Open Subscriptions to cancel it";
 const PAY_SUBTITLE = "Open Debts to log the payment";
 const REDUCE_SUBTITLE = "Open Transactions to review it. Tick it when you are done.";
@@ -186,7 +186,7 @@ function emergencyFundTitle(incomeCents: number): string {
 
 function buildFallback(key: FallbackKey, incomeCents: number): ExorcismAction {
   const base = {
-    id: `${FALLBACK_PREFIX}${key}`,
+    id: `${FALLBACK_ID_PREFIX}${key}`,
     kind: "fallback" as const,
     monthlyAmountCents: 0,
     priorityCents: 0,

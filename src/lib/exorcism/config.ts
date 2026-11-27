@@ -14,4 +14,6 @@ export const FALLBACK_KEYS = [
   "review-subscriptions",
 ] as const;
 
+/** Every fallback action id starts with this prefix (`fallback:<key>`). */
+export const FALLBACK_ID_PREFIX = "fallback:";
 export type FallbackKey = (typeof FALLBACK_KEYS)[number];
