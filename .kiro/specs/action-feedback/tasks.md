@@ -447,7 +447,7 @@ Conventions that apply to every task:
     - Supersede notes in `.kiro/specs/app-screens/requirements.md` (4.4, 4.5, 8.1 and the "Plan actions do the work" decision, 14.2, 14.3) and `.kiro/specs/haunting-engine/requirements.md` (3.4); `tests/demo/calibration.test.ts` and `tests/scene/demoPath.test.ts` pass with 32.74, 37.95, 38.95 and 43.49.
     - _Requirements: 17.7_
 
-- [ ] 10. Final checkpoint
+- [x] 10. Final checkpoint
   - Run `npm test`, `npx tsc --noEmit` and `npm run lint`, one after the other, and fix every failure.
   - Run `scripts/check-moments.mjs` (every case, including `fallbackTick`) at `RAF_THROTTLE_MS=0` and `700` against a local build and report the results.
   - Record in the task summary:

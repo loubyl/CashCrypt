@@ -89,7 +89,7 @@ describe("measured toast of a cancellation", () => {
     await user.click(doIt as HTMLElement);
     const dialog = await screen.findByRole(DIALOG_ROLE);
     await user.click(within(dialog).getByRole("button", { name: CANCEL_LABEL }));
-    expect(await screen.findByText("+$120/mo saved \u00b7 Light +5.2")).toBeTruthy();
+    expect(await screen.findByText("+$120/mo saved \u00b7 Light +5.2", undefined, DASHBOARD_WAIT)).toBeTruthy();
   });
 });
 
