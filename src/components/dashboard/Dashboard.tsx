@@ -20,7 +20,7 @@ import { useCrypt } from "@/hooks/useCrypt";
 import { useExorcismPlan } from "@/hooks/useExorcismPlan";
 import { useHouseState } from "@/hooks/useHouseState";
 import { useSceneModel } from "@/hooks/useSceneModel";
-import { getGuideStep } from "@/lib/utils/planView";
+import { getGuideStepTarget, getGuideStepText } from "@/lib/utils/planView";
 import { getLevelAnnouncement, getNextLevelText, getScoreDelta } from "@/lib/utils/scoreView";
 import { MomentHost } from "@/components/moments/MomentHost";
 import type { MomentHostLive } from "@/components/moments/MomentHost";
@@ -103,6 +103,7 @@ export function Dashboard() {
   }
 
   const { houseState, rows } = result;
+  const guideStepTarget = status === "demo" && plan ? getGuideStepTarget(plan.actions, rows) : null;
   const payableDebts = rows.debts.filter((debt) => debt.balanceCents > 0);
   const scoreDelta = plan ? getScoreDelta(houseState.lightScore, plan.startLightScore) : null;
   const heroDelta = scoreDelta
@@ -147,7 +148,8 @@ export function Dashboard() {
             {guideShown ? (
               <CryptGuide
                 mode={status === "demo" ? "demo" : "real"}
-                step={status === "demo" && plan ? getGuideStep(plan.actions, rows) : null}
+                step={guideStepTarget ? getGuideStepText(guideStepTarget) : null}
+                stepTarget={guideStepTarget}
                 onDismiss={handleDismissGuide}
                 headingId={GUIDE_HEADING_ID}
                 className={GUIDE_PLACEMENT_CLASSES}

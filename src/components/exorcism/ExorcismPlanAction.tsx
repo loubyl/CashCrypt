@@ -6,7 +6,7 @@ import { ExorcismActionRow } from "@/components/ui/ExorcismActionRow";
 import { useToast } from "@/components/ui/ToastRegion";
 import { useActionToast } from "@/components/feedback/useActionToast";
 import type { MutationResult } from "@/hooks/useCryptActions";
-import { getRowDomId } from "@/lib/utils/destinations";
+import { getDoItDomId, getRowDomId } from "@/lib/utils/destinations";
 import { formatCentsShort } from "@/lib/utils/cents";
 import { getPlanActionSubtitle, getToastForCompletion, type DoItTarget } from "@/lib/utils/planView";
 import type { HighlightTag } from "@/lib/utils/destinations";
@@ -91,6 +91,7 @@ export function ExorcismPlanAction({
       {doItTarget !== null ? (
         <div className={DO_IT_WRAPPER_CLASSES}>
           <Button
+            id={getDoItDomId(action.id)}
             type="button"
             variant="secondary"
             size="md"

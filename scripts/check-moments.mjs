@@ -1161,21 +1161,76 @@ const measureGuideLayout = (page) =>
     };
   }, GUIDE_TITLE);
 
+const SHOW_ME_LABEL = "Show me: Cancel Wraithcast";
+const DO_IT_LABEL = "Do it: Cancel Wraithcast";
+const SCROLL_STABLE_MS = 300;
+const SCROLL_TIMEOUT_MS = 4000;
+const SHOW_ME_MIN_TARGET_PX = 44;
+/** Clicks "Show me" below the fold, waits for the (smooth) scroll to stop, and reports where the Do it button ended up. */
+async function runShowMe(page) {
+  const before = await page.evaluate((label) => {
+    const doIt = document.querySelector(`button[aria-label^="${label}"]`);
+    const showMe = [...document.querySelectorAll("button")].find((b) => (b.getAttribute("aria-label") ?? "").startsWith("Show me"));
+    return {
+      doItTopBefore: doIt ? doIt.getBoundingClientRect().top : null,
+      showMeName: showMe?.getAttribute("aria-label") ?? null,
+      showMeHeight: showMe ? showMe.getBoundingClientRect().height : null,
+    };
+  }, DO_IT_LABEL);
+  await clickByText(page, "button", SHOW_ME_LABEL);
+  let last = -1;
+  let stableSince = Date.now();
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < SCROLL_TIMEOUT_MS) {
+    const y = await page.evaluate(() => window.scrollY);
+    if (y !== last) {
+      last = y;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= SCROLL_STABLE_MS) break;
+    await sleep(50);
+  }
+  const after = await page.evaluate((label) => {
+    const doIt = document.querySelector(`button[aria-label^="${label}"]`);
+    const rect = doIt ? doIt.getBoundingClientRect() : null;
+    return {
+      top: rect ? rect.top : null,
+      bottom: rect ? rect.bottom : null,
+      left: rect ? rect.left : null,
+      right: rect ? rect.right : null,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      focused: document.activeElement === doIt,
+      activeLabel: document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.tagName ?? null,
+    };
+  }, DO_IT_LABEL);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await sleep(OVERFLOW_SETTLE_MS_GUIDE);
+  return { ...before, ...after };
+}
 async function runGuide(page) {
   await page.setViewport(GUIDE_VIEWPORT);
   await sleep(OVERFLOW_SETTLE_MS_GUIDE);
   const shown = await measureGuideLayout(page);
+  const showMe = await runShowMe(page);
   await clickByText(page, "button", GUIDE_GOT_IT);
   await waitFor(page, (title) => ![...document.querySelectorAll("h2")].some((h) => (h.textContent ?? "").trim() === title), GUIDE_TITLE);
   await sleep(OVERFLOW_SETTLE_MS_GUIDE);
   const dismissed = await measureGuideLayout(page);
-  return { shown, dismissed };
+  return { shown, dismissed, showMe };
 }
 const OVERFLOW_SETTLE_MS_GUIDE = 500;
 const GUIDE_PLAN_ACTION_COUNT = 3;
 
-function assertGuide({ shown, dismissed }) {
+function assertGuide({ shown, dismissed, showMe }) {
   const vh = GUIDE_VIEWPORT.height;
+  check(showMe.showMeName === SHOW_ME_LABEL, `guide: the Show me Button is named "${SHOW_ME_LABEL}" (${showMe.showMeName})`);
+  check(showMe.showMeHeight !== null && showMe.showMeHeight >= SHOW_ME_MIN_TARGET_PX, `guide: Show me is at least ${SHOW_ME_MIN_TARGET_PX}px tall (${fmt(showMe.showMeHeight)} px)`);
+  check(showMe.doItTopBefore !== null && showMe.doItTopBefore > vh, `guide: before Show me the Do it button is below the fold (top ${fmt(showMe.doItTopBefore)} of ${vh} px)`);
+  check(
+    showMe.top !== null && showMe.top >= 0 && showMe.bottom <= showMe.height && showMe.left >= 0 && showMe.right <= showMe.width,
+    `guide: after Show me the Do it button is fully in the viewport (top ${fmt(showMe.top)}, bottom ${fmt(showMe.bottom)} of ${showMe.height} px)`,
+  );
+  check(showMe.focused, `guide: after Show me the Do it button has focus (active: ${showMe.activeLabel})`);
   check(shown.sceneBottom !== null && shown.sceneBottom <= vh, `guide: with the Guide shown the whole Scene fits (bottom ${fmt(shown.sceneBottom)} of ${vh} px)`);
   check(shown.stepBottom !== null && shown.stepBottom <= vh, `guide: the Guide_Step fits (bottom ${fmt(shown.stepBottom)} of ${vh} px, "${shown.stepText}")`);
   check(

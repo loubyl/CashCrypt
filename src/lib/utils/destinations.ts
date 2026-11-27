@@ -30,6 +30,11 @@ export function getRowDomId(list: HighlightList, rowId: string): string {
   return `row-${list}-${rowId}`;
 }
 
+/** DOM id of a plan action's "Do it" button: `do-it-<actionId>`. */
+export function getDoItDomId(actionId: string): string {
+  return `do-it-${actionId}`;
+}
+
 export function getDestinationPath(list: HighlightList): string {
   return DESTINATION_PATHS[list];
 }

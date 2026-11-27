@@ -103,23 +103,55 @@ export function getShortTitle(title: string): string {
   return (index >= 0 ? title.slice(0, index) : title).trim();
 }
 
+export type GuideStepTarget =
+  | { kind: "doIt"; actionId: string; shortTitle: string; outcome: DoItTarget["kind"] }
+  | { kind: "tick"; actionId: string; shortTitle: string }
+  | { kind: "done" };
+
+/**
+ * What the Guide_Step points at: the first not-done action with a Do it button, else the
+ * first not-done action to tick, else nothing (all done).
+ */
+export function getGuideStepTarget(
+  actions: readonly ExorcismAction[],
+  rows: DoItRows,
+): GuideStepTarget {
+  for (const action of actions) {
+    const target = getDoItTarget(action, rows);
+    if (target !== null) {
+      return {
+        kind: "doIt",
+        actionId: action.id,
+        shortTitle: getShortTitle(action.title),
+        outcome: target.kind,
+      };
+    }
+  }
+  const pending = actions.find((action) => !action.done);
+  if (pending !== undefined) {
+    return { kind: "tick", actionId: pending.id, shortTitle: getShortTitle(pending.title) };
+  }
+  return { kind: "done" };
+}
+
+/** Guide first-step line for a step target. */
+export function getGuideStepText(step: GuideStepTarget): string {
+  if (step.kind === "doIt") {
+    const outcome = step.outcome === "cancel" ? GUIDE_CANCEL_OUTCOME : GUIDE_PAY_OUTCOME;
+    return `${GUIDE_PRESS_PREFIX}${step.shortTitle}${outcome}`;
+  }
+  if (step.kind === "tick") {
+    return `${GUIDE_TICK_PREFIX}${step.shortTitle}${GUIDE_TICK_SUFFIX}`;
+  }
+  return GUIDE_DONE_TEXT;
+}
+
 /**
  * Guide first-step line: the first not-done action with a Do it button, else the first
  * not-done action to tick, else the done text.
  */
 export function getGuideStep(actions: readonly ExorcismAction[], rows: DoItRows): string {
-  for (const action of actions) {
-    const target = getDoItTarget(action, rows);
-    if (target !== null) {
-      const outcome = target.kind === "cancel" ? GUIDE_CANCEL_OUTCOME : GUIDE_PAY_OUTCOME;
-      return `${GUIDE_PRESS_PREFIX}${getShortTitle(action.title)}${outcome}`;
-    }
-  }
-  const pending = actions.find((action) => !action.done);
-  if (pending !== undefined) {
-    return `${GUIDE_TICK_PREFIX}${getShortTitle(pending.title)}${GUIDE_TICK_SUFFIX}`;
-  }
-  return GUIDE_DONE_TEXT;
+  return getGuideStepText(getGuideStepTarget(actions, rows));
 }
 
 /** "+$120/mo" when the action frees money, otherwise undefined. */

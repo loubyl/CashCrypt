@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ExorcismAction } from "@/lib/exorcism/types";
-import { getGuideStep, getShortTitle, type DoItRows } from "@/lib/utils/planView";
+import { getGuideStep, getGuideStepTarget, getShortTitle, type DoItRows } from "@/lib/utils/planView";
 
 function action(overrides: Partial<ExorcismAction>): ExorcismAction {
   return {
@@ -68,5 +68,35 @@ describe("getGuideStep", () => {
     expect(getGuideStep(done, rows)).toBe(
       "This week's exorcism is done. Use Skip to next week in Demo controls for a new plan.",
     );
+  });
+});
+
+describe("getGuideStepTarget", () => {
+  it("points at the Do it button of the first not-done action with a target", () => {
+    expect(getGuideStepTarget([cancel, pay, fallback], rows)).toEqual({
+      kind: "doIt",
+      actionId: "c",
+      shortTitle: "Cancel Wraithcast",
+      outcome: "cancel",
+    });
+    expect(getGuideStepTarget([{ ...cancel, done: true }, pay, fallback], rows)).toEqual({
+      kind: "doIt",
+      actionId: "p",
+      shortTitle: "Pay $300 extra on Scarlet Moth Card",
+      outcome: "pay",
+    });
+  });
+
+  it("points at the checkbox of the first not-done action when none has a Do it button", () => {
+    expect(getGuideStepTarget([{ ...cancel, done: true }, { ...pay, done: true }, fallback], rows)).toEqual({
+      kind: "tick",
+      actionId: "f",
+      shortTitle: "Set aside $50 for an emergency fund",
+    });
+  });
+
+  it("points at nothing when all actions are done", () => {
+    const done = [cancel, pay, fallback].map((item) => ({ ...item, done: true }));
+    expect(getGuideStepTarget(done, rows)).toEqual({ kind: "done" });
   });
 });

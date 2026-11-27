@@ -1,10 +1,12 @@
 // Tests of the Dashboard Guide: visibility, dismissal, focus, storage and axe
 // (Requirements 5.1 to 5.14, 12.3, 12.4, 14.3).
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Dashboard } from "@/components/dashboard/Dashboard";
-import { GUIDE_STORAGE_KEY, startGuideSession } from "@/components/dashboard/CryptGuide";
+import { CryptGuide, GUIDE_STORAGE_KEY, startGuideSession } from "@/components/dashboard/CryptGuide";
+import { getDoItDomId, getRowDomId } from "@/lib/utils/destinations";
+import type { GuideStepTarget } from "@/lib/utils/planView";
 import { expectNoAxeViolations } from "./helpers/axe";
 import { renderWithCrypt, resetNavigationMock, type RealSeed } from "./helpers/crypt";
 
@@ -180,7 +182,12 @@ describe("Guide structure", () => {
     const guide = screen.getByRole("heading", { name: GUIDE_TITLE }).closest("section");
     expect(guide).not.toBeNull();
     expect(guide?.closest("[aria-live]")).toBeNull();
-    expect(guide?.querySelector("[aria-live]")).toBeNull();
+    // Every Button carries an empty sr-only announcer for its success state; it never holds Guide content.
+    const liveRegions = Array.from(guide?.querySelectorAll("[aria-live]") ?? []);
+    liveRegions.forEach((region) => {
+      expect(region.textContent).toBe("");
+      expect(region.previousElementSibling?.tagName).toBe("BUTTON");
+    });
     STATUS_ROLES.forEach((role) => expect(guide?.querySelector(`[role="${role}"]`)).toBeNull());
   }, TEST_TIMEOUT_MS);
 
@@ -231,4 +238,134 @@ describe("Guide axe", () => {
     await screen.findByRole("heading", { name: GUIDE_TITLE });
     await expectNoAxeViolations(container);
   }, TEST_TIMEOUT_MS);
+});
+
+const SHOW_ME_PATTERN = /^Show me/;
+const MIN_TARGET_PX = 44;
+const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
+const realMatchMedia = window.matchMedia;
+const realScrollIntoView = Element.prototype.scrollIntoView;
+
+function stubReducedPreference(reduced: boolean): void {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: reduced && query === REDUCED_QUERY,
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    }),
+  });
+}
+
+describe("Guide Show me", () => {
+  let scrollSpy: ReturnType<typeof vi.fn>;
+  let scrolled: Element[];
+
+  beforeEach(() => {
+    scrolled = [];
+    scrollSpy = vi.fn(function (this: Element) {
+      scrolled.push(this);
+    });
+    Element.prototype.scrollIntoView = scrollSpy as unknown as typeof Element.prototype.scrollIntoView;
+  });
+
+  afterEach(() => {
+    Element.prototype.scrollIntoView = realScrollIntoView;
+    Object.defineProperty(window, "matchMedia", { configurable: true, writable: true, value: realMatchMedia });
+  });
+
+  function renderGuide(stepTarget: GuideStepTarget, mode: "demo" | "real" = "demo") {
+    return render(
+      <>
+        <CryptGuide
+          mode={mode}
+          step="A step"
+          stepTarget={stepTarget}
+          onDismiss={() => undefined}
+          headingId="guide-heading"
+        />
+        <button type="button" id={getDoItDomId("a1")}>Do it</button>
+        <input type="checkbox" id={getRowDomId("plan", "a2")} aria-label="Tick target" />
+      </>,
+    );
+  }
+
+  it("for a Do it step is a ghost 44px Button named after the action that scrolls to and focuses its Do it button", async () => {
+    const user = userEvent.setup();
+    renderGuide({ kind: "doIt", actionId: "a1", shortTitle: "Cancel Wraithcast", outcome: "cancel" });
+    const button = screen.getByRole("button", { name: "Show me: Cancel Wraithcast" });
+    expect(button.getAttribute("data-variant")).toBe("ghost");
+    expect(button.className).toContain("h-11");
+    expect(Number.parseInt(getComputedStyle(button).minHeight || "0", 10) || MIN_TARGET_PX).toBeGreaterThanOrEqual(
+      MIN_TARGET_PX,
+    );
+    await user.click(button);
+    expect(scrolled).toEqual([document.getElementById(getDoItDomId("a1"))]);
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+    expect(document.activeElement).toBe(document.getElementById(getDoItDomId("a1")));
+  });
+
+  it("for a Tick step scrolls to and focuses the action's checkbox", async () => {
+    const user = userEvent.setup();
+    renderGuide({ kind: "tick", actionId: "a2", shortTitle: "Set aside $50 for an emergency fund" });
+    await user.click(screen.getByRole("button", { name: "Show me: Set aside $50 for an emergency fund" }));
+    const checkbox = document.getElementById(getRowDomId("plan", "a2"));
+    expect(scrolled).toEqual([checkbox]);
+    expect(document.activeElement).toBe(checkbox);
+  });
+
+  it("for the all done step shows no Show me Button", () => {
+    renderGuide({ kind: "done" });
+    expect(screen.queryByRole("button", { name: SHOW_ME_PATTERN })).toBeNull();
+  });
+
+  it("shows no Show me Button in the real Crypt, which has no step", () => {
+    render(<CryptGuide mode="real" step={null} onDismiss={() => undefined} headingId="guide-heading" />);
+    expect(screen.queryByRole("button", { name: SHOW_ME_PATTERN })).toBeNull();
+  });
+
+  it("scrolls instantly under reduced motion", async () => {
+    stubReducedPreference(true);
+    const user = userEvent.setup();
+    renderGuide({ kind: "doIt", actionId: "a1", shortTitle: "Cancel Wraithcast", outcome: "cancel" });
+    await user.click(screen.getByRole("button", { name: SHOW_ME_PATTERN }));
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: "instant", block: "center" });
+    expect(document.activeElement).toBe(document.getElementById(getDoItDomId("a1")));
+  });
+
+  it("does nothing when the target is not on the page", async () => {
+    const user = userEvent.setup();
+    renderGuide({ kind: "doIt", actionId: "missing", shortTitle: "Gone", outcome: "pay" });
+    await user.click(screen.getByRole("button", { name: "Show me: Gone" }));
+    expect(scrollSpy).not.toHaveBeenCalled();
+  });
+
+  it("on the demo Dashboard focuses the Do it button of Cancel Wraithcast and adds no primary Button", async () => {
+    const user = userEvent.setup();
+    const { container } = await renderDemo();
+    const button = screen.getByRole("button", { name: "Show me: Cancel Wraithcast" });
+    expect(container.querySelectorAll('[data-variant="primary"]').length).toBeLessThanOrEqual(1);
+    await expectNoAxeViolations(container);
+    await user.click(button);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Do it: Cancel Wraithcast — saves $120/mo" }));
+    expect(scrolled.length).toBe(1);
+  }, TEST_TIMEOUT_MS);
+
+  it("has no axe violations for each variant", async () => {
+    for (const step of [
+      { kind: "doIt", actionId: "a1", shortTitle: "Cancel Wraithcast", outcome: "cancel" },
+      { kind: "tick", actionId: "a2", shortTitle: "Set aside $50" },
+      { kind: "done" },
+    ] as const) {
+      const { container, unmount } = renderGuide(step);
+      await expectNoAxeViolations(container);
+      unmount();
+    }
+  });
 });

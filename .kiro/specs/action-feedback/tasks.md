@@ -335,7 +335,7 @@ Conventions that apply to every task:
     - Run the whole script again.
     - _Requirements: 5.13, 14.8_
 
-- [ ] 6. MANUAL CHECKPOINT: toasts, highlight, checkbox, Moments and Guide (user review on the deployed app at 1280 by 720)
+- [x] 6. MANUAL CHECKPOINT: toasts, highlight, checkbox, Moments and Guide (user review on the deployed app at 1280 by 720)
   - **Executor: STOP here. Do not start task 7 until the user confirms.** Ask the user to deploy, open the app at 1280 by 720 and check:
     - **Guide:** on entering the demo the Guide shows at the top of the right column and the whole Scene is visible. The first step names Cancel Wraithcast. "Got it" hides it, "How it works" brings it back, and both move focus sensibly. In "My crypt", "How it works" opens the Card without a step.
     - **Focus:** focus the "Cut Coffee" checkbox and press Space; focus stays on it. Typing right after opening Add expense fills the amount.
@@ -353,6 +353,10 @@ Conventions that apply to every task:
   - Apply any changes the user requests before continuing.
   - _Requirements: 1, 3, 4, 5, 6, 7, 8, 11, 14.9, 15_
 
+  - [x] 6.1 Add a "Show me" Button to the Guide_Step (change requested at checkpoint 6)
+    - `getGuideStepTarget` and `getGuideStepText` in `planView.ts`; `getDoItDomId` in `destinations.ts`; id on the Do it Button; `CryptGuide` takes `stepTarget` and renders the ghost "Show me: <short title>" Button for Do it and Tick steps only.
+    - Tests in `tests/ui/cryptGuide.test.tsx` (three variants, focus target, smooth and instant scroll, ghost 44px, axe) and `tests/feedback/guideStep.test.ts`; the `guide` browser case asserts the Do it button is fully inside 1280 by 720 and focused after "Show me".
+    - _Requirements: 5.3, 5.4, 5.5, 12.4_
 - [ ] 7. Landing preview
   - [ ] 7.1 Create `src/lib/demo/preview.ts`
     - `PREVIEW_DATE`, `PREVIEW_LABEL_PREFIX` and a cached `buildLandingPreview()` as in the design.

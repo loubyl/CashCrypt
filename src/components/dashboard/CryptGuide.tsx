@@ -2,13 +2,18 @@
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { Footprints } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference";
+import { getDoItDomId, getRowDomId } from "@/lib/utils/destinations";
+import type { GuideStepTarget } from "@/lib/utils/planView";
 
 export const GUIDE_STORAGE_KEY = "cashcrypt:guide-dismissed";
 
 const GUIDE_DISMISSED_VALUE = "1";
 const GUIDE_TITLE = "How your crypt works";
 const GOT_IT_LABEL = "Got it";
+const SHOW_ME_LABEL = "Show me";
 const GUIDE_LINES = [
   "Debt darkens the house. Paying it down raises the light score (0–100), which sets the house level.",
   "Subscriptions are zombies in the basement.",
@@ -106,10 +111,33 @@ export function useGuideVisibility(mode: GuideMode): GuideVisibility {
   return { shown: isDemo ? snapshot === "pending" : realOpen, dismiss, open };
 }
 
+/** DOM id of the control a "Show me" step reveals, or null for the all-done step. */
+export function getShowMeElementId(step: GuideStepTarget): string | null {
+  if (step.kind === "doIt") return getDoItDomId(step.actionId);
+  if (step.kind === "tick") return getRowDomId("plan", step.actionId);
+  return null;
+}
+
+/** Accessible name of the "Show me" Button, which starts with its visible text. */
+export function getShowMeLabel(shortTitle: string): string {
+  return `${SHOW_ME_LABEL}: ${shortTitle}`;
+}
+
+/** Scrolls the control into view (smooth, instant under reduced motion) and focuses it. */
+function revealControl(elementId: string, reduced: boolean): void {
+  const element = document.getElementById(elementId);
+  if (element === null) return;
+  element.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "center" });
+  // preventScroll keeps the smooth scroll above from being cut short by the focus jump.
+  element.focus({ preventScroll: true });
+}
+
 export type CryptGuideProps = {
   mode: GuideMode;
   /** The first-step line. Shown only in the demo. */
   step: string | null;
+  /** What the step points at; drives the "Show me" Button. Demo only. */
+  stepTarget?: GuideStepTarget | null;
   onDismiss: () => void;
   /** Id of the heading, so the Dashboard can move focus to it. */
   headingId: string;
@@ -117,7 +145,17 @@ export type CryptGuideProps = {
   className?: string;
 };
 
-export function CryptGuide({ mode, step, onDismiss, headingId, className }: CryptGuideProps) {
+export function CryptGuide({
+  mode,
+  step,
+  stepTarget = null,
+  onDismiss,
+  headingId,
+  className,
+}: CryptGuideProps) {
+  const reduced = useReducedMotionPreference();
+  const showMeId = mode === "demo" && stepTarget !== null ? getShowMeElementId(stepTarget) : null;
+  const showMeTitle = stepTarget !== null && stepTarget.kind !== "done" ? stepTarget.shortTitle : "";
   return (
     <Card
       title={GUIDE_TITLE}
@@ -137,6 +175,18 @@ export function CryptGuide({ mode, step, onDismiss, headingId, className }: Cryp
             <Footprints aria-hidden="true" size={20} strokeWidth={2} className="mt-0.5 shrink-0 text-candle" />
             <span>{step}</span>
           </p>
+        ) : null}
+        {showMeId !== null ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="md"
+            aria-label={getShowMeLabel(showMeTitle)}
+            onClick={() => revealControl(showMeId, reduced === true)}
+            className="self-start"
+          >
+            {SHOW_ME_LABEL}
+          </Button>
         ) : null}
       </div>
     </Card>
