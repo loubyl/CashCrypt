@@ -126,6 +126,8 @@ npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
 ```
 
+Test timeouts: the `ui` (jsdom) Vitest project sets `testTimeout` to 15000 ms because its async waits (`DASHBOARD_WAIT`) use 5000 ms. The `node` project keeps Vitest's 5000 ms default.
+
 Node.js version: **24**.
 
 ## Deployment
