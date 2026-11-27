@@ -5,7 +5,6 @@ import type { ActionContext, ActionOutcome, MomentRequest } from "./types";
 /** Number of done plan actions that completes the weekly plan. */
 const PLAN_COMPLETE_COUNT = 3;
 const REDUCE_SMALL_EXPENSES_KIND = "reduce_small_expenses";
-const FALLBACK_KIND = "fallback";
 
 function ownRequest(outcome: ActionOutcome, ctx: ActionContext): MomentRequest | null {
   switch (outcome.kind) {
@@ -47,7 +46,8 @@ function planToggleRequest(
   if (!action || action.done) return null;
   const reducesSmallExpenses = action.kind === REDUCE_SMALL_EXPENSES_KIND;
   if (reducesSmallExpenses && ctx.poltergeistPresent) return { kind: "sigil" };
-  if ((reducesSmallExpenses || action.kind === FALLBACK_KIND) && outcome.lightDelta > 0) {
+  // A fallback tick adds no momentum (action-feedback Requirement 17), so only this branch can flicker.
+  if (reducesSmallExpenses && outcome.lightDelta > 0) {
     return { kind: "candleFlicker", litWindows: ctx.litWindowCount > 0 };
   }
   return null;

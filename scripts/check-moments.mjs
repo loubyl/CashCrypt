@@ -95,7 +95,6 @@ function readSceneConstant(name) {
   return Number(match[1]);
 }
 const FEED_SCALE = readSceneConstant("FEED_SCALE");
-const FLICKER_DIP_RATIO = readSceneConstant("FLICKER_DIP_RATIO");
 
 /** Which Moment owns each art part in the Moment layer. */
 const PART_OWNER = {
@@ -909,7 +908,7 @@ function assertTabBarLabels({ results }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// action-feedback Moments: feed, ghostArrival, candleFlicker
+// action-feedback Moments: feed, ghostArrival (candleFlicker has no demo path: see fallbackTick below)
 // ---------------------------------------------------------------------------------------------
 const FEED_MAX_SPAN_MS = 1700;
 const FEED_PEAK_SHARE = 0.9; // peak scale must reach 1 + share * (FEED_SCALE - 1)
@@ -927,9 +926,6 @@ const ARRIVAL_SHOWN_MIN = 0.95;
 const ARRIVAL_BEAT_MIN_MS = 300;
 const ARRIVAL_NEAR_PX = 6;
 const ARRIVAL_MAX_SPAN_MS = 2200;
-const FLICKER_DIP_SLACK = 0.5; // dip must reach this share of the value before (ratio 0.35 plus slack)
-const FLICKER_MAX_SPAN_MS = 2200;
-const FLICKER_TOAST = "Action completed · Light +1.0";
 
 const parseCents = (text) => {
   const match = /\$([\d,]+(?:\.\d+)?)/.exec(text ?? "");
@@ -1103,58 +1099,6 @@ function assertGhostArrival({ samples, fastOpacity, addedOpacity, transactionsPa
   } else if (!THROTTLED) {
     check(false, "ghostArrival: art had a visible rect to compare with the new ghost");
   }
-}
-
-// The two functions below measure the candleFlicker Moment itself. After action-feedback Requirement 17
-// no demo scenario can trigger it (a fallback tick no longer raises the light), so they are not
-// registered in MOMENT_CHECKS. They stay until the Moment's future is decided.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function runCandleFlickerArt(page) {
-  await loadLevel(page, 1);
-  await page.evaluate(installSampler, SAMPLE_MS, DRAWN_PART_SELECTORS);
-  // Fast sampler: the dip lasts 100 ms, which the 100 ms sampler can step over.
-  await page.evaluate((everyMs) => {
-    window.__light = [];
-    const t0 = performance.now();
-    setInterval(() => {
-      const lit = [...document.querySelectorAll('[data-part="scene"] [data-state="lit"] [data-part="light"]')];
-      window.__light.push({ t: Math.round(performance.now() - t0), max: lit.length ? Math.max(...lit.map((w) => Number(getComputedStyle(w).opacity))) : null });
-    }, everyMs);
-  }, FLICKER_SAMPLE_MS);
-  await sleep(300);
-  const box = await page.evaluateHandle(
-    () => [...document.querySelectorAll('input[type="checkbox"]')].find((el) => /emergency/i.test(el.closest("[data-plan-action]")?.textContent ?? "")) ?? null,
-  );
-  if (!box.asElement()) throw new Error("Emergency fund checkbox not found");
-  const tickT = await page.evaluate(() => performance.now());
-  await box.asElement().click();
-  await sleep(MAX_MOMENT_MS);
-  await waitFor(page, () => document.querySelector('[data-part="moment-layer"]')?.children.length === 0, null, 20000).catch(() => undefined);
-  await sleep(SAMPLE_MS * 3);
-  return { samples: await page.evaluate(() => window.__samples), light: await page.evaluate(() => window.__light), tickT: Math.round(tickT) };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function assertCandleFlickerArt({ samples, light }) {
-  const values = light.map((l) => l.max).filter((v) => v !== null);
-  const before = values[0];
-  // The live value after the tick is the last one; the dip is the minimum below the value just before the Moment.
-  const final = values.at(-1);
-  const dip = Math.min(...values);
-  const during = samples.filter((s) => s.parts.some((p) => PART_OWNER[p] === "candleFlicker"));
-  console.log(`candleFlicker: light trace (t ms:max) ${light.filter((_, i) => i % 5 === 0).slice(0, 80).map((l) => `${l.t}:${fmt(l.max).trim()}`).join(" ")}`);
-  console.log(`candleFlicker: light before ${fmt(before)}, min ${fmt(dip)}, final ${fmt(final)}, flicker art in ${during.length} sample(s)`);
-  if (!THROTTLED) check(dip <= before * FLICKER_DIP_SLACK, `candleFlicker: light dips to ${fmt(dip)} (<= ${fmt(before * FLICKER_DIP_SLACK)}, ratio ${FLICKER_DIP_RATIO})`);
-  const tail = values.slice(-30);
-  check(tail.every((v) => Math.abs(v - tail[0]) < LIVE_EPSILON), `candleFlicker: light settles on a steady value (${fmt(final)})`);
-  check(final >= before - LIVE_EPSILON, `candleFlicker: settled light ${fmt(final)} is not below the value before ${fmt(before)}`);
-  const last = samples.at(-1);
-  check(last.layerChildren === 0, "candleFlicker: Moment layer empty at the end");
-  const visible = samples.filter((s) => s.visibleParts.some((p) => PART_OWNER[p] === "candleFlicker"));
-  const span = visible.length && during.length ? visible.at(-1).t - during[0].t : 0;
-  check(span <= FLICKER_MAX_SPAN_MS, `candleFlicker: art on screen for ${span} ms (max ${FLICKER_MAX_SPAN_MS})`);
-  const toast = samples.find((s) => s.toastText.includes(FLICKER_TOAST));
-  check(Boolean(toast), `candleFlicker: toast reads "${FLICKER_TOAST}" (${samples.map((s) => s.toastText).find((t) => t.includes("Light")) ?? "none"})`);
 }
 
 // ---------------------------------------------------------------------------------------------

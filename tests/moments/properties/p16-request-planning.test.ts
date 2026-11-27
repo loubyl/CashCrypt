@@ -81,7 +81,7 @@ function expectedOwn(outcome: ActionOutcome, ctx: ActionContext): MomentRequest 
   const action = ctx.planActions.find((a) => a.id === outcome.actionId);
   if (!outcome.next || action === undefined || action.done) return null;
   if (action.kind === REDUCE && ctx.poltergeistPresent) return { kind: "sigil" };
-  const flickers = (action.kind === REDUCE || action.kind === FALLBACK) && outcome.lightDelta > 0;
+  const flickers = action.kind === REDUCE && outcome.lightDelta > 0;
   return flickers ? { kind: "candleFlicker", litWindows: ctx.litWindowCount > 0 } : null;
 }
 
@@ -173,7 +173,7 @@ describe("Property 16: Request planning follows the action outcome", () => {
     );
   });
 
-  it("never plans a sigil for a fallback tick, whatever the light delta", () => {
+  it("never plans a sigil or a flicker for a fallback tick, whatever the light delta", () => {
     fc.assert(
       fc.property(ctxArb, fc.constantFrom(...IDS), fc.constantFrom(-1, 0, 0.1, 1), (ctx, id, lightDelta) => {
         const withFallback: ActionContext = {
@@ -184,6 +184,7 @@ describe("Property 16: Request planning follows the action outcome", () => {
           (r) => r.kind,
         );
         expect(kinds).not.toContain("sigil");
+        expect(kinds).not.toContain("candleFlicker");
       }),
       { numRuns: NUM_RUNS },
     );

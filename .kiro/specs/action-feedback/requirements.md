@@ -187,12 +187,12 @@ Out of scope: CSV import, JSON export and import, sound, clickable creatures and
 
 ### Requirement 8: Reactions for ticked actions without a Do it target
 
-**User Story:** As a user who ticks the Poltergeist cut or a fallback action, I want the house to react, so that ticking feels acknowledged.
+**User Story:** As a user who ticks the Poltergeist cut, I want the house to react, so that ticking feels acknowledged.
 
 #### Acceptance Criteria
 
 1. WHEN `completePlanAction` succeeds on the Dashboard from a tick on a `reduce_small_expenses` Plan_Action and the Poltergeist is not null, THE action handler SHALL create the existing sigil Moment_Request of `house-scene` Requirement 15, unchanged.
-2. WHEN `completePlanAction` succeeds on the Dashboard from a tick on a `fallback` Plan_Action, or on a `reduce_small_expenses` Plan_Action while the Poltergeist is null, and the Light_Delta is above 0, THE action handler SHALL create a Candle_Flicker_Moment Moment_Request.
+2. WHEN `completePlanAction` succeeds on the Dashboard from a tick on a `reduce_small_expenses` Plan_Action while the Poltergeist is null, and the Light_Delta is above 0, THE action handler SHALL create a Candle_Flicker_Moment Moment_Request.
 3. WHEN the Light_Delta of that tick is 0 (a re-tick after an untick, or momentum at `MOMENTUM_MAX`), THE action handler SHALL create no Candle_Flicker_Moment Moment_Request.
 4. THE Candle_Flicker_Moment SHALL make every lit window dip and return once (one flicker with the `none` ease of the "House light flicker" row of `visual-language.md`), then rise to the live opacity, and SHALL hold the brightest step for at least `MOMENT_BEAT_MIN_MS`.
 5. WHERE no window is lit (Decay_Level 5, or every window boarded or broken), THE Candle_Flicker_Moment SHALL show a brief candle glow through the gaps of the boarded and broken windows instead, and SHALL end with no leftover glow.
@@ -324,9 +324,9 @@ The `fallback` actions fill the plan when a crypt has no debts, subscriptions or
 3. WHEN the user ticks a Fallback_Action, THE toast SHALL read "Action completed · doesn't change the light" (the base text of an action with no amount, the Light_Clause fixed to the expense text), and no Light_Delta SHALL be computed for it.
 4. WHEN the user adds or edits a Debt, a Subscription or a Transaction, and the Weekly_Plan of the current Plan_Week holds only Fallback_Actions and none is done, THE Data_Layer SHALL regenerate that plan with the Planner from the new data, in the same Dexie transaction as the change, keeping its week key, so that the first Real_Actions appear right away. `startLightScore` and `generatedOn` are set again.
 5. THE Data_Layer SHALL NOT regenerate a plan that has any Real_Action or any done action, SHALL NOT create a plan when none exists for the current Plan_Week, and SHALL NOT touch the plan of another week. A change that fails validation SHALL leave the plan as it was.
-6. THE candle-flicker Moment of Requirement 8 SHALL NOT play for a Fallback_Action, because it plays only when the light rises (Requirement 8.1). No Demo_Scenario can still trigger it: the only plan with a `reduce_small_expenses` action is level 4, which also has the Poltergeist, so ticking it plays the sigil. The future of the Moment is a pending product decision and its code is not changed by this requirement.
+6. THE candle-flicker Moment of Requirement 8 SHALL NOT play for a Fallback_Action: the Moment planner has no `fallback` branch. The Moment is kept for its one remaining path, a `reduce_small_expenses` action ticked after its Poltergeist is gone (Requirement 8.2), with its unit tests and geometry unchanged. No Demo_Scenario reaches that path: the only plan with a `reduce_small_expenses` action is level 4, which also has the Poltergeist, so ticking it plays the sigil. The Moment therefore has no demo path and no browser case.
 7. THE level-4 Calibration_Path numbers SHALL stay unchanged (32.74, 37.95, 38.95, 43.49), because that path completes only Real_Actions.
-8. THE Test_Suite SHALL include a fast-check property (at least 100 runs) that Fallback_Action completions never change momentum or the light score, a property that a plan with a Real_Action or a done action is never changed by an add or an edit, examples for the toast text and for the refresh and no-refresh cases, and a `fallbackTick` browser case in `scripts/check-moments.mjs` that replaces the old level-1 `candleFlicker` case. WHEN the property is added, THE task summary SHALL report the mutation check required by `conventions.md`.
+8. THE Test_Suite SHALL include a fast-check property (at least 100 runs) that Fallback_Action completions never change momentum or the light score, the Moment-planning properties updated so that only a `reduce_small_expenses` tick can plan a flicker, a property that a plan with a Real_Action or a done action is never changed by an add or an edit, examples for the toast text and for the refresh and no-refresh cases, and a `fallbackTick` browser case in `scripts/check-moments.mjs` that replaces the old level-1 `candleFlicker` case. WHEN the property is added, THE task summary SHALL report the mutation check required by `conventions.md`.
 
 #### Supersedes
 

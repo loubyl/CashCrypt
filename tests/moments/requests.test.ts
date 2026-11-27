@@ -95,13 +95,18 @@ describe("planMoments for plan toggles", () => {
   });
 });
 
-describe("planMoments for expenses and fallback ticks", () => {
+describe("planMoments for expenses and ticks without a Do it target", () => {
   const expense = (over: Partial<Extract<ActionOutcome, { kind: "expense" }>> = {}): ActionOutcome => ({
     kind: "expense",
     transactionId: "t1",
     small: true,
     poltergeistAfter: true,
     ...over,
+  });
+  const unfedCtx = context({
+    level: 3,
+    poltergeistPresent: false,
+    planActions: [{ id: "f1", kind: "reduce_small_expenses", done: false }],
   });
   const fallbackCtx = context({
     level: 1,
@@ -125,8 +130,12 @@ describe("planMoments for expenses and fallback ticks", () => {
     expect(planMoments(expense({ small: false }), context())).toEqual([]);
   });
 
-  it("flickers lit windows for a level-1 fallback tick with delta 1, and nothing for its re-tick with delta 0", () => {
-    expect(planMoments(tick(1), fallbackCtx)).toEqual([{ kind: "candleFlicker", litWindows: true }]);
+  it("flickers lit windows for a reduce action ticked after the Poltergeist is gone, and nothing for its re-tick with delta 0", () => {
+    expect(planMoments(tick(1), unfedCtx)).toEqual([{ kind: "candleFlicker", litWindows: true }]);
+    expect(planMoments(tick(0), unfedCtx)).toEqual([]);
+  });
+  it("plans nothing for a fallback tick, even when a light delta is passed", () => {
+    expect(planMoments(tick(1), fallbackCtx)).toEqual([]);
     expect(planMoments(tick(0), fallbackCtx)).toEqual([]);
   });
 });

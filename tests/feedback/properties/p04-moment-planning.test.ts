@@ -6,7 +6,6 @@ import type { ActionContext, ActionOutcome, MomentRequest, PlanActionView } from
 const NUM_RUNS = 200;
 const ACTION_ID = "act";
 const KINDS = ["reduce_small_expenses", "cancel_subscription", "extra_payment", "fallback"] as const;
-const FLICKER_KINDS = ["reduce_small_expenses", "fallback"];
 
 const ctxArb: fc.Arbitrary<ActionContext> = fc.record({
   level: fc.constantFrom(1, 2, 3, 4, 5) as fc.Arbitrary<ActionContext["level"]>,
@@ -57,15 +56,15 @@ describe("new Moment requests follow the outcome", () => {
     );
   });
 
-  it("plans a candle flicker only for a new tick of a fallback or unfed reduce action with a positive light delta", () => {
-    // Validates: Requirements 8.1 to 8.3
+  it("plans a candle flicker only for a new tick of a reduce action with no Poltergeist and a positive light delta", () => {
+    // Validates: Requirements 8.1 to 8.3 and 17.6 (a fallback tick never flickers)
     fc.assert(
       fc.property(toggleArb, ctxArb, (outcome, ctx) => {
         const own = ownKinds(planMoments(outcome, ctx));
         const action = ctx.planActions[0];
         const sigil = action.kind === "reduce_small_expenses" && ctx.poltergeistPresent;
         const flickers =
-          outcome.next && !action.done && !sigil && FLICKER_KINDS.includes(action.kind) && outcome.lightDelta > 0;
+          outcome.next && !action.done && !sigil && action.kind === "reduce_small_expenses" && outcome.lightDelta > 0;
         if (flickers) {
           expect(own).toEqual([{ kind: "candleFlicker", litWindows: ctx.litWindowCount > 0 }]);
         } else {

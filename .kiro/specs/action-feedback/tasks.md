@@ -437,9 +437,11 @@ Conventions that apply to every task:
     - `refreshFallbackOnlyPlan` and `isRefreshablePlan` in `plans.ts`; the five add and edit mutations run over every table and call it; `editDebt` and `editSubscription` take a `ctx`; `useCryptActions` passes it.
     - Tests: `tests/db/planRefresh.test.ts` (refreshes after a debt, a subscription, a Poltergeist transaction and two edits; does not refresh with a real action, with a done action, when no plan exists, for another week, or on invalid input) and Property 8 in `tests/db/properties/p08-plan-refresh.test.ts`.
     - _Requirements: 17.4, 17.5, 17.8_
-  - [x] 11.4 Check which scenario can still trigger the candle flicker (stop point)
-    - Scanned the five scenarios at their plan: only level 1 had a fallback (the old trigger); `reduce_small_expenses` exists only at level 4, which has the Poltergeist (sigil). No scenario triggers the flicker any more.
-    - The Moment code, its unit tests and its geometry are not changed. `check-moments.mjs` registers `fallbackTick` instead of `candleFlicker`; the flicker art functions stay unregistered. Options are reported to the user for a decision.
+  - [x] 11.4 Keep `candleFlicker` for its remaining path and remove the dead fallback branch (decision: option A)
+    - Scanned the five scenarios: only level 1 had a fallback (the old trigger); `reduce_small_expenses` exists only at level 4, which has the Poltergeist (sigil). No scenario triggers the flicker, so it has no demo path and no browser case.
+    - `requests.ts` loses `FALLBACK_KIND` and the fallback case of the flicker rule. The Moment, its unit tests and its geometry stay.
+    - Tests updated: `tests/moments/requests.test.ts` (reduce tick flickers, fallback tick plans nothing), `tests/moments/properties/p16-request-planning.test.ts` and `tests/feedback/properties/p04-moment-planning.test.ts` (flicker only for `reduce_small_expenses`; a fallback tick never flickers).
+    - `check-moments.mjs` keeps `fallbackTick`; the two flicker measurement helpers and their constants are deleted.
     - _Requirements: 17.6, 17.8_
   - [x] 11.5 Record what this supersedes and confirm the demo path
     - Supersede notes in `.kiro/specs/app-screens/requirements.md` (4.4, 4.5, 8.1 and the "Plan actions do the work" decision, 14.2, 14.3) and `.kiro/specs/haunting-engine/requirements.md` (3.4); `tests/demo/calibration.test.ts` and `tests/scene/demoPath.test.ts` pass with 32.74, 37.95, 38.95 and 43.49.
